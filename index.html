@@ -315,6 +315,23 @@
             margin-right: 0.5rem;
         }
 
+        /* About Me Section */
+        .about-content {
+            font-size: 1rem;
+            line-height: 1.8;
+            color: var(--text-secondary);
+            margin-top: 1.5rem;
+        }
+
+        .about-content p {
+            margin-bottom: 1rem;
+        }
+
+        .about-highlight {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
         /* Footer */
         footer {
             background-color: var(--bg-secondary);
@@ -541,6 +558,7 @@
             <div class="logo">Bradford R.</div>
             <div class="nav-wrapper">
                 <nav class="navigation">
+                    <a href="#about-me">About Me</a>
                     <a href="#my-works">My Works</a>
                     <a href="#about-process">About My Process</a>
                     <a href="#pricing-services">Pricing & Services</a>
@@ -573,6 +591,22 @@
 
     <!-- Main Content -->
     <main>
+        <!-- About Me Section -->
+        <section class="section info-section" id="about-me">
+            <h2 class="section-title">About Me</h2>
+            <div class="about-content">
+                <p>
+                    My passion for computer graphics has driven me to constantly explore new frontiers in digital creativity. What truly excites me is the <span class="about-highlight">revolution that AI tools have brought to the graphics and video production world</span>. These technologies have transformed what's possible, enabling faster iteration, more dynamic creativity, and unprecedented creative freedom.
+                </p>
+                <p>
+                    I've had the opportunity to work on diverse projects through <span class="about-highlight">Fiverr</span>, collaborating with clients from around the globe, as well as <span class="about-highlight">local projects</span> that have deepened my understanding of real-world creative needs. Each project has been a learning opportunity, allowing me to refine my craft and expand my skill set.
+                </p>
+                <p>
+                    What keeps me energized is the constant evolution of technology and design. I'm always learning new techniques, exploring emerging tools, and pushing the boundaries of what's creatively possible. This continuous growth mindset allows me to deliver innovative solutions that exceed expectations and bring fresh perspectives to every project I undertake.
+                </p>
+            </div>
+        </section>
+
         <!-- Portfolio Section -->
         <section class="section" id="my-works">
             <h2 class="section-title">My Works</h2>
@@ -663,7 +697,7 @@
             </div>
         </section>
 
-        <!-- About Section -->
+        <!-- About Process Section -->
         <section class="section info-section" id="about-process">
             <h2 class="section-title">About My Process</h2>
             <div class="info-grid" style="margin-top: 1.5rem;">
@@ -760,6 +794,7 @@
     <footer>
         <div class="footer-content">
             <div class="footer-links">
+                <a href="#about-me">About Me</a>
                 <a href="#my-works">My Works</a>
                 <a href="#contact-section">Contact</a>
                 <a href="mailto:trancedemon@gmail.com">Email</a>
