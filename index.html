@@ -58,6 +58,36 @@
             color: var(--accent);
         }
 
+        .nav-wrapper {
+            display: flex;
+            gap: 3rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .navigation {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .navigation a {
+            color: var(--text-primary);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+            font-size: 0.95rem;
+        }
+
+        .navigation a:hover {
+            color: var(--accent);
+            border-color: var(--accent);
+            background-color: rgba(77, 184, 255, 0.1);
+        }
+
         .contact-links {
             display: flex;
             gap: 1.5rem;
@@ -382,10 +412,44 @@
         }
 
         /* Responsive Design */
+        @media (max-width: 1024px) {
+            .nav-wrapper {
+                flex-direction: column;
+                gap: 1rem;
+                width: 100%;
+            }
+
+            .navigation {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .contact-links {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
         @media (max-width: 768px) {
             .header-content {
                 flex-direction: column;
                 gap: 1rem;
+            }
+
+            .nav-wrapper {
+                flex-direction: column;
+                gap: 1rem;
+                width: 100%;
+            }
+
+            .navigation {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .navigation a {
+                width: 100%;
+                text-align: center;
             }
 
             .hero h1 {
@@ -449,6 +513,11 @@
             .info-section {
                 padding: 1.5rem;
             }
+
+            .navigation a {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.85rem;
+            }
         }
 
         /* Utility Classes */
@@ -470,9 +539,17 @@
     <header>
         <div class="header-content">
             <div class="logo">Bradford R.</div>
-            <nav class="contact-links">
-                <a href="mailto:trancedemon@gmail.com">📧 Email</a>
-            </nav>
+            <div class="nav-wrapper">
+                <nav class="navigation">
+                    <a href="#my-works">My Works</a>
+                    <a href="#about-process">About My Process</a>
+                    <a href="#pricing-services">Pricing & Services</a>
+                    <a href="#contact-section">Get In Touch</a>
+                </nav>
+                <nav class="contact-links">
+                    <a href="mailto:trancedemon@gmail.com">📧 Email</a>
+                </nav>
+            </div>
         </div>
     </header>
 
@@ -497,7 +574,7 @@
     <!-- Main Content -->
     <main>
         <!-- Portfolio Section -->
-        <section class="section">
+        <section class="section" id="my-works">
             <h2 class="section-title">My Works</h2>
             <div class="portfolio-grid">
                 <!-- YouTube Short 1 -->
@@ -587,7 +664,7 @@
         </section>
 
         <!-- About Section -->
-        <section class="section info-section">
+        <section class="section info-section" id="about-process">
             <h2 class="section-title">About My Process</h2>
             <div class="info-grid" style="margin-top: 1.5rem;">
                 <div class="info-box">
@@ -615,7 +692,7 @@
         </section>
 
         <!-- Pricing Section -->
-        <section class="section info-section">
+        <section class="section info-section" id="pricing-services">
             <h2 class="section-title">Pricing & Services</h2>
             <div style="margin-top: 1.5rem;">
                 <p class="text-muted" style="font-size: 1.1rem; margin-bottom: 1.5rem;">
@@ -683,7 +760,7 @@
     <footer>
         <div class="footer-content">
             <div class="footer-links">
-                <a href="#portfolio">Portfolio</a>
+                <a href="#my-works">My Works</a>
                 <a href="#contact-section">Contact</a>
                 <a href="mailto:trancedemon@gmail.com">Email</a>
             </div>
