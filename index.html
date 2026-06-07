@@ -163,7 +163,7 @@
         .portfolio-item {
             background-color: var(--bg-secondary);
             border: 1px solid var(--border);
-            border-radius: 8px;
+            border-radius: 12px;
             overflow: hidden;
             transition: all 0.3s ease;
             display: flex;
@@ -187,6 +187,13 @@
             cursor: pointer;
             position: relative;
             overflow: hidden;
+            border-radius: 12px 12px 0 0;
+        }
+
+        .portfolio-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         .portfolio-thumbnail:hover::after {
@@ -491,82 +498,88 @@
     <main>
         <!-- Portfolio Section -->
         <section class="section">
-            <h2 class="section-title">Recent Work</h2>
+            <h2 class="section-title">My Works</h2>
             <div class="portfolio-grid">
-                <!-- Portfolio Item 1 -->
+                <!-- YouTube Short 1 -->
                 <div class="portfolio-item">
-                    <div class="portfolio-thumbnail" onclick="openModal('modal1')">🎨</div>
+                    <div class="portfolio-thumbnail" onclick="window.open('https://youtube.com/shorts/IctIUal5STU?feature=share', '_blank')">
+                        <img src="https://img.youtube.com/vi/IctIUal5STU/mqdefault.jpg" alt="YouTube Short">
+                    </div>
                     <div class="portfolio-content">
-                        <span class="portfolio-type">Graphic Design</span>
-                        <h3 class="portfolio-title">Digital Illustration</h3>
+                        <span class="portfolio-type">YouTube Short</span>
+                        <h3 class="portfolio-title">Creative Visual Effects</h3>
                         <p class="portfolio-description">
-                            High-quality digital artwork created using AI assistance for conceptualization and refinement. 
-                            Perfect for marketing materials, album covers, and brand identity.
+                            Dynamic visual effects and motion graphics showcasing AI-enhanced creative techniques.
                         </p>
                     </div>
                 </div>
 
-                <!-- Portfolio Item 2 -->
+                <!-- YouTube Short 2 -->
                 <div class="portfolio-item">
-                    <div class="portfolio-thumbnail" onclick="openModal('modal2')">🎬</div>
+                    <div class="portfolio-thumbnail" onclick="window.open('https://youtube.com/shorts/mdtjwBICZ7g?feature=share', '_blank')">
+                        <img src="https://img.youtube.com/vi/mdtjwBICZ7g/mqdefault.jpg" alt="YouTube Short">
+                    </div>
                     <div class="portfolio-content">
-                        <span class="portfolio-type">Video Production</span>
-                        <h3 class="portfolio-title">Animated Promo Video</h3>
+                        <span class="portfolio-type">YouTube Short</span>
+                        <h3 class="portfolio-title">Animation & Design</h3>
                         <p class="portfolio-description">
-                            Engaging promotional videos with smooth animations and visual effects. 
-                            Created with AI-enhanced workflows for faster turnaround.
+                            Smooth animations and engaging design elements created with precision and creativity.
                         </p>
                     </div>
                 </div>
 
-                <!-- Portfolio Item 3 -->
+                <!-- YouTube Short 3 -->
                 <div class="portfolio-item">
-                    <div class="portfolio-thumbnail" onclick="openModal('modal3')">✨</div>
+                    <div class="portfolio-thumbnail" onclick="window.open('https://youtube.com/shorts/ft1uHuUWMjk?feature=share', '_blank')">
+                        <img src="https://img.youtube.com/vi/ft1uHuUWMjk/mqdefault.jpg" alt="YouTube Short">
+                    </div>
                     <div class="portfolio-content">
-                        <span class="portfolio-type">Visual Effects</span>
-                        <h3 class="portfolio-title">3D Motion Graphics</h3>
+                        <span class="portfolio-type">YouTube Short</span>
+                        <h3 class="portfolio-title">Visual Storytelling</h3>
                         <p class="portfolio-description">
-                            Stunning 3D visuals and motion graphics enhanced with AI tools for rendering 
-                            optimization and creative enhancement.
+                            Compelling visual narratives that capture attention and deliver messages effectively.
                         </p>
                     </div>
                 </div>
 
-                <!-- Portfolio Item 4 -->
+                <!-- YouTube Short 4 -->
                 <div class="portfolio-item">
-                    <div class="portfolio-thumbnail" onclick="openModal('modal4')">🖼️</div>
+                    <div class="portfolio-thumbnail" onclick="window.open('https://youtube.com/shorts/Li16KZ3RdqY?feature=share', '_blank')">
+                        <img src="https://img.youtube.com/vi/Li16KZ3RdqY/mqdefault.jpg" alt="YouTube Short">
+                    </div>
                     <div class="portfolio-content">
-                        <span class="portfolio-type">Concept Art</span>
-                        <h3 class="portfolio-title">Character Design</h3>
+                        <span class="portfolio-type">YouTube Short</span>
+                        <h3 class="portfolio-title">Creative Production</h3>
                         <p class="portfolio-description">
-                            Original character designs and concept art for games, animation, and storytelling. 
-                            Developed using advanced AI prompting techniques.
+                            High-quality production showcasing advanced techniques and creative vision.
                         </p>
                     </div>
                 </div>
 
-                <!-- Portfolio Item 5 -->
+                <!-- YouTube Short 5 -->
                 <div class="portfolio-item">
-                    <div class="portfolio-thumbnail" onclick="openModal('modal5')">🌅</div>
+                    <div class="portfolio-thumbnail" onclick="window.open('https://youtube.com/shorts/gt92EX3CTOU?feature=share', '_blank')">
+                        <img src="https://img.youtube.com/vi/gt92EX3CTOU/mqdefault.jpg" alt="YouTube Short">
+                    </div>
                     <div class="portfolio-content">
-                        <span class="portfolio-type">Digital Art</span>
-                        <h3 class="portfolio-title">Environment Design</h3>
+                        <span class="portfolio-type">YouTube Short</span>
+                        <h3 class="portfolio-title">Motion Graphics</h3>
                         <p class="portfolio-description">
-                            Immersive environment designs and landscapes for various projects. 
-                            Created with AI-assisted ideation and refinement.
+                            Captivating motion graphics that bring ideas to life with modern design principles.
                         </p>
                     </div>
                 </div>
 
-                <!-- Portfolio Item 6 -->
+                <!-- YouTube Short 6 -->
                 <div class="portfolio-item">
-                    <div class="portfolio-thumbnail" onclick="openModal('modal6')">📱</div>
+                    <div class="portfolio-thumbnail" onclick="window.open('https://youtube.com/shorts/nAUBgiU5_yU?feature=share', '_blank')">
+                        <img src="https://img.youtube.com/vi/nAUBgiU5_yU/mqdefault.jpg" alt="YouTube Short">
+                    </div>
                     <div class="portfolio-content">
-                        <span class="portfolio-type">UI/UX Design</span>
-                        <h3 class="portfolio-title">App Interface Design</h3>
+                        <span class="portfolio-type">YouTube Short</span>
+                        <h3 class="portfolio-title">Digital Art Showcase</h3>
                         <p class="portfolio-description">
-                            Modern and intuitive user interface designs. Created with attention to user experience 
-                            and accessibility standards.
+                            Artistic digital creations combining cutting-edge tools with creative excellence.
                         </p>
                     </div>
                 </div>
@@ -681,77 +694,7 @@
         </div>
     </footer>
 
-    <!-- Modals -->
-    <div id="modal1" class="modal">
-        <div class="modal-content">
-            <span class="close-modal" onclick="closeModal('modal1')">&times;</span>
-            <h2 class="modal-title">Digital Illustration</h2>
-            <p>🎨 High-quality digital artwork created using AI assistance for conceptualization and refinement. Perfect for marketing materials, album covers, and brand identity.</p>
-            <p style="margin-top: 1rem; color: var(--text-secondary);">Click the X or outside the modal to close.</p>
-        </div>
-    </div>
-
-    <div id="modal2" class="modal">
-        <div class="modal-content">
-            <span class="close-modal" onclick="closeModal('modal2')">&times;</span>
-            <h2 class="modal-title">Animated Promo Video</h2>
-            <p>🎬 Engaging promotional videos with smooth animations and visual effects. Created with AI-enhanced workflows for faster turnaround.</p>
-            <p style="margin-top: 1rem; color: var(--text-secondary);">Click the X or outside the modal to close.</p>
-        </div>
-    </div>
-
-    <div id="modal3" class="modal">
-        <div class="modal-content">
-            <span class="close-modal" onclick="closeModal('modal3')">&times;</span>
-            <h2 class="modal-title">3D Motion Graphics</h2>
-            <p>✨ Stunning 3D visuals and motion graphics enhanced with AI tools for rendering optimization and creative enhancement.</p>
-            <p style="margin-top: 1rem; color: var(--text-secondary);">Click the X or outside the modal to close.</p>
-        </div>
-    </div>
-
-    <div id="modal4" class="modal">
-        <div class="modal-content">
-            <span class="close-modal" onclick="closeModal('modal4')">&times;</span>
-            <h2 class="modal-title">Character Design</h2>
-            <p>🖼️ Original character designs and concept art for games, animation, and storytelling. Developed using advanced AI prompting techniques.</p>
-            <p style="margin-top: 1rem; color: var(--text-secondary);">Click the X or outside the modal to close.</p>
-        </div>
-    </div>
-
-    <div id="modal5" class="modal">
-        <div class="modal-content">
-            <span class="close-modal" onclick="closeModal('modal5')">&times;</span>
-            <h2 class="modal-title">Environment Design</h2>
-            <p>🌅 Immersive environment designs and landscapes for various projects. Created with AI-assisted ideation and refinement.</p>
-            <p style="margin-top: 1rem; color: var(--text-secondary);">Click the X or outside the modal to close.</p>
-        </div>
-    </div>
-
-    <div id="modal6" class="modal">
-        <div class="modal-content">
-            <span class="close-modal" onclick="closeModal('modal6')">&times;</span>
-            <h2 class="modal-title">App Interface Design</h2>
-            <p>📱 Modern and intuitive user interface designs. Created with attention to user experience and accessibility standards.</p>
-            <p style="margin-top: 1rem; color: var(--text-secondary);">Click the X or outside the modal to close.</p>
-        </div>
-    </div>
-
     <script>
-        function openModal(modalId) {
-            document.getElementById(modalId).style.display = 'block';
-        }
-
-        function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
-        }
-
-        // Close modal when clicking outside of it
-        window.onclick = function(event) {
-            if (event.target.classList.contains('modal')) {
-                event.target.style.display = 'none';
-            }
-        }
-
         // Smooth scroll for anchor links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
