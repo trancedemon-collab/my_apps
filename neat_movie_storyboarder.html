@@ -1,0 +1,2049 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neat Movie Storyboarder v1.5.0</title>
+    <!-- Tailwind CSS for utility layout -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --gtk-bg: #f6f5f4;
+            --gtk-header-bg: #ebebeb;
+            --gtk-card-bg: #ffffff;
+            --gtk-border: #cdc7c2;
+            --gtk-text: #2e3436;
+            --gtk-text-dim: #5e6462;
+            --gtk-blue: #3584e4;
+            --gtk-blue-hover: #1b6acb;
+            --gtk-green: #2ec27e;
+            --gtk-red: #e01b24;
+            --gtk-orange: #e66100;
+            --gtk-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+            --gtk-radius: 8px;
+            --gtk-input-focus: rgba(53, 132, 228, 0.2);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--gtk-bg);
+            color: var(--gtk-text);
+            overflow-x: hidden;
+        }
+
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Custom Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--gtk-bg);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #c0b9b3;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a19a93;
+        }
+
+        /* GTK Component Structures */
+        .gtk-headerbar {
+            background-color: var(--gtk-header-bg);
+            border-bottom: 1px solid var(--gtk-border);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        .gtk-card {
+            background-color: var(--gtk-card-bg);
+            border: 1px solid var(--gtk-border);
+            border-radius: var(--gtk-radius);
+            box-shadow: var(--gtk-shadow);
+        }
+
+        .gtk-btn {
+            background: linear-gradient(to bottom, #ffffff, #f6f5f4);
+            border: 1px solid var(--gtk-border);
+            border-radius: 6px;
+            color: var(--gtk-text);
+            font-weight: 500;
+            font-size: 0.875rem;
+            transition: all 0.15s ease-in-out;
+            box-shadow: 0 1px 1px rgba(0,0,0,0.04);
+        }
+
+        .gtk-btn:hover {
+            background: #f6f5f4;
+            border-color: #b5ada5;
+        }
+
+        .gtk-btn:active {
+            background: #ebebeb;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .gtk-btn-primary {
+            background: var(--gtk-blue);
+            border: 1px solid #1c71d8;
+            color: white !important;
+        }
+
+        .gtk-btn-primary:hover {
+            background: var(--gtk-blue-hover);
+            border-color: #125cb3;
+        }
+
+        .gtk-btn-danger {
+            background: linear-gradient(to bottom, #ffffff, #fdf1f2);
+            border: 1px solid #f5c2c4;
+            color: var(--gtk-red);
+        }
+
+        .gtk-btn-danger:hover {
+            background: #fdf1f2;
+            border-color: var(--gtk-red);
+        }
+
+        .gtk-input {
+            background-color: #ffffff;
+            border: 1px solid var(--gtk-border);
+            border-radius: 6px;
+            color: var(--gtk-text);
+            font-size: 0.875rem;
+            padding: 0.4rem 0.75rem;
+            transition: all 0.15s ease;
+        }
+
+        .gtk-input:focus {
+            outline: none;
+            border-color: var(--gtk-blue);
+            box-shadow: 0 0 0 3px var(--gtk-input-focus);
+        }
+
+        .gtk-tag {
+            background-color: #e4e1de;
+            border: 1px solid var(--gtk-border);
+            border-radius: 4px;
+            font-size: 0.75rem;
+            color: var(--gtk-text);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .gtk-tag:hover {
+            background-color: #d5d1cc;
+            transform: translateY(-1px);
+        }
+
+        /* Autocomplete UI Item classes */
+        .autocomplete-item {
+            padding: 6px 12px;
+            cursor: pointer;
+            transition: background-color 0.1s ease;
+        }
+        .autocomplete-item.active {
+            background-color: var(--gtk-blue);
+            color: white;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <header class="gtk-headerbar px-4 py-3 flex flex-col md:flex-row items-center justify-between sticky top-0 z-40 gap-2">
+        <div class="flex items-center space-x-3 w-full md:w-auto">
+            <div class="w-10 h-10 rounded-md bg-blue-600 flex items-center justify-center text-white shadow-md flex-shrink-0">
+                <i class="fa-solid fa-film text-lg"></i>
+            </div>
+            <div>
+                <h1 class="text-base font-bold tracking-wide flex items-center space-x-2 flex-wrap">
+                    <span>Neat Movie Storyboarder</span>
+                    <span class="text-xs bg-gray-300 px-2 py-0.5 rounded-full text-[10px] font-medium uppercase tracking-wider text-gray-700">v1.5.0</span>
+                </h1>
+                <p class="text-[11px] text-gray-500 -mt-0.5 font-medium">By Bradford R. (<span class="text-blue-600 font-mono">trancedemon@gmail.com</span>)</p>
+            </div>
+        </div>
+
+        <div class="flex items-center flex-wrap gap-2 w-full md:w-auto justify-end">
+            <button onclick="scrollToGuide()" class="gtk-btn py-1.5 px-3 flex items-center space-x-1.5">
+                <i class="fa-solid fa-circle-question text-blue-500"></i>
+                <span>How to Use</span>
+            </button>
+            <button onclick="openAiPromptsModal()" class="gtk-btn py-1.5 px-3 flex items-center space-x-1.5 bg-purple-50 hover:bg-purple-100 border-purple-300">
+                <i class="fa-solid fa-robot text-purple-600"></i>
+                <span class="font-bold text-purple-800">AI Prompts (.md)</span>
+            </button>
+            <button onclick="loadDemoData()" class="gtk-btn py-1.5 px-3 flex items-center space-x-1.5">
+                <i class="fa-solid fa-wand-magic-sparkles text-amber-600"></i>
+                <span>Load Demo</span>
+            </button>
+            <!-- Donate via PayPal Link -->
+            <a href="https://paypal.me/BradfordRisbert" target="_blank" rel="noopener noreferrer" class="gtk-btn py-1.5 px-3 flex items-center space-x-1.5 bg-yellow-50 hover:bg-yellow-100 border-yellow-300">
+                <i class="fa-brands fa-paypal text-blue-700"></i>
+                <span class="font-bold text-yellow-800">Donate</span>
+            </a>
+            <button onclick="clearAllData()" class="gtk-btn py-1.5 px-3 flex items-center space-x-1.5 text-red-600">
+                <i class="fa-solid fa-trash-can"></i>
+                <span>Clear</span>
+            </button>
+            <button onclick="openCompileModal()" class="gtk-btn gtk-btn-primary py-1.5 px-4 flex items-center space-x-1.5">
+                <i class="fa-solid fa-gears"></i>
+                <span>Compile Storyboard</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Workspace Area -->
+    <main class="flex-1 max-w-[1600px] w-full mx-auto p-4 grid grid-cols-1 lg:grid-cols-12 gap-4">
+
+        <!-- LEFT COLUMN: Workspace configuration, legends, and variables dictionary -->
+        <section class="lg:col-span-5 flex flex-col space-y-4">
+            
+            <!-- Dynamic project storage module -->
+            <div class="gtk-card p-4">
+                <div class="flex justify-between items-center mb-3 pb-2 border-b border-gray-200">
+                    <h3 class="text-sm font-bold flex items-center space-x-2 text-gray-800">
+                        <i class="fa-solid fa-floppy-disk text-indigo-500"></i>
+                        <span>💾 Project Storage & Serialization</span>
+                    </h3>
+                    <div id="autosave-badge" class="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded border border-green-200 flex items-center gap-1">
+                        <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                        <span>Auto-Save Active</span>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                    <div>
+                        <label class="block text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Active Storage Slot</label>
+                        <select id="project-slot-selector" onchange="switchProjectSlot(this.value)" class="gtk-input w-full py-1 text-xs font-semibold">
+                            <option value="proj_1">Project Slot 1 (Default)</option>
+                            <option value="proj_2">Project Slot 2</option>
+                            <option value="proj_3">Project Slot 3</option>
+                        </select>
+                    </div>
+                    <div class="flex items-end space-x-1.5">
+                        <button onclick="saveCurrentSlot()" class="gtk-btn py-1 px-3 text-xs flex-1 flex items-center justify-center space-x-1">
+                            <i class="fa-solid fa-download"></i>
+                            <span>Save Slot</span>
+                        </button>
+                        <button onclick="loadCurrentSlot()" class="gtk-btn py-1 px-3 text-xs flex-1 flex items-center justify-center space-x-1">
+                            <i class="fa-solid fa-upload"></i>
+                            <span>Load Slot</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="border-t border-dashed border-gray-200 pt-3 flex items-center justify-between gap-2">
+                    <span class="text-[11px] text-gray-500 font-medium">Backup / Share State:</span>
+                    <div class="flex items-center space-x-1.5">
+                        <button onclick="exportJSONState()" class="gtk-btn py-1 px-2.5 text-xs flex items-center space-x-1">
+                            <i class="fa-solid fa-file-export text-blue-600"></i>
+                            <span>Export JSON</span>
+                        </button>
+                        <button onclick="triggerJSONImport()" class="gtk-btn py-1 px-2.5 text-xs flex items-center space-x-1">
+                            <i class="fa-solid fa-file-import text-green-600"></i>
+                            <span>Import JSON</span>
+                        </button>
+                        <input type="file" id="json-import-input" accept=".json" class="hidden" onchange="importJSONState(event)">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Global design configuration panel -->
+            <div class="gtk-card p-4">
+                <div class="flex justify-between items-center mb-3 pb-2 border-b border-gray-200">
+                    <h3 class="text-sm font-bold flex items-center space-x-2 text-gray-800">
+                        <i class="fa-solid fa-palette text-blue-500"></i>
+                        <span>🎨 1. Global Cinematic Style</span>
+                    </h3>
+                </div>
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Preset Themes</label>
+                        <select id="style-preset" onchange="applyStylePreset(this.value)" class="gtk-input w-full">
+                            <option value="custom">Custom Configuration</option>
+                            <option value="sakuga">High-End 2D Sakuga Anime</option>
+                            <option value="cyberpunk">Neon Cyberpunk Brutalist</option>
+                            <option value="cinematic">35mm Photo-Realistic Cinematic Film</option>
+                            <option value="scifi">Gritty Cosmic Sci-Fi Horror</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Style Prompt Definition <span class="mono text-[10px] text-blue-600">[STYLE-DEFAULT]</span></label>
+                        <textarea id="style-prompt" rows="3" class="gtk-input w-full font-sans text-xs" placeholder="e.g. Photorealistic 35mm cinematic film style, warm lighting, high-fidelity textures, natural grading."></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Audio/SFX Definition <span class="mono text-[10px] text-blue-600">[AUDIO-DEFAULT]</span></label>
+                        <input type="text" id="audio-prompt" class="gtk-input w-full text-xs" placeholder="e.g. Ambient winds, natural foley sound effects, no background music." value="No spoken dialogues, only cinematic gestures. Complete atmospheric ambient SFX. No music.">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Characters database manager -->
+            <div class="gtk-card p-4 flex-grow flex flex-col min-h-[300px]">
+                <div class="flex justify-between items-center mb-3 pb-2 border-b border-gray-200">
+                    <h3 class="text-sm font-bold flex items-center space-x-2 text-gray-800">
+                        <i class="fa-solid fa-user-ninja text-purple-500"></i>
+                        <span>👤 2. Characters Legend & Outfits</span>
+                    </h3>
+                    <button onclick="addCharacter()" class="gtk-btn py-1 px-2.5 text-xs flex items-center space-x-1 text-blue-600">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>Add Character</span>
+                    </button>
+                </div>
+                <div id="characters-list" class="space-y-3 overflow-y-auto max-h-[350px] flex-1 pr-1">
+                    <!-- Dynamic rows inserted dynamically -->
+                </div>
+            </div>
+
+            <!-- Environments & props database manager -->
+            <div class="gtk-card p-4 flex-grow flex flex-col min-h-[300px]">
+                <div class="flex justify-between items-center mb-3 pb-2 border-b border-gray-200">
+                    <h3 class="text-sm font-bold flex items-center space-x-2 text-gray-800">
+                        <i class="fa-solid fa-mountain-sun text-green-500"></i>
+                        <span>🗺️ 3. Environments & Key Props</span>
+                    </h3>
+                    <button onclick="addEnvironment()" class="gtk-btn py-1 px-2.5 text-xs flex items-center space-x-1 text-blue-600">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>Add Asset</span>
+                    </button>
+                </div>
+                <div id="environments-list" class="space-y-3 overflow-y-auto max-h-[350px] flex-1 pr-1">
+                    <!-- Dynamic rows inserted dynamically -->
+                </div>
+            </div>
+
+        </section>
+
+        <!-- RIGHT COLUMN: Storyboard clips, Shot modules, autocomplete engine interface -->
+        <section class="lg:col-span-7 flex flex-col space-y-4">
+
+            <!-- Active variable insert ribbon -->
+            <div class="gtk-card p-3">
+                <div class="flex items-center space-x-2 mb-2">
+                    <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">🎯 Quick-Insert Snippets:</span>
+                    <span class="text-[10px] text-gray-400 font-medium">(Select target text area then click tags or speech snippet)</span>
+                </div>
+                <div id="quick-variables-container" class="flex flex-wrap gap-1.5 max-h-[100px] overflow-y-auto p-1">
+                    <!-- Populated dynamically via updateQuickTagsPanel() -->
+                </div>
+            </div>
+
+            <!-- Storyboard clips workspace (Removed internal calculation scrolls to auto-grow as requested) -->
+            <div class="gtk-card p-4 flex-grow flex flex-col min-h-[600px]">
+                <div class="flex justify-between items-center mb-4 pb-2 border-b border-gray-200">
+                    <div class="flex items-center space-x-2">
+                        <i class="fa-solid fa-clapperboard text-orange-500 text-lg"></i>
+                        <h3 class="text-sm font-bold text-gray-800">🎬 Storyboard Clips & Sequence Editor</h3>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="addNewClip()" class="gtk-btn gtk-btn-primary py-1.5 px-3 text-xs flex items-center space-x-1.5">
+                            <i class="fa-solid fa-plus"></i>
+                            <span>Add New Clip Block</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Storyboard Clips Canvas Container (No max-height scrolling layout) -->
+                <div id="clips-container" class="space-y-6 pr-1">
+                    <!-- Dynamic clip modules loaded here -->
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Compiler output preview module -->
+    <section class="max-w-[1600px] w-full mx-auto px-4 pb-4">
+        <div class="gtk-card p-4 flex flex-col" id="compilation-section">
+            <div class="flex justify-between items-center mb-3 pb-2 border-b border-gray-200">
+                <div class="flex items-center space-x-3">
+                    <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                    <h3 class="text-sm font-bold text-gray-800 flex items-center space-x-2">
+                        <i class="fa-solid fa-square-terminal"></i>
+                        <span>📂 Compiled Storyboard Outputs (AI Ready Markdown)</span>
+                    </h3>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button onclick="copyCompiledOutput()" class="gtk-btn py-1.5 px-3 text-xs flex items-center space-x-1">
+                        <i class="fa-solid fa-copy"></i>
+                        <span id="btn-copy-text">Copy Full Output</span>
+                    </button>
+                    <button onclick="exportMarkdownFile()" class="gtk-btn py-1.5 px-3 text-xs flex items-center space-x-1">
+                        <i class="fa-solid fa-file-arrow-down"></i>
+                        <span>Download MD File</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+                <div class="lg:col-span-8 flex flex-col space-y-2">
+                    <label class="text-xs font-semibold text-gray-600" id="output-view-label">Generated Structured Markdown File (All Clips)</label>
+                    <textarea id="compiled-markdown-output" rows="18" readonly class="mono text-xs p-3 gtk-input w-full bg-gray-50 border-gray-300 rounded" placeholder="Click 'Compile Storyboard' in the header to synthesize your storyboard variables and select compile parameters."></textarea>
+                </div>
+                <div class="lg:col-span-4 flex flex-col space-y-4">
+                    <div>
+                        <label class="text-xs font-semibold text-gray-600 block mb-1">Timing Analytics Summary</label>
+                        <div id="analytics-summary-box" class="gtk-input bg-gray-50 p-3 h-[130px] overflow-y-auto text-xs space-y-2 flex flex-col justify-center">
+                            <span class="text-gray-400 italic text-center">Compile to view calculated pacing analytics...</span>
+                        </div>
+                    </div>
+                    <div class="flex-1 flex flex-col">
+                        <label class="text-xs font-semibold text-gray-600 block mb-1">Rapid Copy AI Video Prompts (First 4 Resolved Shots)</label>
+                        <div id="rapid-prompts-container" class="gtk-input bg-gray-50 p-3 flex-1 overflow-y-auto text-xs space-y-3 max-h-[220px]">
+                            <span class="text-gray-400 italic block text-center mt-6">Compile variables to generate copy-ready prompts...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Unified helpful instructions guide section -->
+    <section id="how-to-use-guide" class="max-w-[1600px] w-full mx-auto px-4 pb-8 scroll-mt-20">
+        <div class="gtk-card p-6 bg-[#ebebeb] border border-[#cdc7c2]">
+            <div class="flex items-center space-x-2 pb-3 mb-4 border-b border-gray-300 text-gray-800">
+                <i class="fa-solid fa-circle-info text-blue-600 text-lg"></i>
+                <h3 class="font-bold text-sm">💡 Quick Documentation & Workflow Explanation</h3>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-xs text-gray-700">
+                <!-- Guide Segment 1 -->
+                <div class="bg-white p-4 rounded-md shadow-sm space-y-2">
+                    <h4 class="font-bold text-gray-900 flex items-center space-x-1.5">
+                        <span class="w-5 h-5 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-[10px]">1</span>
+                        <span>Define the Rulebook</span>
+                    </h4>
+                    <p class="leading-relaxed">
+                        Define variables for styles, characters, and environments inside the left column. Shorthand tag labels (e.g., `[CHAR-SPY]`) are auto-assigned to these entries.
+                    </p>
+                </div>
+
+                <!-- Guide Segment 2 -->
+                <div class="bg-white p-4 rounded-md shadow-sm space-y-2">
+                    <h4 class="font-bold text-gray-900 flex items-center space-x-1.5">
+                        <span class="w-5 h-5 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-[10px]">2</span>
+                        <span>High-Speed Keyboard Tags</span>
+                    </h4>
+                    <p class="leading-relaxed">
+                        Type a bracket symbol <code class="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold font-xs text-blue-600">[</code> inside any shot description box. A dynamic suggestion list will immediately pop up! Select with your keyboard arrows and hit <code class="bg-gray-100 px-1 py-0.5 rounded font-mono font-bold font-xs">Enter</code>.
+                    </p>
+                </div>
+
+                <!-- Guide Segment 3 -->
+                <div class="bg-white p-4 rounded-md shadow-sm space-y-2">
+                    <h4 class="font-bold text-gray-900 flex items-center space-x-1.5">
+                        <span class="w-5 h-5 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center font-bold text-[10px]">🗣️</span>
+                        <span>Spoken Dialogue Rule</span>
+                    </h4>
+                    <p class="leading-relaxed">
+                        To add spoken audio, select a character tag and append the speech snippet to write `[CHAR-TAG] says, "spoken line"`. The compiler will automatically extract this into a dedicated audio channel.
+                    </p>
+                </div>
+
+                <!-- Guide Segment 4 -->
+                <div class="bg-white p-4 rounded-md shadow-sm space-y-2">
+                    <h4 class="font-bold text-gray-900 flex items-center space-x-1.5">
+                        <span class="w-5 h-5 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-bold text-[10px]">MD</span>
+                        <span>What is an "MD" File?</span>
+                    </h4>
+                    <p class="leading-relaxed">
+                        <strong>MD</strong> refers to <strong>Markdown</strong>. It is a highly optimized structured format ideal for feeding visual contexts into LLMs like Claude, Gemini, or ChatGPT with zero formatting loss.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Footer Meta Info -->
+            <div class="mt-6 border-t border-gray-300 pt-4 flex flex-col sm:flex-row items-center justify-between text-xs text-gray-600 gap-4">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-shield-halved text-green-600"></i>
+                    <span>All projects are auto-saved locally in secure project slots every 2 minutes.</span>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <span>Love this workflow? Support development:</span>
+                    <a href="https://paypal.me/BradfordRisbert" target="_blank" class="bg-blue-600 text-white font-bold px-3 py-1.5 rounded hover:bg-blue-700 transition flex items-center space-x-1 shadow">
+                        <i class="fa-brands fa-paypal"></i>
+                        <span>paypal.me/BradfordRisbert</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Page footer block -->
+    <footer class="bg-gray-900 text-gray-400 py-6 border-t border-gray-800 text-xs mt-auto">
+        <div class="max-w-[1600px] w-full mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div>
+                <p class="font-semibold text-gray-300">Neat Movie Storyboarder v1.5.0</p>
+                <p class="text-[11px] text-gray-500 mt-0.5">Designed for streamlined visual prompts compilation in generative video workflows.</p>
+            </div>
+            <!-- Social connections links tray -->
+            <div class="flex items-center space-x-4 text-base">
+                <a href="https://facebook.com" target="_blank" rel="noopener" class="hover:text-white transition" title="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+                <a href="https://instagram.com" target="_blank" rel="noopener" class="hover:text-white transition" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
+                <a href="https://youtube.com" target="_blank" rel="noopener" class="hover:text-white transition" title="YouTube"><i class="fa-brands fa-youtube"></i></a>
+                <a href="https://linkedin.com" target="_blank" rel="noopener" class="hover:text-white transition" title="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
+                <a href="https://github.com" target="_blank" rel="noopener" class="hover:text-white transition" title="GitHub"><i class="fa-brands fa-github"></i></a>
+            </div>
+            <div>
+                <p class="text-right text-[11px] text-gray-500">© 2026 Bradford R. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- SELECTIVE COMPILATION GTK DIALOG MODAL -->
+    <div id="compile-scope-modal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="gtk-card max-w-md w-full bg-white shadow-2xl overflow-hidden transform transition-all duration-300">
+            <div class="bg-[#ebebeb] px-4 py-3 border-b border-gray-300 flex items-center space-x-2 text-blue-600">
+                <i class="fa-solid fa-sliders text-lg"></i>
+                <h3 class="font-bold text-sm text-[#2e3436]">Compile Storyboard Configuration</h3>
+            </div>
+            <div class="p-5 text-sm space-y-3">
+                <p class="text-xs text-gray-500">
+                    Select your compilation scope. Compiling single clip blocks helps prevent context drift inside LLMs, keeping prompts organized inside their respective AI chats.
+                </p>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Compilation Target</label>
+                    <select id="compile-scope-selector" class="gtk-input w-full">
+                        <option value="all">Compile Full Project (All Clip Blocks)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-4 py-3 border-t border-gray-200 flex justify-end space-x-2">
+                <button onclick="closeCompileModal()" class="gtk-btn py-1.5 px-4">Cancel</button>
+                <button onclick="executeCompileStory()" class="gtk-btn gtk-btn-primary py-1.5 px-4">Compile Selected Target</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI SYSTEM PROMPTS GTK DIALOG MODAL -->
+    <div id="ai-prompts-modal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="gtk-card max-w-2xl w-full bg-white shadow-2xl overflow-hidden transform transition-all duration-300">
+            <div class="bg-[#ebebeb] px-4 py-3 border-b border-gray-300 flex items-center justify-between text-purple-600">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-robot text-lg"></i>
+                    <h3 class="font-bold text-sm text-[#2e3436]">Download Raw AI System Prompts (.md)</h3>
+                </div>
+                <button onclick="closeAiPromptsModal()" class="text-gray-500 hover:text-gray-800 text-xl font-bold">&times;</button>
+            </div>
+            <div class="p-5 text-sm space-y-4">
+                <p class="text-xs text-gray-500 leading-relaxed">
+                    To maintain flawless consistency and correct context pacing, download these raw Markdown files. Attach them directly to your AI chats as training files. 
+                    Because they are raw plain-text <strong>.md</strong> format, they bypass rich-text formatting filters, ensuring the AI receives all system guidelines cleanly!
+                </p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Builder Prompt Panel -->
+                    <div class="p-4 bg-purple-50 border border-purple-200 rounded-md flex flex-col justify-between space-y-3">
+                        <div>
+                            <h4 class="font-bold text-xs text-purple-900 flex items-center gap-1.5">
+                                <i class="fa-solid fa-wand-magic-sparkles text-purple-600"></i>
+                                <span>1. Storyboard Builder Prompt</span>
+                            </h4>
+                            <p class="text-[11px] text-purple-700 mt-1 leading-relaxed">
+                                Trains your first chat (Chat 1) to act as a structured editor: analyzing visual reference filenames, locking legends, managing timing parameters, and outputting shorthand storyboards.
+                            </p>
+                        </div>
+                        <button onclick="downloadBuilderMd()" class="gtk-btn w-full py-2 bg-purple-600 hover:bg-purple-700 border-purple-700 text-white flex items-center justify-center space-x-2 rounded shadow-sm">
+                            <i class="fa-solid fa-file-arrow-down"></i>
+                            <span>Download storyboard_builder.md</span>
+                        </button>
+                    </div>
+                    <!-- Interpreter Prompt Panel -->
+                    <div class="p-4 bg-blue-50 border border-blue-200 rounded-md flex flex-col justify-between space-y-3">
+                        <div>
+                            <h4 class="font-bold text-xs text-blue-900 flex items-center gap-1.5">
+                                <i class="fa-solid fa-language text-blue-600"></i>
+                                <span>2. Video Generation Interpreter</span>
+                            </h4>
+                            <p class="text-[11px] text-blue-700 mt-1 leading-relaxed">
+                                Trains your second chat (Chat 2) to act as a compiler: reading bracketed shorthand variables and translating them into dynamic, hyper-detailed prompt strings for Sora, Runway, etc.
+                            </p>
+                        </div>
+                        <button onclick="downloadInterpreterMd()" class="gtk-btn w-full py-2 bg-blue-600 hover:bg-blue-700 border-blue-700 text-white flex items-center justify-center space-x-2 rounded shadow-sm">
+                            <i class="fa-solid fa-file-arrow-down"></i>
+                            <span>Download video_generation_interpreter.md</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-4 py-3 border-t border-gray-200 flex justify-end">
+                <button onclick="closeAiPromptsModal()" class="gtk-btn py-1.5 px-4">Close Panel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CUSTOM GTK OUT-OF-TIME MODAL DIALOG -->
+    <div id="time-error-modal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="gtk-card max-w-md w-full bg-white shadow-2xl overflow-hidden transform transition-all duration-300">
+            <div class="bg-[#ebebeb] px-4 py-3 border-b border-gray-300 flex items-center space-x-2 text-orange-600">
+                <i class="fa-solid fa-clock-rotate-left text-lg"></i>
+                <h3 class="font-bold text-sm text-[#2e3436]">Timing Limit Reached!</h3>
+            </div>
+            <div class="p-5 text-sm space-y-3">
+                <div class="flex items-start space-x-3 text-gray-700">
+                    <i class="fa-solid fa-circle-exclamation text-orange-500 text-xl mt-0.5"></i>
+                    <div>
+                        <p class="font-semibold text-gray-900" id="modal-error-headline">Clip limits exceeded!</p>
+                        <p class="text-xs text-gray-500 mt-1" id="modal-error-description">The cumulative shot time exceeds your maximum defined clip buffer. Would you like to create a new clip block immediately and move this shot there?</p>
+                    </div>
+                </div>
+                <div class="bg-gray-100 p-3 rounded text-xs space-y-1 mono text-gray-600" id="modal-timing-breakdown">
+                    <div>Limit: <span class="font-bold">10.0s</span></div>
+                    <div>Accumulated: <span class="font-bold text-red-600">11.5s</span></div>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-4 py-3 border-t border-gray-200 flex justify-end space-x-2">
+                <button onclick="dismissTimeModal(false)" class="gtk-btn py-1.5 px-4">No, I'll Adjust Timing</button>
+                <button onclick="dismissTimeModal(true)" class="gtk-btn gtk-btn-primary py-1.5 px-4">Yes, Create Next Clip</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FLOATING AUTOCOMPLETE SELECTION CONTAINER -->
+    <div id="gtk-autocomplete" class="hidden absolute z-50 bg-white border border-[#cdc7c2] shadow-xl rounded-md max-h-[180px] overflow-y-auto text-xs font-mono py-1 min-w-[240px] select-none">
+        <!-- populated dynamically on typing '[' -->
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="gtk-toast" class="fixed bottom-4 right-4 z-50 transform translate-y-12 opacity-0 transition-all duration-300 ease-out flex items-center space-x-2 bg-gray-900 text-white text-xs px-4 py-3 rounded-md shadow-xl border border-gray-700">
+        <i class="fa-solid fa-circle-check text-green-400 text-sm"></i>
+        <span id="toast-message" class="font-medium">Action completed successfully.</span>
+    </div>
+
+    <script>
+
+        // --- GLOBAL CAMERA ANGLE & MOTION LIST ARRAYS (Now featuring defaults) ---
+        const cameraAnglesList = [
+            "Normal Shot (AI Decides)",
+            "Face Close-Up (Extreme Close-Up / ECU)",
+            "Worm's-Eye View (Ground Level Looking Up)",
+            "High-Angle Shot (Overhead View)",
+            "Aerial Drone Shot (Top-Down Bird's Eye)",
+            "High Drone Shot with Dutch Tilt (Canted Angle)",
+            "Close-Up (CU)",
+            "Frontal Eye-Level Shot",
+            "Rear View / Over-the-Shoulder (OTS)",
+            "Distant View (Extreme Wide Shot)",
+            "Extreme Wide Establishing Shot (EWS)",
+            "Medium Wide Shot (MWS)",
+            "Full Body Shot (FS)",
+            "Medium Portrait Shot (MS)",
+            "Medium Close-Up (MCU)",
+            "Macro Detail Close-Up (Hyper Detail)",
+            "Low-Angle View (Power/Hero perspective)",
+            "Point-Of-View (POV) Angle",
+            "Two-Shot (Symmetrical Character Framing)",
+            "Choker Shot (Tight Face Crop)",
+            "Profile Shot (Side Silhouette)",
+            "Dutch Angle (Intense dramatic tilt)",
+            "Cowboy Shot (Thighs-up Framing)"
+        ];
+
+        const cameraMotionsList = [
+            "Static (No camera motion)",
+            "Steadicam Glide (Silky smooth active tracking)",
+            "Dolly In (Slow push-in toward subject)",
+            "Dolly Out (Slow pull-back away from subject)",
+            "Pan Left / Right (Horizontal sweep)",
+            "Tilt Up / Down (Vertical pitch rotation)",
+            "Tracking Shot (Camera accompanies side-by-side motion)",
+            "Orbit Shot (360-degree rotating sweep)",
+            "Crane Shot (Swooping high-to-low vertical move)",
+            "Handheld Shake (High kinetic cinematic vibration)",
+            "Optical Zoom In / Out (Focal adjustments)",
+            "Whip Pan (Ultra-fast blur camera sweep)"
+        ];
+
+        // --- GLOBAL STORYBOARD STATE ---
+        let appState = {
+            style: {
+                preset: 'cinematic',
+                prompt: 'Photorealistic 35mm cinematic film style, shallow depth of field, warm golden-hour lighting, high-fidelity textures, natural grading.',
+                audio: 'Ambient park sounds (birds chirping, gentle wind), clear Foley sound effects (footsteps, sliding rustle, deep thud). No background music.'
+            },
+            characters: [],
+            environments: [],
+            clips: []
+        };
+
+        // Autocomplete status references
+        let activeAutocompleteIndex = 0;
+        let autocompleteOpen = false;
+        let lastFocusedInputId = null;
+        let pendingClipTransfer = null;
+        let currentActiveSlot = "proj_1";
+
+        // Raw Markdown prompt text templates
+        const storyboardBuilderPromptText = `# SYSTEM PROMPT: AI Storyboard Builder & Variable Organizer (Chat 1) ...`; // Handled natively in download code below
+        const videoGenerationInterpreterPromptText = `# SYSTEM PROMPT: Video Generation Continuity Director & Prompt Resolver (Chat 2) ...`;
+
+        window.onload = function() {
+            if (!loadCurrentSlot(true)) {
+                loadDemoData();
+            }
+            
+            // Global focus hook to track description elements
+            document.addEventListener('focusin', function(e) {
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+                    lastFocusedInputId = e.target.id;
+                }
+            });
+
+            // Initialize global auto-save thread (2 mins)
+            setInterval(autoSaveHandler, 120000);
+
+            // Hook the autocomplete parser
+            initAutocompleteTracker();
+        };
+
+
+        // --- DYNAMIC SLOT DATABASE ENGINE ---
+        function switchProjectSlot(slotKey) {
+            currentActiveSlot = slotKey;
+            loadCurrentSlot();
+        }
+
+        function autoSaveHandler() {
+            saveStateToStorage(currentActiveSlot);
+            const badge = document.getElementById('autosave-badge');
+            badge.classList.remove('bg-green-100', 'text-green-700', 'border-green-200');
+            badge.classList.add('bg-indigo-100', 'text-indigo-700', 'border-indigo-200');
+            badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></span> <span>Auto-Saved State</span>`;
+            
+            setTimeout(() => {
+                badge.classList.remove('bg-indigo-100', 'text-indigo-700', 'border-indigo-200');
+                badge.classList.add('bg-green-100', 'text-green-700', 'border-green-200');
+                badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span> <span>Auto-Save Active</span>`;
+            }, 3000);
+        }
+
+        function saveCurrentSlot() {
+            saveStateToStorage(currentActiveSlot);
+            showToast(`Saved project state successfully inside ${currentActiveSlot.toUpperCase()}!`);
+        }
+
+        function loadCurrentSlot(silent = false) {
+            const result = loadStateFromStorage(currentActiveSlot);
+            if (result) {
+                if (!silent) showToast(`Restored layout from storage slot ${currentActiveSlot.toUpperCase()}!`);
+                return true;
+            } else {
+                if (!silent) showToast(`No saved project state found in slot ${currentActiveSlot.toUpperCase()}.`);
+                return false;
+            }
+        }
+
+        function saveStateToStorage(slot) {
+            appState.style.prompt = document.getElementById('style-prompt').value.trim();
+            appState.style.audio = document.getElementById('audio-prompt').value.trim();
+            appState.style.preset = document.getElementById('style-preset').value;
+            localStorage.setItem(slot, JSON.stringify(appState));
+        }
+
+        function loadStateFromStorage(slot) {
+            const raw = localStorage.getItem(slot);
+            if (!raw) return false;
+            try {
+                const parsed = JSON.parse(raw);
+                if (parsed && typeof parsed === 'object') {
+                    appState = parsed;
+                    
+                    document.getElementById('style-preset').value = appState.style.preset || 'custom';
+                    document.getElementById('style-prompt').value = appState.style.prompt || '';
+                    document.getElementById('audio-prompt').value = appState.style.audio || '';
+                    
+                    document.getElementById('characters-list').innerHTML = '';
+                    document.getElementById('environments-list').innerHTML = '';
+                    document.getElementById('clips-container').innerHTML = '';
+
+                    if (appState.characters && appState.characters.length > 0) {
+                        appState.characters.forEach(c => renderCharacterRow(c));
+                    }
+                    if (appState.environments && appState.environments.length > 0) {
+                        appState.environments.forEach(e => renderEnvironmentRow(e));
+                    }
+                    if (appState.clips && appState.clips.length > 0) {
+                        appState.clips.forEach(clip => {
+                            renderClipWorkspace(clip);
+                            if (clip.shots && clip.shots.length > 0) {
+                                clip.shots.forEach(s => renderShotRow(clip.id, s));
+                            }
+                            calculateClipTimes(clip.id);
+                        });
+                    }
+
+                    updateQuickTagsPanel();
+                    return true;
+                }
+            } catch(e) {
+                console.error("Storage load error:", e);
+                return false;
+            }
+            return false;
+        }
+
+        function exportJSONState() {
+            appState.style.prompt = document.getElementById('style-prompt').value.trim();
+            appState.style.audio = document.getElementById('audio-prompt').value.trim();
+            appState.style.preset = document.getElementById('style-preset').value;
+
+            const content = JSON.stringify(appState, null, 2);
+            const blob = new Blob([content], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            
+            link.href = url;
+            link.setAttribute("download", `storyboard_project_${currentActiveSlot}.json`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showToast("Exported project config state as JSON file!");
+        }
+
+        function triggerJSONImport() {
+            document.getElementById('json-import-input').click();
+        }
+
+        function importJSONState(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const parsed = JSON.parse(e.target.result);
+                    if (parsed && typeof parsed === 'object') {
+                        appState = parsed;
+                        saveStateToStorage(currentActiveSlot);
+                        loadCurrentSlot();
+                        showToast("Successfully imported JSON backup configuration state!");
+                    } else {
+                        showToast("Invalid config file structure. Upload failed.");
+                    }
+                } catch(err) {
+                    showToast("Error processing JSON config file.");
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        function scrollToGuide() {
+            const guide = document.getElementById('how-to-use-guide');
+            guide.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // --- PRESET DESIGN CONFIGURATIONS ---
+        const stylePresets = {
+            custom: { prompt: '', audio: '' },
+            sakuga: {
+                prompt: 'High-end 2D Sakuga anime style, crisp line-art, cinematic keyframes, dramatic cell-shading, fluid camera sweeps, 2D hand-drawn aesthetic.',
+                audio: 'No spoken dialogues, only cinematic gestures. Complete atmospheric ambient SFX. No music.'
+            },
+            cyberpunk: {
+                prompt: 'Gritty neon cyberpunk style, hyper-detailed futuristic city alley, rain-slick streets reflecting neon magenta and teal lights, volumetrics, cinematic film grain.',
+                audio: 'Deep synthesizer drone rumble, crackling electric sparks, heavy rain pattering on metal roofs, muffled distant city sirens.'
+            },
+            cinematic: {
+                prompt: 'Photorealistic 35mm cinematic film style, shallow depth of field, warm golden-hour lighting, high-fidelity textures, natural color grading.',
+                audio: 'Ambient park sounds (birds chirping, gentle wind), clear Foley sound effects (footsteps, sliding rustle, deep thud). No background music.'
+            },
+            scifi: {
+                prompt: 'Alien sci-fi environment, cosmic horror vibes, dark biomechanical corridors, pulsing violet bioluminescent spores, foggy atmosphere, cinematic depth.',
+                audio: 'Ominous metallic echoing hums, rhythmic mechanical respirators, heavy wet step sounds, high-pitched digital scanning noises.'
+            }
+        };
+
+        function applyStylePreset(presetKey) {
+            if (stylePresets[presetKey]) {
+                appState.style.preset = presetKey;
+                document.getElementById('style-prompt').value = stylePresets[presetKey].prompt;
+                document.getElementById('audio-prompt').value = stylePresets[presetKey].audio;
+                appState.style.prompt = stylePresets[presetKey].prompt;
+                appState.style.audio = stylePresets[presetKey].audio;
+                showToast("Applied design style preset: " + presetKey);
+            }
+        }
+
+
+        // --- VARIABLE & LEGEND BUILDER MODULES ---
+        function addCharacter(charData = null) {
+            const charId = charData ? charData.id : 'char_' + Date.now() + Math.floor(Math.random() * 100);
+            const indexNum = appState.characters.length + 1;
+            const code = charData ? charData.code : `CHAR-HERO-${indexNum}`;
+            const name = charData ? charData.name : `Hero ${indexNum}`;
+            const description = charData ? charData.description : '';
+
+            const charObj = { id: charId, code, name, description };
+            appState.characters.push(charObj);
+
+            renderCharacterRow(charObj);
+            updateQuickTagsPanel();
+        }
+
+        function renderCharacterRow(char) {
+            const list = document.getElementById('characters-list');
+            const row = document.createElement('div');
+            row.id = `row-${char.id}`;
+            row.className = 'p-3 bg-gray-50 border border-gray-200 rounded-md space-y-2 relative group';
+            row.innerHTML = `
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-2">
+                        <span class="mono text-[10px] font-bold bg-purple-100 text-purple-700 px-2 py-0.5 rounded border border-purple-200">ID CODE</span>
+                        <input type="text" id="code-${char.id}" onchange="updateCharacterState('${char.id}')" value="${char.code}" class="mono font-bold text-xs gtk-input max-w-[130px] py-0.5 px-1.5" placeholder="CHAR-SPY">
+                    </div>
+                    <div class="flex items-center space-x-1">
+                        <input type="text" id="name-${char.id}" onchange="updateCharacterState('${char.id}')" value="${char.name}" class="font-bold text-xs gtk-input max-w-[150px] py-0.5 px-1.5" placeholder="Character Name">
+                        <button onclick="removeCharacter('${char.id}')" class="gtk-btn gtk-btn-danger p-1 text-[10px]" title="Delete Character">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                <div>
+                    <textarea id="desc-${char.id}" onchange="updateCharacterState('${char.id}')" rows="2" class="gtk-input w-full text-xs font-sans" placeholder="Analyze visual traits: physical attributes, facial shape, hairstyle, outfits...">${char.description}</textarea>
+                </div>
+            `;
+            list.appendChild(row);
+        }
+
+        function updateCharacterState(charId) {
+            const charIndex = appState.characters.findIndex(c => c.id === charId);
+            if (charIndex !== -1) {
+                appState.characters[charIndex].code = document.getElementById(`code-${charId}`).value.trim().toUpperCase();
+                appState.characters[charIndex].name = document.getElementById(`name-${charId}`).value.trim();
+                appState.characters[charIndex].description = document.getElementById(`desc-${charId}`).value.trim();
+                updateQuickTagsPanel();
+            }
+        }
+
+        function removeCharacter(charId) {
+            appState.characters = appState.characters.filter(c => c.id !== charId);
+            const element = document.getElementById(`row-${charId}`);
+            if (element) element.remove();
+            updateQuickTagsPanel();
+            showToast("Removed character variable from list.");
+        }
+
+        function addEnvironment(envData = null) {
+            const envId = envData ? envData.id : 'env_' + Date.now() + Math.floor(Math.random() * 100);
+            const indexNum = appState.environments.length + 1;
+            const code = envData ? envData.code : `ENV-LOC-${indexNum}`;
+            const name = envData ? envData.name : `Location ${indexNum}`;
+            const description = envData ? envData.description : '';
+
+            const envObj = { id: envId, code, name, description };
+            appState.environments.push(envObj);
+
+            renderEnvironmentRow(envObj);
+            updateQuickTagsPanel();
+        }
+
+        function renderEnvironmentRow(env) {
+            const list = document.getElementById('environments-list');
+            const row = document.createElement('div');
+            row.id = `row-${env.id}`;
+            row.className = 'p-3 bg-gray-50 border border-gray-200 rounded-md space-y-2 relative group';
+            row.innerHTML = `
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-2">
+                        <span class="mono text-[10px] font-bold bg-green-100 text-green-700 px-2 py-0.5 rounded border border-green-200">ID CODE</span>
+                        <input type="text" id="envcode-${env.id}" onchange="updateEnvironmentState('${env.id}')" value="${env.code}" class="mono font-bold text-xs gtk-input max-w-[130px] py-0.5 px-1.5" placeholder="ENV-CHECKPOINT">
+                    </div>
+                    <div class="flex items-center space-x-1">
+                        <input type="text" id="envname-${env.id}" onchange="updateEnvironmentState('${env.id}')" value="${env.name}" class="font-bold text-xs gtk-input max-w-[150px] py-0.5 px-1.5" placeholder="Environment / Prop Name">
+                        <button onclick="removeEnvironment('${env.id}')" class="gtk-btn gtk-btn-danger p-1 text-[10px]" title="Delete Variable">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                <div>
+                    <textarea id="envdesc-${env.id}" onchange="updateEnvironmentState('${env.id}')" rows="2" class="gtk-input w-full text-xs font-sans" placeholder="Detailed atmosphere prompts: architectural design, lighting shadows, textures...">${env.description}</textarea>
+                </div>
+            `;
+            list.appendChild(row);
+        }
+
+        function updateEnvironmentState(envId) {
+            const envIndex = appState.environments.findIndex(e => e.id === envId);
+            if (envIndex !== -1) {
+                appState.environments[envIndex].code = document.getElementById(`envcode-${envId}`).value.trim().toUpperCase();
+                appState.environments[envIndex].name = document.getElementById(`envname-${envId}`).value.trim();
+                appState.environments[envIndex].description = document.getElementById(`envdesc-${envId}`).value.trim();
+                updateQuickTagsPanel();
+            }
+        }
+
+        function removeEnvironment(envId) {
+            appState.environments = appState.environments.filter(e => e.id !== envId);
+            const element = document.getElementById(`row-${envId}`);
+            if (element) element.remove();
+            updateQuickTagsPanel();
+            showToast("Removed environment/prop variable.");
+        }
+
+
+        // --- QUICK RIBBON PANEL BUILDER ---
+        function updateQuickTagsPanel() {
+            const panel = document.getElementById('quick-variables-container');
+            panel.innerHTML = '';
+
+            appState.characters.forEach(c => {
+                if (c.code) {
+                    const tag = document.createElement('span');
+                    tag.className = 'gtk-tag px-2.5 py-1 select-none flex items-center space-x-1 text-purple-700 bg-purple-50 border-purple-300';
+                    tag.innerHTML = `<i class="fa-solid fa-user-tag text-[9px]"></i> <span class="mono">[${c.code}]</span>`;
+                    tag.onclick = () => insertAtLastFocused(`[${c.code}]`);
+                    panel.appendChild(tag);
+                }
+            });
+
+            appState.environments.forEach(e => {
+                if (e.code) {
+                    const tag = document.createElement('span');
+                    tag.className = 'gtk-tag px-2.5 py-1 select-none flex items-center space-x-1 text-green-700 bg-green-50 border-green-300';
+                    tag.innerHTML = `<i class="fa-solid fa-location-dot text-[9px]"></i> <span class="mono">[${e.code}]</span>`;
+                    tag.onclick = () => insertAtLastFocused(`[${e.code}]`);
+                    panel.appendChild(tag);
+                }
+            });
+
+            const defaultTags = [
+                { code: 'STYLE-DEFAULT', icon: 'fa-palette', color: 'text-blue-700 bg-blue-50 border-blue-300' },
+                { code: 'AUDIO-DEFAULT', icon: 'fa-volume-high', color: 'text-amber-700 bg-amber-50 border-amber-300' }
+            ];
+
+            defaultTags.forEach(t => {
+                const tag = document.createElement('span');
+                tag.className = `gtk-tag px-2.5 py-1 select-none flex items-center space-x-1 ${t.color}`;
+                tag.innerHTML = `<i class="fa-solid ${t.icon} text-[9px]"></i> <span class="mono">[${t.code}]</span>`;
+                tag.onclick = () => insertAtLastFocused(`[${t.code}]`);
+                panel.appendChild(tag);
+            });
+
+            const speechTag = document.createElement('span');
+            speechTag.className = 'gtk-tag px-2.5 py-1 select-none flex items-center space-x-1 text-red-700 bg-red-50 border-red-300 font-bold';
+            speechTag.innerHTML = `<i class="fa-solid fa-comment-dots text-[10px]"></i> <span>💬 Speech Snippet</span>`;
+            speechTag.onclick = () => insertAtLastFocused(` says, "this is my voice!"`);
+            panel.appendChild(speechTag);
+        }
+
+        function insertAtLastFocused(text) {
+            if (!lastFocusedInputId) {
+                showToast("Please click inside an Action description text area first.");
+                return;
+            }
+
+            const inputEl = document.getElementById(lastFocusedInputId);
+            if (!inputEl) return;
+
+            const startPos = inputEl.selectionStart;
+            const endPos = inputEl.selectionEnd;
+            const val = inputEl.value;
+
+            inputEl.value = val.substring(0, startPos) + text + val.substring(endPos, val.length);
+            inputEl.focus();
+            const caretPos = startPos + text.length;
+            inputEl.setSelectionRange(caretPos, caretPos);
+
+            inputEl.dispatchEvent(new Event('change'));
+            updateQuickTagsPanel();
+        }
+
+
+        // --- STORYBOARD CLIPS & SHOTS MODULE ---
+        function addNewClip(clipData = null) {
+            const clipId = clipData ? clipData.id : 'clip_' + Date.now();
+            const clipNum = appState.clips.length + 1;
+            const title = clipData ? clipData.title : `Clip Block ${clipNum}`;
+            const maxDuration = clipData ? clipData.maxDuration : 10.0;
+            const shots = clipData ? clipData.shots : [];
+
+            const clipObj = { id: clipId, title, maxDuration, shots };
+            appState.clips.push(clipObj);
+
+            renderClipWorkspace(clipObj);
+
+            if (shots.length === 0) {
+                addNewShotToClip(clipId);
+            } else {
+                shots.forEach(s => renderShotRow(clipId, s));
+            }
+
+            calculateClipTimes(clipId);
+        }
+
+        function renderClipWorkspace(clip) {
+            const container = document.getElementById('clips-container');
+            const card = document.createElement('div');
+            card.id = `card-${clip.id}`;
+            card.className = 'gtk-card p-4 bg-white border border-gray-300 space-y-4';
+            card.innerHTML = `
+                <div class="flex flex-col md:flex-row md:items-center justify-between pb-3 border-b border-gray-100 gap-2">
+                    <div class="flex items-center space-x-3">
+                        <span class="w-6 h-6 rounded-md bg-orange-100 border border-orange-200 text-orange-700 flex items-center justify-center font-bold text-xs"><i class="fa-solid fa-clapperboard text-[10px]"></i></span>
+                        <input type="text" id="cliptitle-${clip.id}" onchange="syncClipMeta('${clip.id}')" value="${clip.title}" class="font-bold text-sm gtk-input max-w-[180px] py-0.5 px-2" placeholder="Clip Block Title">
+                    </div>
+                    
+                    <div class="flex items-center flex-wrap gap-2">
+                        <div class="flex items-center space-x-1.5 px-3 py-1 rounded bg-gray-100 border border-gray-200">
+                            <span class="text-xs text-gray-500 font-medium">Accumulated:</span>
+                            <span id="accumulated-time-${clip.id}" class="mono font-bold text-xs text-gray-800">0.0s</span>
+                            <span class="text-xs text-gray-400">/</span>
+                            <span class="text-xs text-gray-500 font-medium">Max Limit:</span>
+                            <input type="number" id="maxdur-${clip.id}" step="0.5" onchange="syncClipMeta('${clip.id}')" value="${clip.maxDuration}" class="mono font-bold text-xs gtk-input max-w-[60px] py-0.5 px-1 text-center">
+                            <span class="mono text-xs text-gray-500">s</span>
+                        </div>
+                        
+                        <div class="flex items-center space-x-1">
+                            <button onclick="addNewShotToClip('${clip.id}')" class="gtk-btn py-1 px-2.5 text-xs text-green-700 flex items-center space-x-1">
+                                <i class="fa-solid fa-plus"></i>
+                                <span>Add Shot</span>
+                            </button>
+                            <button onclick="deleteClip('${clip.id}')" class="gtk-btn gtk-btn-danger p-1 px-2 text-xs" title="Delete Clip Block">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-3" id="shots-container-${clip.id}">
+                    <!-- Shot Rows Rendered Dynamic -->
+                </div>
+            `;
+            container.appendChild(card);
+        }
+
+        function syncClipMeta(clipId) {
+            const clipIndex = appState.clips.findIndex(c => c.id === clipId);
+            if (clipIndex !== -1) {
+                appState.clips[clipIndex].title = document.getElementById(`cliptitle-${clipId}`).value.trim();
+                appState.clips[clipIndex].maxDuration = parseFloat(document.getElementById(`maxdur-${clipId}`).value) || 10.0;
+                calculateClipTimes(clipId);
+            }
+        }
+
+        function deleteClip(clipId) {
+            appState.clips = appState.clips.filter(c => c.id !== clipId);
+            const element = document.getElementById(`card-${clipId}`);
+            if (element) element.remove();
+            showToast("Removed storyboard clip block.");
+        }
+
+        // Default Duration adjusted to 1.0s (originally 1.5s)
+        // Default camera settings prioritized to 'Normal Shot (AI Decides)' and 'Static (No camera motion)'
+        function addNewShotToClip(clipId, shotData = null) {
+            const clipObj = appState.clips.find(c => c.id === clipId);
+            if (!clipObj) return;
+
+            const shotId = shotData ? shotData.id : 'shot_' + Date.now() + Math.floor(Math.random() * 100);
+            const duration = shotData ? shotData.duration : 1.0;
+            const angle = shotData ? shotData.angle : 'Normal Shot (AI Decides)';
+            const motion = shotData ? shotData.motion : 'Static (No camera motion)';
+            const action = shotData ? shotData.action : '';
+
+            const shotObj = { id: shotId, duration, angle, motion, action };
+            clipObj.shots.push(shotObj);
+
+            renderShotRow(clipId, shotObj);
+            calculateClipTimes(clipId, shotId);
+        }
+
+
+        function renderShotRow(clipId, shot) {
+            const table = document.getElementById(`shots-container-${clipId}`);
+            const row = document.createElement('div');
+            row.id = `shotrow-${shot.id}`;
+            row.className = 'p-3 bg-gray-50 border border-gray-200 rounded-md relative flex flex-col gap-3 group hover:border-gray-400 transition-colors';
+
+            const isCustomAngle = !cameraAnglesList.includes(shot.angle) && shot.angle !== '';
+            const isCustomMotion = !cameraMotionsList.includes(shot.motion) && shot.motion !== '';
+
+            // Generate drop-list details
+            let angleOptionsHtml = '';
+            cameraAnglesList.forEach(a => {
+                const isSelected = shot.angle === a || (a === "Normal Shot (AI Decides)" && !shot.angle) ? 'selected' : '';
+                angleOptionsHtml += `<option value="${a}" ${isSelected}>${a}</option>`;
+            });
+            angleOptionsHtml += `<option value="custom" ${isCustomAngle ? 'selected' : ''}>-- Custom Angle... --</option>`;
+
+            let motionOptionsHtml = '';
+            cameraMotionsList.forEach(m => {
+                const isSelected = shot.motion === m || (m === "Static (No camera motion)" && !shot.motion) ? 'selected' : '';
+                motionOptionsHtml += `<option value="${m}" ${isSelected}>${m}</option>`;
+            });
+            motionOptionsHtml += `<option value="custom" ${isCustomMotion ? 'selected' : ''}>-- Custom Motion... --</option>`;
+
+            row.innerHTML = `
+                <!-- Top Row: Time, Angle and Motion selections -->
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
+                    
+                    <!-- Duration (col-span-2) -->
+                    <div class="md:col-span-2 flex items-center space-x-1.5">
+                        <span class="text-[10px] uppercase font-bold text-gray-500 min-w-[40px] md:hidden">Time:</span>
+                        <i class="fa-regular fa-clock text-xs text-gray-400 hidden md:block"></i>
+                        <input type="number" step="0.1" min="0.1" id="shotdur-${shot.id}" onchange="updateShotState('${clipId}', '${shot.id}')" value="${shot.duration}" class="mono font-bold text-xs gtk-input w-full py-1 text-center" placeholder="1.0">
+                        <span class="text-xs text-gray-500">s</span>
+                    </div>
+
+                    <!-- Camera Angle Option (col-span-5) -->
+                    <div class="md:col-span-5 flex flex-col space-y-1">
+                        <div class="flex items-center space-x-1.5">
+                            <span class="text-[10px] uppercase font-bold text-gray-500 min-w-[40px] md:hidden">Angle:</span>
+                            <select id="shotangle-select-${shot.id}" onchange="handleAngleSelectChange('${clipId}', '${shot.id}')" class="font-medium text-xs gtk-input w-full py-1 cursor-pointer">
+                                ${angleOptionsHtml}
+                            </select>
+                        </div>
+                        <input type="text" id="shotangle-custom-${shot.id}" onchange="handleAngleCustomChange('${clipId}', '${shot.id}')" value="${isCustomAngle ? shot.angle : ''}" class="${isCustomAngle ? '' : 'hidden'} font-medium text-[11px] gtk-input w-full py-0.5" placeholder="Type custom angle...">
+                    </div>
+
+                    <!-- Camera Kinetic Motion Option (col-span-4) -->
+                    <div class="md:col-span-4 flex flex-col space-y-1">
+                        <div class="flex items-center space-x-1.5">
+                            <span class="text-[10px] uppercase font-bold text-gray-500 min-w-[40px] md:hidden">Motion:</span>
+                            <select id="shotmotion-select-${shot.id}" onchange="handleMotionSelectChange('${clipId}', '${shot.id}')" class="font-medium text-xs gtk-input w-full py-1 cursor-pointer">
+                                ${motionOptionsHtml}
+                            </select>
+                        </div>
+                        <input type="text" id="shotmotion-custom-${shot.id}" onchange="handleMotionCustomChange('${clipId}', '${shot.id}')" value="${isCustomMotion ? shot.motion : ''}" class="${isCustomMotion ? '' : 'hidden'} font-medium text-[11px] gtk-input w-full py-0.5" placeholder="Type custom motion...">
+                    </div>
+
+                    <!-- Delete Trigger Button (col-span-1) -->
+                    <div class="md:col-span-1 flex items-center justify-end">
+                        <button onclick="removeShotFromClip('${clipId}', '${shot.id}')" class="gtk-btn gtk-btn-danger p-1 text-[10px] w-full md:w-auto flex items-center justify-center gap-1" title="Delete Shot">
+                            <i class="fa-solid fa-trash-can"></i>
+                            <span class="md:hidden text-[10px] font-bold uppercase">Delete</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Bottom Row: Dedicated full-width text area row for description metrics (No scrolling/nested scroll resizing needed) -->
+                <div class="flex flex-col space-y-1 w-full">
+                    <div class="flex justify-between items-center">
+                        <span class="text-[10px] uppercase font-bold text-gray-400">Scene Description Narrative</span>
+                        <span class="text-[9px] text-gray-400 font-medium hidden md:block">Press <kbd class="bg-gray-200 px-1 rounded font-mono font-bold">[</kbd> to trigger autocomplete tags</span>
+                    </div>
+                    <textarea id="shotaction-${shot.id}" onchange="updateShotState('${clipId}', '${shot.id}')" rows="3" class="shot-action-textarea text-xs gtk-input w-full py-1.5 px-2.5 font-sans leading-relaxed" placeholder="Narrate scene... Type '[' to autocomplete variables, or click 'Speech Snippet' to write spoken dialogs.">${shot.action}</textarea>
+                </div>
+            `;
+            table.appendChild(row);
+        }
+
+        // Drop-list Selection Handlers
+        function handleAngleSelectChange(clipId, shotId) {
+            const select = document.getElementById(`shotangle-select-${shotId}`);
+            const customInput = document.getElementById(`shotangle-custom-${shotId}`);
+            
+            if (select.value === 'custom') {
+                customInput.classList.remove('hidden');
+                customInput.focus();
+            } else {
+                customInput.classList.add('hidden');
+                updateShotValue(clipId, shotId, 'angle', select.value);
+            }
+        }
+
+        function handleAngleCustomChange(clipId, shotId) {
+            const customInput = document.getElementById(`shotangle-custom-${shotId}`);
+            updateShotValue(clipId, shotId, 'angle', customInput.value.trim());
+        }
+
+        function handleMotionSelectChange(clipId, shotId) {
+            const select = document.getElementById(`shotmotion-select-${shotId}`);
+            const customInput = document.getElementById(`shotmotion-custom-${shotId}`);
+            
+            if (select.value === 'custom') {
+                customInput.classList.remove('hidden');
+                customInput.focus();
+            } else {
+                customInput.classList.add('hidden');
+                updateShotValue(clipId, shotId, 'motion', select.value);
+            }
+        }
+
+        function handleMotionCustomChange(clipId, shotId) {
+            const customInput = document.getElementById(`shotmotion-custom-${shotId}`);
+            updateShotValue(clipId, shotId, 'motion', customInput.value.trim());
+        }
+
+        function updateShotValue(clipId, shotId, field, value) {
+            const clipObj = appState.clips.find(c => c.id === clipId);
+            if (!clipObj) return;
+            const shotObj = clipObj.shots.find(s => s.id === shotId);
+            if (!shotObj) return;
+
+            shotObj[field] = value;
+            calculateClipTimes(clipId, shotId);
+        }
+
+        function updateShotState(clipId, shotId) {
+            const clipObj = appState.clips.find(c => c.id === clipId);
+            if (!clipObj) return;
+
+            const shotObj = clipObj.shots.find(s => s.id === shotId);
+            if (!shotObj) return;
+
+            shotObj.duration = parseFloat(document.getElementById(`shotdur-${shotId}`).value) || 0;
+            shotObj.action = document.getElementById(`shotaction-${shotId}`).value.trim();
+
+            calculateClipTimes(clipId, shotId);
+        }
+
+        function removeShotFromClip(clipId, shotId) {
+            const clipObj = appState.clips.find(c => c.id === clipId);
+            if (!clipObj) return;
+
+            clipObj.shots = clipObj.shots.filter(s => s.id !== shotId);
+            const rowElement = document.getElementById(`shotrow-${shotId}`);
+            if (rowElement) rowElement.remove();
+
+            calculateClipTimes(clipId);
+            showToast("Removed shot from clip sequence.");
+        }
+
+
+        // --- KEYBOARD AUTCOMPLETE TAG COMPILER ENGINE ---
+        function initAutocompleteTracker() {
+            const clipsContainer = document.getElementById('clips-container');
+            const autocompleteMenu = document.getElementById('gtk-autocomplete');
+
+            // Event delegation on description textareas
+            clipsContainer.addEventListener('input', function(e) {
+                if (e.target.classList.contains('shot-action-textarea')) {
+                    handleAutocompleteInput(e.target);
+                }
+            });
+
+            clipsContainer.addEventListener('keydown', function(e) {
+                if (e.target.classList.contains('shot-action-textarea')) {
+                    handleAutocompleteKeys(e, e.target);
+                }
+            });
+
+            // Hide autocomplete on click away
+            document.addEventListener('click', function(e) {
+                if (!autocompleteMenu.contains(e.target) && !e.target.classList.contains('shot-action-textarea')) {
+                    hideAutocomplete();
+                }
+            });
+        }
+
+        function handleAutocompleteInput(textarea) {
+            const caretPos = textarea.selectionStart;
+            const textBefore = textarea.value.substring(0, caretPos);
+            
+            const lastBracket = textBefore.lastIndexOf('[');
+            const lastCloseBracket = textBefore.lastIndexOf(']');
+
+            if (lastBracket !== -1 && lastBracket > lastCloseBracket) {
+                const query = textBefore.substring(lastBracket + 1).toUpperCase();
+                showAutocompleteMenu(textarea, lastBracket, query);
+            } else {
+                hideAutocomplete();
+            }
+        }
+
+        function showAutocompleteMenu(textarea, bracketIndex, query) {
+            const menu = document.getElementById('gtk-autocomplete');
+            menu.innerHTML = '';
+
+            // Collect all available variables in dynamic memory
+            const variables = [];
+            appState.characters.forEach(c => {
+                if (c.code) variables.push({ code: c.code, name: c.name, type: 'Character', color: 'text-purple-600' });
+            });
+            appState.environments.forEach(e => {
+                if (e.code) variables.push({ code: e.code, name: e.name, type: 'Environment/Prop', color: 'text-green-600' });
+            });
+            variables.push({ code: 'STYLE-DEFAULT', name: 'Global Visual Aesthetic', type: 'Style', color: 'text-blue-600' });
+            variables.push({ code: 'AUDIO-DEFAULT', name: 'Global Sound & Foley FX', type: 'Style', color: 'text-amber-600' });
+
+            // Filter values based on query
+            const filtered = variables.filter(v => v.code.toUpperCase().includes(query));
+
+            if (filtered.length === 0) {
+                hideAutocomplete();
+                return;
+            }
+
+            autocompleteOpen = true;
+            activeAutocompleteIndex = 0;
+
+            filtered.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = `autocomplete-item flex justify-between items-center text-[11px] ${index === 0 ? 'active' : ''}`;
+                div.dataset.index = index;
+                div.dataset.code = item.code;
+                div.innerHTML = `
+                    <span class="font-bold ${item.color}">[${item.code}]</span>
+                    <span class="text-gray-400 font-sans text-[10px] truncate max-w-[120px]">${item.name}</span>
+                `;
+
+                div.onclick = function() {
+                    applyAutocompleteSelection(textarea, bracketIndex, item.code);
+                };
+
+                menu.appendChild(div);
+            });
+
+            // Positioning code using standard browser layout bounding boxes
+            const rect = textarea.getBoundingClientRect();
+            menu.style.left = `${window.scrollX + rect.left}px`;
+            menu.style.top = `${window.scrollY + rect.bottom + 4}px`;
+            menu.style.width = `${rect.width}px`;
+            menu.classList.remove('hidden');
+        }
+
+        function handleAutocompleteKeys(e, textarea) {
+            const menu = document.getElementById('gtk-autocomplete');
+            if (menu.classList.contains('hidden') || !autocompleteOpen) return;
+
+            const items = menu.querySelectorAll('.autocomplete-item');
+
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                items[activeAutocompleteIndex].classList.remove('active');
+                activeAutocompleteIndex = (activeAutocompleteIndex + 1) % items.length;
+                items[activeAutocompleteIndex].classList.add('active');
+                items[activeAutocompleteIndex].scrollIntoView({ block: 'nearest' });
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                items[activeAutocompleteIndex].classList.remove('active');
+                activeAutocompleteIndex = (activeAutocompleteIndex - 1 + items.length) % items.length;
+                items[activeAutocompleteIndex].classList.add('active');
+                items[activeAutocompleteIndex].scrollIntoView({ block: 'nearest' });
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                const selectedCode = items[activeAutocompleteIndex].dataset.code;
+                const textBefore = textarea.value.substring(0, textarea.selectionStart);
+                const bracketIndex = textBefore.lastIndexOf('[');
+                applyAutocompleteSelection(textarea, bracketIndex, selectedCode);
+            } else if (e.key === 'Escape') {
+                e.preventDefault();
+                hideAutocomplete();
+            }
+        }
+
+        function applyAutocompleteSelection(textarea, bracketIndex, code) {
+            const caretPos = textarea.selectionStart;
+            const text = textarea.value;
+            
+            const before = text.substring(0, bracketIndex);
+            const after = text.substring(caretPos);
+
+            const replacement = `[${code}] `;
+            textarea.value = before + replacement + after;
+            
+            textarea.focus();
+            const newCaretPos = bracketIndex + replacement.length;
+            textarea.setSelectionRange(newCaretPos, newCaretPos);
+
+            textarea.dispatchEvent(new Event('change'));
+            hideAutocomplete();
+        }
+
+        function hideAutocomplete() {
+            const menu = document.getElementById('gtk-autocomplete');
+            menu.classList.add('hidden');
+            autocompleteOpen = false;
+        }
+
+
+        function calculateClipTimes(clipId, triggeredShotId = null) {
+            const clipObj = appState.clips.find(c => c.id === clipId);
+            if (!clipObj) return;
+
+            let totalTime = 0.0;
+            clipObj.shots.forEach(s => {
+                totalTime += s.duration;
+            });
+
+            const totalEl = document.getElementById(`accumulated-time-${clipId}`);
+            if (totalEl) {
+                totalEl.innerText = totalTime.toFixed(1) + 's';
+                
+                if (totalTime > clipObj.maxDuration) {
+                    totalEl.className = 'mono font-bold text-xs text-red-600 bg-red-50 border border-red-200 px-1 rounded';
+                } else if (totalTime >= clipObj.maxDuration - 1.0) {
+                    totalEl.className = 'mono font-bold text-xs text-orange-600 bg-orange-50 border border-orange-200 px-1 rounded';
+                } else {
+                    totalEl.className = 'mono font-bold text-xs text-green-700 bg-green-50 border border-green-200 px-1 rounded';
+                }
+            }
+
+            if (totalTime > clipObj.maxDuration && triggeredShotId) {
+                const shotObj = clipObj.shots.find(s => s.id === triggeredShotId);
+                const overage = totalTime - clipObj.maxDuration;
+                
+                pendingClipTransfer = {
+                    originClipId: clipId,
+                    shotId: triggeredShotId,
+                    shotDuration: shotObj.duration,
+                    shotAngle: shotObj.angle,
+                    shotMotion: shotObj.motion,
+                    shotAction: shotObj.action
+                };
+
+                document.getElementById('modal-error-headline').innerText = `Overage detected on ${clipObj.title}!`;
+                document.getElementById('modal-error-description').innerHTML = `The addition of this shot brings the accumulated time to <strong>${totalTime.toFixed(1)}s</strong>, which exceeds the max allowed limit of <strong>${clipObj.maxDuration.toFixed(1)}s</strong> by <strong>${overage.toFixed(1)}s</strong>. <br><br>Would you like to instantly spawn a new clip block and transfer this shot there?`;
+                document.getElementById('modal-timing-breakdown').innerHTML = `
+                    <div>Clip Limit: <span class="font-bold">${clipObj.maxDuration.toFixed(1)}s</span></div>
+                    <div>Accumulated Total: <span class="font-bold text-red-600">${totalTime.toFixed(1)}s</span></div>
+                    <div>Over Limit By: <span class="font-bold text-orange-600">${overage.toFixed(1)}s</span></div>
+                `;
+
+                document.getElementById('time-error-modal').classList.remove('hidden');
+            }
+        }
+
+        function dismissTimeModal(shouldMoveToNewClip) {
+            document.getElementById('time-error-modal').classList.add('hidden');
+
+            if (!pendingClipTransfer) return;
+
+            const { originClipId, shotId, shotDuration, shotAngle, shotMotion, shotAction } = pendingClipTransfer;
+
+            if (shouldMoveToNewClip) {
+                removeShotFromClip(originClipId, shotId);
+
+                const nextClipId = 'clip_' + Date.now();
+                const nextClipNum = appState.clips.length + 1;
+                
+                addNewClip({
+                    id: nextClipId,
+                    title: `Clip Block ${nextClipNum}`,
+                    maxDuration: 10.0,
+                    shots: [
+                        {
+                            id: 'shot_' + Date.now() + Math.floor(Math.random() * 100),
+                            duration: shotDuration,
+                            angle: shotAngle,
+                            motion: shotMotion,
+                            action: shotAction
+                        }
+                    ]
+                });
+
+                showToast(`Created Clip Block ${nextClipNum} and transferred shot successfully!`);
+            } else {
+                showToast("Please manually reduce the duration of your shots to match the clip's threshold.");
+            }
+
+            pendingClipTransfer = null;
+        }
+
+        function openCompileModal() {
+            const selector = document.getElementById('compile-scope-selector');
+            selector.innerHTML = `<option value="all">Compile Full Project (All Clip Blocks)</option>`;
+            
+            appState.clips.forEach((clip, index) => {
+                const opt = document.createElement('option');
+                opt.value = clip.id;
+                opt.innerText = `Only compile Clip ${index + 1}: ${clip.title}`;
+                selector.appendChild(opt);
+            });
+
+            document.getElementById('compile-scope-modal').classList.remove('hidden');
+        }
+
+        function closeCompileModal() {
+            document.getElementById('compile-scope-modal').classList.add('hidden');
+        }
+
+        function executeCompileStory() {
+            const target = document.getElementById('compile-scope-selector').value;
+            closeCompileModal();
+            compileStoryboard(target);
+            
+            const targetEl = document.getElementById('compilation-section');
+            targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+
+        // --- MASTER LEGEND & STORYBOARD MARKDOWN COMPILER ---
+        function compileStoryboard(scopeTarget = 'all', silent = false) {
+            appState.style.prompt = document.getElementById('style-prompt').value.trim();
+            appState.style.audio = document.getElementById('audio-prompt').value.trim();
+
+            if (appState.clips.length === 0) {
+                if (!silent) showToast("Error: No Clip blocks defined to compile! Please add a clip first.");
+                return;
+            }
+
+            let clipsToCompile = [];
+            let headerLabel = "";
+
+            if (scopeTarget === 'all') {
+                clipsToCompile = appState.clips;
+                headerLabel = "Generated Full Structured Markdown File (All Clips)";
+            } else {
+                const singleObj = appState.clips.find(c => c.id === scopeTarget);
+                if (singleObj) {
+                    clipsToCompile = [singleObj];
+                    headerLabel = `Generated Structured Markdown (Only compiling: ${singleObj.title})`;
+                } else {
+                    clipsToCompile = appState.clips;
+                    headerLabel = "Generated Full Structured Markdown File (All Clips)";
+                }
+            }
+
+            document.getElementById('output-view-label').innerText = headerLabel;
+
+            let totalVideoTime = 0.0;
+            clipsToCompile.forEach(c => {
+                c.shots.forEach(s => {
+                    totalVideoTime += s.duration;
+                });
+            });
+
+            let md = `# 🎬 Storyboard: ${scopeTarget === 'all' ? 'Full Project' : 'Selected Clip Block'}\n\n`;
+            md += `This storyboard is compiled using the **Variable-Based Legend System** to ensure absolute consistency across video frames.\n\n`;
+            md += `*Compiled by Bradford R. (trancedemon@gmail.com) via Neat Movie Storyboarder v1.5.0*\n\n`;
+            md += `--- \n\n`;
+            
+            // Newly updated Header specifically optimized for copy-pasting into brand-new AI chats
+            md += `## 🎨 MASTER LEGEND & RULEBOOK (INJECT TO NEW AI CHATS)\n\n`;
+            md += `### 🚀 AI CHAT INSTRUCTIONS (Read Before Processing Storyboard)\n`;
+            md += `> **ATTENTION AI ASSISTANT (Fresh Chat Video Compiler Training):**\n`;
+            md += `> You are acting as the Video Generation Continuity Director. This document utilizes shorthand codes wrapped in square brackets (e.g., \`[CHAR-A]\`, \`[OUTFIT-A]\`, \`[ENV-1]\`) to maintain flawless continuity across shots.\n`;
+            md += `> \n`;
+            md += `> **Your Operational Instructions:**\n`;
+            md += `> 1. **Rule of Absolute Replacement:** Before rendering any visual description, find and replace every bracketed shorthand code with its exact, detailed physical description defined below in the Master Legend. Never leave a raw bracket code in your prompt.\n`;
+            md += `> 2. **Seamless Prompt Synthesis:** Combine the global visual style \`[STYLE-DEFAULT]\`, the camera angle, camera motion, and resolved character/environment descriptions into a single, cohesive visual paragraph optimized for video generation models (Sora, Runway Gen-3, Luma, Kling).\n`;
+            md += `> 3. **Lipsync Alignment:** Extract any \`says, "..."\` syntax into a precise facial close-up directive with strict audio/lip coordination.\n`;
+            md += `> \n`;
+            md += `> **Quick Resolve Example:**\n`;
+            md += `> * *Legend:* \`[CHAR-A]\` = "A tall athletic man with short messy brown hair." | \`[OUTFIT-A]\` = "A crimson zip-up hoodie."\n`;
+            md += `> * *Action Script:* \`[CHAR-A]\` wearing \`[OUTFIT-A]\` walks down the cobblestone path.\n`;
+            md += `> * *Your Compiled Output Prompt:* "Cinematic style. A tall athletic man with short messy brown hair wearing a crimson zip-up hoodie walks down the cobblestone path, detailed textures, photorealistic lighting."\n\n`;
+            md += `--- \n\n`;
+
+            md += `### 1. General Cinematic Style\n`;
+            md += `*   \`[STYLE-DEFAULT]\`: ${appState.style.prompt || 'Not defined'}\n`;
+            md += `*   \`[AUDIO-DEFAULT]\`: ${appState.style.audio || 'Not defined'}\n\n`;
+
+            md += `### 2. Character Biometrics (\"Speech Snips\" enabled \`[CHAR-*]\`)\n`;
+            if (appState.characters.length > 0) {
+                appState.characters.forEach(c => {
+                    md += `*   \`[${c.code}]\`: **${c.name}** - ${c.description || 'No visual description detailed.'}\n`;
+                });
+            } else {
+                md += `*   *(No custom characters defined in Legend)*\n`;
+            }
+            md += `\n`;
+
+            md += `### 3. Environments & Key Props (\`[ENV-*]\` / \`[PROP-*]\`)\n`;
+            if (appState.environments.length > 0) {
+                appState.environments.forEach(e => {
+                    md += `*   \`[${e.code}]\`: **${e.name}** - ${e.description || 'No physical properties specified.'}\n`;
+                });
+            } else {
+                md += `*   *(No environment/prop variables defined in Legend)*\n`;
+            }
+            md += `\n`;
+
+            md += `### 4. Audio Dialogue & Lipsync Protocols\n`;
+            md += `*   Spoken lines are formatted directly within shots as: \`[CHARACTER] says, "..."\`\n`;
+            md += `*   AI video generators must align lipsync/facial animations to matches below.\n\n`;
+
+            md += `--- \n\n`;
+            md += `## ⏱️ TIMING & PACE ANALYSIS\n`;
+            md += `*   **Compiled Sequence Runtime:** ${totalVideoTime.toFixed(1)} seconds.\n`;
+            md += `*   **Clipped Buffer blocks:** **${clipsToCompile.length} Clips** (Optimized for Omni/Flash Max 10s Clip Window).\n\n`;
+
+            let blueprintPromptsList = [];
+
+            clipsToCompile.forEach((clip, cIdx) => {
+                let clipAccumulator = 0.0;
+                clip.shots.forEach(s => clipAccumulator += s.duration);
+
+                md += `--- \n\n`;
+                md += `## 🎬 CLIP BLOCK: ${clip.title.toUpperCase()} (${clipAccumulator.toFixed(1)} Seconds / Max Limit ${clip.maxDuration.toFixed(1)}s)\n`;
+                md += `*Focuses on pacing consistency, using shorthand variables to maintain structure.*\n\n`;
+
+                if (clip.shots.length > 0) {
+                    clip.shots.forEach((shot, sIdx) => {
+                        md += `### Shot ${sIdx + 1}\n`;
+                        md += `*   **Duration:** ${shot.duration.toFixed(1)}s\n`;
+                        md += `*   **Camera Angle:** ${shot.angle || 'Normal Shot (AI Decides)'}\n`;
+                        md += `*   **Camera Motion:** ${shot.motion || 'Static (No camera motion)'}\n`;
+                        md += `*   **Action Scene:** ${shot.action || 'No action scene details written.'}\n`;
+
+                        const dialogueRegex = /(?:(\[[A-Za-z0-9\-_]+\])\s+)?says,\s*"([^"]+)"/gi;
+                        let dialogueMatches = [];
+                        let dialogMatch;
+                        
+                        while ((dialogMatch = dialogueRegex.exec(shot.action)) !== null) {
+                            const charRef = dialogMatch[1] || 'Character';
+                            const dialogueText = dialogMatch[2];
+                            dialogueMatches.push({ charRef, dialogueText });
+                        }
+
+                        if (dialogueMatches.length > 0) {
+                            md += `*   **🎙️ Spoken Dialogue Track:**\n`;
+                            dialogueMatches.forEach(dm => {
+                                md += `    *   **${dm.charRef}**: "${dm.dialogueText}" (Sync visual speech timing)\n`;
+                            });
+                        }
+
+                        md += `*   **Prompting Execution:** \`[STYLE-DEFAULT]\` setup. \`[AUDIO-DEFAULT]\` pacing sound matching physical kinetic motion.\n\n`;
+
+                        if (blueprintPromptsList.length < 4 && shot.action) {
+                            blueprintPromptsList.push({
+                                label: `${clip.title} - Shot ${sIdx + 1}`,
+                                angle: shot.angle,
+                                motion: shot.motion,
+                                action: shot.action
+                            });
+                        }
+                    });
+                } else {
+                    md += `*(No shots mapped in this clip block yet)*\n\n`;
+                }
+            });
+
+            md += `--- \n\n`;
+            md += `## 🤖 RESOLVED BLUEPRINTS FOR AI VIDEO GENERATORS (SORA, RUNWAY, LUMA)\n`;
+            md += `*To run these, copy the resolved blueprints below directly into your AI video model prompt interface.*\n\n`;
+
+            let blueprintHTML = '';
+
+            blueprintPromptsList.forEach((bp, index) => {
+                const resolvedText = resolvePromptVariables(bp.action, bp.angle, bp.motion);
+                md += `### Resolved Blueprint Prompt ${index + 1}: ${bp.label}\n`;
+                md += `> **Compiled Raw Prompt:** ${resolvedText}\n\n`;
+
+                blueprintHTML += `
+                    <div class="bg-white p-3 rounded border border-gray-200 space-y-1">
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold text-[10px] text-blue-600 uppercase tracking-wider">${bp.label}</span>
+                            <button onclick="copyRawText(\`${escapeJsString(resolvedText)}\`)" class="text-[10px] text-gray-500 hover:text-blue-600 flex items-center space-x-1">
+                                <i class="fa-solid fa-copy"></i>
+                                <span>Copy Prompt</span>
+                            </button>
+                        </div>
+                        <p class="text-[11px] font-sans text-gray-600 italic leading-relaxed line-clamp-3" title="${resolvedText}">"${resolvedText}"</p>
+                    </div>
+                `;
+            });
+
+            if (blueprintPromptsList.length === 0) {
+                blueprintHTML = `<span class="text-gray-400 italic block text-center mt-6">Resolve variables to view copy-ready blueprints...</span>`;
+            }
+
+            document.getElementById('compiled-markdown-output').value = md;
+            renderAnalyticsSummary(totalVideoTime, clipsToCompile);
+            document.getElementById('rapid-prompts-container').innerHTML = blueprintHTML;
+
+            if (!silent) {
+                showToast(`Compiled storyboard successfully! Scope target: ${scopeTarget.toUpperCase()}`);
+            }
+        }
+
+        function escapeJsString(str) {
+            return str.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\$/g, '\\$');
+        }
+
+        function renderAnalyticsSummary(totalTime, activeClips) {
+            const summaryBox = document.getElementById('analytics-summary-box');
+            let totalShots = 0;
+            activeClips.forEach(c => totalShots += c.shots.length);
+            const averageDuration = totalShots > 0 ? (totalTime / totalShots).toFixed(1) : 0.0;
+            
+            summaryBox.innerHTML = `
+                <div class="grid grid-cols-2 gap-2 text-xs">
+                    <div class="bg-white p-2 rounded border border-gray-200">
+                        <span class="text-gray-400 text-[10px] block font-semibold uppercase tracking-wider">Active Sequence Length</span>
+                        <span class="mono text-sm font-bold text-blue-600">${totalTime.toFixed(1)}s</span>
+                    </div>
+                    <div class="bg-white p-2 rounded border border-gray-200">
+                        <span class="text-gray-400 text-[10px] block font-semibold uppercase tracking-wider">Clip Count Chunks</span>
+                        <span class="mono text-sm font-bold text-purple-600">${activeClips.length} Clips</span>
+                    </div>
+                    <div class="bg-white p-2 rounded border border-gray-200">
+                        <span class="text-gray-400 text-[10px] block font-semibold uppercase tracking-wider">Active Shots Cut</span>
+                        <span class="mono text-sm font-bold text-orange-600">${totalShots} Cuts</span>
+                    </div>
+                    <div class="bg-white p-2 rounded border border-gray-200">
+                        <span class="text-gray-400 text-[10px] block font-semibold uppercase tracking-wider">Avg Shot Duration</span>
+                        <span class="mono text-sm font-bold text-green-700">${averageDuration}s</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        function resolvePromptVariables(actionText, angle, motion) {
+            let spatialPrompt = "";
+            if (angle && angle !== "Normal Shot (AI Decides)") spatialPrompt += `${angle} view. `;
+            if (motion && motion !== "Static (No camera motion)") spatialPrompt += `Camera motion: ${motion}. `;
+
+            let compiledPrompt = `${appState.style.prompt} ${spatialPrompt}${actionText}`;
+            compiledPrompt = compiledPrompt.replace(/\[STYLE-DEFAULT\]/g, appState.style.prompt);
+
+            appState.characters.forEach(c => {
+                const regex = new RegExp(`\\[${c.code}\\]`, 'g');
+                compiledPrompt = compiledPrompt.replace(regex, c.description);
+            });
+
+            appState.environments.forEach(e => {
+                const regex = new RegExp(`\\[${e.code}\\]`, 'g');
+                compiledPrompt = compiledPrompt.replace(regex, e.description);
+            });
+
+            compiledPrompt = compiledPrompt.replace(/\s+/g, ' ').trim();
+            return compiledPrompt;
+        }
+
+        function copyCompiledOutput() {
+            const textarea = document.getElementById('compiled-markdown-output');
+            if (!textarea.value) {
+                showToast("Please compile the storyboard first!");
+                return;
+            }
+            
+            textarea.select();
+            textarea.setSelectionRange(0, 99999);
+            
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    showToast("Copied Markdown content to clipboard!");
+                } else {
+                    showToast("Copy failed, please select and copy manually.");
+                }
+            } catch (err) {
+                showToast("Error: System security restrictions blocked copy execution.");
+            }
+        }
+
+        function copyRawText(text) {
+            const tempInput = document.createElement("textarea");
+            tempInput.value = text;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    showToast("Copied AI Prompt Blueprint to clipboard!");
+                } else {
+                    showToast("Failed to copy prompt.");
+                }
+            } catch (err) {
+                showToast("Could not copy prompt.");
+            }
+            
+            document.body.removeChild(tempInput);
+        }
+
+        function exportMarkdownFile() {
+            const content = document.getElementById('compiled-markdown-output').value;
+            if (!content) {
+                showToast("Compile a storyboard to download!");
+                return;
+            }
+
+            const blob = new Blob([content], { type: 'text/markdown;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            
+            link.href = url;
+            link.setAttribute("download", `neat_storyboard_${currentActiveSlot}.md`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showToast("Downloaded Markdown (.md) file successfully!");
+        }
+
+        // --- PROMPT MODAL CONTROLS & DOWNLOAD FILE GENERATORS ---
+        function openAiPromptsModal() {
+            document.getElementById('ai-prompts-modal').classList.remove('hidden');
+        }
+
+        function closeAiPromptsModal() {
+            document.getElementById('ai-prompts-modal').classList.add('hidden');
+        }
+
+        function downloadBuilderMd() {
+            const rawPrompt = `# SYSTEM PROMPT: AI Storyboard Builder & Variable Organizer (Chat 1)
+
+You are a professional cinematic Storyboard Director and Continuity Planner specialized in high-end animation (2D Sakuga, Anime, Cyberpunk) and live-action cinematography. Your task is to take rough concept drafts, analyze uploaded character images, and organize them into highly precise, timing-restricted modular storyboards.
+
+---
+
+## 🛠️ THE WORKFLOW PROTOCOL
+
+### Phase 1: Asset Ingest & Variable Initialization
+1. **Wait for character images:** You must analyze the uploaded images (such as \`policeman.png\`, \`thug.png\`, \`prettywomancop.png\`) to extract detailed descriptions of faces, hair, physique, outfits, jewelry, and accessories.
+2. **Lock variables:** Create a permanent \`[MASTER LEGEND]\` mapping these features to structured shorthand tags based on the image filenames (e.g., \`[CHAR-POLICEMAN]\`, \`[OUTFIT-COP-A]\`, \`[ENV-PARK]\`, \`[PROP-BANANA]\`).
+3. **Wait for Story input:** Do not write the storyboard until the user provides a rough concept wrapped in curly braces \`{ like this }\`.
+
+### Phase 2: Timing, Pacing, & Drafting
+1. **Analyze Timeline:** The absolute limit per video clip is **10 seconds**. Shots must cut every **1.5 to 2.5 seconds** to maintain dynamic cinematic energy.
+2. **Calculate Clips:** Determine how many 10-second clips are needed for the full story. Break the storyboard into explicit blocks: \`CLIP 1 (10s)\`, \`CLIP 2 (10s)\`, etc.
+3. **Apply Shorthand:** Write the shots using clean, uncluttered actions utilizing your defined legend codes (e.g., \`[CHAR-POLICEMAN] steps on [PROP-BANANA]\`).
+4. **Synchronize Audio/Dialogue:** Use the specific syntax \`says, "..."\` for spoken lines. The system will auto-extract these into a dedicated \`🎙️ Spoken Dialogue & Lipsync Track\` for each shot.
+
+---
+
+## 🎥 CAMERA ANGLE & MOTION TAXONOMY
+You must only use the following standardized camera vocabulary:
+
+### 22 Static Camera Angles:
+- **Close-ups & Portraits:** \`Face Close-Up\` (Extreme portrait focus), \`Closeup\` (Standard head/shoulders), \`Extreme Close-Up\` (ECU - tight focus on eyes/hands), \`Medium Close-Up\` (Chest up).
+- **Standard Angles:** \`Medium Shot\` (Waist up), \`Medium Two-Shot\` (Two characters waist up), \`Front View\` (Direct frontal perspective), \`Back View\` (Direct rear perspective).
+- **Dramatic Heights:** \`Worm's-Eye View\` (Dramatic extreme low angle looking up), \`Low Angle\` (Looking up slightly), \`High Angle\` (Looking down slightly), \`High Drone\` (Overhead aerial map perspective), \`High Drone Dutch Angle\` (Overhead with a dramatic camera tilt), \`Distant View\` (Establishing extreme wide shot).
+- **POV & Over-The-Shoulder:** \`Over-The-Shoulder\` (OTS - looking over shoulder at target), \`POV\` (First-person perspective), \`Match Cut\` (Visual alignment from previous shot frame).
+
+### 11 Dynamic Motion Effects:
+\`Dolly In\` (Smooth push-in), \`Dolly Out\` (Smooth pull-back), \`Pan Left/Right\` (Horizontal rotation), \`Tilt Up/Down\` (Vertical rotation), \`Steadicam Glide\` (Fluid, handheld tracking), \`Crane Shot\` (Dramatic vertical lift), \`Zoom In/Out\` (Focal change), \`Whip Pan\` (High-speed horizontal blur cut), \`Orbit\` (360-degree rotational camera track).`;
+
+            const blob = new Blob([rawPrompt], { type: 'text/markdown;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.setAttribute("download", "storyboard_builder.md");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast("Downloaded storyboard_builder.md successfully!");
+        }
+
+        function downloadInterpreterMd() {
+            const rawPrompt = `# SYSTEM PROMPT: Video Generation Continuity Director & Prompt Resolver (Chat 2)
+
+You are the Video Generation Continuity Director. Your sole purpose is to act as a compiler. You take the highly structured shorthand storyboards generated in Chat 1 (which contain abbreviations and variable legends) and dynamically resolve them into incredibly dense, hyper-detailed prompt blueprints ready to be copy-pasted into video generation engines (Sora, Runway Gen-3, Luma Dream Machine, Kling).
+
+---
+
+## 🧠 COMPILATION RULES & PRINCIPLES
+
+1. **Rule of absolute replacement:** When you see a shorthand tag like \`[CHAR-A]\`, \`[OUTFIT-A]\`, or \`[ENV-PARK]\`, you must replace it with its exact physical description from the Legend. You must **NEVER** leave a bracketed code in the resolved output.
+2. **Avoid AI visual drift:** Ensure every resolved prompt includes the exact same character features (hair, face structure, clothing, physique) and environment details from shot to shot, even if the camera angle changes.
+3. **Inject Cinematic Grammar:** Convert specified camera angles and motions into explicit structural directives at the start of the prompt (e.g., "A high-end 2D Sakuga anime low-angle worm's-eye view tracking shot of...").
+4. **Provide Individual Outputs:** Users generate videos clip-by-clip. Do not output all prompts simultaneously if the user asks for a specific clip block. Keep the outputs isolated, clean, and extremely easy to copy-paste.`;
+
+            const blob = new Blob([rawPrompt], { type: 'text/markdown;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.setAttribute("download", "video_generation_interpreter.md");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast("Downloaded video_generation_interpreter.md successfully!");
+        }
+
+
+        // --- LOAD DEMO STORYBOARD ASSETS ---
+        function loadDemoData() {
+            clearAllData(true);
+
+            document.getElementById('style-preset').value = 'sakuga';
+            applyStylePreset('sakuga');
+
+            addCharacter({
+                id: 'char_spy',
+                code: 'CHAR-SPY',
+                name: 'The Spy (tall lady.jpeg)',
+                description: 'Exceptionally tall female spy (towering over security), super lightweight, slender, sinewy, retro-wavy black bob hair, intense eyes, signature red lipstick. Wearing dark technical red jacket.'
+            });
+
+            addCharacter({
+                id: 'char_guard',
+                code: 'CHAR-GUARD',
+                name: 'Officer Kenji (security.jpeg)',
+                description: 'Sharp-jawed young male guard, shorter in height than spy, dark hair under a dark blue RED-TRACE security cap and matching armor gear.'
+            });
+
+            addEnvironment({
+                id: 'env_checkpoint',
+                code: 'ENV-CHECKPOINT',
+                name: 'Security Gate Counter',
+                description: 'Futuristic border security counter with sleek geometric partitions and glowing scanning interfaces.'
+            });
+
+            addEnvironment({
+                id: 'prop_id',
+                code: 'PROP-ID',
+                name: 'Digital ID Card',
+                description: 'Glowing high-tech digital passport showing a holographic portrait photograph of [CHAR-SPY].'
+            });
+
+            addEnvironment({
+                id: 'prop_jacket',
+                code: 'OUTFIT-JACKET',
+                name: 'Red Technical Jacket',
+                description: 'Zipped-up sleek dark red technical high-collar jacket. Underneath: Yellow ribbed tank top with green trim.'
+            });
+
+            addNewClip({
+                id: 'clip_approach',
+                title: 'Clip 1: The Encounter',
+                maxDuration: 10.0,
+                shots: [
+                    { id: 'sh_1', duration: 2.0, angle: 'Distant View (Extreme Wide Shot)', motion: 'Tracking Shot (Camera accompanies side-by-side motion)', action: '[CHAR-SPY] in her [OUTFIT-JACKET] walks confidently toward [ENV-CHECKPOINT], her long-limbed stride creating a striking, lightweight silhouette as the background wind rustles her hair.' },
+                    { id: 'sh_2', duration: 2.5, angle: 'Rear View / Over-the-Shoulder (OTS)', motion: 'Orbit Shot (360-degree rotating sweep)', action: 'She stops at the counter, handing [PROP-ID] to [CHAR-GUARD]. Her towering height is immediately evident as she looks down at him.' },
+                    { id: 'sh_3', duration: 2.0, angle: 'Face Close-Up (Extreme Close-Up / ECU)', motion: 'Optical Zoom In / Out (Focal adjustments)', action: 'Focus on the glowing screen of [PROP-ID] showing a portrait of her. The blue light from the scanner illuminates [CHAR-GUARD]\'s hands.' },
+                    { id: 'sh_3_5', duration: 2.5, angle: 'Worm\'s-Eye View (Ground Level Looking Up)', motion: 'Static (No camera motion)', action: '[CHAR-GUARD] looks suspicious from [PROP-ID] up to inspect her face, his gaze traveling up her long, elegant neck.' }
+                ]
+            });
+
+            updateQuickTagsPanel();
+            compileStoryboard('all', true);
+            showToast("Successfully loaded demo project variables!");
+        }
+
+        function clearAllData(silent = false) {
+            appState = {
+                style: { preset: 'custom', prompt: '', audio: '' },
+                characters: [],
+                environments: [],
+                clips: []
+            };
+
+            document.getElementById('style-preset').value = 'custom';
+            document.getElementById('style-prompt').value = '';
+            document.getElementById('audio-prompt').value = '';
+
+            document.getElementById('characters-list').innerHTML = '';
+            document.getElementById('environments-list').innerHTML = '';
+            document.getElementById('clips-container').innerHTML = '';
+            
+            document.getElementById('compiled-markdown-output').value = '';
+            document.getElementById('analytics-summary-box').innerHTML = `<span class="text-gray-400 italic text-center">Compile to view calculated pacing analytics...</span>`;
+            document.getElementById('rapid-prompts-container').innerHTML = `<span class="text-gray-400 italic block text-center mt-6">Compile variables to generate copy-ready prompts...</span>`;
+
+            updateQuickTagsPanel();
+            
+            if (!silent) {
+                showToast("Cleared active workspace memory.");
+            }
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('gtk-toast');
+            document.getElementById('toast-message').innerText = message;
+            
+            toast.classList.remove('translate-y-12', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+            
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-12', 'opacity-0');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
