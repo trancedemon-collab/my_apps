@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GTK Lite Infinite Sticky Notes</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts for UNIX/GTK Interface look -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #f6f5f4; /* Authentic GNOME Adwaita Light background */
+      color: #2e3440;
+    }
+    
+    code, pre, .mono, textarea {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Light blueprint grid design for minimum eye strain */
+    .blueprint-grid {
+      background-size: 40px 40px;
+      background-image: 
+        linear-gradient(to right, rgba(46, 52, 64, 0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(46, 52, 64, 0.04) 1px, transparent 1px);
+    }
+
+    /* Scrollbars GTK Light style */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #e8e8e7;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #c0c0be;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #a8a8a7;
+    }
+
+    /* Custom GTK Adwaita Light elements styling with realistic soft drop shadow */
+    .gtk-window {
+      background: #ffffff;
+      color: #2e3440;
+      box-shadow: 0 12px 30px -4px rgba(0, 0, 0, 0.12), 0 4px 12px -2px rgba(0, 0, 0, 0.06), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+      transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+    }
+    
+    .gtk-window:focus-within {
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.18), 0 10px 20px -5px rgba(0, 0, 0, 0.08);
+      transform: translateY(-1px);
+    }
+
+    /* Custom borders tailored for Light Theme */
+    .border-style-solid { border: 2px solid #c0c0be; }
+    .border-style-double { border: 6px double #86888c; }
+    .border-style-dashed { border: 2px dashed #a0a09e; }
+    .border-style-groove { border: 4px groove #e1e1df; }
+    .border-style-neon { 
+      border: 2px solid #3584e4; 
+      box-shadow: 0 0 10px rgba(53, 132, 228, 0.2), inset 0 0 4px rgba(53, 132, 228, 0.1);
+    }
+
+    /* Note Content Styles: Fixing user-select to allow full typing & text focusing */
+    .note-editable-area {
+      outline: none;
+      word-break: break-word;
+      user-select: text !important;
+      -webkit-user-select: text !important;
+    }
+
+    /* Dynamic cursor/drag handling state overrides */
+    .drag-active * {
+      user-select: none !important;
+      -webkit-user-select: none !important;
+    }
+  </style>
+</head>
+<body class="w-screen h-screen overflow-hidden flex flex-col relative">
+
+  <!-- Top Global GTK Panel Header (Light Theme) -->
+  <header class="w-full h-14 bg-[#f6f5f4] border-b border-[#e1e1e0] px-4 flex items-center justify-between z-40 select-none shadow-sm">
+    <div class="flex items-center space-x-3">
+      <!-- Minimalist GTK Icon -->
+      <div class="w-8 h-8 rounded-lg bg-[#3584e4] flex items-center justify-center font-bold text-white shadow-md">
+        🗒️
+      </div>
+      <div>
+        <h1 class="text-sm font-bold tracking-wide text-[#2e3440]">StickyBoard</h1>
+        <p class="text-[10px] text-[#5e646a] font-medium">GTK-Lite Infinite Workspace</p>
+      </div>
+    </div>
+
+    <!-- Active Navigation Tools -->
+    <div class="flex items-center space-x-2">
+      <!-- Spawn Button -->
+      <button onclick="createNewNote()" class="flex items-center space-x-1.5 px-3 py-1.5 bg-[#3584e4] hover:bg-[#1c71d8] text-white text-xs font-semibold rounded-md transition shadow-sm">
+        <span>+ New Note</span>
+      </button>
+
+      <!-- Vertical Divider -->
+      <div class="h-6 w-[1px] bg-[#e1e1e0] mx-2"></div>
+
+      <!-- Snap To Grid Toggle -->
+      <button id="snap-toggle-btn" onclick="toggleSnapToGrid()" class="flex items-center space-x-1 px-3 py-1.5 bg-[#e8e8e7] hover:bg-[#dcdcdc] text-[#2e3440] text-xs font-medium rounded-md transition border border-[#d3d3d2]">
+        <span class="w-2.5 h-2.5 rounded-full bg-red-500 inline-block mr-1" id="snap-indicator"></span>
+        <span>Snap Grid</span>
+      </button>
+
+      <!-- View Navigation Home -->
+      <button onclick="recenterCanvas()" class="px-3 py-1.5 bg-[#e8e8e7] hover:bg-[#dcdcdc] text-[#2e3440] text-xs font-medium rounded-md transition border border-[#d3d3d2]" title="Recenter to Viewport Origin">
+        Recenter (0,0)
+      </button>
+
+      <!-- Vertical Divider -->
+      <div class="h-6 w-[1px] bg-[#e1e1e0] mx-2"></div>
+
+      <!-- Utilities Dropdowns / Sidebar triggers -->
+      <button onclick="toggleArchiveSidebar()" class="relative px-3 py-1.5 bg-[#e8e8e7] hover:bg-[#dcdcdc] text-[#2e3440] text-xs font-medium rounded-md transition border border-[#d3d3d2] flex items-center space-x-1">
+        <span>Archive Cabinet</span>
+        <span id="archive-count" class="bg-[#3584e4] text-[10px] text-white px-1.5 py-0.2 rounded-full hidden">0</span>
+      </button>
+
+      <button onclick="openImportExportModal()" class="px-3 py-1.5 bg-[#e8e8e7] hover:bg-[#dcdcdc] text-[#2e3440] text-xs font-medium rounded-md transition border border-[#d3d3d2]">
+        Import / Export
+      </button>
+
+      <button onclick="triggerNukeDialog()" class="px-3 py-1.5 bg-[#fddbc7] hover:bg-[#fca586] border border-[#f8a57e] text-[#8f290b] text-xs font-bold rounded-md transition">
+        Nuke Board
+      </button>
+    </div>
+  </header>
+
+  <!-- App Info, Donations, and Local Storage Warning Banner -->
+  <div class="w-full bg-[#f1f0ee] border-b border-[#e1e1e0] px-4 py-2.5 flex flex-col xl:flex-row xl:items-center xl:justify-between gap-3 text-xs z-30 shadow-sm select-text">
+    <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+      <span class="font-bold text-[#2e3440] flex items-center">
+        👤 Created by Bradford R.
+      </span>
+      <span class="text-[#c0c0be] hidden md:inline">|</span>
+      <a href="mailto:trancedemon@gmail.com" class="text-[#3584e4] hover:underline font-mono">trancedemon@gmail.com</a>
+      <span class="text-[#c0c0be] hidden md:inline">|</span>
+      <a href="https://paypal.me/BradfordRisbert" target="_blank" rel="noopener noreferrer" class="inline-flex items-center space-x-1 text-[#2ec27e] hover:text-[#26a269] font-bold transition">
+        <span>☕ Paypal Donate: paypal.me/BradfordRisbert</span>
+      </a>
+    </div>
+    <div class="text-[11px] text-amber-800 bg-amber-50 border border-amber-200/80 rounded-md px-3 py-1.5 max-w-4xl leading-relaxed">
+      ⚠️ <strong>Attention:</strong> This app uses your browser's <strong>Local Storage</strong> (not cloud backup). Resetting your browser, clearing site data, or switching devices will cause data loss. Use the <strong>Import/Export</strong> system above to keep backup JSON files. This is not ideal for permanent, long-term safe storage!
+    </div>
+  </div>
+
+  <!-- Interactive Infinite Canvas Workspace Viewport -->
+  <main id="viewport" class="flex-1 relative w-full h-full overflow-hidden blueprint-grid cursor-grab active:cursor-grabbing" style="background-color: #f6f5f4;">
+    
+    <!-- Virtual coordinate tracker in bottom corner -->
+    <div class="absolute bottom-4 left-4 z-[9999] bg-white/90 backdrop-blur-md border border-neutral-300 px-3 py-1.5 rounded-md text-[10px] text-[#2e3440] pointer-events-none font-mono flex flex-col space-y-1 shadow-sm">
+      <div>Position: X <span id="coord-x">0</span>, Y <span id="coord-y">0</span></div>
+      <div>Zoom Level: <span id="coord-zoom">100%</span></div>
+      <div class="text-[9px] text-gray-500 font-semibold">Hold Spacebar + Drag to Pan | Scroll wheel to Zoom</div>
+    </div>
+
+    <!-- The Infinite Workspace Element that accepts transforms -->
+    <div id="workspace" class="absolute w-0 h-0 top-0 left-0 transform-gpu" style="transform: translate(0px, 0px) scale(1);">
+      <!-- Render area for all individual GTK Note components dynamically placed here -->
+    </div>
+  </main>
+
+  <!-- Side Cabinet: Archived Notes Dashboard -->
+  <aside id="archive-sidebar" class="fixed right-0 top-14 bottom-0 w-80 bg-[#f6f5f4] border-l border-[#e1e1e0] z-40 transform translate-x-full transition-transform duration-300 shadow-2xl flex flex-col">
+    <div class="p-4 border-b border-[#e1e1e0] flex items-center justify-between bg-white">
+      <h3 class="font-bold text-sm text-[#2e3440] flex items-center space-x-2">
+        <span>📦 Archived Cabinet</span>
+      </h3>
+      <button onclick="toggleArchiveSidebar()" class="text-gray-500 hover:text-black text-xs px-2 py-1 bg-[#e8e8e7] rounded">Close</button>
+    </div>
+    
+    <div id="archive-list" class="flex-1 overflow-y-auto p-4 space-y-3">
+      <!-- Archived list element cards rendered dynamically -->
+    </div>
+  </aside>
+
+  <!-- Custom GTK Styling Modal Context System -->
+  <!-- Dialog 1: Import/Export JSON Interface -->
+  <div id="modal-import-export" class="fixed inset-0 bg-black/40 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+    <div class="w-full max-w-lg bg-white border border-neutral-300 rounded-lg overflow-hidden shadow-2xl flex flex-col">
+      <div class="bg-[#f6f5f4] px-4 py-3 border-b border-neutral-200 flex justify-between items-center">
+        <span class="text-sm font-bold text-[#2e3440]">Portability Panel (JSON Operations)</span>
+        <button onclick="closeImportExportModal()" class="text-gray-500 hover:text-black text-xs font-mono font-bold">✕</button>
+      </div>
+      <div class="p-4 space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-gray-700 mb-1">Backup Export (Copy your workspace configuration)</label>
+          <textarea id="export-textarea" readonly onclick="this.select()" class="w-full h-24 bg-[#fafafa] border border-neutral-300 p-2 text-xs font-mono rounded text-blue-600 focus:outline-none focus:border-blue-500 cursor-pointer"></textarea>
+          <div class="flex space-x-2 mt-1">
+            <button onclick="copyExportText()" class="text-[11px] bg-[#e8e8e7] text-gray-700 px-3 py-1 rounded hover:bg-neutral-200 transition border border-neutral-300 font-semibold">Copy to Clipboard</button>
+            <button onclick="downloadJsonFile()" class="text-[11px] bg-[#3584e4] text-white px-3 py-1 rounded hover:bg-blue-600 transition font-semibold">Download .json File</button>
+          </div>
+        </div>
+        <hr class="border-neutral-200">
+        <div>
+          <label class="block text-xs font-bold text-gray-700 mb-1">Import System State (Paste and apply JSON file configuration)</label>
+          <textarea id="import-textarea" placeholder="Paste your saved dashboard JSON configuration here..." class="w-full h-24 bg-white border border-neutral-300 p-2 text-xs font-mono rounded text-orange-600 focus:outline-none focus:border-orange-500"></textarea>
+          <div class="flex justify-between items-center mt-1">
+            <input type="file" id="import-file-selector" accept=".json" class="hidden" onchange="handleFileSelected(event)">
+            <button onclick="document.getElementById('import-file-selector').click()" class="text-[11px] bg-[#e8e8e7] text-gray-700 px-3 py-1 rounded hover:bg-neutral-200 transition border border-neutral-300 font-semibold">Choose JSON File...</button>
+            <button onclick="runJSONImport()" class="text-[11px] bg-[#2ec27e] text-white px-4 py-1.5 font-bold rounded hover:bg-[#26a269] transition">Process Import State</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dialog 2: Safe Confirmation Modal -->
+  <div id="modal-confirm" class="fixed inset-0 bg-black/40 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+    <div class="w-full max-w-sm bg-white border border-red-200 rounded-lg overflow-hidden shadow-2xl">
+      <div class="bg-red-50 px-4 py-3 border-b border-red-100 flex items-center space-x-2">
+        <span class="text-red-500 text-lg">⚠️</span>
+        <span class="text-sm font-bold text-red-800">Destructive Actions Panel</span>
+      </div>
+      <div class="p-5 space-y-4">
+        <p class="text-xs text-gray-600 leading-relaxed font-medium" id="confirm-message">
+          Are you absolutely sure you want to proceed with this action? This operation will completely reset your workspace environment.
+        </p>
+        <div class="flex items-center justify-end space-x-2">
+          <button onclick="closeConfirmationDialog()" class="px-4 py-1.5 bg-[#e8e8e7] text-gray-700 hover:bg-neutral-200 text-xs font-semibold rounded transition border border-neutral-300">Cancel</button>
+          <button id="confirm-execute-btn" class="px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded transition">Apply & Reset</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Overlay -->
+  <div id="toast-overlay" class="fixed bottom-6 right-6 z-50 bg-white border border-neutral-300 text-xs px-4 py-3 rounded-lg shadow-xl translate-y-20 opacity-0 transition-all duration-300 flex items-center space-x-2 select-none text-[#2e3440] font-medium">
+    <span id="toast-icon">ℹ️</span>
+    <span id="toast-text">System updated successfully</span>
+  </div>
+
+  <script>
+    // --- STATE ENGINE DECLARATION ---
+    let notes = [];
+    let zoom = 1.0;
+    let panX = 0;
+    let panY = 0;
+    let snapToGrid = false;
+    const gridSize = 20;
+
+    // Viewport dragging states
+    let isPanning = false;
+    let startPanX = 0;
+    let startPanY = 0;
+    let spacebarDown = false;
+
+    // Note interaction variables
+    let activeDraggingNote = null;
+    let dragStartX = 0;
+    let dragStartY = 0;
+    let noteOriginalX = 0;
+    let noteOriginalY = 0;
+
+    // Resizing interactions
+    let activeResizingNote = null;
+    let resizeStartX = 0;
+    let resizeStartY = 0;
+    let noteOriginalW = 0;
+    let noteOriginalH = 0;
+
+    // Depth ordering helper state
+    let maxZIndex = 10;
+
+    // Default note colors configured under premium GTK Light / Adwaita palette styles
+    const gtkColors = [
+      { name: "Adwaita Light Gray", header: "#e8e8e7", body: "#ffffff", text: "#2e3440" },
+      { name: "Minty Light Teal", header: "#c3f2d0", body: "#e8fcf0", text: "#1a4c2e" },
+      { name: "Warn Amber Light", header: "#fce8b2", body: "#fefcf0", text: "#5c3e00" },
+      { name: "Gnome Orchid Light", header: "#f1d4f5", body: "#faf0fc", text: "#4a1a5c" },
+      { name: "Blue Lagoon Light", header: "#c6e6fb", body: "#f0f8ff", text: "#0f3a5f" },
+      { name: "Candy Rose Light", header: "#fbc9c3", body: "#fff5f5", text: "#6b1d1d" }
+    ];
+
+    const borderStyles = ["solid", "double", "dashed", "groove", "neon"];
+
+    // Helper to strip HTML and extract clean plain text (useful during database loading/import)
+    function cleanHtmlToPlainText(htmlContent) {
+      if (!htmlContent) return "";
+      // Create element on the fly to utilize the browser parser
+      const tempDiv = document.createElement("div");
+      tempDiv.innerHTML = htmlContent.replace(/<br\s*\/?>/gi, '\n').replace(/<\/div>/gi, '\n').replace(/<\/li>/gi, '\n');
+      const text = tempDiv.innerText || tempDiv.textContent || "";
+      return text.trim();
+    }
+
+    // Initialize core parameters on document payload ready
+    window.onload = function() {
+      loadDatabase();
+      initCanvasListeners();
+      renderBoard();
+      updateCoordinatesDisplay();
+
+      if (notes.length === 0) {
+        // Build generic workspace startup layout
+        notes = [
+          {
+            id: "welcome-note-1",
+            title: "📌 GTK Board Welcome Note",
+            content: "Welcome to your spatial light sticky dashboard!\n\nInteractive mechanics:\n- Panning: Drag with middle-mouse button, or hold Spacebar and drag with left-click.\n- Zooming: Use your mouse scrollwheel to focus on any area.\n- Double-click the header to toggle Minimize/Maximize.\n\nNow simplified to pure plain-text notes using monospace font settings!",
+            x: 100,
+            y: 100,
+            w: 320,
+            h: 340,
+            colorIndex: 0,
+            borderStyle: "solid",
+            fontSize: 14,
+            archived: false,
+            minimized: false,
+            zIndex: 11
+          },
+          {
+            id: "welcome-note-2",
+            title: "💡 Fixed Width Text",
+            content: "This application now uses JetBrains Mono for clean alignment.\n\nChecklist representations:\n[ ] Test checklist integration\n[x] Highly responsive GTK Light Theme\n[ ] Zero overlap physics engine\n\nEnjoy structured plain text note layouts!",
+            x: 460,
+            y: 100,
+            w: 280,
+            h: 240,
+            colorIndex: 1,
+            borderStyle: "double",
+            fontSize: 13,
+            archived: false,
+            minimized: false,
+            zIndex: 12
+          }
+        ];
+        saveDatabase();
+        renderBoard();
+      }
+
+      recenterCanvas();
+    };
+
+    // --- STREAMING_CHUNK: Programming navigation coordinate engines, mouse wheel pan/zoom transforms... ---
+    // --- VIEWPORT NAVIGATION (PANNING & ZOOMING) ---
+    function initCanvasListeners() {
+      const viewport = document.getElementById('viewport');
+      const workspace = document.getElementById('workspace');
+
+      // Key Events for spacebar detection
+      window.addEventListener('keydown', (e) => {
+        if (e.code === 'Space') {
+          // Verify we aren't typing inside a textarea or any standard input/textarea
+          const active = document.activeElement;
+          if (active && (
+            active.tagName === 'INPUT' ||
+            active.tagName === 'TEXTAREA' ||
+            active.tagName === 'SELECT'
+          )) {
+            return;
+          }
+          spacebarDown = true;
+          viewport.classList.add('cursor-grab');
+          e.preventDefault();
+        }
+      });
+
+      window.addEventListener('keyup', (e) => {
+        if (e.code === 'Space') {
+          spacebarDown = false;
+          viewport.classList.remove('cursor-grab');
+        }
+      });
+
+      // Mouse Press Events on Background Canvas
+      viewport.addEventListener('mousedown', (e) => {
+        if (e.target !== viewport && e.target !== workspace) return;
+
+        // Spacebar key, or middle mouse drag, or left-drag directly to pan
+        if (e.button === 1 || spacebarDown || e.button === 0) {
+          isPanning = true;
+          startPanX = e.clientX - panX;
+          startPanY = e.clientY - panY;
+          viewport.classList.add('cursor-grabbing');
+          document.body.classList.add('drag-active');
+          e.preventDefault();
+        }
+      });
+
+      window.addEventListener('mousemove', (e) => {
+        // Pan Canvas
+        if (isPanning) {
+          panX = e.clientX - startPanX;
+          panY = e.clientY - startPanY;
+          applyCanvasTransform();
+          updateCoordinatesDisplay();
+          return;
+        }
+
+        // Move Active Dragging Note
+        if (activeDraggingNote) {
+          const dx = (e.clientX - dragStartX) / zoom;
+          const dy = (e.clientY - dragStartY) / zoom;
+          
+          let targetX = noteOriginalX + dx;
+          let targetY = noteOriginalY + dy;
+
+          if (snapToGrid) {
+            targetX = Math.round(targetX / gridSize) * gridSize;
+            targetY = Math.round(targetY / gridSize) * gridSize;
+          }
+
+          const resolved = resolveCollisions(activeDraggingNote.id, targetX, targetY, activeDraggingNote.w, activeDraggingNote.h);
+          
+          activeDraggingNote.x = resolved.x;
+          activeDraggingNote.y = resolved.y;
+
+          const elem = document.getElementById(`note-win-${activeDraggingNote.id}`);
+          if (elem) {
+            elem.style.left = `${activeDraggingNote.x}px`;
+            elem.style.top = `${activeDraggingNote.y}px`;
+          }
+          updateCoordinatesDisplay(activeDraggingNote.x, activeDraggingNote.y);
+          return;
+        }
+
+        // Handle Resizing Action on Notes
+        if (activeResizingNote) {
+          const dx = (e.clientX - resizeStartX) / zoom;
+          const dy = (e.clientY - resizeStartY) / zoom;
+
+          let targetW = Math.max(180, noteOriginalW + dx);
+          let targetH = Math.max(120, noteOriginalH + dy);
+
+          if (snapToGrid) {
+            targetW = Math.round(targetW / gridSize) * gridSize;
+            targetH = Math.round(targetH / gridSize) * gridSize;
+          }
+
+          activeResizingNote.w = targetW;
+          activeResizingNote.h = targetH;
+
+          const elem = document.getElementById(`note-win-${activeResizingNote.id}`);
+          if (elem) {
+            elem.style.width = `${activeResizingNote.w}px`;
+            elem.style.height = `${activeResizingNote.h}px`;
+          }
+          return;
+        }
+      });
+
+      window.addEventListener('mouseup', () => {
+        if (isPanning) {
+          isPanning = false;
+          viewport.classList.remove('cursor-grabbing');
+        }
+        
+        // Unconditionally remove selection restrictions on mouseup
+        document.body.classList.remove('drag-active');
+
+        if (activeDraggingNote) {
+          activeDraggingNote = null;
+          saveDatabase();
+        }
+        if (activeResizingNote) {
+          activeResizingNote = null;
+          saveDatabase();
+        }
+      });
+
+      viewport.addEventListener('wheel', (e) => {
+        e.preventDefault();
+
+        const zoomIntensity = 0.08;
+        const rect = viewport.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+
+        const virtX = (mouseX - panX) / zoom;
+        const virtY = (mouseY - panY) / zoom;
+
+        if (e.deltaY < 0) {
+          zoom = Math.min(3.0, zoom + zoomIntensity);
+        } else {
+          zoom = Math.max(0.15, zoom - zoomIntensity);
+        }
+
+        panX = mouseX - virtX * zoom;
+        panY = mouseY - virtY * zoom;
+
+        applyCanvasTransform();
+        updateCoordinatesDisplay();
+      }, { passive: false });
+    }
+
+    function applyCanvasTransform() {
+      const workspace = document.getElementById('workspace');
+      workspace.style.transform = `translate(${panX}px, ${panY}px) scale(${zoom})`;
+    }
+
+    function updateCoordinatesDisplay(xVal = 0, yVal = 0) {
+      document.getElementById('coord-x').innerText = Math.round(xVal || -panX);
+      document.getElementById('coord-y').innerText = Math.round(yVal || -panY);
+      document.getElementById('coord-zoom').innerText = `${Math.round(zoom * 100)}%`;
+    }
+
+    function recenterCanvas() {
+      const viewport = document.getElementById('viewport');
+      const w = viewport.clientWidth;
+      const h = viewport.clientHeight;
+      
+      zoom = 1.0;
+      panX = w / 3;
+      panY = h / 4;
+      applyCanvasTransform();
+      updateCoordinatesDisplay();
+      showToast("Workspace centered.", "🧭");
+    }
+
+    // --- STREAMING_CHUNK: Programming AABB non-overlapping physics engines and grid alignment calculations... ---
+    // --- COLLISION RESOLUTION LOGIC (NO-OVERLAPPING ENGINE) ---
+    function resolveCollisions(draggingNoteId, newX, newY, w, h) {
+      let solvedX = newX;
+      let solvedY = newY;
+      let collisionOccurred = true;
+      let iterations = 0;
+      const maxIterations = 25;
+
+      while (collisionOccurred && iterations < maxIterations) {
+        collisionOccurred = false;
+        
+        for (let other of notes) {
+          if (other.id === draggingNoteId || other.archived || other.minimized) continue;
+
+          // Check for visual intersection
+          if (solvedX < other.x + other.w &&
+              solvedX + w > other.x &&
+              solvedY < other.y + other.h &&
+              solvedY + h > other.y) {
+            
+            collisionOccurred = true;
+
+            let overlapRight = (other.x + other.w) - solvedX;
+            let overlapLeft = (solvedX + w) - other.x;
+            let overlapBottom = (other.y + other.h) - solvedY;
+            let overlapTop = (solvedY + h) - other.y;
+
+            let minOverlap = Math.min(overlapRight, overlapLeft, overlapBottom, overlapTop);
+
+            if (minOverlap === overlapRight) {
+              solvedX += overlapRight;
+            } else if (minOverlap === overlapLeft) {
+              solvedX -= overlapLeft;
+            } else if (minOverlap === overlapBottom) {
+              solvedY += overlapBottom;
+            } else if (minOverlap === overlapTop) {
+              solvedY -= overlapTop;
+            }
+
+            if (snapToGrid) {
+              solvedX = Math.round(solvedX / gridSize) * gridSize;
+              solvedY = Math.round(solvedY / gridSize) * gridSize;
+            }
+          }
+        }
+        iterations++;
+      }
+      return { x: solvedX, y: solvedY };
+    }
+
+    function toggleSnapToGrid() {
+      snapToGrid = !snapToGrid;
+      const indicator = document.getElementById('snap-indicator');
+
+      if (snapToGrid) {
+        indicator.classList.remove('bg-red-500');
+        indicator.classList.add('bg-emerald-500');
+        showToast("Snap-to-Grid Enabled", "📏");
+        snapAllNotesToGrid();
+      } else {
+        indicator.classList.remove('bg-emerald-500');
+        indicator.classList.add('bg-red-500');
+        showToast("Snap-to-Grid Disabled", "📏");
+      }
+    }
+
+    function snapAllNotesToGrid() {
+      notes.forEach(note => {
+        if (note.archived) return;
+        note.x = Math.round(note.x / gridSize) * gridSize;
+        note.y = Math.round(note.y / gridSize) * gridSize;
+        note.w = Math.round(note.w / gridSize) * gridSize;
+        note.h = Math.round(note.h / gridSize) * gridSize;
+      });
+      saveDatabase();
+      renderBoard();
+    }
+
+    // --- STREAMING_CHUNK: Designing GTK Board HTML Note component creation and rendering workspace... ---
+    // --- NOTE ENGINE ACTIONS & RENDER SYSTEM ---
+    function createNewNote() {
+      const viewport = document.getElementById('viewport');
+      const midX = (-panX + (viewport.clientWidth / 2) - 150) / zoom;
+      const midY = (-panY + (viewport.clientHeight / 2) - 150) / zoom;
+
+      const randomId = 'note-' + Date.now();
+      
+      let spawnX = midX;
+      let spawnY = midY;
+
+      if (snapToGrid) {
+        spawnX = Math.round(spawnX / gridSize) * gridSize;
+        spawnY = Math.round(spawnY / gridSize) * gridSize;
+      }
+
+      const resolved = resolveCollisions(randomId, spawnX, spawnY, 300, 250);
+      maxZIndex++;
+
+      const newNote = {
+        id: randomId,
+        title: "📄 New Monospace Sticky",
+        content: "Write plain text notes here...",
+        x: resolved.x,
+        y: resolved.y,
+        w: 300,
+        h: 250,
+        colorIndex: 0, // Default to Adwaita Light Gray
+        borderStyle: "solid",
+        fontSize: 14,
+        archived: false,
+        minimized: false,
+        zIndex: maxZIndex
+      };
+
+      notes.push(newNote);
+      saveDatabase();
+      renderBoard();
+      showToast("Note spawned on canvas.", "✨");
+    }
+
+    function renderBoard() {
+      const workspace = document.getElementById('workspace');
+      workspace.innerHTML = "";
+
+      let archiveCount = 0;
+
+      notes.forEach((note) => {
+        if (note.archived) {
+          archiveCount++;
+          return;
+        }
+
+        const colorSet = gtkColors[note.colorIndex] || gtkColors[0];
+        
+        const noteWindow = document.createElement('div');
+        noteWindow.id = `note-win-${note.id}`;
+        noteWindow.className = `absolute gtk-window rounded-lg flex flex-col border-style-${note.borderStyle}`;
+        noteWindow.style.left = `${note.x}px`;
+        noteWindow.style.top = `${note.y}px`;
+        noteWindow.style.width = `${note.w}px`;
+        noteWindow.style.height = note.minimized ? '42px' : `${note.h}px`;
+        noteWindow.style.backgroundColor = colorSet.body;
+        noteWindow.style.color = colorSet.text;
+        noteWindow.style.zIndex = note.zIndex || 10;
+
+        // Bring any clicked note instantly to the front using Z-Index (Preserves typing focus)
+        noteWindow.addEventListener('mousedown', () => {
+          bringToFront(note.id);
+        });
+
+        const headerBar = document.createElement('div');
+        headerBar.className = `h-10 px-3 flex items-center justify-between border-b cursor-grab active:cursor-grabbing select-none rounded-t-lg shrink-0`;
+        headerBar.style.backgroundColor = colorSet.header;
+        headerBar.style.borderColor = `rgba(0,0,0,0.08)`;
+        
+        headerBar.addEventListener('mousedown', (e) => {
+          if (e.target.closest('.header-btn-bypass')) return;
+
+          activeDraggingNote = note;
+          dragStartX = e.clientX;
+          dragStartY = e.clientY;
+          noteOriginalX = note.x;
+          noteOriginalY = note.y;
+          document.body.classList.add('drag-active');
+          bringToFront(note.id);
+        });
+
+        headerBar.addEventListener('dblclick', () => {
+          toggleMinimizeNote(note.id);
+        });
+
+        const titleInput = document.createElement('input');
+        titleInput.type = "text";
+        titleInput.value = note.title;
+        titleInput.className = "bg-transparent font-bold text-xs border-none outline-none focus:ring-1 focus:ring-blue-400 rounded px-1 w-[55%] truncate header-btn-bypass";
+        titleInput.style.color = colorSet.text;
+        titleInput.addEventListener('change', (e) => {
+          note.title = e.target.value;
+          saveDatabase();
+        });
+
+        const controls = document.createElement('div');
+        controls.className = "flex items-center space-x-1.5 header-btn-bypass shrink-0";
+        controls.innerHTML = `
+          <button onclick="toggleOptionsDrawer('${note.id}')" title="Configure Style Borders" class="w-5 h-5 rounded hover:bg-black/5 flex items-center justify-center text-xs opacity-75 hover:opacity-100 transition">
+            ⚙️
+          </button>
+          <button onclick="cycleNoteColor('${note.id}')" title="Cycle GTK Preset Color" class="w-5 h-5 rounded hover:bg-black/5 flex items-center justify-center text-xs opacity-75 hover:opacity-100 transition">
+            🎨
+          </button>
+          <button onclick="toggleMinimizeNote('${note.id}')" title="Collapse Window" class="w-5 h-5 rounded hover:bg-black/5 flex items-center justify-center text-xs font-bold leading-none opacity-75 hover:opacity-100 transition">
+            ${note.minimized ? '🗖' : '🗕'}
+          </button>
+          <button onclick="archiveNote('${note.id}')" title="Send to Cabinet" class="w-5 h-5 rounded hover:bg-black/5 flex items-center justify-center text-xs opacity-75 hover:opacity-100 transition">
+            📦
+          </button>
+          <button onclick="deleteNote('${note.id}')" title="Permanent Delete" class="w-5 h-5 bg-red-500/10 hover:bg-red-500 hover:text-white rounded flex items-center justify-center text-[10px] font-bold transition text-red-700">
+            ✕
+          </button>
+        `;
+
+        headerBar.appendChild(titleInput);
+        headerBar.appendChild(controls);
+        noteWindow.appendChild(headerBar);
+
+        const optionsDrawer = document.createElement('div');
+        optionsDrawer.id = `options-drawer-${note.id}`;
+        optionsDrawer.className = "hidden bg-black/[0.02] border-b border-black/5 px-3 py-1.5 flex items-center justify-between text-xs transition-all shrink-0 select-none";
+        optionsDrawer.innerHTML = `
+          <div class="flex items-center space-x-2">
+            <span class="text-[10px] font-bold opacity-75">Border Style:</span>
+            <select onchange="updateNoteBorder('${note.id}', this.value)" class="bg-white border border-black/20 text-xs rounded px-1 py-0.5 outline-none focus:ring-1 focus:ring-blue-500 font-semibold">
+              ${borderStyles.map(s => `<option value="${s}" ${note.borderStyle === s ? 'selected' : ''}>${s.toUpperCase()}</option>`).join('')}
+            </select>
+          </div>
+          <div class="flex items-center space-x-1.5">
+            <span class="text-[10px] font-bold opacity-75">Text Size:</span>
+            <button onclick="adjustNoteFont('${note.id}', -1)" class="w-5 h-4 bg-white hover:bg-neutral-100 rounded border border-black/20 flex items-center justify-center font-bold text-[9px]">-</button>
+            <span class="font-mono text-[10px] font-bold">${note.fontSize}px</span>
+            <button onclick="adjustNoteFont('${note.id}', 1)" class="w-5 h-4 bg-white hover:bg-neutral-100 rounded border border-black/20 flex items-center justify-center font-bold text-[9px]">+</button>
+          </div>
+        `;
+        noteWindow.appendChild(optionsDrawer);
+
+        // --- STREAMING_CHUNK: Integrating pure plain text contentareas with monospace font settings... ---
+        // Core Window Text-Editor Workspace Element (Rendered as robust <textarea> for plain text representation)
+        if (!note.minimized) {
+          const editorWrapper = document.createElement('div');
+          editorWrapper.className = "flex-1 flex flex-col min-h-0 relative";
+
+          const contentArea = document.createElement('textarea');
+          contentArea.className = "flex-1 w-full h-full p-3 bg-transparent border-none outline-none resize-none font-mono text-xs focus:ring-0 leading-relaxed overflow-y-auto";
+          contentArea.style.fontSize = `${note.fontSize}px`;
+          contentArea.style.color = colorSet.text;
+          
+          // Migrate old HTML format notes gracefully to clean plain text on focus/rendering
+          contentArea.value = cleanHtmlToPlainText(note.content);
+
+          contentArea.addEventListener('input', () => {
+            note.content = contentArea.value;
+            saveDatabase();
+          });
+
+          contentArea.addEventListener('focus', () => {
+            bringToFront(note.id);
+          });
+
+          editorWrapper.appendChild(contentArea);
+
+          const resizeHandle = document.createElement('div');
+          resizeHandle.className = "absolute bottom-1 right-1 w-3 h-3 cursor-se-resize bg-black/5 hover:bg-black/10 rounded-tl transition z-10 flex items-center justify-center text-[8px] font-bold";
+          resizeHandle.innerHTML = "◿";
+          resizeHandle.addEventListener('mousedown', (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            activeResizingNote = note;
+            resizeStartX = e.clientX;
+            resizeStartY = e.clientY;
+            noteOriginalW = note.w;
+            noteOriginalH = note.h;
+            document.body.classList.add('drag-active');
+            bringToFront(note.id);
+          });
+
+          editorWrapper.appendChild(resizeHandle);
+          noteWindow.appendChild(editorWrapper);
+        }
+
+        workspace.appendChild(noteWindow);
+      });
+
+      const badge = document.getElementById('archive-count');
+      if (archiveCount > 0) {
+        badge.innerText = archiveCount;
+        badge.classList.remove('hidden');
+      } else {
+        badge.classList.add('hidden');
+      }
+      repopulateArchiveSidebarList();
+    }
+
+    function bringToFront(id) {
+      const note = notes.find(n => n.id === id);
+      if (note) {
+        const currentMax = Math.max(...notes.map(n => n.zIndex || 10), 10);
+        if (note.zIndex !== currentMax || notes.length === 1) {
+          maxZIndex = currentMax + 1;
+          note.zIndex = maxZIndex;
+          
+          const elem = document.getElementById(`note-win-${id}`);
+          if (elem) {
+            elem.style.zIndex = note.zIndex;
+          }
+          saveDatabase();
+        }
+      }
+    }
+
+    function toggleMinimizeNote(id) {
+      const note = notes.find(n => n.id === id);
+      if (note) {
+        note.minimized = !note.minimized;
+        saveDatabase();
+        renderBoard();
+      }
+    }
+
+    function toggleOptionsDrawer(id) {
+      const drawer = document.getElementById(`options-drawer-${id}`);
+      if (drawer) {
+        drawer.classList.toggle('hidden');
+      }
+    }
+
+    function updateNoteBorder(id, styleName) {
+      const note = notes.find(n => n.id === id);
+      if (note) {
+        note.borderStyle = styleName;
+        saveDatabase();
+        renderBoard();
+      }
+    }
+
+    function adjustNoteFont(id, direction) {
+      const note = notes.find(n => n.id === id);
+      if (note) {
+        note.fontSize = Math.min(32, Math.max(10, note.fontSize + direction));
+        saveDatabase();
+        renderBoard();
+      }
+    }
+
+    function cycleNoteColor(id) {
+      const note = notes.find(n => n.id === id);
+      if (note) {
+        note.colorIndex = (note.colorIndex + 1) % gtkColors.length;
+        saveDatabase();
+        renderBoard();
+      }
+    }
+
+    // --- STREAMING_CHUNK: Setting up Sidebar, Archives Cabinet, and Restoring logic... ---
+    // --- ARCHIVE & CABINET SYSTEM ---
+    function archiveNote(id) {
+      const note = notes.find(n => n.id === id);
+      if (note) {
+        note.archived = true;
+        saveDatabase();
+        renderBoard();
+        showToast("Note relocated to Archive Cabinet.", "📦");
+      }
+    }
+
+    function restoreNote(id) {
+      const note = notes.find(n => n.id === id);
+      if (note) {
+        note.archived = false;
+        
+        const resolved = resolveCollisions(note.id, note.x, note.y, note.w, note.h);
+        note.x = resolved.x;
+        note.y = resolved.y;
+
+        saveDatabase();
+        renderBoard();
+        showToast("Note recovered back to Canvas.", "♻️");
+      }
+    }
+
+    function deleteNote(id) {
+      const noteIdx = notes.findIndex(n => n.id === id);
+      if (noteIdx > -1) {
+        notes.splice(noteIdx, 1);
+        saveDatabase();
+        renderBoard();
+        showToast("Note removed permanently.", "🗑️");
+      }
+    }
+
+    function toggleArchiveSidebar() {
+      const bar = document.getElementById('archive-sidebar');
+      bar.classList.toggle('translate-x-full');
+    }
+
+    function repopulateArchiveSidebarList() {
+      const listContainer = document.getElementById('archive-list');
+      listContainer.innerHTML = "";
+
+      const archivedNotes = notes.filter(n => n.archived);
+
+      if (archivedNotes.length === 0) {
+        listContainer.innerHTML = `
+          <div class="text-center py-10 text-gray-400 text-xs font-semibold">
+            Cabinet is empty. No archived notes stored yet.
+          </div>
+        `;
+        return;
+      }
+
+      archivedNotes.forEach((note) => {
+        const item = document.createElement('div');
+        item.className = "p-3 bg-white border border-neutral-200 rounded-lg flex flex-col space-y-2 text-xs shadow-sm";
+        item.innerHTML = `
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-[#2e3440] truncate w-[65%]">${note.title || "Untitled Stick"}</span>
+            <div class="flex items-center space-x-1.5 shrink-0">
+              <button onclick="restoreNote('${note.id}')" class="px-2 py-0.5 bg-[#3584e4] hover:bg-[#1c71d8] text-white rounded text-[10px] font-semibold transition" title="Restore to workspace">Restore</button>
+              <button onclick="deleteNote('${note.id}')" class="px-2 py-0.5 bg-red-100 hover:bg-red-200 text-red-700 rounded text-[10px] font-semibold transition" title="Delete forever">Delete</button>
+            </div>
+          </div>
+          <div class="text-[10px] text-gray-500 truncate max-h-12 overflow-hidden bg-neutral-50 p-1.5 rounded font-mono">
+            ${cleanHtmlToPlainText(note.content) || '(Empty contents)'}
+          </div>
+        `;
+        listContainer.appendChild(item);
+      });
+    }
+
+    // --- NUKE DATABASE ---
+    function triggerNukeDialog() {
+      const msg = "WARNING: You are about to completely wipe and delete all sticky notes currently saved inside your dashboard environment. This is irreversible!";
+      triggerConfirmModal(msg, () => {
+        notes = [];
+        saveDatabase();
+        renderBoard();
+        recenterCanvas();
+        showToast("Database completely wiped.", "💣");
+      });
+    }
+
+    // --- STREAMING_CHUNK: Building global portability, JSON operations, and file exporters... ---
+    // --- SYSTEM BACKUP PORTABILITY MODALS (EXPORT / IMPORT JSON) ---
+    function openImportExportModal() {
+      const stringified = JSON.stringify(notes, null, 2);
+      document.getElementById('export-textarea').value = stringified;
+      document.getElementById('import-textarea').value = "";
+
+      document.getElementById('modal-import-export').classList.remove('hidden');
+      document.getElementById('modal-import-export').classList.add('flex');
+    }
+
+    function closeImportExportModal() {
+      document.getElementById('modal-import-export').classList.remove('flex');
+      document.getElementById('modal-import-export').classList.add('hidden');
+    }
+
+    // Secure clipboard copy
+    function copyExportText() {
+      const area = document.getElementById('export-textarea');
+      area.select();
+      document.execCommand('copy');
+      showToast("JSON Board data copied to Clipboard!", "📋");
+    }
+
+    function downloadJsonFile() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(notes, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `stickyboard_backup_${Date.now()}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+      showToast("Download backup initiated.", "💾");
+    }
+
+    function handleFileSelected(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        document.getElementById('import-textarea').value = e.target.result;
+      };
+      reader.readAsText(file);
+    }
+
+    function runJSONImport() {
+      const input = document.getElementById('import-textarea').value.trim();
+      if (!input) {
+        showToast("No configuration data entered to import.", "❌");
+        return;
+      }
+
+      try {
+        const parsed = JSON.parse(input);
+        
+        if (Array.isArray(parsed)) {
+          const sanitiSed = parsed.map(note => ({
+            id: note.id || 'note-' + Math.random().toString(36).substr(2, 9),
+            title: note.title || 'Imported Note',
+            content: cleanHtmlToPlainText(note.content) || 'No text content loaded.',
+            x: Number(note.x) || 100,
+            y: Number(note.y) || 100,
+            w: Number(note.w) || 280,
+            h: Number(note.h) || 220,
+            colorIndex: Number(note.colorIndex) || 0,
+            borderStyle: note.borderStyle || 'solid',
+            fontSize: Number(note.fontSize) || 14,
+            archived: !!note.archived,
+            minimized: !!note.minimized,
+            zIndex: Number(note.zIndex) || 10
+          }));
+
+          notes = sanitiSed;
+          saveDatabase();
+          renderBoard();
+          closeImportExportModal();
+          showToast("Workspace configuration updated successfully!", "🎉");
+          recenterCanvas();
+        } else {
+          showToast("Invalid format: Root component must be an Array.", "❌");
+        }
+      } catch (err) {
+        showToast(`Import Failed: ${err.message}`, "❌");
+      }
+    }
+
+    // --- SECURE CONFIRMATION WRAPPER SYSTEM ---
+    let activeConfirmCallback = null;
+
+    function triggerConfirmModal(textMessage, callbackFn) {
+      document.getElementById('confirm-message').innerText = textMessage;
+      activeConfirmCallback = callbackFn;
+      
+      const modal = document.getElementById('modal-confirm');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeConfirmationDialog() {
+      document.getElementById('modal-confirm').classList.remove('flex');
+      document.getElementById('modal-confirm').classList.add('hidden');
+      activeConfirmCallback = null;
+    }
+
+    document.getElementById('confirm-execute-btn').addEventListener('click', () => {
+      if (activeConfirmCallback) {
+        activeConfirmCallback();
+      }
+      closeConfirmationDialog();
+    });
+
+    // --- TOAST SYSTEM OVERLAYS ---
+    function showToast(message, icon = "ℹ️") {
+      const toast = document.getElementById('toast-overlay');
+      document.getElementById('toast-icon').innerText = icon;
+      document.getElementById('toast-text').innerText = message;
+
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-20', 'opacity-0');
+      }, 3000);
+    }
+
+    // --- SYSTEM PERSISTENCE UTILITIES ---
+    function saveDatabase() {
+      localStorage.setItem('gtk_stickyboard_notes', JSON.stringify(notes));
+    }
+
+    function loadDatabase() {
+      try {
+        const payload = localStorage.getItem('gtk_stickyboard_notes');
+        if (payload) {
+          notes = JSON.parse(payload);
+        }
+      } catch (err) {
+        console.error("Storage read exception: ", err);
+        notes = [];
+      }
+    }
+  </script>
+</body>
+</html>
