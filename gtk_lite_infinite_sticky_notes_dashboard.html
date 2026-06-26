@@ -50,13 +50,13 @@
     .gtk-window {
       background: #ffffff;
       color: #2e3440;
-      box-shadow: 0 12px 30px -4px rgba(0, 0, 0, 0.12), 0 4px 12px -2px rgba(0, 0, 0, 0.06), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+      box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.26), 0 8px 18px -3px rgba(0, 0, 0, 0.16), 0 3px 8px -1px rgba(0, 0, 0, 0.1);
       transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
     }
     
     .gtk-window:focus-within {
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.18), 0 10px 20px -5px rgba(0, 0, 0, 0.08);
-      transform: translateY(-1px);
+      box-shadow: 0 28px 55px -10px rgba(0, 0, 0, 0.36), 0 12px 24px -5px rgba(0, 0, 0, 0.2);
+      transform: translateY(-2px);
     }
 
     /* Custom borders tailored for Light Theme */
@@ -164,7 +164,8 @@
     <div class="absolute bottom-4 left-4 z-[9999] bg-white/90 backdrop-blur-md border border-neutral-300 px-3 py-1.5 rounded-md text-[10px] text-[#2e3440] pointer-events-none font-mono flex flex-col space-y-1 shadow-sm">
       <div>Position: X <span id="coord-x">0</span>, Y <span id="coord-y">0</span></div>
       <div>Zoom Level: <span id="coord-zoom">100%</span></div>
-      <div class="text-[9px] text-gray-500 font-semibold">Hold Spacebar + Drag to Pan | Scroll wheel to Zoom</div>
+      <div class="text-[9px] text-gray-500 font-semibold mb-1">Hold Spacebar + Drag to Pan | Scroll wheel to Zoom</div>
+      <div class="text-[9px] text-blue-600 font-bold">Alt + Left Drag: Move note from anywhere | Alt + Right Drag: Resize note</div>
     </div>
 
     <!-- The Infinite Workspace Element that accepts transforms -->
@@ -290,7 +291,6 @@
     // Helper to strip HTML and extract clean plain text (useful during database loading/import)
     function cleanHtmlToPlainText(htmlContent) {
       if (!htmlContent) return "";
-      // Create element on the fly to utilize the browser parser
       const tempDiv = document.createElement("div");
       tempDiv.innerHTML = htmlContent.replace(/<br\s*\/?>/gi, '\n').replace(/<\/div>/gi, '\n').replace(/<\/li>/gi, '\n');
       const text = tempDiv.innerText || tempDiv.textContent || "";
@@ -310,7 +310,7 @@
           {
             id: "welcome-note-1",
             title: "📌 GTK Board Welcome Note",
-            content: "Welcome to your spatial light sticky dashboard!\n\nInteractive mechanics:\n- Panning: Drag with middle-mouse button, or hold Spacebar and drag with left-click.\n- Zooming: Use your mouse scrollwheel to focus on any area.\n- Double-click the header to toggle Minimize/Maximize.\n\nNow simplified to pure plain-text notes using monospace font settings!",
+            content: "Welcome to your spatial light sticky dashboard!\n\nInteractive mechanics:\n- Panning: Drag with middle-mouse button, or hold Spacebar and drag with left-click.\n- Zooming: Use your mouse scrollwheel to focus on any area.\n- Double-click the header to toggle Minimize/Maximize.\n- Alt + Left Drag: Drag this note from ANY section (including this textarea).\n- Alt + Right Drag: Resize this note from ANY section.\n\nNow simplified to pure plain-text notes using monospace font settings!",
             x: 100,
             y: 100,
             w: 320,
@@ -345,16 +345,21 @@
       recenterCanvas();
     };
 
-    // --- STREAMING_CHUNK: Programming navigation coordinate engines, mouse wheel pan/zoom transforms... ---
     // --- VIEWPORT NAVIGATION (PANNING & ZOOMING) ---
     function initCanvasListeners() {
       const viewport = document.getElementById('viewport');
       const workspace = document.getElementById('workspace');
 
+      // Intercept context menu to prevent browser native dropdown during Alt + Right Click drag
+      window.addEventListener('contextmenu', (e) => {
+        if (e.altKey) {
+          e.preventDefault();
+        }
+      });
+
       // Key Events for spacebar detection
       window.addEventListener('keydown', (e) => {
         if (e.code === 'Space') {
-          // Verify we aren't typing inside a textarea or any standard input/textarea
           const active = document.activeElement;
           if (active && (
             active.tagName === 'INPUT' ||
@@ -521,54 +526,16 @@
       showToast("Workspace centered.", "🧭");
     }
 
-    // --- STREAMING_CHUNK: Programming AABB non-overlapping physics engines and grid alignment calculations... ---
-    // --- COLLISION RESOLUTION LOGIC (NO-OVERLAPPING ENGINE) ---
+    // --- COLLISION RESOLUTION LOGIC (OVERLAPPING ENABLED) ---
     function resolveCollisions(draggingNoteId, newX, newY, w, h) {
       let solvedX = newX;
       let solvedY = newY;
-      let collisionOccurred = true;
-      let iterations = 0;
-      const maxIterations = 25;
 
-      while (collisionOccurred && iterations < maxIterations) {
-        collisionOccurred = false;
-        
-        for (let other of notes) {
-          if (other.id === draggingNoteId || other.archived || other.minimized) continue;
-
-          // Check for visual intersection
-          if (solvedX < other.x + other.w &&
-              solvedX + w > other.x &&
-              solvedY < other.y + other.h &&
-              solvedY + h > other.y) {
-            
-            collisionOccurred = true;
-
-            let overlapRight = (other.x + other.w) - solvedX;
-            let overlapLeft = (solvedX + w) - other.x;
-            let overlapBottom = (other.y + other.h) - solvedY;
-            let overlapTop = (solvedY + h) - other.y;
-
-            let minOverlap = Math.min(overlapRight, overlapLeft, overlapBottom, overlapTop);
-
-            if (minOverlap === overlapRight) {
-              solvedX += overlapRight;
-            } else if (minOverlap === overlapLeft) {
-              solvedX -= overlapLeft;
-            } else if (minOverlap === overlapBottom) {
-              solvedY += overlapBottom;
-            } else if (minOverlap === overlapTop) {
-              solvedY -= overlapTop;
-            }
-
-            if (snapToGrid) {
-              solvedX = Math.round(solvedX / gridSize) * gridSize;
-              solvedY = Math.round(solvedY / gridSize) * gridSize;
-            }
-          }
-        }
-        iterations++;
+      if (snapToGrid) {
+        solvedX = Math.round(solvedX / gridSize) * gridSize;
+        solvedY = Math.round(solvedY / gridSize) * gridSize;
       }
+
       return { x: solvedX, y: solvedY };
     }
 
@@ -600,7 +567,6 @@
       renderBoard();
     }
 
-    // --- STREAMING_CHUNK: Designing GTK Board HTML Note component creation and rendering workspace... ---
     // --- NOTE ENGINE ACTIONS & RENDER SYSTEM ---
     function createNewNote() {
       const viewport = document.getElementById('viewport');
@@ -668,8 +634,29 @@
         noteWindow.style.zIndex = note.zIndex || 10;
 
         // Bring any clicked note instantly to the front using Z-Index (Preserves typing focus)
-        noteWindow.addEventListener('mousedown', () => {
+        noteWindow.addEventListener('mousedown', (e) => {
           bringToFront(note.id);
+
+          // Custom Alt + Click Shortcuts on any part of the note window
+          if (e.altKey) {
+            if (e.button === 0) { // Alt + Left Drag to Move Note
+              e.preventDefault();
+              activeDraggingNote = note;
+              dragStartX = e.clientX;
+              dragStartY = e.clientY;
+              noteOriginalX = note.x;
+              noteOriginalY = note.y;
+              document.body.classList.add('drag-active');
+            } else if (e.button === 2) { // Alt + Right Drag to Resize Note
+              e.preventDefault();
+              activeResizingNote = note;
+              resizeStartX = e.clientX;
+              resizeStartY = e.clientY;
+              noteOriginalW = note.w;
+              noteOriginalH = note.h;
+              document.body.classList.add('drag-active');
+            }
+          }
         });
 
         const headerBar = document.createElement('div');
@@ -679,6 +666,7 @@
         
         headerBar.addEventListener('mousedown', (e) => {
           if (e.target.closest('.header-btn-bypass')) return;
+          if (e.altKey) return; // Allow Alt+Drag listener on noteWindow container to take priority
 
           activeDraggingNote = note;
           dragStartX = e.clientX;
@@ -696,7 +684,7 @@
         const titleInput = document.createElement('input');
         titleInput.type = "text";
         titleInput.value = note.title;
-        titleInput.className = "bg-transparent font-bold text-xs border-none outline-none focus:ring-1 focus:ring-blue-400 rounded px-1 w-[55%] truncate header-btn-bypass";
+        titleInput.className = "bg-transparent font-bold text-xs border-none outline-none focus:ring-1 focus:ring-blue-400 rounded px-1 w-[45%] truncate header-btn-bypass";
         titleInput.style.color = colorSet.text;
         titleInput.addEventListener('change', (e) => {
           note.title = e.target.value;
@@ -704,8 +692,11 @@
         });
 
         const controls = document.createElement('div');
-        controls.className = "flex items-center space-x-1.5 header-btn-bypass shrink-0";
+        controls.className = "flex items-center space-x-1 header-btn-bypass shrink-0";
         controls.innerHTML = `
+          <button onclick="copyNoteContent('${note.id}')" title="Copy Full Note Text" class="w-5 h-5 rounded hover:bg-black/5 flex items-center justify-center text-xs opacity-75 hover:opacity-100 transition">
+            📋
+          </button>
           <button onclick="toggleOptionsDrawer('${note.id}')" title="Configure Style Borders" class="w-5 h-5 rounded hover:bg-black/5 flex items-center justify-center text-xs opacity-75 hover:opacity-100 transition">
             ⚙️
           </button>
@@ -746,7 +737,6 @@
         `;
         noteWindow.appendChild(optionsDrawer);
 
-        // --- STREAMING_CHUNK: Integrating pure plain text contentareas with monospace font settings... ---
         // Core Window Text-Editor Workspace Element (Rendered as robust <textarea> for plain text representation)
         if (!note.minimized) {
           const editorWrapper = document.createElement('div');
@@ -863,7 +853,24 @@
       }
     }
 
-    // --- STREAMING_CHUNK: Setting up Sidebar, Archives Cabinet, and Restoring logic... ---
+    // --- COPY NOTE CONTENT HELPER ---
+    function copyNoteContent(id) {
+      const note = notes.find(n => n.id === id);
+      if (note) {
+        const plainText = cleanHtmlToPlainText(note.content);
+        
+        // Robust fallback-compatible iframe copy utility
+        const tempTextarea = document.createElement('textarea');
+        tempTextarea.value = plainText;
+        document.body.appendChild(tempTextarea);
+        tempTextarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(tempTextarea);
+        
+        showToast("Full note content copied!", "📋");
+      }
+    }
+
     // --- ARCHIVE & CABINET SYSTEM ---
     function archiveNote(id) {
       const note = notes.find(n => n.id === id);
@@ -925,10 +932,10 @@
         item.className = "p-3 bg-white border border-neutral-200 rounded-lg flex flex-col space-y-2 text-xs shadow-sm";
         item.innerHTML = `
           <div class="flex items-center justify-between">
-            <span class="font-bold text-[#2e3440] truncate w-[65%]">${note.title || "Untitled Stick"}</span>
-            <div class="flex items-center space-x-1.5 shrink-0">
-              <button onclick="restoreNote('${note.id}')" class="px-2 py-0.5 bg-[#3584e4] hover:bg-[#1c71d8] text-white rounded text-[10px] font-semibold transition" title="Restore to workspace">Restore</button>
-              <button onclick="deleteNote('${note.id}')" class="px-2 py-0.5 bg-red-100 hover:bg-red-200 text-red-700 rounded text-[10px] font-semibold transition" title="Delete forever">Delete</button>
+            <span class="font-bold text-[#2e3440] truncate w-[60%]">${note.title || "Untitled Stick"}</span>
+            <div class="flex items-center space-x-1 shrink-0">
+              <button onclick="restoreNote('${note.id}')" class="px-1.5 py-0.5 bg-[#3584e4] hover:bg-[#1c71d8] text-white rounded text-[10px] font-semibold transition" title="Restore to workspace">Restore</button>
+              <button onclick="deleteNote('${note.id}')" class="px-1.5 py-0.5 bg-red-100 hover:bg-red-200 text-red-700 rounded text-[10px] font-semibold transition" title="Delete forever">Delete</button>
             </div>
           </div>
           <div class="text-[10px] text-gray-500 truncate max-h-12 overflow-hidden bg-neutral-50 p-1.5 rounded font-mono">
@@ -951,7 +958,6 @@
       });
     }
 
-    // --- STREAMING_CHUNK: Building global portability, JSON operations, and file exporters... ---
     // --- SYSTEM BACKUP PORTABILITY MODALS (EXPORT / IMPORT JSON) ---
     function openImportExportModal() {
       const stringified = JSON.stringify(notes, null, 2);
