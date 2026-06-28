@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GTK Lite Infinite Sticky Notes</title>
+  <title>KDE/GTK Infinite Sticky Notes</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Google Fonts for UNIX/GTK Interface look -->
@@ -12,64 +12,241 @@
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   
   <style>
+    :root, .theme-gtk-light {
+      --bg-color: #f6f5f4;
+      --bg-grid: rgba(46, 52, 64, 0.04);
+      --card-bg: #ffffff;
+      --card-fg: #2e3440;
+      --panel-bg: #ffffff;
+      --panel-border: #e1e1e0;
+      --border-color: #c0c0be;
+      --accent-color: #3584e4;
+      --accent-hover: #1c71d8;
+      --header-bg: #e8e8e7;
+      --banner-bg: #f1f0ee;
+      --banner-fg: #2e3440;
+      
+      /* Window Geometry */
+      --window-radius: 12px;
+      --btn-radius: 9999px; /* Gnome flat circular buttons */
+      --title-align: left;
+      --window-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.15), 0 8px 18px -3px rgba(0, 0, 0, 0.08);
+      --window-shadow-focus: 0 25px 50px -10px rgba(0, 0, 0, 0.25), 0 12px 24px -5px rgba(0, 0, 0, 0.12);
+      --close-hover-bg: #e01b24;
+    }
+
+    .theme-gtk-dark {
+      --bg-color: #1e1e1e;
+      --bg-grid: rgba(255, 255, 255, 0.03);
+      --card-bg: #2d2d2d;
+      --card-fg: #eeeeee;
+      --panel-bg: #242424;
+      --panel-border: #3a3a3a;
+      --border-color: #4a4a4a;
+      --accent-color: #3584e4;
+      --accent-hover: #1c71d8;
+      --header-bg: #353535;
+      --banner-bg: #2d2d2d;
+      --banner-fg: #eeeeee;
+      
+      /* Window Geometry */
+      --window-radius: 12px;
+      --btn-radius: 9999px;
+      --title-align: left;
+      --window-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.5), 0 8px 18px -3px rgba(0, 0, 0, 0.3);
+      --window-shadow-focus: 0 28px 55px -10px rgba(0, 0, 0, 0.65), 0 14px 28px -5px rgba(0, 0, 0, 0.4);
+      --close-hover-bg: #e01b24;
+    }
+
+    .theme-adwaita-light {
+      --bg-color: #f6f5f4;
+      --bg-grid: rgba(46, 52, 64, 0.04);
+      --card-bg: #ffffff;
+      --card-fg: #2e3440;
+      --panel-bg: #f1f0ee;
+      --panel-border: #e1e1e0;
+      --border-color: #c0c0be;
+      --accent-color: #3584e4;
+      --accent-hover: #1c71d8;
+      --header-bg: #e8e8e7;
+      --banner-bg: #e8e8e7;
+      --banner-fg: #2e3440;
+      
+      /* Window Geometry */
+      --window-radius: 12px;
+      --btn-radius: 9999px;
+      --title-align: left;
+      --window-shadow: 0 12px 30px -4px rgba(0, 0, 0, 0.12), 0 4px 12px -2px rgba(0, 0, 0, 0.06);
+      --window-shadow-focus: 0 25px 50px -12px rgba(0, 0, 0, 0.18), 0 10px 20px -5px rgba(0, 0, 0, 0.08);
+      --close-hover-bg: #e01b24;
+    }
+
+    .theme-adwaita-dark {
+      --bg-color: #242424;
+      --bg-grid: rgba(255, 255, 255, 0.03);
+      --card-bg: #303030;
+      --card-fg: #ffffff;
+      --panel-bg: #1e1e1e;
+      --panel-border: #484848;
+      --border-color: #484848;
+      --accent-color: #3584e4;
+      --accent-hover: #1c71d8;
+      --header-bg: #2d2d2d;
+      --banner-bg: #2d2d2d;
+      --banner-fg: #ffffff;
+      
+      /* Window Geometry */
+      --window-radius: 12px;
+      --btn-radius: 9999px;
+      --title-align: left;
+      --window-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.45), 0 8px 18px -3px rgba(0, 0, 0, 0.25);
+      --window-shadow-focus: 0 30px 60px -12px rgba(0, 0, 0, 0.6), 0 15px 30px -5px rgba(0, 0, 0, 0.35);
+      --close-hover-bg: #e01b24;
+    }
+
+    .theme-breeze-light {
+      --bg-color: #eff0f1;
+      --bg-grid: rgba(35, 38, 41, 0.04);
+      --card-bg: #fcfcfc;
+      --card-fg: #232629;
+      --panel-bg: #eff0f1;
+      --panel-border: #bdc3c7;
+      --border-color: #bdc3c7;
+      --accent-color: #3daee9; /* Breeze Cyan Blue */
+      --accent-hover: #1d99db;
+      --header-bg: #e0e2e4;
+      --banner-bg: #e0e2e4;
+      --banner-fg: #232629;
+      
+      /* Window Geometry */
+      --window-radius: 4px; /* Crisp KDE breeze corners */
+      --btn-radius: 4px; /* Blockier KDE controls */
+      --title-align: center; /* KDE Plasma centers headers by default */
+      --window-shadow: 0 8px 16px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.05);
+      --window-shadow-focus: 0 15px 30px rgba(0, 0, 0, 0.15), 0 2px 8px rgba(0, 0, 0, 0.08);
+      --close-hover-bg: #da4453; /* Breeze system red */
+    }
+
+    .theme-breeze-dark {
+      --bg-color: #232629;
+      --bg-grid: rgba(252, 252, 252, 0.03);
+      --card-bg: #31363b;
+      --card-fg: #fcfcfc;
+      --panel-bg: #232629;
+      --panel-border: #4d5052;
+      --border-color: #4d5052;
+      --accent-color: #3daee9;
+      --accent-hover: #1d99db;
+      --header-bg: #2a2e32;
+      --banner-bg: #2a2e32;
+      --banner-fg: #fcfcfc;
+      
+      /* Window Geometry */
+      --window-radius: 4px;
+      --btn-radius: 4px;
+      --title-align: center;
+      --window-shadow: 0 10px 25px rgba(0, 0, 0, 0.35), 0 1px 4px rgba(0, 0, 0, 0.2);
+      --window-shadow-focus: 0 20px 45px rgba(0, 0, 0, 0.55), 0 2px 10px rgba(0, 0, 0, 0.3);
+      --close-hover-bg: #da4453;
+    }
+
     body {
       font-family: 'Plus Jakarta Sans', sans-serif;
-      background-color: #f6f5f4; /* Authentic GNOME Adwaita Light background */
-      color: #2e3440;
+      background-color: var(--bg-color);
+      color: var(--card-fg);
+      transition: background-color 0.2s ease, color 0.2s ease;
     }
     
     code, pre, .mono, textarea {
       font-family: 'JetBrains Mono', monospace;
     }
 
-    /* Light blueprint grid design for minimum eye strain */
     .blueprint-grid {
       background-size: 40px 40px;
       background-image: 
-        linear-gradient(to right, rgba(46, 52, 64, 0.04) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(46, 52, 64, 0.04) 1px, transparent 1px);
+        linear-gradient(to right, var(--bg-grid) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--bg-grid) 1px, transparent 1px);
     }
 
-    /* Scrollbars GTK Light style */
+    /* Scrollbars GTK/KDE style mapping */
     ::-webkit-scrollbar {
       width: 8px;
       height: 8px;
     }
     ::-webkit-scrollbar-track {
-      background: #e8e8e7;
+      background: var(--bg-color);
     }
     ::-webkit-scrollbar-thumb {
-      background: #c0c0be;
-      border-radius: 4px;
+      background: var(--border-color);
+      border-radius: var(--window-radius);
     }
     ::-webkit-scrollbar-thumb:hover {
-      background: #a8a8a7;
+      background: var(--accent-color);
     }
 
-    /* Custom GTK Adwaita Light elements styling with realistic soft drop shadow */
+    /* Note window structure dynamic adaptation */
     .gtk-window {
-      background: #ffffff;
-      color: #2e3440;
-      box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.26), 0 8px 18px -3px rgba(0, 0, 0, 0.16), 0 3px 8px -1px rgba(0, 0, 0, 0.1);
-      transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+      background: var(--card-bg);
+      color: var(--card-fg);
+      border-radius: var(--window-radius);
+      box-shadow: var(--window-shadow);
+      border: 1px solid var(--panel-border);
+      transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.15s ease, border-radius 0.2s ease;
     }
     
     .gtk-window:focus-within {
-      box-shadow: 0 28px 55px -10px rgba(0, 0, 0, 0.36), 0 12px 24px -5px rgba(0, 0, 0, 0.2);
+      box-shadow: var(--window-shadow-focus);
       transform: translateY(-2px);
+      border-color: var(--accent-color); /* Highlight active note borders */
     }
 
-    /* Custom borders tailored for Light Theme */
-    .border-style-solid { border: 2px solid #c0c0be; }
-    .border-style-double { border: 6px double #86888c; }
-    .border-style-dashed { border: 2px dashed #a0a09e; }
-    .border-style-groove { border: 4px groove #e1e1df; }
+    /* Customizable border modes override classes */
+    .border-style-solid { border-width: 2px; border-style: solid; border-color: var(--border-color); }
+    .border-style-double { border-width: 6px; border-style: double; border-color: var(--border-color); }
+    .border-style-dashed { border-width: 2px; border-style: dashed; border-color: var(--border-color); }
+    .border-style-groove { border-width: 4px; border-style: groove; border-color: var(--header-bg); }
     .border-style-neon { 
-      border: 2px solid #3584e4; 
-      box-shadow: 0 0 10px rgba(53, 132, 228, 0.2), inset 0 0 4px rgba(53, 132, 228, 0.1);
+      border-width: 2px;
+      border-style: solid;
+      border-color: var(--accent-color); 
+      box-shadow: 0 0 15px rgba(53, 132, 228, 0.35), inset 0 0 6px rgba(53, 132, 228, 0.15);
     }
 
-    /* Note Content Styles: Fixing user-select to allow full typing & text focusing */
+    /* Adaptive Titlebar Buttons styled as larger, borderless modern icons */
+    .titlebar-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: var(--btn-radius);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px; /* Bigger and clearer emoji icon size */
+      transition: all 0.15s ease;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+    }
+    
+    .theme-gtk-dark .titlebar-btn, .theme-adwaita-dark .titlebar-btn, .theme-breeze-dark .titlebar-btn {
+      background: transparent;
+    }
+
+    .titlebar-btn:hover {
+      background: rgba(0, 0, 0, 0.08);
+      transform: scale(1.15);
+    }
+
+    .theme-gtk-dark .titlebar-btn:hover, .theme-adwaita-dark .titlebar-btn:hover, .theme-breeze-dark .titlebar-btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    /* Close Button Native Hover red effect */
+    .titlebar-btn-close:hover {
+      background-color: var(--close-hover-bg) !important;
+      color: #ffffff !important;
+    }
+
+    /* Note Content Styles */
     .note-editable-area {
       outline: none;
       word-break: break-word;
@@ -84,90 +261,108 @@
     }
   </style>
 </head>
-<body class="w-screen h-screen overflow-hidden flex flex-col relative">
+<body class="w-screen h-screen overflow-hidden flex flex-col relative theme-gtk-light">
 
-  <!-- Top Global GTK Panel Header (Light Theme) -->
-  <header class="w-full h-14 bg-[#f6f5f4] border-b border-[#e1e1e0] px-4 flex items-center justify-between z-40 select-none shadow-sm">
+  <!-- Top Global GTK/KDE Panel Header -->
+  <header class="w-full h-14 bg-[var(--panel-bg)] border-b border-[var(--panel-border)] px-4 flex items-center justify-between z-40 select-none shadow-sm transition-all">
     <div class="flex items-center space-x-3">
       <!-- Minimalist GTK Icon -->
-      <div class="w-8 h-8 rounded-lg bg-[#3584e4] flex items-center justify-center font-bold text-white shadow-md">
+      <div class="w-8 h-8 rounded-lg bg-[var(--accent-color)] flex items-center justify-center font-bold text-white shadow-md transition-all">
         🗒️
       </div>
       <div>
-        <h1 class="text-sm font-bold tracking-wide text-[#2e3440]">StickyBoard</h1>
-        <p class="text-[10px] text-[#5e646a] font-medium">GTK-Lite Infinite Workspace</p>
+        <h1 class="text-sm font-bold tracking-wide text-[var(--card-fg)]">StickyBoard</h1>
+        <p class="text-[10px] text-gray-500 font-bold">KDE/GTK Infinite Workspace</p>
       </div>
     </div>
 
     <!-- Active Navigation Tools -->
     <div class="flex items-center space-x-2">
       <!-- Spawn Button -->
-      <button onclick="createNewNote()" class="flex items-center space-x-1.5 px-3 py-1.5 bg-[#3584e4] hover:bg-[#1c71d8] text-white text-xs font-semibold rounded-md transition shadow-sm">
+      <button onclick="createNewNote()" class="flex items-center space-x-1.5 px-3 py-1.5 bg-[var(--accent-color)] hover:bg-[var(--accent-hover)] text-white text-xs font-bold rounded-md transition shadow-sm">
         <span>+ New Note</span>
       </button>
 
       <!-- Vertical Divider -->
-      <div class="h-6 w-[1px] bg-[#e1e1e0] mx-2"></div>
+      <div class="h-6 w-[1px] bg-[var(--panel-border)] mx-2"></div>
 
       <!-- Snap To Grid Toggle -->
-      <button id="snap-toggle-btn" onclick="toggleSnapToGrid()" class="flex items-center space-x-1 px-3 py-1.5 bg-[#e8e8e7] hover:bg-[#dcdcdc] text-[#2e3440] text-xs font-medium rounded-md transition border border-[#d3d3d2]">
+      <button id="snap-toggle-btn" onclick="toggleSnapToGrid()" class="flex items-center space-x-1 px-3 py-1.5 bg-[var(--header-bg)] hover:bg-[var(--border-color)] text-[var(--card-fg)] text-xs font-bold rounded-md transition border border-[var(--panel-border)]">
         <span class="w-2.5 h-2.5 rounded-full bg-red-500 inline-block mr-1" id="snap-indicator"></span>
         <span>Snap Grid</span>
       </button>
 
       <!-- View Navigation Home -->
-      <button onclick="recenterCanvas()" class="px-3 py-1.5 bg-[#e8e8e7] hover:bg-[#dcdcdc] text-[#2e3440] text-xs font-medium rounded-md transition border border-[#d3d3d2]" title="Recenter to Viewport Origin">
+      <button onclick="recenterCanvas()" class="px-3 py-1.5 bg-[var(--header-bg)] hover:bg-[var(--border-color)] text-[var(--card-fg)] text-xs font-bold rounded-md transition border border-[var(--panel-border)]" title="Recenter to Viewport Origin">
         Recenter (0,0)
       </button>
 
       <!-- Vertical Divider -->
-      <div class="h-6 w-[1px] bg-[#e1e1e0] mx-2"></div>
+      <div class="h-6 w-[1px] bg-[var(--panel-border)] mx-2"></div>
+
+      <!-- Theme Selector Dropdown Menu -->
+      <div class="flex items-center space-x-1">
+        <span class="text-[10px] font-bold text-gray-500 uppercase">Theme:</span>
+        <select id="theme-selector" onchange="changeTheme(this.value)" class="bg-[var(--header-bg)] border border-[var(--panel-border)] text-[11px] text-[var(--card-fg)] rounded px-2 py-1 outline-none font-bold cursor-pointer">
+          <option value="gtk-light">GTK Light</option>
+          <option value="gtk-dark">GTK Dark</option>
+          <option value="adwaita-light">Adwaita Light</option>
+          <option value="adwaita-dark">Adwaita Dark</option>
+          <option value="breeze-light">Breeze Light</option>
+          <option value="breeze-dark">Breeze Dark</option>
+        </select>
+      </div>
+
+      <!-- Vertical Divider -->
+      <div class="h-6 w-[1px] bg-[var(--panel-border)] mx-2"></div>
 
       <!-- Utilities Dropdowns / Sidebar triggers -->
-      <button onclick="toggleArchiveSidebar()" class="relative px-3 py-1.5 bg-[#e8e8e7] hover:bg-[#dcdcdc] text-[#2e3440] text-xs font-medium rounded-md transition border border-[#d3d3d2] flex items-center space-x-1">
-        <span>Archive Cabinet</span>
-        <span id="archive-count" class="bg-[#3584e4] text-[10px] text-white px-1.5 py-0.2 rounded-full hidden">0</span>
+      <button onclick="toggleArchiveSidebar()" class="relative px-3 py-1.5 bg-[var(--header-bg)] hover:bg-[var(--border-color)] text-[var(--card-fg)] text-xs font-bold rounded-md transition border border-[var(--panel-border)] flex items-center space-x-1">
+        <span>Cabinet</span>
+        <span id="archive-count" class="bg-[var(--accent-color)] text-[10px] text-white px-1.5 py-0.2 rounded-full hidden">0</span>
       </button>
 
-      <button onclick="openImportExportModal()" class="px-3 py-1.5 bg-[#e8e8e7] hover:bg-[#dcdcdc] text-[#2e3440] text-xs font-medium rounded-md transition border border-[#d3d3d2]">
+      <button onclick="openImportExportModal()" class="px-3 py-1.5 bg-[var(--header-bg)] hover:bg-[var(--border-color)] text-[var(--card-fg)] text-xs font-bold rounded-md transition border border-[var(--panel-border)]">
         Import / Export
       </button>
 
-      <button onclick="triggerNukeDialog()" class="px-3 py-1.5 bg-[#fddbc7] hover:bg-[#fca586] border border-[#f8a57e] text-[#8f290b] text-xs font-bold rounded-md transition">
+      <button onclick="triggerNukeDialog()" class="px-3 py-1.5 bg-red-100 dark:bg-red-950/40 hover:bg-red-200 dark:hover:bg-red-950/70 border border-red-300 dark:border-red-800 text-red-700 dark:text-red-300 text-xs font-bold rounded-md transition">
         Nuke Board
       </button>
     </div>
   </header>
 
-  <!-- App Info, Donations, and Local Storage Warning Banner -->
-  <div class="w-full bg-[#f1f0ee] border-b border-[#e1e1e0] px-4 py-2.5 flex flex-col xl:flex-row xl:items-center xl:justify-between gap-3 text-xs z-30 shadow-sm select-text">
+  <!-- App Info, Donations, Monitors and Warning Banner -->
+  <div class="w-full bg-[var(--banner-bg)] border-b border-[var(--panel-border)] px-4 py-2.5 flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4 text-xs z-30 shadow-sm transition-all">
     <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
-      <span class="font-bold text-[#2e3440] flex items-center">
+      <span class="font-bold text-[var(--banner-fg)] flex items-center">
         👤 Created by Bradford R.
       </span>
-      <span class="text-[#c0c0be] hidden md:inline">|</span>
-      <a href="mailto:trancedemon@gmail.com" class="text-[#3584e4] hover:underline font-mono">trancedemon@gmail.com</a>
-      <span class="text-[#c0c0be] hidden md:inline">|</span>
+      <span class="text-gray-400 hidden md:inline">|</span>
+      <a href="mailto:trancedemon@gmail.com" class="text-[var(--accent-color)] hover:underline font-mono">trancedemon@gmail.com</a>
+      <span class="text-gray-400 hidden md:inline">|</span>
       <a href="https://paypal.me/BradfordRisbert" target="_blank" rel="noopener noreferrer" class="inline-flex items-center space-x-1 text-[#2ec27e] hover:text-[#26a269] font-bold transition">
         <span>☕ Paypal Donate: paypal.me/BradfordRisbert</span>
       </a>
     </div>
-    <div class="text-[11px] text-amber-800 bg-amber-50 border border-amber-200/80 rounded-md px-3 py-1.5 max-w-4xl leading-relaxed">
-      ⚠️ <strong>Attention:</strong> This app uses your browser's <strong>Local Storage</strong> (not cloud backup). Resetting your browser, clearing site data, or switching devices will cause data loss. Use the <strong>Import/Export</strong> system above to keep backup JSON files. This is not ideal for permanent, long-term safe storage!
+
+    <!-- Integrated Dynamic Coordinate Monitor -->
+    <div class="flex flex-wrap items-center gap-2">
+      <!-- Coordinate Monitor -->
+      <div class="bg-[var(--panel-bg)] border border-[var(--panel-border)] px-2.5 py-1 rounded-md text-[10px] text-[var(--card-fg)] font-mono flex items-center space-x-2.5">
+        <div>X: <span id="coord-x" class="font-bold">0</span></div>
+        <div>Y: <span id="coord-y" class="font-bold">0</span></div>
+        <div class="text-[var(--accent-color)] font-bold">Zoom: <span id="coord-zoom">100%</span></div>
+      </div>
+    </div>
+
+    <div class="text-[10px] text-amber-800 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/40 rounded-md px-3 py-1.5 max-w-2xl leading-tight">
+      ⚠️ <strong>Attention:</strong> Uses <strong>Local Storage</strong>. Clearing site data causes data loss. Use <strong>Import/Export</strong> as dynamic backups!
     </div>
   </div>
 
   <!-- Interactive Infinite Canvas Workspace Viewport -->
-  <main id="viewport" class="flex-1 relative w-full h-full overflow-hidden blueprint-grid cursor-grab active:cursor-grabbing" style="background-color: #f6f5f4;">
-    
-    <!-- Virtual coordinate tracker in bottom corner -->
-    <div class="absolute bottom-4 left-4 z-[9999] bg-white/90 backdrop-blur-md border border-neutral-300 px-3 py-1.5 rounded-md text-[10px] text-[#2e3440] pointer-events-none font-mono flex flex-col space-y-1 shadow-sm">
-      <div>Position: X <span id="coord-x">0</span>, Y <span id="coord-y">0</span></div>
-      <div>Zoom Level: <span id="coord-zoom">100%</span></div>
-      <div class="text-[9px] text-gray-500 font-semibold mb-1">Hold Spacebar + Drag to Pan | Scroll wheel to Zoom</div>
-      <div class="text-[9px] text-blue-600 font-bold">Alt + Left Drag: Move note from anywhere | Alt + Right Drag: Resize note</div>
-    </div>
-
+  <main id="viewport" class="flex-1 relative w-full h-full overflow-hidden blueprint-grid cursor-grab active:cursor-grabbing" style="background-color: var(--bg-color);">
     <!-- The Infinite Workspace Element that accepts transforms -->
     <div id="workspace" class="absolute w-0 h-0 top-0 left-0 transform-gpu" style="transform: translate(0px, 0px) scale(1);">
       <!-- Render area for all individual GTK Note components dynamically placed here -->
@@ -175,12 +370,12 @@
   </main>
 
   <!-- Side Cabinet: Archived Notes Dashboard -->
-  <aside id="archive-sidebar" class="fixed right-0 top-14 bottom-0 w-80 bg-[#f6f5f4] border-l border-[#e1e1e0] z-40 transform translate-x-full transition-transform duration-300 shadow-2xl flex flex-col">
-    <div class="p-4 border-b border-[#e1e1e0] flex items-center justify-between bg-white">
-      <h3 class="font-bold text-sm text-[#2e3440] flex items-center space-x-2">
+  <aside id="archive-sidebar" class="fixed right-0 top-14 bottom-0 w-80 bg-[var(--bg-color)] border-l border-[var(--panel-border)] z-40 transform translate-x-full transition-transform duration-300 shadow-2xl flex flex-col">
+    <div class="p-4 border-b border-[var(--panel-border)] flex items-center justify-between bg-[var(--panel-bg)]">
+      <h3 class="font-bold text-sm text-[var(--card-fg)] flex items-center space-x-2">
         <span>📦 Archived Cabinet</span>
       </h3>
-      <button onclick="toggleArchiveSidebar()" class="text-gray-500 hover:text-black text-xs px-2 py-1 bg-[#e8e8e7] rounded">Close</button>
+      <button onclick="toggleArchiveSidebar()" class="text-gray-500 hover:text-[var(--card-fg)] text-xs px-2 py-1 bg-[var(--header-bg)] rounded border border-[var(--panel-border)]">Close</button>
     </div>
     
     <div id="archive-list" class="flex-1 overflow-y-auto p-4 space-y-3">
@@ -188,30 +383,30 @@
     </div>
   </aside>
 
-  <!-- Custom GTK Styling Modal Context System -->
+  <!-- Custom GTK/KDE Styling Modal Context System -->
   <!-- Dialog 1: Import/Export JSON Interface -->
   <div id="modal-import-export" class="fixed inset-0 bg-black/40 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
-    <div class="w-full max-w-lg bg-white border border-neutral-300 rounded-lg overflow-hidden shadow-2xl flex flex-col">
-      <div class="bg-[#f6f5f4] px-4 py-3 border-b border-neutral-200 flex justify-between items-center">
-        <span class="text-sm font-bold text-[#2e3440]">Portability Panel (JSON Operations)</span>
-        <button onclick="closeImportExportModal()" class="text-gray-500 hover:text-black text-xs font-mono font-bold">✕</button>
+    <div class="w-full max-w-lg bg-[var(--card-bg)] border border-[var(--panel-border)] rounded-lg overflow-hidden shadow-2xl flex flex-col">
+      <div class="bg-[var(--header-bg)] px-4 py-3 border-b border-[var(--panel-border)] flex justify-between items-center">
+        <span class="text-sm font-bold text-[var(--card-fg)]">Portability Panel (JSON Operations)</span>
+        <button onclick="closeImportExportModal()" class="text-gray-500 hover:text-[var(--card-fg)] text-xs font-mono font-bold">✕</button>
       </div>
       <div class="p-4 space-y-4">
         <div>
-          <label class="block text-xs font-bold text-gray-700 mb-1">Backup Export (Copy your workspace configuration)</label>
-          <textarea id="export-textarea" readonly onclick="this.select()" class="w-full h-24 bg-[#fafafa] border border-neutral-300 p-2 text-xs font-mono rounded text-blue-600 focus:outline-none focus:border-blue-500 cursor-pointer"></textarea>
+          <label class="block text-xs font-bold text-gray-500 mb-1">Backup Export (Copy your workspace configuration)</label>
+          <textarea id="export-textarea" readonly onclick="this.select()" class="w-full h-24 bg-[var(--bg-color)] border border-[var(--panel-border)] p-2 text-xs font-mono rounded text-[var(--accent-color)] focus:outline-none focus:border-[var(--accent-color)] cursor-pointer"></textarea>
           <div class="flex space-x-2 mt-1">
-            <button onclick="copyExportText()" class="text-[11px] bg-[#e8e8e7] text-gray-700 px-3 py-1 rounded hover:bg-neutral-200 transition border border-neutral-300 font-semibold">Copy to Clipboard</button>
-            <button onclick="downloadJsonFile()" class="text-[11px] bg-[#3584e4] text-white px-3 py-1 rounded hover:bg-blue-600 transition font-semibold">Download .json File</button>
+            <button onclick="copyExportText()" class="text-[11px] bg-[var(--header-bg)] text-[var(--card-fg)] px-3 py-1 rounded hover:bg-[var(--border-color)] transition border border-[var(--panel-border)] font-semibold">Copy to Clipboard</button>
+            <button onclick="downloadJsonFile()" class="text-[11px] bg-[var(--accent-color)] text-white px-3 py-1 rounded hover:bg-[var(--accent-hover)] transition font-semibold">Download .json File</button>
           </div>
         </div>
-        <hr class="border-neutral-200">
+        <hr class="border-[var(--panel-border)]">
         <div>
-          <label class="block text-xs font-bold text-gray-700 mb-1">Import System State (Paste and apply JSON file configuration)</label>
-          <textarea id="import-textarea" placeholder="Paste your saved dashboard JSON configuration here..." class="w-full h-24 bg-white border border-neutral-300 p-2 text-xs font-mono rounded text-orange-600 focus:outline-none focus:border-orange-500"></textarea>
+          <label class="block text-xs font-bold text-gray-500 mb-1">Import System State (Paste and apply JSON file configuration)</label>
+          <textarea id="import-textarea" placeholder="Paste your saved dashboard JSON configuration here..." class="w-full h-24 bg-[var(--card-bg)] border border-[var(--panel-border)] p-2 text-xs font-mono rounded text-orange-600 focus:outline-none focus:border-orange-500"></textarea>
           <div class="flex justify-between items-center mt-1">
             <input type="file" id="import-file-selector" accept=".json" class="hidden" onchange="handleFileSelected(event)">
-            <button onclick="document.getElementById('import-file-selector').click()" class="text-[11px] bg-[#e8e8e7] text-gray-700 px-3 py-1 rounded hover:bg-neutral-200 transition border border-neutral-300 font-semibold">Choose JSON File...</button>
+            <button onclick="document.getElementById('import-file-selector').click()" class="text-[11px] bg-[var(--header-bg)] text-[var(--card-fg)] px-3 py-1 rounded hover:bg-[var(--border-color)] transition border border-[var(--panel-border)] font-semibold">Choose JSON File...</button>
             <button onclick="runJSONImport()" class="text-[11px] bg-[#2ec27e] text-white px-4 py-1.5 font-bold rounded hover:bg-[#26a269] transition">Process Import State</button>
           </div>
         </div>
@@ -221,17 +416,17 @@
 
   <!-- Dialog 2: Safe Confirmation Modal -->
   <div id="modal-confirm" class="fixed inset-0 bg-black/40 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
-    <div class="w-full max-w-sm bg-white border border-red-200 rounded-lg overflow-hidden shadow-2xl">
-      <div class="bg-red-50 px-4 py-3 border-b border-red-100 flex items-center space-x-2">
+    <div class="w-full max-w-sm bg-[var(--card-bg)] border border-red-200 rounded-lg overflow-hidden shadow-2xl">
+      <div class="bg-red-50 dark:bg-red-950/40 px-4 py-3 border-b border-red-100 dark:border-red-900/40 flex items-center space-x-2">
         <span class="text-red-500 text-lg">⚠️</span>
-        <span class="text-sm font-bold text-red-800">Destructive Actions Panel</span>
+        <span class="text-sm font-bold text-red-800 dark:text-red-200">Destructive Actions Panel</span>
       </div>
       <div class="p-5 space-y-4">
-        <p class="text-xs text-gray-600 leading-relaxed font-medium" id="confirm-message">
+        <p class="text-xs text-gray-600 dark:text-gray-300 leading-relaxed font-medium" id="confirm-message">
           Are you absolutely sure you want to proceed with this action? This operation will completely reset your workspace environment.
         </p>
         <div class="flex items-center justify-end space-x-2">
-          <button onclick="closeConfirmationDialog()" class="px-4 py-1.5 bg-[#e8e8e7] text-gray-700 hover:bg-neutral-200 text-xs font-semibold rounded transition border border-neutral-300">Cancel</button>
+          <button onclick="closeConfirmationDialog()" class="px-4 py-1.5 bg-[var(--header-bg)] text-[var(--card-fg)] hover:bg-[var(--border-color)] text-xs font-semibold rounded transition border border-[var(--panel-border)]">Cancel</button>
           <button id="confirm-execute-btn" class="px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded transition">Apply & Reset</button>
         </div>
       </div>
@@ -239,7 +434,7 @@
   </div>
 
   <!-- Toast Notification Overlay -->
-  <div id="toast-overlay" class="fixed bottom-6 right-6 z-50 bg-white border border-neutral-300 text-xs px-4 py-3 rounded-lg shadow-xl translate-y-20 opacity-0 transition-all duration-300 flex items-center space-x-2 select-none text-[#2e3440] font-medium">
+  <div id="toast-overlay" class="fixed bottom-6 right-6 z-50 bg-[var(--card-bg)] border border-[var(--panel-border)] text-xs px-4 py-3 rounded-lg shadow-xl translate-y-20 opacity-0 transition-all duration-300 flex items-center space-x-2 select-none text-[var(--card-fg)] font-medium">
     <span id="toast-icon">ℹ️</span>
     <span id="toast-text">System updated successfully</span>
   </div>
@@ -278,7 +473,7 @@
 
     // Default note colors configured under premium GTK Light / Adwaita palette styles
     const gtkColors = [
-      { name: "Adwaita Light Gray", header: "#e8e8e7", body: "#ffffff", text: "#2e3440" },
+      { name: "Adwaita Light Gray", header: "var(--header-bg)", body: "var(--card-bg)", text: "var(--card-fg)" },
       { name: "Minty Light Teal", header: "#c3f2d0", body: "#e8fcf0", text: "#1a4c2e" },
       { name: "Warn Amber Light", header: "#fce8b2", body: "#fefcf0", text: "#5c3e00" },
       { name: "Gnome Orchid Light", header: "#f1d4f5", body: "#faf0fc", text: "#4a1a5c" },
@@ -299,6 +494,11 @@
 
     // Initialize core parameters on document payload ready
     window.onload = function() {
+      // Load saved theme or match system theme
+      const savedTheme = localStorage.getItem('stickyboard_theme') || 'gtk-light';
+      document.getElementById('theme-selector').value = savedTheme;
+      changeTheme(savedTheme, false);
+
       loadDatabase();
       initCanvasListeners();
       renderBoard();
@@ -344,6 +544,23 @@
 
       recenterCanvas();
     };
+
+    // Theme Switcher Implementation
+    function changeTheme(themeName, triggerToast = true) {
+      // Remove all theme classes
+      document.body.className = "w-screen h-screen overflow-hidden flex flex-col relative";
+      
+      // Apply the targeted theme class
+      document.body.classList.add(`theme-${themeName}`);
+      localStorage.setItem('stickyboard_theme', themeName);
+      
+      if (triggerToast) {
+        showToast(`Switched theme to ${themeName.toUpperCase().replace('-', ' ')}`, "🎨");
+      }
+      
+      // Re-render board color sets to ensure correct mappings
+      renderBoard();
+    }
 
     // --- VIEWPORT NAVIGATION (PANNING & ZOOMING) ---
     function initCanvasListeners() {
@@ -477,7 +694,13 @@
         }
       });
 
+      // RESTRICT SCROLL ZOOMING WHEN OVER A STICKY NOTE
       viewport.addEventListener('wheel', (e) => {
+        // If the scroll event originates inside a sticky note window, allow standard textarea scrolling
+        if (e.target.closest('.gtk-window')) {
+          return;
+        }
+
         e.preventDefault();
 
         const zoomIntensity = 0.08;
@@ -594,7 +817,7 @@
         y: resolved.y,
         w: 300,
         h: 250,
-        colorIndex: 0, // Default to Adwaita Light Gray
+        colorIndex: 0, // Default to Gray index
         borderStyle: "solid",
         fontSize: 14,
         archived: false,
@@ -624,7 +847,7 @@
         
         const noteWindow = document.createElement('div');
         noteWindow.id = `note-win-${note.id}`;
-        noteWindow.className = `absolute gtk-window rounded-lg flex flex-col border-style-${note.borderStyle}`;
+        noteWindow.className = `absolute gtk-window flex flex-col border-style-${note.borderStyle}`;
         noteWindow.style.left = `${note.x}px`;
         noteWindow.style.top = `${note.y}px`;
         noteWindow.style.width = `${note.w}px`;
@@ -660,7 +883,7 @@
         });
 
         const headerBar = document.createElement('div');
-        headerBar.className = `h-10 px-3 flex items-center justify-between border-b cursor-grab active:cursor-grabbing select-none rounded-t-lg shrink-0`;
+        headerBar.className = `h-10 px-3 flex items-center justify-between border-b cursor-grab active:cursor-grabbing select-none rounded-t-[var(--window-radius)] shrink-0`;
         headerBar.style.backgroundColor = colorSet.header;
         headerBar.style.borderColor = `rgba(0,0,0,0.08)`;
         
@@ -677,39 +900,36 @@
           bringToFront(note.id);
         });
 
-        headerBar.addEventListener('dblclick', () => {
-          toggleMinimizeNote(note.id);
-        });
-
         const titleInput = document.createElement('input');
         titleInput.type = "text";
         titleInput.value = note.title;
-        titleInput.className = "bg-transparent font-bold text-xs border-none outline-none focus:ring-1 focus:ring-blue-400 rounded px-1 w-[45%] truncate header-btn-bypass";
+        titleInput.className = "bg-transparent font-bold text-xs font-mono border-none outline-none focus:ring-1 focus:ring-blue-400 rounded px-1 w-[45%] truncate header-btn-bypass note-title-input";
         titleInput.style.color = colorSet.text;
+        titleInput.style.textAlign = "var(--title-align)";
         titleInput.addEventListener('change', (e) => {
           note.title = e.target.value;
           saveDatabase();
         });
 
         const controls = document.createElement('div');
-        controls.className = "flex items-center space-x-1 header-btn-bypass shrink-0";
+        controls.className = "flex items-center space-x-1.5 header-btn-bypass shrink-0";
         controls.innerHTML = `
-          <button onclick="copyNoteContent('${note.id}')" title="Copy Full Note Text" class="w-5 h-5 rounded hover:bg-black/5 flex items-center justify-center text-xs opacity-75 hover:opacity-100 transition">
+          <button onclick="copyNoteContent('${note.id}')" title="Copy Full Note Text" class="titlebar-btn">
             📋
           </button>
-          <button onclick="toggleOptionsDrawer('${note.id}')" title="Configure Style Borders" class="w-5 h-5 rounded hover:bg-black/5 flex items-center justify-center text-xs opacity-75 hover:opacity-100 transition">
+          <button onclick="toggleOptionsDrawer('${note.id}')" title="Configure Style Borders" class="titlebar-btn">
             ⚙️
           </button>
-          <button onclick="cycleNoteColor('${note.id}')" title="Cycle GTK Preset Color" class="w-5 h-5 rounded hover:bg-black/5 flex items-center justify-center text-xs opacity-75 hover:opacity-100 transition">
+          <button onclick="cycleNoteColor('${note.id}')" title="Cycle GTK Preset Color" class="titlebar-btn">
             🎨
           </button>
-          <button onclick="toggleMinimizeNote('${note.id}')" title="Collapse Window" class="w-5 h-5 rounded hover:bg-black/5 flex items-center justify-center text-xs font-bold leading-none opacity-75 hover:opacity-100 transition">
+          <button onclick="toggleMinimizeNote('${note.id}')" title="Collapse Window" class="titlebar-btn font-bold leading-none">
             ${note.minimized ? '🗖' : '🗕'}
           </button>
-          <button onclick="archiveNote('${note.id}')" title="Send to Cabinet" class="w-5 h-5 rounded hover:bg-black/5 flex items-center justify-center text-xs opacity-75 hover:opacity-100 transition">
+          <button onclick="archiveNote('${note.id}')" title="Send to Cabinet" class="titlebar-btn">
             📦
           </button>
-          <button onclick="deleteNote('${note.id}')" title="Permanent Delete" class="w-5 h-5 bg-red-500/10 hover:bg-red-500 hover:text-white rounded flex items-center justify-center text-[10px] font-bold transition text-red-700">
+          <button onclick="deleteNote('${note.id}')" title="Permanent Delete" class="titlebar-btn titlebar-btn-close font-bold">
             ✕
           </button>
         `;
@@ -724,15 +944,15 @@
         optionsDrawer.innerHTML = `
           <div class="flex items-center space-x-2">
             <span class="text-[10px] font-bold opacity-75">Border Style:</span>
-            <select onchange="updateNoteBorder('${note.id}', this.value)" class="bg-white border border-black/20 text-xs rounded px-1 py-0.5 outline-none focus:ring-1 focus:ring-blue-500 font-semibold">
+            <select onchange="updateNoteBorder('${note.id}', this.value)" class="bg-white dark:bg-neutral-800 border border-black/20 text-xs rounded px-1 py-0.5 outline-none focus:ring-1 focus:ring-blue-500 font-semibold">
               ${borderStyles.map(s => `<option value="${s}" ${note.borderStyle === s ? 'selected' : ''}>${s.toUpperCase()}</option>`).join('')}
             </select>
           </div>
           <div class="flex items-center space-x-1.5">
             <span class="text-[10px] font-bold opacity-75">Text Size:</span>
-            <button onclick="adjustNoteFont('${note.id}', -1)" class="w-5 h-4 bg-white hover:bg-neutral-100 rounded border border-black/20 flex items-center justify-center font-bold text-[9px]">-</button>
+            <button onclick="adjustNoteFont('${note.id}', -1)" class="w-5 h-4 bg-white dark:bg-neutral-800 hover:bg-neutral-100 rounded border border-black/20 flex items-center justify-center font-bold text-[9px]">-</button>
             <span class="font-mono text-[10px] font-bold">${note.fontSize}px</span>
-            <button onclick="adjustNoteFont('${note.id}', 1)" class="w-5 h-4 bg-white hover:bg-neutral-100 rounded border border-black/20 flex items-center justify-center font-bold text-[9px]">+</button>
+            <button onclick="adjustNoteFont('${note.id}', 1)" class="w-5 h-4 bg-white dark:bg-neutral-800 hover:bg-neutral-100 rounded border border-black/20 flex items-center justify-center font-bold text-[9px]">+</button>
           </div>
         `;
         noteWindow.appendChild(optionsDrawer);
@@ -743,7 +963,7 @@
           editorWrapper.className = "flex-1 flex flex-col min-h-0 relative";
 
           const contentArea = document.createElement('textarea');
-          contentArea.className = "flex-1 w-full h-full p-3 bg-transparent border-none outline-none resize-none font-mono text-xs focus:ring-0 leading-relaxed overflow-y-auto";
+          contentArea.className = "flex-1 w-full h-full p-3 bg-transparent border-none outline-none resize-none font-mono text-xs focus:ring-0 leading-relaxed overflow-y-auto rounded-b-[var(--window-radius)]";
           contentArea.style.fontSize = `${note.fontSize}px`;
           contentArea.style.color = colorSet.text;
           
@@ -819,6 +1039,7 @@
       }
     }
 
+    // Toggle options drawer
     function toggleOptionsDrawer(id) {
       const drawer = document.getElementById(`options-drawer-${id}`);
       if (drawer) {
@@ -897,6 +1118,7 @@
       }
     }
 
+    // Delete note
     function deleteNote(id) {
       const noteIdx = notes.findIndex(n => n.id === id);
       if (noteIdx > -1) {
@@ -929,16 +1151,16 @@
 
       archivedNotes.forEach((note) => {
         const item = document.createElement('div');
-        item.className = "p-3 bg-white border border-neutral-200 rounded-lg flex flex-col space-y-2 text-xs shadow-sm";
+        item.className = "p-3 bg-[var(--card-bg)] border border-[var(--panel-border)] rounded-lg flex flex-col space-y-2 text-xs shadow-sm";
         item.innerHTML = `
           <div class="flex items-center justify-between">
-            <span class="font-bold text-[#2e3440] truncate w-[60%]">${note.title || "Untitled Stick"}</span>
+            <span class="font-bold text-[var(--card-fg)] truncate w-[60%]">${note.title || "Untitled Stick"}</span>
             <div class="flex items-center space-x-1 shrink-0">
-              <button onclick="restoreNote('${note.id}')" class="px-1.5 py-0.5 bg-[#3584e4] hover:bg-[#1c71d8] text-white rounded text-[10px] font-semibold transition" title="Restore to workspace">Restore</button>
+              <button onclick="restoreNote('${note.id}')" class="px-1.5 py-0.5 bg-[var(--accent-color)] hover:bg-[var(--accent-hover)] text-white rounded text-[10px] font-semibold transition" title="Restore to workspace">Restore</button>
               <button onclick="deleteNote('${note.id}')" class="px-1.5 py-0.5 bg-red-100 hover:bg-red-200 text-red-700 rounded text-[10px] font-semibold transition" title="Delete forever">Delete</button>
             </div>
           </div>
-          <div class="text-[10px] text-gray-500 truncate max-h-12 overflow-hidden bg-neutral-50 p-1.5 rounded font-mono">
+          <div class="text-[10px] text-gray-400 truncate max-h-12 overflow-hidden bg-[var(--bg-color)] p-1.5 rounded font-mono">
             ${cleanHtmlToPlainText(note.content) || '(Empty contents)'}
           </div>
         `;
