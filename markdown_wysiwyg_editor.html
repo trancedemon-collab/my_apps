@@ -3,107 +3,113 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ScribeFlow - Premium Markdown Editor</title>
-    <!-- Tailwind CSS -->
+    <title>ScribeFlow Pro - Breeze Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Marked Markdown Parser -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <!-- DOMPurify to sanitize HTML -->
     <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;500;600;700&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&display=swap" rel="stylesheet">
-
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        mono: ['Fira Code', 'monospace'],
-                        serif: ['Merriweather', 'serif'],
+                    colors: {
+                        breeze: {
+                            light: '#eff0f1',
+                            dark: '#232629',
+                            panel: '#31363b',
+                            accent: '#3daee9'
+                        }
                     }
                 }
             }
         }
     </script>
-
     <style>
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        .dark ::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 4px; }
-        .markdown-preview h1 { font-size: 2rem; font-weight: 700; margin-top: 1.5rem; margin-bottom: 1rem; border-bottom: 1px solid rgba(156, 163, 175, 0.3); }
-        .markdown-preview h2 { font-size: 1.5rem; font-weight: 600; margin-top: 1.5rem; margin-bottom: 0.75rem; border-bottom: 1px solid rgba(156, 163, 175, 0.2); }
+        .markdown-preview h1 { font-size: 2rem; font-weight: 700; margin: 1.5rem 0 1rem; border-bottom: 1px solid #ccc; }
+        .dark .markdown-preview h1 { border-bottom: 1px solid #474b50; }
+        .markdown-preview h2 { font-size: 1.5rem; font-weight: 600; margin: 1.5rem 0 0.75rem; border-bottom: 1px solid #ddd; }
+        .dark .markdown-preview h2 { border-bottom: 1px solid #474b50; }
         .markdown-preview p { margin-bottom: 1rem; line-height: 1.7; }
-        .markdown-preview blockquote { padding-left: 1rem; border-left: 4px solid #3b82f6; color: #6b7280; font-style: italic; margin: 1.5rem 0; background: rgba(59, 130, 246, 0.05); }
-        .markdown-preview code { font-family: 'Fira Code', monospace; background-color: rgba(156, 163, 175, 0.15); padding: 0.2rem 0.4rem; border-radius: 0.25rem; font-size: 0.875em; }
+        .markdown-preview blockquote { border-left: 4px solid #3daee9; padding-left: 1rem; color: #6b7280; font-style: italic; margin: 1rem 0; background: rgba(61, 174, 233, 0.1); }
+        .markdown-preview code { background: #e0e0e0; padding: 0.2rem 0.4rem; border-radius: 0.25rem; font-family: monospace; }
+        .dark .markdown-preview code { background: #191c1f; color: #da4453; }
+        .markdown-preview ul { list-style: disc; margin-left: 1.5rem; margin-bottom: 1rem; }
     </style>
 </head>
-<body class="h-full font-sans bg-gray-50 text-gray-800 dark:bg-gray-950 dark:text-gray-100 flex flex-col transition-colors duration-200">
+<body class="h-full flex flex-col bg-breeze-light dark:bg-breeze-dark text-gray-900 dark:text-gray-100 transition-colors duration-200">
 
-    <header class="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-6 py-3 flex items-center justify-between shrink-0">
-        <div class="flex items-center space-x-3">
-            <div class="bg-indigo-600 text-white p-2 rounded-lg"><i data-lucide="file-text" class="w-5 h-5"></i></div>
-            <div>
-                <span class="font-bold text-lg bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">ScribeFlow</span>
-                <span class="text-xs text-gray-400 block -mt-1 font-medium">Auto-Saving Editor</span>
-            </div>
+    <header class="bg-gray-200 dark:bg-gray-800 border-b border-gray-300 dark:border-gray-700 px-4 py-2 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+            <div class="bg-breeze-accent text-white p-2 rounded"><i data-lucide="edit-3"></i></div>
+            <h1 class="font-bold text-lg tracking-tight">ScribeFlow</h1>
         </div>
-        <div class="flex items-center space-x-4">
-            <span id="save-status" class="text-xs text-gray-400 font-mono">All changes saved</span>
-            <button id="theme-toggle" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"><i data-lucide="sun" id="sun" class="w-5 h-5 hidden"></i><i data-lucide="moon" id="moon" class="w-5 h-5"></i></button>
+        <div class="flex items-center gap-4">
+            <div id="save-status" class="text-xs text-gray-500 dark:text-gray-400 font-mono">All changes saved</div>
+            <button id="theme-toggle" class="p-2 hover:bg-gray-300 dark:hover:bg-gray-700 rounded transition-colors" title="Toggle Theme">
+                <i data-lucide="sun" class="dark:hidden"></i>
+                <i data-lucide="moon" class="hidden dark:block"></i>
+            </button>
         </div>
     </header>
 
+    <div class="bg-gray-100 dark:bg-breeze-panel border-b border-gray-300 dark:border-gray-700 p-2 flex gap-1 flex-wrap">
+        <button onclick="insert('**', '**')" class="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-600 rounded" title="Bold"><i data-lucide="bold"></i></button>
+        <button onclick="insert('*', '*')" class="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-600 rounded" title="Italic"><i data-lucide="italic"></i></button>
+        <button onclick="insert('### ', '')" class="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-600 rounded" title="Heading"><i data-lucide="heading"></i></button>
+        <button onclick="insert('> ', '')" class="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-600 rounded" title="Quote"><i data-lucide="quote"></i></button>
+        <button onclick="insert('- ', '')" class="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-600 rounded" title="List"><i data-lucide="list"></i></button>
+        <button onclick="insert('`', '`')" class="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-600 rounded" title="Code"><i data-lucide="code"></i></button>
+    </div>
+
     <main class="flex-1 flex overflow-hidden">
-        <div id="editor-container" class="w-1/2 h-full flex flex-col border-r border-gray-200 dark:border-gray-800">
-            <textarea id="editor-textarea" spellcheck="false" class="flex-1 w-full p-8 resize-none outline-none font-mono text-sm bg-white dark:bg-gray-900 overflow-y-auto"></textarea>
-        </div>
-        <div id="preview-area" class="w-1/2 h-full overflow-y-auto p-8 markdown-preview dark:text-gray-300 bg-gray-50 dark:bg-gray-950"></div>
+        <textarea id="editor" class="w-1/2 h-full p-6 outline-none resize-none bg-white dark:bg-[#191c1f] text-gray-800 dark:text-gray-200 font-mono text-sm border-r border-gray-300 dark:border-gray-700"></textarea>
+        <div id="preview" class="w-1/2 h-full p-6 overflow-y-auto bg-gray-50 dark:bg-breeze-dark markdown-preview"></div>
     </main>
 
     <script>
-        const editor = document.getElementById('editor-textarea');
-        const previewArea = document.getElementById('preview-area');
+        const editor = document.getElementById('editor');
+        const preview = document.getElementById('preview');
         const saveStatus = document.getElementById('save-status');
+        const themeToggle = document.getElementById('theme-toggle');
 
-        // Load saved content
-        window.onload = () => {
-            const saved = localStorage.getItem('autosave-content');
-            editor.value = saved || '# Welcome to ScribeFlow\nStart writing to see changes...';
-            updatePreview();
-            
-            // Theme init
-            if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark');
-            lucide.createIcons();
-        };
-
-        // Autosave Logic
-        let saveTimeout;
-        editor.addEventListener('input', () => {
-            saveStatus.textContent = 'Saving...';
-            clearTimeout(saveTimeout);
-            saveTimeout = setTimeout(() => {
-                localStorage.setItem('autosave-content', editor.value);
-                saveStatus.textContent = `Last saved at ${new Date().toLocaleTimeString()}`;
-                updatePreview();
-            }, 2000);
-        });
-
-        function updatePreview() {
-            previewArea.innerHTML = DOMPurify.sanitize(marked.parse(editor.value));
+        function insert(prefix, suffix) {
+            const start = editor.selectionStart;
+            const end = editor.selectionEnd;
+            const text = editor.value;
+            editor.value = text.substring(0, start) + prefix + text.substring(start, end) + suffix + text.substring(end);
+            update();
         }
 
-        document.getElementById('theme-toggle').onclick = () => {
+        function update() {
+            preview.innerHTML = DOMPurify.sanitize(marked.parse(editor.value));
+            localStorage.setItem('autosave-content', editor.value);
+            saveStatus.textContent = 'Last saved at ' + new Date().toLocaleTimeString();
+        }
+
+        editor.addEventListener('input', () => {
+            saveStatus.textContent = 'Saving...';
+            clearTimeout(window.saveTimer);
+            window.saveTimer = setTimeout(update, 1000);
+        });
+
+        // Theme management
+        themeToggle.addEventListener('click', () => {
             document.documentElement.classList.toggle('dark');
             localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
-            document.getElementById('sun').classList.toggle('hidden');
-            document.getElementById('moon').classList.toggle('hidden');
+        });
+
+        window.onload = () => {
+            // Load content
+            editor.value = localStorage.getItem('autosave-content') || '# Start writing...';
+            update();
+            
+            // Load theme
+            if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            }
+            
+            lucide.createIcons();
         };
     </script>
 </body>
