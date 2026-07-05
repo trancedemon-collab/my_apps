@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GTK Vector Studio</title>
+    <!-- Reliable, production-ready ImageTracer.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/imagetracerjs@1.2.6/imagetracer_v1.2.6.js"></script>
+    <style>
+        /* GTK-style CSS Theme Variables */
+        :root {
+            --gtk-bg: #f6f6f6;
+            --gtk-header-bg: #e1e1e1;
+            --gtk-card-bg: #ffffff;
+            --gtk-text: #2e3436;
+            --gtk-text-muted: #555753;
+            --gtk-border: #cfcfcf;
+            --gtk-primary: #3584e4;
+            --gtk-primary-hover: #1b6acb;
+            --gtk-success: #2ec27e;
+            --gtk-success-hover: #26a269;
+            --gtk-shadow: rgba(0, 0, 0, 0.05);
+            --gtk-overlay-bg: rgba(255, 255, 255, 0.8);
+        }
+
+        [data-theme="dark"] {
+            --gtk-bg: #1e1e1e;
+            --gtk-header-bg: #2d2d2d;
+            --gtk-card-bg: #242424;
+            --gtk-text: #eeeeec;
+            --gtk-text-muted: #babdb6;
+            --gtk-border: #3a3a3a;
+            --gtk-primary: #62a0ea;
+            --gtk-primary-hover: #3584e4;
+            --gtk-success: #57e389;
+            --gtk-success-hover: #2ec27e;
+            --gtk-shadow: rgba(0, 0, 0, 0.2);
+            --gtk-overlay-bg: rgba(30, 30, 30, 0.85);
+        }
+
+        /* Base Reset & Layout */
+        * {
+            box-sizing: border-box;
+            transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+        }
+
+        body { 
+            font-family: -apple-system, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            margin: 0; 
+            padding: 20px; 
+            background: var(--gtk-bg); 
+            color: var(--gtk-text);
+            line-height: 1.5;
+        }
+        
+        .app-container { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 20px; 
+            max-width: 1400px; 
+            margin: 0 auto; 
+        }
+
+        /* GTK Window Header */
+        .header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            border-bottom: 1px solid var(--gtk-border); 
+            padding-bottom: 15px; 
+        }
+
+        .header h1 {
+            font-size: 22px;
+            font-weight: 700;
+            margin: 0;
+            letter-spacing: -0.5px;
+        }
+        
+        /* Modern GTK Toolbar Grid */
+        .toolbar { 
+            background: var(--gtk-card-bg); 
+            padding: 20px; 
+            border-radius: 8px; 
+            border: 1px solid var(--gtk-border); 
+            box-shadow: 0 2px 8px var(--gtk-shadow);
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            align-items: flex-end;
+        }
+        
+        /* Dual Interactive Previews Floor */
+        .studio-floor { 
+            display: flex; 
+            gap: 20px; 
+            min-height: 500px;
+        }
+
+        @media (max-width: 900px) {
+            .studio-floor {
+                flex-direction: column;
+            }
+        }
+
+        .panel { 
+            flex: 1; 
+            background: var(--gtk-card-bg); 
+            padding: 20px; 
+            border-radius: 8px; 
+            border: 1px solid var(--gtk-border); 
+            box-shadow: 0 2px 8px var(--gtk-shadow);
+            display: flex; 
+            flex-direction: column; 
+            min-width: 0; 
+        }
+
+        .panel-title { 
+            font-weight: bold; 
+            margin-bottom: 15px; 
+            color: var(--gtk-text); 
+            opacity: 0.9; 
+            border-bottom: 1px solid var(--gtk-border); 
+            padding-bottom: 8px; 
+            font-size: 14px; 
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .view-area { 
+            flex: 1; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            border: 1px dashed var(--gtk-border); 
+            border-radius: 6px; 
+            overflow: hidden; 
+            background: var(--gtk-bg); 
+            position: relative; 
+            min-height: 400px;
+        }
+        
+        /* Form inputs & GTK Styling */
+        .control-group { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 6px; 
+        }
+
+        label { 
+            font-size: 11px; 
+            font-weight: bold; 
+            color: var(--gtk-text-muted); 
+            text-transform: uppercase; 
+            letter-spacing: 0.5px; 
+        }
+
+        select, input, button { 
+            background: var(--gtk-card-bg); 
+            color: var(--gtk-text); 
+            border: 1px solid var(--gtk-border); 
+            padding: 8px 12px; 
+            border-radius: 6px; 
+            font-size: 13px; 
+            outline: none; 
+            width: 100%;
+        }
+
+        select:focus, input:focus { 
+            border-color: var(--gtk-primary); 
+            box-shadow: 0 0 0 2px rgba(53, 132, 228, 0.2);
+        }
+
+        /* Action Buttons */
+        .btn-primary { 
+            background: var(--gtk-primary); 
+            color: white; 
+            border: none; 
+            font-weight: 600; 
+            cursor: pointer; 
+        }
+
+        .btn-primary:hover:not(:disabled) { 
+            background: var(--gtk-primary-hover); 
+        }
+
+        .btn-success { 
+            background: var(--gtk-success); 
+            color: white; 
+            border: none; 
+            font-weight: 600; 
+            cursor: pointer; 
+        }
+
+        .btn-success:hover:not(:disabled) { 
+            background: var(--gtk-success-hover); 
+        }
+
+        button:disabled { 
+            opacity: 0.4; 
+            cursor: not-allowed; 
+        }
+        
+        /* GTK Theme Switch Styling */
+        .theme-switch-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 48px;
+            height: 24px;
+        }
+
+        .switch input { 
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: var(--gtk-border);
+            transition: .3s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--gtk-primary);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(24px);
+        }
+
+        /* Preview elements */
+        img, svg { 
+            max-width: 100%; 
+            max-height: 550px; 
+            object-fit: contain; 
+            display: block;
+        }
+
+        /* Loading / Processing Screen */
+        .status-overlay { 
+            position: absolute; 
+            background: var(--gtk-overlay-bg); 
+            color: var(--gtk-text); 
+            top: 0; left: 0; right: 0; bottom: 0;
+            display: none; 
+            flex-direction: column;
+            gap: 15px;
+            align-items: center; 
+            justify-content: center; 
+            font-weight: bold; 
+            font-size: 16px;
+            backdrop-filter: blur(4px); 
+            z-index: 10;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--gtk-border);
+            border-top: 4px solid var(--gtk-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body data-theme="light">
+
+<div class="app-container">
+    <div class="header">
+        <h1>GTK Vector Studio</h1>
+        <div class="theme-switch-container">
+            <span style="font-size: 13px; font-weight: 600;">Dark Mode</span>
+            <label class="switch">
+                <input type="checkbox" id="themeToggle">
+                <span class="slider"></span>
+            </label>
+        </div>
+    </div>
+
+    <!-- Toolbar Controls -->
+    <div class="toolbar">
+        <div class="control-group">
+            <label>Source Image</label>
+            <input type="file" id="imageInput" accept="image/*">
+        </div>
+
+        <div class="control-group">
+            <label>Preset Config</label>
+            <select id="presetSelect">
+                <option value="high">High Quality</option>
+                <option value="high-contrast-face">High Contrast (Facial Focus)</option>
+                <option value="smooth-art">Ultra Smooth / Vector Art</option>
+                <option value="logo">Logo / Flat Graphics</option>
+            </select>
+        </div>
+
+        <div class="control-group">
+            <label>Max Colors</label>
+            <input type="number" id="colorsInput" value="32" min="2" max="64">
+        </div>
+
+        <div class="control-group">
+            <label>Contrast Boost</label>
+            <input type="number" id="contrastInput" value="0" min="-50" max="100" title="Bumps contrast to flatten noise and snap important vector curves out.">
+        </div>
+
+        <div class="control-group">
+            <label>Ignore Micro Shapes</label>
+            <input type="number" id="pathOmitInput" value="4" min="0" max="100" title="Omits smaller vector particles. Prevents file bloating by ignoring tiny specks.">
+        </div>
+
+        <div class="control-group">
+            <label>Pre-Blur (px)</label>
+            <input type="number" id="blurInput" value="0" min="0" max="5" title="Applies blur before tracing to eliminate jagged steps.">
+        </div>
+
+        <div class="control-group">
+            <label>Line Error (ltres)</label>
+            <input type="number" id="ltresInput" value="1.0" min="0.1" max="10" step="0.1" title="Lower values trace strictly; higher values straighten lines.">
+        </div>
+
+        <div class="control-group">
+            <label>Curve Error (qtres)</label>
+            <input type="number" id="qtresInput" value="1.0" min="0.1" max="10" step="0.1" title="Higher values smooth edges out into continuous flowing vector curves.">
+        </div>
+
+        <div class="control-group">
+            <label>Max Resolution</label>
+            <input type="number" id="maxResInput" value="800" min="200" max="2000" step="100">
+        </div>
+
+        <div class="control-group">
+            <button id="processBtn" class="btn-primary" disabled>Process Vector</button>
+        </div>
+
+        <div class="control-group">
+            <button id="downloadBtn" class="btn-success" disabled>Save SVG</button>
+        </div>
+    </div>
+
+    <!-- Side-by-Side Live Workspace -->
+    <div class="studio-floor">
+        <div class="panel">
+            <div class="panel-title">Original Raster Source</div>
+            <div class="view-area">
+                <img id="origPreview" src="" alt="Please choose a file above to begin" style="display: none;">
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">Vector Output (SVG)</div>
+            <div class="view-area">
+                <div id="statusOverlay" class="status-overlay">
+                    <div class="spinner"></div>
+                    <div>Tracing Vector Paths...</div>
+                </div>
+                <div id="svgContainer"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden processing canvas used for downscaling & contrast filters -->
+<canvas id="scaleCanvas" style="display:none;"></canvas>
+
+<script>
+    const imageInput = document.getElementById('imageInput');
+    const presetSelect = document.getElementById('presetSelect');
+    const maxResInput = document.getElementById('maxResInput');
+    const colorsInput = document.getElementById('colorsInput');
+    const contrastInput = document.getElementById('contrastInput');
+    const pathOmitInput = document.getElementById('pathOmitInput');
+    const blurInput = document.getElementById('blurInput');
+    const ltresInput = document.getElementById('ltresInput');
+    const qtresInput = document.getElementById('qtresInput');
+    const processBtn = document.getElementById('processBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const themeToggle = document.getElementById('themeToggle');
+    
+    const origPreview = document.getElementById('origPreview');
+    const svgContainer = document.getElementById('svgContainer');
+    const statusOverlay = document.getElementById('statusOverlay');
+    const canvas = document.getElementById('scaleCanvas');
+    const ctx = canvas.getContext('2d');
+
+    let sourceImgDataUrl = null;
+    let generatedSvg = '';
+
+    // GTK Native Theme Toggling
+    themeToggle.addEventListener('change', () => {
+        document.body.setAttribute('data-theme', themeToggle.checked ? 'dark' : 'light');
+    });
+
+    // Custom Preset Configurator
+    presetSelect.addEventListener('change', () => {
+        const val = presetSelect.value;
+        if (val === 'high') {
+            maxResInput.value = 800; colorsInput.value = 32; contrastInput.value = 0; pathOmitInput.value = 4; blurInput.value = 0; ltresInput.value = "1.0"; qtresInput.value = "1.0";
+        } else if (val === 'high-contrast-face') {
+            maxResInput.value = 900; colorsInput.value = 16; contrastInput.value = 35; pathOmitInput.value = 12; blurInput.value = 0; ltresInput.value = "0.8"; qtresInput.value = "1.2";
+        } else if (val === 'smooth-art') {
+            maxResInput.value = 800; colorsInput.value = 24; contrastInput.value = 10; pathOmitInput.value = 6; blurInput.value = 1; ltresInput.value = "3.0"; qtresInput.value = "4.0";
+        } else if (val === 'logo') {
+            maxResInput.value = 500; colorsInput.value = 8; contrastInput.value = 0; pathOmitInput.value = 8; blurInput.value = 0; ltresInput.value = "2.0"; qtresInput.value = "2.0";
+        }
+    });
+
+    // Handle initial image uploading
+    imageInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            sourceImgDataUrl = event.target.result;
+            origPreview.src = sourceImgDataUrl;
+            origPreview.style.display = 'block';
+            processBtn.disabled = false;
+            downloadBtn.disabled = true;
+            svgContainer.innerHTML = '';
+        };
+        reader.readAsDataURL(file);
+    });
+
+    // High performance pixel-contrast processing filter
+    function applyContrast(imgData, contrastValue) {
+        const d = imgData.data;
+        const factor = (259 * (contrastValue + 255)) / (255 * (259 - contrastValue));
+        for (let i = 0; i < d.length; i += 4) {
+            d[i] = factor * (d[i] - 128) + 128;     // Red
+            d[i+1] = factor * (d[i+1] - 128) + 128; // Green
+            d[i+2] = factor * (d[i+2] - 128) + 128; // Blue
+        }
+        return imgData;
+    }
+
+    // Process & Render Pipeline
+    processBtn.addEventListener('click', () => {
+        if (!sourceImgDataUrl) return;
+        
+        statusOverlay.style.display = 'flex';
+        processBtn.disabled = true;
+
+        // Brief delay to allow the loading UI and spinner thread to update smoothly
+        setTimeout(() => {
+            const img = new Image();
+            img.onload = () => {
+                const MAX_DIM = parseInt(maxResInput.value) || 800;
+                let width = img.width, height = img.height;
+
+                // Restrict resolution safely to protect the main browser thread
+                if (width > MAX_DIM || height > MAX_DIM) {
+                    if (width > height) { 
+                        height *= MAX_DIM / width; 
+                        width = MAX_DIM; 
+                    } else { 
+                        width *= MAX_DIM / height; 
+                        height = MAX_DIM; 
+                    }
+                }
+
+                canvas.width = width; 
+                canvas.height = height;
+                ctx.drawImage(img, 0, 0, width, height);
+                
+                let imgData = ctx.getImageData(0, 0, width, height);
+                
+                // Contrast mapping preprocessing adjustments
+                const contrastVal = parseInt(contrastInput.value) || 0;
+                if (contrastVal !== 0) {
+                    imgData = applyContrast(imgData, contrastVal);
+                }
+
+                try {
+                    // Call the tracing engine
+                    generatedSvg = ImageTracer.imagedataToSVG(imgData, {
+                        ltres: parseFloat(ltresInput.value) || 1.0,
+                        qtres: parseFloat(qtresInput.value) || 1.0,
+                        numberofcolors: parseInt(colorsInput.value) || 16,
+                        blurradius: parseInt(blurInput.value) || 0,
+                        colorsampling: 2,
+                        mincolorratio: 0.005,
+                        pathomit: parseInt(pathOmitInput.value) || 4,
+                        scale: 1
+                    });
+                    
+                    svgContainer.innerHTML = generatedSvg;
+                    downloadBtn.disabled = false;
+                } catch (err) {
+                    console.error("Vectorization error:", err);
+                } finally {
+                    statusOverlay.style.display = 'none';
+                    processBtn.disabled = false;
+                }
+            };
+            img.src = sourceImgDataUrl;
+        }, 50);
+    });
+
+    // Local file export
+    downloadBtn.addEventListener('click', () => {
+        if (!generatedSvg) return;
+        const blob = new Blob([generatedSvg], { type: 'image/svg+xml' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; 
+        a.download = 'vectorized-studio.svg';
+        document.body.appendChild(a); 
+        a.click(); 
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    });
+</script>
+</body>
+</html>

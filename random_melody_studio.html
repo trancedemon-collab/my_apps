@@ -1,0 +1,2292 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Melody Studio</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- LameJS for Offline MP3 Encoding -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lamejs/1.2.1/lame.all.min.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        gtk: {
+                            darkbg: '#1e1e1e',
+                            darkheader: '#2d2d2d',
+                            darkborder: '#3f3f3f',
+                            lightbg: '#f6f6f6',
+                            lightheader: '#e8e8e8',
+                            lightborder: '#d0d0d0',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        .dark ::-webkit-scrollbar-track { background: #1e1e1e; }
+        .dark ::-webkit-scrollbar-thumb { background: #3f3f3f; border-radius: 4px; }
+        .dark ::-webkit-scrollbar-thumb:hover { background: #555; }
+        
+        .light ::-webkit-scrollbar-track { background: #f6f6f6; }
+        .light ::-webkit-scrollbar-thumb { background: #d0d0d0; border-radius: 4px; }
+        .light ::-webkit-scrollbar-thumb:hover { background: #b0b0b0; }
+
+        /* Dynamic variable-driven sizing for zoom features (Default Minimums) */
+        :root {
+            --cell-width: 20px;
+            --row-height: 18px;
+        }
+        .piano-key { height: var(--row-height); }
+        .grid-row { height: var(--row-height); }
+        .grid-cell { width: var(--cell-width); height: var(--row-height); }
+    </style>
+</head>
+<body class="bg-gtk-lightbg dark:bg-gtk-darkbg text-gray-800 dark:text-gray-100 h-screen max-h-screen flex flex-col select-none font-sans overflow-hidden transition-colors duration-250">
+
+    <!-- Header / Menu Bar -->
+    <header class="bg-gtk-lightheader dark:bg-gtk-darkheader border-b border-gtk-lightborder dark:border-gtk-darkborder p-3 sticky top-0 z-50 shadow-sm flex flex-wrap items-center justify-between gap-3 shrink-0">
+        <!-- Logo & Theme Selector -->
+        <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-2">
+                <span class="text-xl">🎹</span>
+                <div>
+                    <h1 class="text-sm font-bold tracking-tight">Random Melody Studio</h1>
+                    <p class="text-[10px] text-gray-500 dark:text-gray-400">Advanced Algorithmic DAW for Suno AI &amp; MIDI</p>
+                </div>
+            </div>
+            <!-- Theme Switcher Buttons -->
+            <div class="flex bg-gray-200 dark:bg-gray-800 p-0.5 rounded-lg border border-gtk-lightborder dark:border-gtk-darkborder text-xs">
+                <button id="themeLight" class="px-2 py-1 rounded-md transition-all">☀️ Light</button>
+                <button id="themeDark" class="px-2 py-1 rounded-md bg-white dark:bg-gray-700 shadow-sm font-semibold transition-all">🌙 Dark</button>
+            </div>
+        </div>
+
+        <!-- Master Transport Strip (Start, Stop, Play, Pause, Home, End) -->
+        <div class="flex items-center flex-wrap gap-1 bg-gray-200/60 dark:bg-gray-800 p-1 rounded-lg border border-gtk-lightborder dark:border-gtk-darkborder">
+            <button id="homeBtn" class="hover:bg-gray-300 dark:hover:bg-gray-700 p-1.5 rounded-md transition-all text-xs" title="Rewind to Beginning (Home)">
+                ⏮️
+            </button>
+            <button id="playBtn" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs px-3 py-1 rounded-md flex items-center gap-1 transition-all active:scale-95">
+                ▶ Play
+            </button>
+            <button id="pauseBtn" class="bg-amber-600 hover:bg-amber-500 text-white font-semibold text-xs px-3 py-1 rounded-md flex items-center gap-1 transition-all active:scale-95">
+                ⏸ Pause
+            </button>
+            <button id="stopBtn" class="bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600 text-xs px-2 py-1 rounded-md transition-all">
+                ⏹ Stop
+            </button>
+            <button id="endBtn" class="hover:bg-gray-300 dark:hover:bg-gray-700 p-1.5 rounded-md transition-all text-xs" title="Skip to End">
+                ⏭️
+            </button>
+
+            <div class="h-4 w-[1px] bg-gray-400 dark:bg-gray-600 mx-1"></div>
+
+            <!-- Tempo settings -->
+            <div class="flex items-center gap-1.5 text-xs">
+                <span class="text-gray-500 font-mono">BPM</span>
+                <input id="bpmSlider" type="range" min="60" max="180" value="110" class="w-16 accent-emerald-600 cursor-pointer">
+                <input id="bpmInput" type="number" min="60" max="180" value="110" class="bg-white dark:bg-gray-900 border border-gtk-lightborder dark:border-gtk-darkborder rounded text-center w-10 text-xs font-mono font-bold text-emerald-600 focus:outline-none">
+            </div>
+
+            <!-- Loop Active Toggle -->
+            <button id="loopBtn" class="bg-emerald-600/10 text-emerald-600 dark:text-emerald-400 px-2 py-1 rounded-md text-xs font-semibold">
+                🔄 Loop: On
+            </button>
+
+            <!-- Metronome Click Toggle -->
+            <button id="metroBtn" class="bg-gray-300 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-1 rounded-md text-xs font-semibold transition-all">
+                🔔 Click: Off
+            </button>
+        </div>
+
+        <!-- Exporters & Library Options -->
+        <div class="flex items-center gap-1.5 flex-wrap">
+            <button id="openLibraryBtn" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-3 py-1.5 rounded-md transition-all">
+                📂 My Library
+            </button>
+            <button id="saveTuneBtn" class="bg-gray-200 dark:bg-gray-800 border border-gtk-lightborder dark:border-gtk-darkborder text-xs px-3 py-1.5 rounded-md transition-all hover:bg-emerald-600 hover:text-white">
+                💾 Save Tune
+            </button>
+            
+            <div class="h-4 w-[1px] bg-gray-400 dark:bg-gray-600 mx-0.5"></div>
+
+            <!-- Export Formats Group -->
+            <div class="relative inline-block text-left">
+                <button id="exportMenuBtn" class="bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold px-3 py-1.5 rounded-md flex items-center gap-1">
+                    📥 Export ▾
+                </button>
+                <div id="exportMenu" class="hidden absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 z-50">
+                    <div class="py-1">
+                        <button id="exportMp3Btn" class="block w-full text-left px-4 py-2 text-xs hover:bg-gray-100 dark:hover:bg-gray-700">🎵 Export MP3</button>
+                        <button id="exportWavBtn" class="block w-full text-left px-4 py-2 text-xs hover:bg-gray-100 dark:hover:bg-gray-700">💾 Export WAV (Suno Ready)</button>
+                        <button id="exportMidiBtn" class="block w-full text-left px-4 py-2 text-xs hover:bg-gray-100 dark:hover:bg-gray-700">🎹 Export MIDI</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Import MIDI -->
+            <label class="bg-gray-200 dark:bg-gray-800 border border-gtk-lightborder dark:border-gtk-darkborder text-xs px-3 py-1.5 rounded-md transition-all hover:bg-indigo-600 hover:text-white cursor-pointer text-center">
+                🔌 Import MIDI
+                <input type="file" id="importMidiInput" accept=".mid,.midi" class="hidden">
+            </label>
+        </div>
+    </header>
+
+    <!-- Workspace Tabs Panel -->
+    <div class="bg-gray-200 dark:bg-gray-900/60 border-b border-gtk-lightborder dark:border-gtk-darkborder px-4 py-1.5 flex items-center justify-between shrink-0 select-none">
+        <div class="flex items-center space-x-1.5 overflow-x-auto" id="tabsContainer">
+            <!-- Tabs rendered programmatically here -->
+        </div>
+        <button id="newTabBtn" class="bg-emerald-600/20 hover:bg-emerald-600/40 text-emerald-600 dark:text-emerald-400 px-3 py-1 rounded text-xs font-bold transition-all">
+            + New Tab
+        </button>
+    </div>
+
+    <!-- Main Workspace -->
+    <main class="flex-1 flex overflow-hidden">
+        
+        <!-- Interactive Custom Sidebar Controls -->
+        <aside class="w-72 bg-gtk-lightheader dark:bg-gtk-darkheader border-r border-gtk-lightborder dark:border-gtk-darkborder p-4 flex flex-col justify-between shrink-0 h-full overflow-hidden">
+            <!-- Scrollable Sidebar Content container -->
+            <div class="flex-1 overflow-y-auto pr-1 space-y-5">
+                <!-- Grid Length & Loop Utilities -->
+                <div class="space-y-2 bg-white dark:bg-gray-900/60 p-3 rounded-lg border border-gtk-lightborder dark:border-gtk-darkborder/50">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 flex items-center justify-between">
+                        <span>Grid Size & Loop Utility</span>
+                        <span class="text-[10px] bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-300 px-1.5 py-0.5 rounded">Blocks</span>
+                    </h3>
+                    <div class="grid grid-cols-4 gap-1 pt-1">
+                        <button data-bars="1" class="bar-len-btn py-1 px-1.5 text-[11px] rounded bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition">1 Bar</button>
+                        <button data-bars="2" class="bar-len-btn py-1 px-1.5 text-[11px] rounded bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition">2 Bars</button>
+                        <button data-bars="4" class="bar-len-btn py-1 px-1.5 text-[11px] rounded bg-indigo-600 text-white font-bold transition">4 Bars</button>
+                        <button data-bars="8" class="bar-len-btn py-1 px-1.5 text-[11px] rounded bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition">8 Bars</button>
+                    </div>
+
+                    <!-- Duplication Engine -->
+                    <div class="grid grid-cols-2 gap-1 pt-2">
+                        <button id="dupFirstBarBtn" class="text-[11px] bg-indigo-600/10 hover:bg-indigo-600/20 text-indigo-600 dark:text-indigo-400 py-1.5 px-2 rounded border border-indigo-500/20 font-medium transition" title="Loops Bar 1 patterns into other Bars">
+                            🔁 Repeat Bar 1
+                        </button>
+                        <button id="doubleLengthBtn" class="text-[11px] bg-indigo-600/10 hover:bg-indigo-600/20 text-indigo-600 dark:text-indigo-400 py-1.5 px-2 rounded border border-indigo-500/20 font-medium transition">
+                            👥 Double & Copy
+                        </button>
+                    </div>
+
+                    <!-- Transposition Engine (Up / Down Octave) -->
+                    <div class="grid grid-cols-2 gap-1 pt-1.5 border-t border-gray-100 dark:border-gray-800/50 mt-1.5">
+                        <button id="transposeUpBtn" class="text-[11px] bg-emerald-600/10 hover:bg-emerald-600/20 text-emerald-600 dark:text-emerald-400 py-1.5 px-2 rounded border border-emerald-500/20 font-medium transition" title="Transpose all notes up by one octave (+12 semitones)">
+                            ⬆️ Octave Up
+                        </button>
+                        <button id="transposeDownBtn" class="text-[11px] bg-emerald-600/10 hover:bg-emerald-600/20 text-emerald-600 dark:text-emerald-400 py-1.5 px-2 rounded border border-emerald-500/20 font-medium transition" title="Transpose all notes down by one octave (-12 semitones)">
+                            ⬇️ Octave Down
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Custom Zoom Tools (Default Slider Minimized) -->
+                <div class="space-y-2 bg-white dark:bg-gray-900/60 p-3 rounded-lg border border-gtk-lightborder dark:border-gtk-darkborder/50 text-xs">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">🔍 Piano Roll Zoom</h3>
+                    <div class="space-y-1.5 pt-1">
+                        <div class="flex justify-between text-[11px] text-gray-400">
+                            <span>Horizontal Width:</span>
+                            <span id="zoomHVal">20px</span>
+                        </div>
+                        <input id="zoomHSlider" type="range" min="20" max="80" value="20" class="w-full accent-indigo-600 cursor-pointer">
+                        
+                        <div class="flex justify-between text-[11px] text-gray-400">
+                            <span>Vertical Height:</span>
+                            <span id="zoomVVal">18px</span>
+                        </div>
+                        <input id="zoomVSlider" type="range" min="18" max="44" value="18" class="w-full accent-indigo-600 cursor-pointer">
+                    </div>
+                </div>
+
+                <!-- Custom Randomizer Engine Controls -->
+                <div class="space-y-3 bg-white dark:bg-gray-900/60 p-3 rounded-lg border border-gtk-lightborder dark:border-gtk-darkborder/50">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">🤖 Generator Settings</h3>
+
+                    <!-- Scale Matcher -->
+                    <div class="space-y-1">
+                        <label class="text-[10px] uppercase font-bold text-gray-400 block">Musical Scale</label>
+                        <select id="scaleSelect" class="w-full bg-gray-100 dark:bg-gray-800 border border-gtk-lightborder dark:border-gtk-darkborder rounded px-2 py-1 text-xs text-gray-700 dark:text-gray-200 focus:outline-none">
+                            <option value="minorPentatonic" selected>Minor Pentatonic (Moody / R&B)</option>
+                            <option value="majorPentatonic">Major Pentatonic (Happy / Uplifting)</option>
+                            <option value="dorian">Dorian (Jazz / Synthwave)</option>
+                            <option value="phrygian">Phrygian (Dark / Heavy / Hip-Hop)</option>
+                            <option value="aeolian">Natural Minor (Melancholic / Epic)</option>
+                        </select>
+                    </div>
+
+                    <!-- Presets & Vibes -->
+                    <div class="space-y-1">
+                        <label class="text-[10px] uppercase font-bold text-gray-400 block">Melodic Preset / Vibe</label>
+                        <select id="vibeSelect" class="w-full bg-gray-100 dark:bg-gray-800 border border-gtk-lightborder dark:border-gtk-darkborder rounded px-2 py-1 text-xs text-gray-700 dark:text-gray-200 focus:outline-none">
+                            <option value="motif" selected>🎼 Theme & Motif (Rhythm Repetition)</option>
+                            <option value="hybridBar1">🧬 Hybrid Bar 1 (Rhythm Clone & Shift)</option>
+                            <option value="similarityBar1">🔗 Markov Continuity (Similarity Match)</option>
+                            <option value="contour">🌊 Wave Contour (Smooth Brownian Walk)</option>
+                            <option value="callResponse">🗣️ Call & Response (Tense/Resolved)</option>
+                            <option value="jazzNeo">🎹 Jazz Progression + Lead (Chords & Melody)</option>
+                            <option value="arpeggiator">⚡ Neo-Arp (Flowing cascades)</option>
+                            <option value="cyberpunk">🌌 Tech / Ambient (Atmospheric & Sparse)</option>
+                            <option value="epic">⚔️ Epic Motif (Heavy, rhythmic theme)</option>
+                            <option value="pop">✨ Top-40 (Catchy, syncopated chord jumps)</option>
+                            <option value="random">🎲 Chaos (Pure exploration)</option>
+                        </select>
+                    </div>
+
+                    <!-- Forced Octave Range Limit dropdown -->
+                    <div class="space-y-1">
+                        <label class="text-[10px] uppercase font-bold text-gray-400 block">Randomizer Range Limit</label>
+                        <select id="randomizerRangeSelect" class="w-full bg-gray-100 dark:bg-gray-800 border border-gtk-lightborder dark:border-gtk-darkborder rounded px-2 py-1 text-xs text-gray-700 dark:text-gray-200 focus:outline-none">
+                            <option value="all" selected>Full Register (C3 - C6)</option>
+                            <option value="c4-c6">Mid to High (C4 - C6)</option>
+                            <option value="c5-c6">High Range (C5 - C6)</option>
+                            <option value="c4-c5">Mid Range (C4 - C5)</option>
+                            <option value="c3-c5">Bass to Mid (C3 - C5)</option>
+                            <option value="c3-c4">Bass Range (C3 - C4)</option>
+                        </select>
+                    </div>
+
+                    <!-- Custom parameters -->
+                    <div class="space-y-2 pt-1 border-t border-gray-200 dark:border-gray-800 text-xs">
+                        <div class="flex justify-between items-center">
+                            <span class="text-[11px] text-gray-500">Note Density:</span>
+                            <span id="densityVal" class="text-[11px] font-mono text-emerald-600">Medium</span>
+                        </div>
+                        <input id="densitySlider" type="range" min="1" max="3" value="2" class="w-full accent-emerald-600 cursor-pointer">
+
+                        <div class="flex justify-between items-center">
+                            <span class="text-[11px] text-gray-500">Spacing / Legato:</span>
+                            <span id="durationVal" class="text-[11px] font-mono text-emerald-600">Standard</span>
+                        </div>
+                        <input id="durationSlider" type="range" min="1" max="3" value="2" class="w-full accent-emerald-600 cursor-pointer">
+
+                        <div class="flex items-center justify-between pt-1">
+                            <span class="text-[11px] text-gray-500" title="Will place stacked chords alongside single notes">Polyphonic Chords:</span>
+                            <input id="chordToggle" type="checkbox" class="w-4 h-4 rounded text-emerald-600 border-gray-300 focus:ring-emerald-500">
+                        </div>
+                    </div>
+
+                    <!-- Keep More Bars / Evolve Logic -->
+                    <div class="pt-2 border-t border-gray-200 dark:border-gray-800 space-y-2">
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="text-[11px] text-gray-500">Seed with First Notes:</span>
+                            <select id="seedModeSelect" class="bg-gray-100 dark:bg-gray-800 border border-gtk-lightborder dark:border-gtk-darkborder rounded text-[10px] px-1 py-0.5">
+                                <option value="0">Overwrite All</option>
+                                <option value="4">Keep First 4 Steps</option>
+                                <option value="8">Keep First 8 Steps</option>
+                                <option value="16">Keep First Bar (Bar 1)</option>
+                                <option value="32">Keep First 2 Bars (Bars 1-2)</option>
+                                <option value="48">Keep First 3 Bars (Bars 1-3)</option>
+                                <option value="64">Keep First 4 Bars (Bars 1-4)</option>
+                                <option value="96">Keep First 6 Bars (Bars 1-6)</option>
+                            </select>
+                        </div>
+                        <button id="randomizeBtn" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs py-2 rounded shadow transition active:scale-95 flex items-center justify-center gap-1">
+                            🎲 Generate New Melody
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Synth Voice Types -->
+                <div class="space-y-2 bg-white dark:bg-gray-900/60 p-3 rounded-lg border border-gtk-lightborder dark:border-gtk-darkborder/50">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">🔊 Synth Type</h3>
+                    <div class="grid grid-cols-2 gap-1.5" id="synthSelector">
+                        <button data-type="triangle" class="py-1 px-2 text-xs rounded bg-emerald-600 text-white font-bold transition">Pluck Synth</button>
+                        <button data-type="sine" class="py-1 px-2 text-xs rounded bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition">Soft Sine</button>
+                        <button data-type="sawtooth" class="py-1 px-2 text-xs rounded bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition">Warm Saw</button>
+                        <button data-type="square" class="py-1 px-2 text-xs rounded bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition">Lo-Fi Square</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-3">
+                <button id="clearBtn" class="w-full text-xs py-2 rounded-md transition-all text-red-500 bg-red-500/10 border border-red-500/20 hover:bg-red-500/25">
+                    🗑️ Wipe Grid Clean
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Workspace (Piano keys & Grid Scroll Area) -->
+        <section class="flex-1 flex flex-col overflow-hidden bg-gray-100 dark:bg-gtk-darkbg relative">
+            
+            <!-- Step ruler tracker -->
+            <div class="flex border-b border-gtk-lightborder dark:border-gtk-darkborder bg-gray-200/50 dark:bg-gtk-darkheader/30 shrink-0 select-none">
+                <!-- Width spacing aligning keys -->
+                <div class="w-20 sm:w-24 shrink-0 border-r border-gtk-lightborder dark:border-gtk-darkborder flex items-center justify-center text-[10px] text-gray-400 uppercase tracking-widest font-bold">
+                    Key
+                </div>
+                <!-- Time ruler steps -->
+                <div class="flex-1 overflow-x-auto overflow-y-hidden flex relative" id="rulerContainer" style="scrollbar-width: none;">
+                    <div class="flex" id="rulerSteps">
+                        <!-- Populated dynamic grid step indicators -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Piano Roll Engine workspace -->
+            <div class="flex-1 flex overflow-hidden">
+                <!-- Sticky Keyboards Column (Overflow scrollbar is visually hidden, but tracks scroll) -->
+                <div id="pianoKeyboard" class="w-20 sm:w-24 bg-gray-200 dark:bg-gtk-darkheader border-r border-gtk-lightborder dark:border-gtk-darkborder overflow-y-auto flex flex-col select-none shrink-0" style="scrollbar-width: none;">
+                    <!-- Auto generated pitch buttons -->
+                </div>
+
+                <!-- Grid Cells Matrix Area -->
+                <div id="gridWorkspace" class="flex-1 overflow-auto relative">
+                    <div id="pianoGrid" class="flex flex-col relative select-none bg-gray-100 dark:bg-gtk-darkbg">
+                        <!-- Playhead indicator -->
+                        <div id="playhead" class="absolute top-0 bottom-0 w-1 bg-amber-500 opacity-90 pointer-events-none shadow-lg transition-all duration-75 left-0 z-10"></div>
+                        <!-- Programmatically generated grid matrix lines -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Slide-out Library / Saved Panel overlay -->
+    <div id="libraryPanel" class="fixed inset-y-0 right-0 w-80 bg-gtk-lightheader dark:bg-gtk-darkheader shadow-2xl z-50 transform translate-x-full transition-transform duration-300 border-l border-gtk-lightborder dark:border-gtk-darkborder flex flex-col">
+        <div class="p-4 border-b border-gtk-lightborder dark:border-gtk-darkborder flex justify-between items-center bg-gray-200 dark:bg-gray-800">
+            <h2 class="font-bold text-sm">📁 Studio Catalog Library</h2>
+            <button id="closeLibraryBtn" class="text-xs text-gray-400 hover:text-white bg-gray-300 dark:bg-gray-700 px-2 py-1 rounded">Close</button>
+        </div>
+        <!-- Library List -->
+        <div class="flex-1 overflow-y-auto p-4 space-y-3" id="libraryItemsContainer">
+            <!-- Saved list items appended here dynamically -->
+        </div>
+        <div class="p-3 border-t border-gtk-lightborder dark:border-gtk-darkborder text-center text-[11px] text-gray-400">
+            Presets &amp; archives stored on local device storage.
+        </div>
+    </div>
+
+    <!-- Save Tune Dialog Modal -->
+    <div id="saveDialog" class="fixed inset-0 bg-black/70 flex items-center justify-center hidden z-50">
+        <div class="bg-gtk-lightheader dark:bg-gtk-darkheader p-5 rounded-lg border border-gtk-lightborder dark:border-gtk-darkborder w-96 space-y-4 shadow-xl">
+            <h3 class="font-bold text-sm">💾 Save Current Tune</h3>
+            <div class="space-y-2">
+                <label class="text-xs text-gray-400">Tune Name:</label>
+                <input id="tuneNameInput" type="text" class="w-full bg-white dark:bg-gray-900 border border-gtk-lightborder dark:border-gtk-darkborder rounded px-3 py-1.5 text-xs text-gray-800 dark:text-gray-100 focus:outline-none" placeholder="My New Vibe Project">
+            </div>
+            <div class="flex justify-end gap-2 text-xs">
+                <button id="cancelSaveBtn" class="bg-gray-300 dark:bg-gray-800 hover:bg-gray-400 px-3 py-1.5 rounded">Cancel</button>
+                <button id="confirmSaveBtn" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-1.5 rounded font-bold">Save Now</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Dialog Modal (Failsafe fallback for sandbox environments) -->
+    <div id="exportDialog" class="fixed inset-0 bg-black/70 flex items-center justify-center hidden z-50">
+        <div class="bg-gtk-lightheader dark:bg-gtk-darkheader p-6 rounded-lg border border-gtk-lightborder dark:border-gtk-darkborder w-96 space-y-4 shadow-xl text-center">
+            <h3 class="font-bold text-base flex items-center justify-center gap-2">
+                <span>🎉</span> Melody Export Ready!
+            </h3>
+            <p class="text-xs text-gray-500 dark:text-gray-400" id="exportInfoText">
+                Your Suno-ready loop is compiled.
+            </p>
+            
+            <!-- Audio Player -->
+            <div class="bg-gray-200/50 dark:bg-gray-900/60 p-3 rounded-lg border border-gtk-lightborder dark:border-gtk-darkborder flex flex-col items-center gap-2">
+                <span class="text-[10px] uppercase font-bold text-gray-400">Audio Preview</span>
+                <audio id="exportAudioPlayer" controls class="w-full h-8 accent-indigo-600"></audio>
+            </div>
+
+            <!-- Download and Close Buttons -->
+            <div class="flex flex-col gap-2 pt-2">
+                <a id="exportDownloadLink" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold py-2.5 rounded shadow transition active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer">
+                    📥 Download File
+                </a>
+                <button id="closeExportBtn" class="w-full bg-gray-300 dark:bg-gray-800 hover:bg-gray-400 text-xs py-2 rounded">
+                    Close
+                </button>
+            </div>
+            
+            <!-- Sandbox note -->
+            <p class="text-[10px] text-gray-400 dark:text-gray-500 leading-tight">
+                💡 <strong>Sandbox Tip:</strong> If your browser's security settings block the download button, right-click (or long-press) the audio player and select <strong>"Save audio as..."</strong> to save it directly!
+            </p>
+        </div>
+    </div>
+
+    <!-- Bottom Status Info Bar -->
+    <footer class="bg-gtk-lightheader dark:bg-gtk-darkheader border-t border-gtk-lightborder dark:border-gtk-darkborder px-4 py-2 flex justify-between items-center text-xs text-gray-500 dark:text-gray-400 shrink-0 z-40">
+        <div>
+            Status: <span id="statusText" class="text-emerald-600 dark:text-emerald-400 font-bold">Ready</span>
+        </div>
+        <div class="flex items-center gap-4">
+            <span>Grid Resolution: <span class="text-gray-700 dark:text-gray-200 font-mono">1/16 Beat</span></span>
+            <span>Est. Loop Length: <span id="estimatedSec" class="text-gray-700 dark:text-gray-200 font-bold font-mono">8.0s</span></span>
+            <span class="hidden md:inline font-mono text-[10px]">Shortcuts: Space (Play/Pause) | Click &amp; Drag (Draw)</span>
+        </div>
+    </footer>
+
+    <!-- Audio & App Logic -->
+    <script>
+        // Setup Audio Engine Context
+        let audioCtx = null;
+        let playIntervalId = null;
+        let isPlaying = false;
+        let currentStep = 0;
+        let bpm = 110;
+        let loopMode = true;
+        let selectedSynth = 'triangle'; 
+        let metronomeActive = false;
+
+        // Minimum defaults on startup
+        let cellWidth = 20;
+        let rowHeight = 18;
+
+        // Expanded notes setup: C3 (MIDI 48) to C6 (MIDI 84)
+        const NOTES = [
+            { name: "C6", freq: 1046.50, midi: 84, isBlack: false },
+            { name: "B5", freq: 987.77, midi: 83, isBlack: false },
+            { name: "A#5", freq: 932.33, midi: 82, isBlack: true },
+            { name: "A5", freq: 880.00, midi: 81, isBlack: false },
+            { name: "G#5", freq: 830.61, midi: 80, isBlack: true },
+            { name: "G5", freq: 783.99, midi: 79, isBlack: false },
+            { name: "F#5", freq: 739.99, midi: 78, isBlack: true },
+            { name: "F5", freq: 698.46, midi: 77, isBlack: false },
+            { name: "E5", freq: 659.25, midi: 76, isBlack: false },
+            { name: "D#5", freq: 622.25, midi: 75, isBlack: true },
+            { name: "D5", freq: 587.33, midi: 74, isBlack: false },
+            { name: "C#5", freq: 554.37, midi: 73, isBlack: true },
+            { name: "C5", freq: 523.25, midi: 72, isBlack: false },
+            { name: "B4", freq: 493.88, midi: 71, isBlack: false },
+            { name: "A#4", freq: 466.16, midi: 70, isBlack: true },
+            { name: "A4", freq: 440.00, midi: 69, isBlack: false },
+            { name: "G#4", freq: 415.30, midi: 68, isBlack: true },
+            { name: "G4", freq: 392.00, midi: 67, isBlack: false },
+            { name: "F#4", freq: 369.99, midi: 66, isBlack: true },
+            { name: "F4", freq: 349.23, midi: 65, isBlack: false },
+            { name: "E4", freq: 329.63, midi: 64, isBlack: false },
+            { name: "D#4", freq: 311.13, midi: 63, isBlack: true },
+            { name: "D4", freq: 293.66, midi: 62, isBlack: false },
+            { name: "C#4", freq: 277.18, midi: 61, isBlack: true },
+            { name: "C4", freq: 261.63, midi: 60, isBlack: false },
+            { name: "B3", freq: 246.94, midi: 59, isBlack: false },
+            { name: "A#3", freq: 233.08, midi: 58, isBlack: true },
+            { name: "A3", freq: 220.00, midi: 57, isBlack: false },
+            { name: "G#3", freq: 207.65, midi: 56, isBlack: true },
+            { name: "G3", freq: 196.00, midi: 55, isBlack: false },
+            { name: "F#3", freq: 185.00, midi: 54, isBlack: true },
+            { name: "F3", freq: 174.61, midi: 53, isBlack: false },
+            { name: "E3", freq: 164.81, midi: 52, isBlack: false },
+            { name: "D#3", freq: 155.56, midi: 51, isBlack: true },
+            { name: "D3", freq: 146.83, midi: 50, isBlack: false },
+            { name: "C#3", freq: 138.59, midi: 49, isBlack: true },
+            { name: "C3", freq: 130.81, midi: 48, isBlack: false }
+        ];
+
+        // Tabs & Sessions management
+        let tabs = [
+            {
+                id: 'tab_default_1',
+                title: 'Melody Alpha',
+                gridState: Array(NOTES.length).fill().map(() => Array(16 * 4).fill(false)),
+                totalBars: 4,
+                bpm: 110,
+                scale: 'minorPentatonic',
+                vibe: 'motif',
+                synth: 'triangle'
+            }
+        ];
+        let activeTabId = 'tab_default_1';
+
+        // Retrieve current active tab session
+        function getActiveTab() {
+            return tabs.find(t => t.id === activeTabId) || tabs[0];
+        }
+
+        // Sound Scales Mapping Database
+        const SCALES = {
+            minorPentatonic: [0, 3, 5, 7, 10],      // Bluesy / Moody
+            majorPentatonic: [0, 2, 4, 7, 9],       // Happy / Catchy
+            dorian: [0, 2, 3, 5, 7, 9, 10],         // Spacey / Jazz
+            phrygian: [0, 1, 3, 5, 7, 8, 10],       // Heavy / Dark
+            aeolian: [0, 2, 3, 5, 7, 8, 10]         // Classical Minor
+        };
+
+        // DOM caching selectors
+        const pianoKeyboard = document.getElementById('pianoKeyboard');
+        const pianoGrid = document.getElementById('pianoGrid');
+        const gridWorkspace = document.getElementById('gridWorkspace');
+        const playhead = document.getElementById('playhead');
+        
+        const homeBtn = document.getElementById('homeBtn');
+        const playBtn = document.getElementById('playBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const endBtn = document.getElementById('endBtn');
+        const loopBtn = document.getElementById('loopBtn');
+        const metroBtn = document.getElementById('metroBtn');
+        
+        const bpmSlider = document.getElementById('bpmSlider');
+        const bpmInput = document.getElementById('bpmInput');
+        
+        const clearBtn = document.getElementById('clearBtn');
+        const randomizeBtn = document.getElementById('randomizeBtn');
+        const scaleSelect = document.getElementById('scaleSelect');
+        const vibeSelect = document.getElementById('vibeSelect');
+        const randomizerRangeSelect = document.getElementById('randomizerRangeSelect');
+        const densitySlider = document.getElementById('densitySlider');
+        const durationSlider = document.getElementById('durationSlider');
+        const chordToggle = document.getElementById('chordToggle');
+        const seedModeSelect = document.getElementById('seedModeSelect');
+        
+        const exportMenuBtn = document.getElementById('exportMenuBtn');
+        const exportMenu = document.getElementById('exportMenu');
+        const exportMp3Btn = document.getElementById('exportMp3Btn');
+        const exportWavBtn = document.getElementById('exportWavBtn');
+        const exportMidiBtn = document.getElementById('exportMidiBtn');
+        const importMidiInput = document.getElementById('importMidiInput');
+        
+        const openLibraryBtn = document.getElementById('openLibraryBtn');
+        const saveTuneBtn = document.getElementById('saveTuneBtn');
+        const libraryPanel = document.getElementById('libraryPanel');
+        const closeLibraryBtn = document.getElementById('closeLibraryBtn');
+        const libraryItemsContainer = document.getElementById('libraryItemsContainer');
+        const saveDialog = document.getElementById('saveDialog');
+        const tuneNameInput = document.getElementById('tuneNameInput');
+        const cancelSaveBtn = document.getElementById('cancelSaveBtn');
+        const confirmSaveBtn = document.getElementById('confirmSaveBtn');
+        
+        const zoomHSlider = document.getElementById('zoomHSlider');
+        const zoomVSlider = document.getElementById('zoomVSlider');
+        const zoomHVal = document.getElementById('zoomHVal');
+        const zoomVVal = document.getElementById('zoomVVal');
+        
+        const statusText = document.getElementById('statusText');
+        const estimatedSec = document.getElementById('estimatedSec');
+        const rulerSteps = document.getElementById('rulerSteps');
+        const rulerContainer = document.getElementById('rulerContainer');
+        const dupFirstBarBtn = document.getElementById('dupFirstBarBtn');
+        const doubleLengthBtn = document.getElementById('doubleLengthBtn');
+        const transposeUpBtn = document.getElementById('transposeUpBtn');
+        const transposeDownBtn = document.getElementById('transposeDownBtn');
+        const densityVal = document.getElementById('densityVal');
+        const durationVal = document.getElementById('durationVal');
+        
+        const tabsContainer = document.getElementById('tabsContainer');
+        const newTabBtn = document.getElementById('newTabBtn');
+
+        // Theme Toggle elements
+        const themeLightBtn = document.getElementById('themeLight');
+        const themeDarkBtn = document.getElementById('themeDark');
+
+        // Export Fallback Modal Elements
+        const exportDialog = document.getElementById('exportDialog');
+        const exportAudioPlayer = document.getElementById('exportAudioPlayer');
+        const exportDownloadLink = document.getElementById('exportDownloadLink');
+        const exportInfoText = document.getElementById('exportInfoText');
+        const closeExportBtn = document.getElementById('closeExportBtn');
+
+        // Draw and Interaction Trackers
+        let isMouseDown = false;
+        let paintMode = true;
+
+        // Initialize Audio Engine Context
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        // Apply visual zoom state variables to Document layout
+        function applyZoom() {
+            document.documentElement.style.setProperty('--cell-width', `${cellWidth}px`);
+            document.documentElement.style.setProperty('--row-height', `${rowHeight}px`);
+            zoomHVal.innerText = `${cellWidth}px`;
+            zoomVVal.innerText = `${rowHeight}px`;
+            updatePlayhead(currentStep);
+        }
+
+        // Render project tabs list visually
+        function renderTabs() {
+            tabsContainer.innerHTML = '';
+            tabs.forEach((tab) => {
+                const isActive = tab.id === activeTabId;
+                const tabEl = document.createElement('div');
+                tabEl.className = `flex items-center gap-2 px-3 py-1 text-xs rounded-md cursor-pointer transition-all ${
+                    isActive 
+                    ? 'bg-indigo-600 text-white font-bold shadow-md' 
+                    : 'bg-gray-300 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-400 dark:hover:bg-gray-700'
+                }`;
+
+                // Double click name edit
+                const label = document.createElement('span');
+                label.innerText = tab.title;
+                label.addEventListener('dblclick', () => {
+                    const newName = prompt("Rename tune project:", tab.title);
+                    if (newName && newName.trim()) {
+                        tab.title = newName.trim();
+                        renderTabs();
+                    }
+                });
+
+                tabEl.appendChild(label);
+
+                // Add close/delete button to tabs except if it is the only one
+                if (tabs.length > 1) {
+                    const closeBtn = document.createElement('button');
+                    closeBtn.className = "hover:text-red-400 font-bold ml-1 text-[10px]";
+                    closeBtn.innerText = "✕";
+                    closeBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        tabs = tabs.filter(t => t.id !== tab.id);
+                        if (isActive) {
+                            activeTabId = tabs[0].id;
+                        }
+                        syncTabStateToInputs();
+                        renderTabs();
+                        buildGridUI();
+                    });
+                    tabEl.appendChild(closeBtn);
+                }
+
+                // Make active
+                tabEl.addEventListener('click', () => {
+                    activeTabId = tab.id;
+                    syncTabStateToInputs();
+                    renderTabs();
+                    buildGridUI();
+                });
+
+                tabsContainer.appendChild(tabEl);
+            });
+        }
+
+        // Sync visual settings panel inputs from current tab's model properties
+        function syncTabStateToInputs() {
+            const currentTab = getActiveTab();
+            bpm = currentTab.bpm;
+            bpmSlider.value = bpm;
+            bpmInput.value = bpm;
+            scaleSelect.value = currentTab.scale;
+            vibeSelect.value = currentTab.vibe;
+            selectedSynth = currentTab.synth;
+
+            // Update synth selector button colors
+            document.querySelectorAll('#synthSelector button').forEach(b => {
+                if (b.dataset.type === selectedSynth) {
+                    b.className = "py-1 px-2 text-xs rounded bg-emerald-600 text-white font-bold transition";
+                } else {
+                    b.className = "py-1 px-2 text-xs rounded bg-gray-200 dark:bg-gray-800 text-gray-800 dark:text-gray-100 hover:bg-gray-300 dark:hover:bg-gray-700 transition";
+                }
+            });
+
+            // Set grid bar size button indicators
+            const barsCount = currentTab.totalBars;
+            document.querySelectorAll('.bar-len-btn').forEach(btn => {
+                if (parseInt(btn.dataset.bars) === barsCount) {
+                    btn.className = "bar-len-btn py-1 px-1.5 text-[11px] rounded bg-indigo-600 text-white font-bold transition";
+                } else {
+                    btn.className = "bar-len-btn py-1 px-1.5 text-[11px] rounded bg-gray-200 dark:bg-gray-800 text-gray-800 dark:text-gray-100 hover:bg-gray-300 dark:hover:bg-gray-700 transition";
+                }
+            });
+        }
+
+        // Set properties back to tab session memory
+        function writeInputsToTabState() {
+            const currentTab = getActiveTab();
+            currentTab.bpm = bpm;
+            currentTab.scale = scaleSelect.value;
+            currentTab.vibe = vibeSelect.value;
+            currentTab.synth = selectedSynth;
+        }
+
+        // Setup Workspace Matrix elements
+        function buildGridUI() {
+            const currentTab = getActiveTab();
+            const bars = currentTab.totalBars;
+            const totalSteps = bars * 16;
+            
+            // Adjust current grid state array matching current selection size
+            const oldState = currentTab.gridState;
+            currentTab.gridState = Array(NOTES.length).fill().map((_, rIdx) => {
+                const newRow = Array(totalSteps).fill(false);
+                // Copy over previous note arrays if existing
+                for (let cIdx = 0; cIdx < totalSteps; cIdx++) {
+                    if (oldState[rIdx] && oldState[rIdx][cIdx] !== undefined) {
+                        newRow[cIdx] = oldState[rIdx][cIdx];
+                    }
+                }
+                return newRow;
+            });
+
+            // 1. Setup Time Ruler Steps
+            rulerSteps.innerHTML = '';
+            for (let s = 0; s < totalSteps; s++) {
+                const barNum = Math.floor(s / 16) + 1;
+                const beatInBar = Math.floor((s % 16) / 4) + 1;
+                
+                const rCell = document.createElement('div');
+                const isBarStart = s % 16 === 0;
+                const isBeatStart = s % 4 === 0;
+
+                rCell.className = `grid-cell text-[9px] flex flex-col items-center justify-center select-none border-r shrink-0 ${
+                    isBarStart 
+                    ? 'bg-gray-300 dark:bg-gray-800 text-indigo-600 dark:text-emerald-400 font-bold border-l border-emerald-500/20' 
+                    : isBeatStart 
+                    ? 'bg-gray-200 dark:bg-gray-900/60 text-gray-500 dark:text-gray-300 font-semibold' 
+                    : 'text-gray-400 dark:text-gray-600 bg-transparent'
+                } border-gtk-lightborder dark:border-gtk-darkborder`;
+
+                if (isBarStart) {
+                    rCell.innerHTML = `<span class="text-[8px] opacity-75">B${barNum}</span><span>1</span>`;
+                } else if (isBeatStart) {
+                    rCell.innerText = beatInBar;
+                } else {
+                    rCell.innerText = '.';
+                }
+                rulerSteps.appendChild(rCell);
+            }
+
+            // 2. Build Piano Keyboard Side column
+            pianoKeyboard.innerHTML = '';
+            NOTES.forEach((note) => {
+                const key = document.createElement('div');
+                key.className = `piano-key flex items-center justify-between px-2 text-[10px] select-none cursor-pointer border-b shrink-0 transition-colors ${
+                    note.isBlack 
+                    ? 'bg-zinc-800 text-zinc-400 border-zinc-700 hover:bg-zinc-700' 
+                    : 'bg-white text-zinc-900 border-zinc-200 hover:bg-zinc-100 font-bold'
+                }`;
+                
+                key.innerHTML = `
+                    <span>${note.name}</span>
+                    <span class="w-1.5 h-1.5 rounded-full ${note.isBlack ? 'bg-indigo-500/50' : 'bg-emerald-500/50'}"></span>
+                `;
+
+                key.addEventListener('mousedown', () => {
+                    initAudio();
+                    playPreviewNote(note.freq);
+                });
+                pianoKeyboard.appendChild(key);
+            });
+
+            // 3. Render note matrix Workspace columns
+            pianoGrid.innerHTML = '';
+            pianoGrid.appendChild(playhead); // Append playhead back on top layer
+
+            NOTES.forEach((note, rIdx) => {
+                const row = document.createElement('div');
+                row.className = `grid-row flex shrink-0 border-b border-gtk-lightborder/50 dark:border-gtk-darkborder/40 ${
+                    note.isBlack ? 'bg-gray-200/20 dark:bg-gray-900/30' : 'bg-transparent'
+                }`;
+
+                for (let cIdx = 0; cIdx < totalSteps; cIdx++) {
+                    const cell = document.createElement('div');
+                    const isBeatStart = cIdx % 4 === 0;
+                    const isBarStart = cIdx % 16 === 0;
+
+                    cell.className = `grid-cell border-r border-gtk-lightborder/50 dark:border-gtk-darkborder/30 transition-colors cursor-pointer shrink-0 ${
+                        isBarStart 
+                        ? 'border-l-2 border-l-indigo-500/30 dark:border-l-emerald-500/30' 
+                        : isBeatStart 
+                        ? 'border-l border-l-gray-300 dark:border-l-gray-800' 
+                        : ''
+                    } hover:bg-emerald-500/10`;
+
+                    // Maintain previous drawing visual representation
+                    updateCellVisual(cell, rIdx, cIdx);
+
+                    // Multi-touch drag listeners to paint notes
+                    cell.addEventListener('mousedown', (e) => {
+                        e.preventDefault();
+                        initAudio();
+                        isMouseDown = true;
+                        paintMode = !currentTab.gridState[rIdx][cIdx];
+                        setCellState(rIdx, cIdx, paintMode, cell);
+                    });
+
+                    cell.addEventListener('mouseenter', () => {
+                        if (isMouseDown) {
+                            setCellState(rIdx, cIdx, paintMode, cell);
+                        }
+                    });
+
+                    row.appendChild(cell);
+                }
+                pianoGrid.appendChild(row);
+            });
+
+            recalculateDurationEst();
+            updatePlayhead(currentStep);
+        }
+
+        // Transpose all written notes up or down by a full octave (12 semitones)
+        function transposeOctave(direction) {
+            const currentTab = getActiveTab();
+            const totalSteps = currentTab.totalBars * 16;
+            // Shifting pitch up is moving index down (-12) in our high-to-low NOTES array
+            const shift = direction === 'up' ? -12 : 12;
+            const newState = Array(NOTES.length).fill().map(() => Array(totalSteps).fill(false));
+
+            for (let r = 0; r < NOTES.length; r++) {
+                for (let c = 0; c < totalSteps; c++) {
+                    if (currentTab.gridState[r][c]) {
+                        const targetRowIdx = r + shift;
+                        if (targetRowIdx >= 0 && targetRowIdx < NOTES.length) {
+                            newState[targetRowIdx][c] = true;
+                        }
+                    }
+                }
+            }
+            currentTab.gridState = newState;
+            buildGridUI();
+            triggerStatusAlert(`Transposed 1 Octave ${direction.toUpperCase()}`);
+        }
+
+        // Set state for a specific grid point
+        function setCellState(rIdx, cIdx, activeState, cellElement) {
+            const currentTab = getActiveTab();
+            currentTab.gridState[rIdx][cIdx] = activeState;
+            updateCellVisual(cellElement, rIdx, cIdx);
+
+            if (activeState && isMouseDown) {
+                playPreviewNote(NOTES[rIdx].freq);
+            }
+        }
+
+        // Toggle state visually
+        function updateCellVisual(cell, rIdx, cIdx) {
+            const currentTab = getActiveTab();
+            const isActive = currentTab.gridState[rIdx][cIdx];
+            if (isActive) {
+                cell.classList.remove('bg-transparent', 'bg-gray-200/20', 'dark:bg-gray-900/30');
+                cell.classList.add('bg-emerald-500', 'dark:bg-emerald-400', 'shadow-sm');
+            } else {
+                cell.classList.remove('bg-emerald-500', 'dark:bg-emerald-400', 'shadow-sm');
+                if (NOTES[rIdx].isBlack) {
+                    cell.classList.add('bg-gray-200/20', 'dark:bg-gray-900/30');
+                } else {
+                    cell.classList.add('bg-transparent');
+                }
+            }
+        }
+
+        // Loops Bar 1 across the grid length
+        function repeatFirstBar() {
+            const currentTab = getActiveTab();
+            const totalSteps = currentTab.totalBars * 16;
+            for (let r = 0; r < NOTES.length; r++) {
+                const barOnePattern = currentTab.gridState[r].slice(0, 16);
+                for (let bar = 1; bar < currentTab.totalBars; bar++) {
+                    for (let step = 0; step < 16; step++) {
+                        currentTab.gridState[r][bar * 16 + step] = barOnePattern[step];
+                    }
+                }
+            }
+            buildGridUI();
+            triggerStatusAlert("Duplicated Bar 1 patterns!");
+        }
+
+        // Double length and replicate left half onto right half
+        function doubleLengthAndCopy() {
+            const currentTab = getActiveTab();
+            const totalSteps = currentTab.totalBars * 16;
+            const midPoint = totalSteps / 2;
+            for (let r = 0; r < NOTES.length; r++) {
+                const firstHalf = currentTab.gridState[r].slice(0, midPoint);
+                for (let step = 0; step < midPoint; step++) {
+                    currentTab.gridState[r][midPoint + step] = firstHalf[step];
+                }
+            }
+            buildGridUI();
+            triggerStatusAlert("Halves synced & looped!");
+        }
+
+        // Realtime Web Audio Synth voices with adjustable low-pass envelope
+        function playPreviewNote(frequency) {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            const filterNode = document.createElement ? audioCtx.createBiquadFilter() : null;
+
+            osc.type = selectedSynth;
+            osc.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+
+            if (filterNode) {
+                filterNode.type = 'lowpass';
+                filterNode.frequency.setValueAtTime(1600, audioCtx.currentTime);
+                filterNode.frequency.linearRampToValueAtTime(120, audioCtx.currentTime + 0.3);
+            }
+
+            gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+            gainNode.gain.linearRampToValueAtTime(0.25, audioCtx.currentTime + 0.01);
+            gainNode.gain.linearRampToValueAtTime(0.001, audioCtx.currentTime + 0.35);
+
+            if (filterNode) {
+                osc.connect(filterNode);
+                filterNode.connect(gainNode);
+            } else {
+                osc.connect(gainNode);
+            }
+            gainNode.connect(audioCtx.destination);
+
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.36);
+        }
+
+        // Metronome click audio synthesis helper
+        function playMetronomeClick(time, isDownbeat) {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(isDownbeat ? 1200 : 800, time);
+            
+            gainNode.gain.setValueAtTime(0, time);
+            gainNode.gain.linearRampToValueAtTime(0.12, time + 0.002);
+            gainNode.gain.linearRampToValueAtTime(0.001, time + 0.05);
+            
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            osc.start(time);
+            osc.stop(time + 0.06);
+        }
+
+        // Live Sequencer playback synth sounds
+        function playSequencerStepSound(frequency, time, duration) {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            const filterNode = audioCtx.createBiquadFilter();
+
+            osc.type = selectedSynth;
+            osc.frequency.setValueAtTime(frequency, time);
+
+            filterNode.type = 'lowpass';
+            filterNode.Q.setValueAtTime(3, time);
+            filterNode.frequency.setValueAtTime(2000, time);
+            filterNode.frequency.linearRampToValueAtTime(140, time + duration);
+
+            gainNode.gain.setValueAtTime(0, time);
+            gainNode.gain.linearRampToValueAtTime(0.22, time + 0.01);
+            gainNode.gain.linearRampToValueAtTime(0.001, time + duration);
+
+            osc.connect(filterNode);
+            filterNode.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            osc.start(time);
+            osc.stop(time + duration);
+        }
+
+        // Playback clock loops
+        let lastStepTime = 0;
+        function playHeadClockScheduler() {
+            if (!isPlaying) return;
+
+            const currentTab = getActiveTab();
+            const totalSteps = currentTab.totalBars * 16;
+            const stepDuration = 60 / bpm / 4; 
+            const currentTime = audioCtx.currentTime;
+
+            if (currentTime >= lastStepTime + stepDuration - 0.015) {
+                lastStepTime = currentTime;
+                
+                // Metronome click on beats
+                if (metronomeActive && (currentStep % 4 === 0)) {
+                    const isDownbeat = (currentStep % 16 === 0);
+                    playMetronomeClick(currentTime, isDownbeat);
+                }
+                
+                // Fetch & play stacked polyphonic triggers
+                const noteDurLevel = parseInt(durationSlider.value); // 1 = Short, 2 = Medium, 3 = Legato
+                const durationMultiplier = noteDurLevel === 1 ? 0.8 : (noteDurLevel === 2 ? 1.5 : 3.0);
+                const actualPlayDuration = stepDuration * durationMultiplier;
+
+                for (let rIdx = 0; rIdx < NOTES.length; rIdx++) {
+                    if (currentTab.gridState[rIdx][currentStep]) {
+                        playSequencerStepSound(NOTES[rIdx].freq, currentTime, actualPlayDuration);
+                    }
+                }
+
+                updatePlayhead(currentStep);
+
+                // Increment step tracker
+                currentStep++;
+                if (currentStep >= totalSteps) {
+                    if (loopMode) {
+                        currentStep = 0;
+                    } else {
+                        pauseSequencer();
+                    }
+                }
+            }
+
+            if (isPlaying) {
+                requestAnimationFrame(playHeadClockScheduler);
+            }
+        }
+
+        // Position tracking line animation
+        function updatePlayhead(step) {
+            const stepPosition = step * cellWidth;
+            playhead.style.left = `${stepPosition}px`;
+
+            // Auto-scrolling grid window
+            const viewport = gridWorkspace.clientWidth;
+            const scrollLeft = gridWorkspace.scrollLeft;
+            
+            if (stepPosition > scrollLeft + viewport - 120) {
+                gridWorkspace.scrollTo({ left: stepPosition - 100, behavior: 'smooth' });
+            } else if (stepPosition < scrollLeft) {
+                gridWorkspace.scrollTo({ left: 0, behavior: 'smooth' });
+            }
+        }
+
+        // Sequencer action toggles
+        function playSequencer() {
+            initAudio();
+            if (isPlaying) return;
+            isPlaying = true;
+            lastStepTime = audioCtx.currentTime;
+            
+            playBtn.classList.remove('bg-emerald-600', 'hover:bg-emerald-500');
+            playBtn.classList.add('bg-indigo-600', 'hover:bg-indigo-500');
+            playBtn.innerHTML = `<span>Pause</span>`;
+
+            playHeadClockScheduler();
+            statusText.innerText = "Live Sequencer Playing";
+        }
+
+        function pauseSequencer() {
+            isPlaying = false;
+            playBtn.classList.add('bg-emerald-600', 'hover:bg-emerald-500');
+            playBtn.classList.remove('bg-indigo-600', 'hover:bg-indigo-500');
+            playBtn.innerHTML = `▶ Play`;
+            statusText.innerText = "Paused";
+        }
+
+        function stopAndReset() {
+            pauseSequencer();
+            currentStep = 0;
+            updatePlayhead(0);
+            gridWorkspace.scrollTo({ left: 0, behavior: 'smooth' });
+        }
+
+        // Advanced AI Vibe Randomizer Engine
+        function runScaleVibeGenerator() {
+            initAudio();
+            writeInputsToTabState();
+            const currentTab = getActiveTab();
+            const totalSteps = currentTab.totalBars * 16;
+            
+            // Constrain seed index boundaries to current total timeline lengths
+            const startSeedStep = Math.min(parseInt(seedModeSelect.value), totalSteps);
+
+            // Preserve initial seed notes if specified
+            const keptNotes = Array(NOTES.length).fill().map(() => Array(totalSteps).fill(false));
+            if (startSeedStep > 0) {
+                for (let r = 0; r < NOTES.length; r++) {
+                    for (let c = 0; c < startSeedStep; c++) {
+                        keptNotes[r][c] = currentTab.gridState[r][c];
+                    }
+                }
+            }
+
+            // Rhythm & pitch transition caches for similarity patterns
+            const bar1ActiveSteps = [];
+            const bar1NotesByStep = Array(16).fill().map(() => []);
+            const pitchTransitions = {};
+            let lastMidi = null;
+
+            // Pre-scan bar 1 content for Hybrid / Similarity logic
+            for (let c = 0; c < 16; c++) {
+                let hasNote = false;
+                for (let r = 0; r < NOTES.length; r++) {
+                    if (currentTab.gridState[r][c]) {
+                        bar1NotesByStep[c].push(r);
+                        hasNote = true;
+
+                        const currentMidi = NOTES[r].midi;
+                        if (lastMidi !== null) {
+                            if (!pitchTransitions[lastMidi]) pitchTransitions[lastMidi] = [];
+                            pitchTransitions[lastMidi].push(currentMidi);
+                        }
+                        lastMidi = currentMidi;
+                    }
+                }
+                if (hasNote) bar1ActiveSteps.push(c);
+            }
+
+            // Wipe rest of sequence
+            currentTab.gridState = Array(NOTES.length).fill().map(() => Array(totalSteps).fill(false));
+
+            // Restore seeded notes back
+            if (startSeedStep > 0) {
+                for (let r = 0; r < NOTES.length; r++) {
+                    for (let c = 0; c < startSeedStep; c++) {
+                        currentTab.gridState[r][c] = keptNotes[r][c];
+                    }
+                }
+            }
+
+            const scaleOffsets = SCALES[scaleSelect.value];
+            const pitchRange = randomizerRangeSelect.value;
+            
+            // Force notes limit configurations:
+            // C3 = MIDI 48, C4 = MIDI 60, C5 = MIDI 72, C6 = MIDI 84
+            let minMidi = 48;
+            let maxMidi = 84;
+            if (pitchRange === 'c4-c6') { minMidi = 60; maxMidi = 84; }
+            else if (pitchRange === 'c5-c6') { minMidi = 72; maxMidi = 84; }
+            else if (pitchRange === 'c4-c5') { minMidi = 60; maxMidi = 72; }
+            else if (pitchRange === 'c3-c5') { minMidi = 48; maxMidi = 72; }
+            else if (pitchRange === 'c3-c4') { minMidi = 48; maxMidi = 60; }
+
+            // Map indexes that are within our musical key scale and designated range
+            const scaleNotesIndexes = [];
+            NOTES.forEach((note, index) => {
+                const pitchOffset = note.midi % 12;
+                if (scaleOffsets.includes(pitchOffset) && note.midi >= minMidi && note.midi <= maxMidi) {
+                    scaleNotesIndexes.push(index);
+                }
+            });
+
+            // Prevent crash if range selection has no compatible pitches
+            if (scaleNotesIndexes.length === 0) {
+                NOTES.forEach((note, index) => {
+                    if (note.midi >= minMidi && note.midi <= maxMidi) {
+                        scaleNotesIndexes.push(index);
+                    }
+                });
+            }
+
+            const userVibe = vibeSelect.value;
+            const densityVal = parseInt(densitySlider.value); // 1=Sparse, 2=Med, 3=Dense
+            const isChordsMode = chordToggle.checked;
+
+            let step = startSeedStep;
+
+            if (userVibe === 'hybridBar1') {
+                // If Bar 1 holds no notes on generator run, seed baseline rhythmic values
+                if (bar1ActiveSteps.length === 0) {
+                    bar1ActiveSteps.push(0, 4, 8, 12);
+                    const rootScaleIdx = Math.floor(scaleNotesIndexes.length / 2);
+                    bar1NotesByStep[0].push(scaleNotesIndexes[rootScaleIdx]);
+                    bar1NotesByStep[4].push(scaleNotesIndexes[Math.max(0, rootScaleIdx - 2)]);
+                    bar1NotesByStep[8].push(scaleNotesIndexes[Math.min(scaleNotesIndexes.length - 1, rootScaleIdx + 2)]);
+                    bar1NotesByStep[12].push(scaleNotesIndexes[rootScaleIdx]);
+                }
+
+                while (step < totalSteps) {
+                    const stepInBar = step % 16;
+                    if (bar1ActiveSteps.includes(stepInBar)) {
+                        const originalNotes = bar1NotesByStep[stepInBar];
+                        originalNotes.forEach(srcRow => {
+                            let scaleIdx = scaleNotesIndexes.indexOf(srcRow);
+                            if (scaleIdx === -1) scaleIdx = Math.floor(scaleNotesIndexes.length / 2);
+
+                            // Shift scale index randomly by -2 to +2 to hybridize melody contour
+                            const shiftAmount = Math.floor(Math.random() * 5) - 2;
+                            let targetScaleIdx = scaleIdx + shiftAmount;
+                            targetScaleIdx = Math.max(0, Math.min(scaleNotesIndexes.length - 1, targetScaleIdx));
+
+                            const targetRowIdx = scaleNotesIndexes[targetScaleIdx];
+                            currentTab.gridState[targetRowIdx][step] = true;
+                        });
+                    }
+                    step++;
+                }
+            }
+            else if (userVibe === 'similarityBar1') {
+                // Count average active density of Bar 1
+                let activeDensityCount = 0;
+                for (let c = 0; c < 16; c++) {
+                    for (let r = 0; r < NOTES.length; r++) {
+                        if (currentTab.gridState[r][c]) activeDensityCount++;
+                    }
+                }
+                if (activeDensityCount === 0) activeDensityCount = 4; // default baseline
+
+                const probabilityThreshold = activeDensityCount / 16;
+                let currentMidiVal = lastMidi || NOTES[scaleNotesIndexes[Math.floor(scaleNotesIndexes.length / 2)]].midi;
+
+                while (step < totalSteps) {
+                    if (Math.random() < probabilityThreshold) {
+                        let nextMidi = null;
+                        // Match similarity transition pairs with 80% weight accuracy, else slide
+                        if (pitchTransitions[currentMidiVal] && pitchTransitions[currentMidiVal].length > 0 && Math.random() < 0.8) {
+                            const pool = pitchTransitions[currentMidiVal];
+                            nextMidi = pool[Math.floor(Math.random() * pool.length)];
+                        } else {
+                            let scaleIdx = scaleNotesIndexes.findIndex(i => NOTES[i].midi === currentMidiVal);
+                            if (scaleIdx === -1) scaleIdx = Math.floor(scaleNotesIndexes.length / 2);
+
+                            const shiftAmount = Math.floor(Math.random() * 3) - 1; // -1, 0, 1 scale drift
+                            let targetScaleIdx = scaleIdx + shiftAmount;
+                            targetScaleIdx = Math.max(0, Math.min(scaleNotesIndexes.length - 1, targetScaleIdx));
+                            nextMidi = NOTES[scaleNotesIndexes[targetScaleIdx]].midi;
+                        }
+
+                        // Constrain nextMidi output inside the chosen boundary
+                        if (nextMidi >= minMidi && nextMidi <= maxMidi) {
+                            const targetRowIdx = NOTES.findIndex(n => n.midi === nextMidi);
+                            if (targetRowIdx !== -1) {
+                                currentTab.gridState[targetRowIdx][step] = true;
+                                currentMidiVal = nextMidi;
+                            }
+                        } else {
+                            // Reset back to baseline scale boundaries
+                            const targetRowIdx = scaleNotesIndexes[Math.floor(Math.random() * scaleNotesIndexes.length)];
+                            currentTab.gridState[targetRowIdx][step] = true;
+                            currentMidiVal = NOTES[targetRowIdx].midi;
+                        }
+                    }
+                    step++;
+                }
+            }
+            else if (userVibe === 'motif') {
+                // Generate a core rhythmic pattern (1 Bar)
+                const rhythmPattern = Array(16).fill(false);
+                let designProbability = densityVal === 1 ? 0.25 : (densityVal === 3 ? 0.65 : 0.45);
+                for (let i = 0; i < 16; i++) {
+                    if (Math.random() < designProbability) {
+                        rhythmPattern[i] = true;
+                    }
+                }
+
+                // Apply rhythmic pattern across all bars but shuffle notes smoothly
+                let currentScaleIndex = Math.floor(scaleNotesIndexes.length / 2);
+                while (step < totalSteps) {
+                    const patternIndex = step % 16;
+                    if (rhythmPattern[patternIndex]) {
+                        currentScaleIndex += Math.random() > 0.5 ? 1 : -1;
+                        if (currentScaleIndex < 0) currentScaleIndex = 1;
+                        if (currentScaleIndex >= scaleNotesIndexes.length) currentScaleIndex = scaleNotesIndexes.length - 2;
+                        
+                        const targetNoteIdx = scaleNotesIndexes[currentScaleIndex];
+                        currentTab.gridState[targetNoteIdx][step] = true;
+                    }
+                    step++;
+                }
+            } 
+            else if (userVibe === 'contour') {
+                // Smooth Brownian Walk (Wave contour)
+                let currentScaleIndex = Math.floor(scaleNotesIndexes.length / 2);
+                let direction = 1;
+
+                while (step < totalSteps) {
+                    let stepProb = densityVal === 1 ? 0.25 : (densityVal === 3 ? 0.70 : 0.45);
+                    
+                    if (step % 2 === 0 && Math.random() < stepProb) {
+                        const drift = Math.floor(Math.random() * 2) + 1;
+                        
+                        if (currentScaleIndex <= 2) direction = 1; 
+                        if (currentScaleIndex >= scaleNotesIndexes.length - 3) direction = -1;
+
+                        currentScaleIndex += drift * direction;
+                        
+                        if (Math.random() > 0.85) direction *= -1;
+
+                        // Clamp index bounds
+                        currentScaleIndex = Math.max(0, Math.min(scaleNotesIndexes.length - 1, currentScaleIndex));
+
+                        const targetNoteIdx = scaleNotesIndexes[currentScaleIndex];
+                        currentTab.gridState[targetNoteIdx][step] = true;
+                    }
+                    step++;
+                }
+            } 
+            else if (userVibe === 'callResponse') {
+                // Call vs Response structures
+                const midPoint = Math.floor(totalSteps / 2);
+                
+                // Call generation
+                while (step < midPoint) {
+                    let stepProb = step % 4 === 0 ? 0.6 : 0.3;
+                    if (Math.random() < stepProb) {
+                        const nonRootSubset = scaleNotesIndexes.slice(0, -1);
+                        const targetNoteIdx = nonRootSubset.length > 0 ? nonRootSubset[Math.floor(Math.random() * nonRootSubset.length)] : scaleNotesIndexes[0];
+                        currentTab.gridState[targetNoteIdx][step] = true;
+                    }
+                    step++;
+                }
+
+                // Response generation
+                while (step < totalSteps) {
+                    let stepProb = step % 4 === 0 ? 0.7 : 0.35;
+                    if (Math.random() < stepProb) {
+                        if (step >= totalSteps - 4) {
+                            const rootNoteIdx = scaleNotesIndexes[scaleNotesIndexes.length - 1];
+                            currentTab.gridState[rootNoteIdx][step] = true;
+                        } else {
+                            const targetNoteIdx = scaleNotesIndexes[Math.floor(Math.random() * scaleNotesIndexes.length)];
+                            currentTab.gridState[targetNoteIdx][step] = true;
+                        }
+                    }
+                    step++;
+                }
+            } 
+            else if (userVibe === 'jazzNeo') {
+                while (step < totalSteps) {
+                    if (step % 8 === 0) {
+                        const rootOffsetIndex = Math.floor(Math.random() * Math.max(1, (scaleNotesIndexes.length - 6)));
+                        const baseIdx = scaleNotesIndexes[rootOffsetIndex];
+                        
+                        currentTab.gridState[baseIdx][step] = true;
+                        if (rootOffsetIndex + 2 < scaleNotesIndexes.length) currentTab.gridState[scaleNotesIndexes[rootOffsetIndex + 2]][step] = true;
+                        if (rootOffsetIndex + 4 < scaleNotesIndexes.length) currentTab.gridState[scaleNotesIndexes[rootOffsetIndex + 4]][step] = true;
+                        if (rootOffsetIndex + 6 < scaleNotesIndexes.length && Math.random() > 0.4) {
+                            currentTab.gridState[scaleNotesIndexes[rootOffsetIndex + 6]][step] = true;
+                        }
+                    } else if ((step % 8 === 2 || step % 8 === 4 || step % 8 === 6) && Math.random() < 0.6) {
+                        const upperMelodySubset = scaleNotesIndexes.slice(0, Math.max(1, Math.floor(scaleNotesIndexes.length * 0.6)));
+                        const leadIdx = upperMelodySubset[Math.floor(Math.random() * upperMelodySubset.length)];
+                        currentTab.gridState[leadIdx][step] = true;
+                    }
+                    step++;
+                }
+            }
+            else {
+                // Fallbacks to standard vibe options
+                while (step < totalSteps) {
+                    let noteProbability = 0.3;
+                    if (densityVal === 1) noteProbability = 0.15;
+                    if (densityVal === 3) noteProbability = 0.55;
+
+                    if (userVibe === 'arpeggiator') {
+                        const arpPatternIndex = Math.floor(step / 2) % scaleNotesIndexes.length;
+                        const scaleNoteIdx = scaleNotesIndexes[arpPatternIndex];
+                        if (step % 2 === 0 && Math.random() < 0.85) {
+                            currentTab.gridState[scaleNoteIdx][step] = true;
+                        }
+                        step++;
+                    } 
+                    else if (userVibe === 'cyberpunk') {
+                        if (step % 8 === 0 && Math.random() < 0.6) {
+                            const randomNoteIdx = scaleNotesIndexes[Math.floor(Math.random() * scaleNotesIndexes.length)];
+                            currentTab.gridState[randomNoteIdx][step] = true;
+                            if (step + 4 < totalSteps && Math.random() < 0.4) {
+                                currentTab.gridState[randomNoteIdx][step + 4] = true;
+                            }
+                        }
+                        step += 4;
+                    } 
+                    else if (userVibe === 'epic') {
+                        const isQuarterBeat = step % 4 === 0;
+                        if (isQuarterBeat && Math.random() < 0.8) {
+                            const lowScaleSubset = scaleNotesIndexes.filter(i => NOTES[i].midi < 68);
+                            const targetIdx = lowScaleSubset.length > 0 ? lowScaleSubset[Math.floor(Math.random() * lowScaleSubset.length)] : scaleNotesIndexes[0];
+                            currentTab.gridState[targetIdx][step] = true;
+                        }
+                        step += 2;
+                    } 
+                    else if (userVibe === 'pop') {
+                        const isSyncopated = step % 4 === 2 || step % 4 === 3;
+                        const popProb = isSyncopated ? 0.7 : 0.2;
+                        if (Math.random() < popProb) {
+                            const randomNoteIdx = scaleNotesIndexes[Math.floor(Math.random() * (scaleNotesIndexes.length / 2))];
+                            currentTab.gridState[randomNoteIdx][step] = true;
+                        }
+                        step++;
+                    } 
+                    else {
+                        if (Math.random() < noteProbability) {
+                            const randomNoteIdx = scaleNotesIndexes[Math.floor(Math.random() * scaleNotesIndexes.length)];
+                            currentTab.gridState[randomNoteIdx][step] = true;
+                        }
+                        step++;
+                    }
+
+                    if (isChordsMode && (step % 8 === 0) && step < totalSteps) {
+                        const baseRootIdx = scaleNotesIndexes[Math.floor(Math.random() * Math.max(1, (scaleNotesIndexes.length - 4)))];
+                        currentTab.gridState[baseRootIdx][step] = true;
+                        currentTab.gridState[baseRootIdx + 2 < scaleNotesIndexes.length ? baseRootIdx + 2 : baseRootIdx][step] = true;
+                        currentTab.gridState[baseRootIdx + 4 < scaleNotesIndexes.length ? baseRootIdx + 4 : baseRootIdx][step] = true;
+                    }
+                }
+            }
+
+            buildGridUI();
+            triggerStatusAlert(`Vibe Generation: ${vibeSelect.options[vibeSelect.selectedIndex].text}`);
+        }
+
+        // Global state wipe
+        function clearGrid() {
+            const currentTab = getActiveTab();
+            const totalSteps = currentTab.totalBars * 16;
+            currentTab.gridState = Array(NOTES.length).fill().map(() => Array(totalSteps).fill(false));
+            buildGridUI();
+            stopAndReset();
+            triggerStatusAlert("Grid fully cleared");
+        }
+
+        // Calculate and display duration estimation
+        function recalculateDurationEst() {
+            const currentTab = getActiveTab();
+            const stepDuration = 60 / bpm / 4;
+            const finalDuration = currentTab.totalBars * 16 * stepDuration;
+            estimatedSec.innerText = `${finalDuration.toFixed(1)}s`;
+        }
+
+        // Render Offline Synthesis buffer (Explicitly Math.round frames count for all browsers compatibility)
+        function renderOfflineSynthesizedBuffer(callback) {
+            initAudio();
+            const currentTab = getActiveTab();
+            const totalSteps = currentTab.totalBars * 16;
+            const stepDuration = 60 / bpm / 4;
+            const singleLoopDuration = totalSteps * stepDuration;
+            
+            // Loop calculation to ensure Suno's 6 seconds minimum rule
+            let loopRepeatCount = 1;
+            if (singleLoopDuration < 6.0) {
+                loopRepeatCount = Math.ceil(6.0 / singleLoopDuration);
+            }
+
+            const renderTotalDuration = singleLoopDuration * loopRepeatCount;
+            const sampleRate = 44100;
+            
+            // MATH.ROUND is critical here to guarantee browser constructor parameter integers!
+            const roundedTotalFrames = Math.round(sampleRate * renderTotalDuration);
+            
+            let offlineCtx;
+            try {
+                // Initialize as standard stereo (2-channel) for maximum OS-level hardware compatibility
+                offlineCtx = new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(2, roundedTotalFrames, sampleRate);
+            } catch (err) {
+                console.error("Context creation crash:", err);
+                triggerStatusAlert("WAV render failed - Context construction error");
+                return;
+            }
+            
+            const noteDurLevel = parseInt(durationSlider.value) || 2;
+            const durationMultiplier = noteDurLevel === 1 ? 0.8 : (noteDurLevel === 2 ? 1.5 : 3.0);
+            const playbackNoteDuration = stepDuration * durationMultiplier;
+
+            let noteCount = 0;
+            for (let loopIdx = 0; loopIdx < loopRepeatCount; loopIdx++) {
+                const loopOffsetTime = loopIdx * singleLoopDuration;
+
+                for (let c = 0; c < totalSteps; c++) {
+                    const stepTime = loopOffsetTime + (c * stepDuration);
+                    for (let r = 0; r < NOTES.length; r++) {
+                        if (currentTab.gridState[r] && currentTab.gridState[r][c]) {
+                            scheduleOfflineNote(offlineCtx, NOTES[r].freq, stepTime, playbackNoteDuration);
+                            noteCount++;
+                        }
+                    }
+                }
+            }
+
+            if (noteCount === 0) {
+                triggerStatusAlert("Empty grid - add some notes first!");
+                return;
+            }
+
+            statusText.innerText = "Rendering Project audio layers...";
+            offlineCtx.startRendering()
+                .then(callback)
+                .catch(err => {
+                    console.error("Renderer runtime error: ", err);
+                    statusText.innerText = "Error rendering audio context";
+                });
+        }
+
+        // DIRECT EXPORT TO MP3 ENCODING MECHANISM
+        function exportMp3() {
+            if (typeof lamejs === 'undefined' || !lamejs.Mp3Encoder) {
+                triggerStatusAlert("MP3 encoder unavailable (Network CSP Block). Downloading high-quality WAV instead!");
+                setTimeout(() => {
+                    exportSunoWav();
+                }, 1500);
+                return;
+            }
+
+            renderOfflineSynthesizedBuffer((renderedBuffer) => {
+                statusText.innerText = "Converting and compressing to MP3 format...";
+                setTimeout(() => {
+                    try {
+                        const mp3Blob = bufferToMp3(renderedBuffer);
+                        const url = URL.createObjectURL(mp3Blob);
+                        const filename = `${getActiveTab().title.replace(/\s+/g, '_')}_${bpm}bpm.mp3`;
+
+                        // Setup Modal Player and Direct Link
+                        exportAudioPlayer.src = url;
+                        exportDownloadLink.href = url;
+                        exportDownloadLink.download = filename;
+                        exportInfoText.innerText = `Format: MP3 | Duration: ${renderedBuffer.duration.toFixed(1)}s | Size: ~${Math.round(mp3Blob.size / 1024)} KB`;
+                        
+                        // Show popup
+                        exportDialog.classList.remove('hidden');
+
+                        // Trigger auto-download safely (might be blocked by browser sandbox)
+                        try {
+                            const link = document.createElement('a');
+                            link.href = url;
+                            link.download = filename;
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                        } catch (downloadErr) {
+                            console.warn("Auto-download blocked by browser frame; modal fallback active.", downloadErr);
+                        }
+
+                        triggerStatusAlert("Direct MP3 Compiled!");
+                    } catch(e) {
+                        console.error(e);
+                        statusText.innerText = "MP3 conversion error!";
+                    }
+                }, 100);
+            });
+        }
+
+        // MP3 helper using lamejs library
+        function bufferToMp3(buffer) {
+            const channelData = buffer.getChannelData(0); // Mono conversion
+            const sampleRate = buffer.sampleRate;
+            const mp3encoder = new lamejs.Mp3Encoder(1, sampleRate, 128); // 128kbps quality
+            const mp3Data = [];
+            
+            // Map float32 to Int16 values
+            const samples = new Int16Array(channelData.length);
+            for (let i = 0; i < channelData.length; i++) {
+                let s = Math.max(-1, Math.min(1, channelData[i]));
+                samples[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+            }
+            
+            const sampleBlockSize = 1152;
+            for (let i = 0; i < samples.length; i += sampleBlockSize) {
+                let sampleChunk = samples.subarray(i, i + sampleBlockSize);
+                let mp3buf = mp3encoder.encodeBuffer(sampleChunk);
+                if (mp3buf.length > 0) {
+                    mp3Data.push(mp3buf);
+                }
+            }
+            const mp3buf = mp3encoder.flush();
+            if (mp3buf.length > 0) {
+                mp3Data.push(mp3buf);
+            }
+            return new Blob(mp3Data, { type: 'audio/mp3' });
+        }
+
+        // SUNO COMPATIBLE WAV AUDIO EXPORTER
+        function exportSunoWav() {
+            renderOfflineSynthesizedBuffer((renderedBuffer) => {
+                const wavBlob = bufferToWav(renderedBuffer);
+                const url = URL.createObjectURL(wavBlob);
+                const filename = `${getActiveTab().title.replace(/\s+/g, '_')}_${bpm}bpm.wav`;
+
+                // Setup Modal Player and Direct Link
+                exportAudioPlayer.src = url;
+                exportDownloadLink.href = url;
+                exportDownloadLink.download = filename;
+                exportInfoText.innerText = `Format: WAV (Suno Ready) | Duration: ${renderedBuffer.duration.toFixed(1)}s | Size: ~${Math.round(wavBlob.size / 1024)} KB`;
+                
+                // Show popup
+                exportDialog.classList.remove('hidden');
+
+                // Trigger auto-download safely (might be blocked by browser sandbox)
+                try {
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = filename;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                } catch (downloadErr) {
+                    console.warn("Auto-download blocked by browser frame; modal fallback active.", downloadErr);
+                }
+
+                triggerStatusAlert("Suno-ready WAV compiled!");
+            });
+        }
+
+        // Pure JS MIDI Binary File Exporter
+        function exportMidiFile() {
+            const currentTab = getActiveTab();
+            const totalSteps = currentTab.totalBars * 16;
+            const ticksPerQuarter = 96;
+            const ticksPer16th = ticksPerQuarter / 4; // 24 ticks
+
+            // Construct SMF structures
+            const header = [
+                0x4d, 0x54, 0x68, 0x64, // "MThd"
+                0x00, 0x00, 0x00, 0x06, // chunk size (6)
+                0x00, 0x00,             // format type 0 (single track)
+                0x00, 0x01,             // track count (1)
+                0x00, ticksPerQuarter   // time division resolution
+            ];
+
+            const events = [];
+
+            // Read notes and map events
+            for (let c = 0; c < totalSteps; c++) {
+                const stepTicks = c * ticksPer16th;
+                for (let r = 0; r < NOTES.length; r++) {
+                    if (currentTab.gridState[r][c]) {
+                        const pitch = NOTES[r].midi;
+                        events.push({ tick: stepTicks, type: 0x90, pitch: pitch, vel: 90 });
+                        events.push({ tick: stepTicks + ticksPer16th, type: 0x80, pitch: pitch, vel: 0 });
+                    }
+                }
+            }
+
+            // Sort sequentially by tick times
+            events.sort((a, b) => a.tick - b.tick);
+
+            // Pack track events byte-array
+            const trackData = [];
+            let lastTick = 0;
+
+            // Set Tempo Meta Event (BPM)
+            trackData.push(0x00);
+            trackData.push(0xFF, 0x51, 0x03);
+            const microsecondsPerQuarter = Math.round(60000000 / bpm);
+            trackData.push((microsecondsPerQuarter >> 16) & 0xFF);
+            trackData.push((microsecondsPerQuarter >> 8) & 0xFF);
+            trackData.push(microsecondsPerQuarter & 0xFF);
+
+            // Set Track Name Meta Event
+            trackData.push(0x00); // delta
+            trackData.push(0xFF, 0x03); // Meta Type Track Name
+            const nameBytes = new TextEncoder().encode(currentTab.title);
+            trackData.push(nameBytes.length);
+            for (let b of nameBytes) trackData.push(b);
+
+            // Add note events
+            events.forEach(ev => {
+                const deltaTime = ev.tick - lastTick;
+                lastTick = ev.tick;
+
+                // Write variable length quantity for delta-time
+                writeVarLength(trackData, deltaTime);
+
+                // Event Type + status byte
+                trackData.push(ev.type);
+                trackData.push(ev.pitch);
+                trackData.push(ev.vel);
+            });
+
+            // End of track meta event
+            trackData.push(0x00); // delta
+            trackData.push(0xFF, 0x2F, 0x00);
+
+            // Combine tracks header
+            const mtrkHeader = [
+                0x4d, 0x54, 0x72, 0x6b, // "MTrk"
+                (trackData.length >> 24) & 0xFF,
+                (trackData.length >> 16) & 0xFF,
+                (trackData.length >> 8) & 0xFF,
+                trackData.length & 0xFF
+            ];
+
+            const midiBlob = new Blob([new Uint8Array([...header, ...mtrkHeader, ...trackData])], { type: 'audio/midi' });
+            const url = URL.createObjectURL(midiBlob);
+            
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `${currentTab.title.replace(/\s+/g, '_')}.mid`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            triggerStatusAlert("MIDI File Exported!");
+        }
+
+        // MIDI Variable Length helper
+        function writeVarLength(array, value) {
+            let buffer = value & 0x7F;
+            while ((value >>= 7) > 0) {
+                buffer <<= 8;
+                buffer |= ((value & 0x7F) | 0x80);
+            }
+            while (true) {
+                array.push(buffer & 0xFF);
+                if (buffer & 0x80) {
+                    buffer >>= 8;
+                } else {
+                    break;
+                }
+            }
+        }
+
+        // Pure JS MIDI Binary File Importer
+        function importMidiFile(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                const buffer = evt.target.result;
+                const view = new DataView(buffer);
+                
+                try {
+                    const mthd = view.getUint32(0);
+                    if (mthd !== 0x4d546864) {
+                        triggerStatusAlert("Error: Invalid MIDI file header");
+                        return;
+                    }
+
+                    const headerLength = view.getUint32(4);
+                    const format = view.getUint16(8);
+                    const numTracks = view.getUint16(10);
+                    const division = view.getUint16(12); // Ticks per quarter note
+
+                    if (division & 0x8000) {
+                        triggerStatusAlert("Error: SMPTE time code in MIDI not supported");
+                        return;
+                    }
+
+                    // Locate track structure (skip header)
+                    let offset = 8 + headerLength;
+                    
+                    // Simple event parsing for first MIDI track
+                    const mtrkSig = view.getUint32(offset);
+                    if (mtrkSig !== 0x4d54726b) {
+                        triggerStatusAlert("Error: Unable to locate MIDI track");
+                        return;
+                    }
+
+                    const trackLength = view.getUint32(offset + 4);
+                    offset += 8;
+
+                    let lastStatus = 0;
+                    let currentTick = 0;
+                    const parsedNotes = []; // { tick, pitch, duration }
+
+                    const activeNotesMap = {};
+
+                    let endOffset = offset + trackLength;
+                    while (offset < endOffset && offset < view.byteLength) {
+                        // Read delta-time
+                        let [deltaTime, deltaBytes] = readVarLengthFromView(view, offset);
+                        offset += deltaBytes;
+                        currentTick += deltaTime;
+
+                        let status = view.getUint8(offset);
+                        offset++;
+
+                        // Handle running status
+                        if ((status & 0x80) === 0) {
+                            status = lastStatus;
+                            offset--; // Rewind to re-read data byte
+                        } else {
+                            lastStatus = status;
+                        }
+
+                        const eventType = status & 0xF0;
+                        
+                        if (eventType === 0x90 || eventType === 0x80) {
+                            const pitch = view.getUint8(offset);
+                            const velocity = view.getUint8(offset + 1);
+                            offset += 2;
+
+                            if (eventType === 0x90 && velocity > 0) {
+                                // Note On
+                                activeNotesMap[pitch] = currentTick;
+                            } else {
+                                // Note Off
+                                if (activeNotesMap[pitch] !== undefined) {
+                                    const startTick = activeNotesMap[pitch];
+                                    const durationTicks = currentTick - startTick;
+                                    parsedNotes.push({ tick: startTick, pitch: pitch, duration: durationTicks });
+                                    delete activeNotesMap[pitch];
+                                }
+                            }
+                        } else if (status === 0xFF) {
+                            // Meta Event handling
+                            const metaType = view.getUint8(offset);
+                            offset++;
+                            let [metaLen, metaLenBytes] = readVarLengthFromView(view, offset);
+                            offset += metaLenBytes + metaLen;
+                        } else if (eventType === 0xA0 || eventType === 0xD0) {
+                            offset += 1;
+                        } else if (eventType === 0xB0 || eventType === 0xE0) {
+                            offset += 2;
+                        } else if (eventType === 0xC0) {
+                            offset += 1;
+                        }
+                    }
+
+                    // Map parsed absolute notes onto Studio Grid array
+                    const ticksPer16th = division / 4;
+                    const currentTab = getActiveTab();
+                    
+                    // Wipe clean before import
+                    currentTab.gridState = Array(NOTES.length).fill().map(() => Array(currentTab.totalBars * 16).fill(false));
+
+                    parsedNotes.forEach(n => {
+                        const stepIndex = Math.round(n.tick / ticksPer16th);
+                        if (stepIndex < currentTab.totalBars * 16) {
+                            const targetRowIdx = NOTES.findIndex(note => note.midi === n.pitch);
+                            if (targetRowIdx !== -1) {
+                                currentTab.gridState[targetRowIdx][stepIndex] = true;
+                            }
+                        }
+                    });
+
+                    buildGridUI();
+                    triggerStatusAlert(`Imported MIDI: ${file.name}`);
+
+                } catch(err) {
+                    console.error(err);
+                    triggerStatusAlert("Error parsing MIDI track data.");
+                }
+            };
+
+            reader.readAsArrayBuffer(file);
+        }
+
+        function readVarLengthFromView(view, offset) {
+            let value = 0;
+            let bytesRead = 0;
+            while (true) {
+                const b = view.getUint8(offset + bytesRead);
+                bytesRead++;
+                value = (value << 7) | (b & 0x7F);
+                if ((b & 0x80) === 0) break;
+            }
+            return [value, bytesRead];
+        }
+
+        // Convert PCM offline buffers into binary high-res WAV structure
+        function bufferToWav(buffer) {
+            const numOfChan = buffer.numberOfChannels;
+            const length = buffer.length * numOfChan * 2 + 44;
+            const bufferArray = new ArrayBuffer(length);
+            const view = new DataView(bufferArray);
+            let offset = 0;
+            let pos = 0;
+
+            // Write chunk markers
+            setUint32(0x46464952); // "RIFF"
+            setUint32(length - 8); 
+            setUint32(0x45564157); // "WAVE"
+            setUint32(0x20746d66); // "fmt " format chunk
+            setUint32(16);         // Chunk size
+            setUint16(1);          // Linear PCM format
+            setUint16(numOfChan);
+            setUint32(buffer.sampleRate);
+            setUint32(buffer.sampleRate * 2 * numOfChan); // Byte rate
+            setUint16(numOfChan * 2);                    // Block align bytes
+            setUint16(16);                               // Bits per sample
+            setUint32(0x61746164);                       // "data" descriptor
+            setUint32(length - offset - 4);
+
+            const channels = [];
+            for (let i = 0; i < buffer.numberOfChannels; i++) {
+                channels.push(buffer.getChannelData(i));
+            }
+
+            while (pos < buffer.length) {
+                for (let i = 0; i < numOfChan; i++) {
+                    let sample = Math.max(-1, Math.min(1, channels[i][pos]));
+                    sample = sample < 0 ? sample * 0x8000 : sample * 0x7FFF;
+                    view.setInt16(offset, sample, true);
+                    offset += 2;
+                }
+                pos++;
+            }
+
+            return new Blob([bufferArray], { type: 'audio/wav' });
+
+            function setUint16(data) {
+                view.setUint16(offset, data, true);
+                offset += 2;
+            }
+            function setUint32(data) {
+                view.setUint32(offset, data, true);
+                offset += 4;
+            }
+        }
+
+        // Mathematically safe linear scheduling logic to bypass browser errors
+        function scheduleOfflineNote(ctx, frequency, startTime, duration) {
+            const osc = ctx.createOscillator();
+            const gainNode = ctx.createGain();
+            const filterNode = ctx.createBiquadFilter();
+
+            osc.type = selectedSynth;
+            osc.frequency.setValueAtTime(frequency, startTime);
+
+            // Biquad filter pluck shape via linear automation curves (failsafe in Chrome/Safari)
+            filterNode.type = 'lowpass';
+            filterNode.Q.setValueAtTime(3, startTime);
+            filterNode.frequency.setValueAtTime(2000, startTime);
+            filterNode.frequency.linearRampToValueAtTime(140, startTime + duration);
+
+            // Amplitude envelope
+            gainNode.gain.setValueAtTime(0, startTime);
+            gainNode.gain.linearRampToValueAtTime(0.22, startTime + 0.01);
+            gainNode.gain.linearRampToValueAtTime(0.001, startTime + duration);
+
+            osc.connect(filterNode);
+            filterNode.connect(gainNode);
+            gainNode.connect(ctx.destination);
+
+            osc.start(startTime);
+            osc.stop(startTime + duration);
+        }
+
+        // LOCAL STORAGE SYSTEM: Save and Catalog Catalog List
+        function saveCurrentTuneToLocalStorage() {
+            const name = tuneNameInput.value.trim() || "Untitled Jam Project";
+            const currentTab = getActiveTab();
+            
+            const database = JSON.parse(localStorage.getItem('RANDOM_MELODY_STUDIO_TUNES') || '[]');
+            
+            const tuneRecord = {
+                id: 'tune_record_' + Date.now(),
+                title: name,
+                gridState: currentTab.gridState,
+                totalBars: currentTab.totalBars,
+                bpm: bpm,
+                scale: scaleSelect.value,
+                vibe: vibeSelect.value,
+                synth: selectedSynth,
+                savedAt: new Date().toLocaleDateString(),
+                archived: false
+            };
+
+            database.push(tuneRecord);
+            localStorage.setItem('RANDOM_MELODY_STUDIO_TUNES', JSON.stringify(database));
+            
+            saveDialog.classList.add('hidden');
+            triggerStatusAlert(`Saved "${name}" to Library!`);
+            renderLibraryItems();
+        }
+
+        function loadTuneFromRecord(recordId) {
+            const database = JSON.parse(localStorage.getItem('RANDOM_MELODY_STUDIO_TUNES') || '[]');
+            const record = database.find(r => r.id === recordId);
+            if (!record) return;
+
+            const newTabId = 'tab_loaded_' + Date.now();
+            const newTab = {
+                id: newTabId,
+                title: record.title,
+                gridState: record.gridState,
+                totalBars: record.totalBars || 4,
+                bpm: record.bpm || 110,
+                scale: record.scale || 'minorPentatonic',
+                vibe: record.vibe || 'motif',
+                synth: record.synth || 'triangle'
+            };
+
+            tabs.push(newTab);
+            activeTabId = newTabId;
+            syncTabStateToInputs();
+            renderTabs();
+            buildGridUI();
+
+            libraryPanel.classList.add('translate-x-full');
+            triggerStatusAlert(`Loaded project: ${record.title}`);
+        }
+
+        function deleteTuneRecord(recordId) {
+            let database = JSON.parse(localStorage.getItem('RANDOM_MELODY_STUDIO_TUNES') || '[]');
+            database = database.filter(r => r.id !== recordId);
+            localStorage.setItem('RANDOM_MELODY_STUDIO_TUNES', JSON.stringify(database));
+            renderLibraryItems();
+            triggerStatusAlert("Tune deleted from local Library.");
+        }
+
+        function toggleArchiveRecord(recordId) {
+            const database = JSON.parse(localStorage.getItem('RANDOM_MELODY_STUDIO_TUNES') || '[]');
+            const record = database.find(r => r.id === recordId);
+            if (record) {
+                record.archived = !record.archived;
+                localStorage.setItem('RANDOM_MELODY_STUDIO_TUNES', JSON.stringify(database));
+                renderLibraryItems();
+                triggerStatusAlert(record.archived ? "Tune archived." : "Tune unarchived.");
+            }
+        }
+
+        // Render saved catalog records inside panel lists
+        function renderLibraryItems() {
+            libraryItemsContainer.innerHTML = '';
+            const database = JSON.parse(localStorage.getItem('RANDOM_MELODY_STUDIO_TUNES') || '[]');
+            
+            if (database.length === 0) {
+                libraryItemsContainer.innerHTML = `<p class="text-xs text-center text-gray-500 py-6">Library empty. Write and save a tune above!</p>`;
+                return;
+            }
+
+            database.forEach((rec) => {
+                const item = document.createElement('div');
+                item.className = `p-3 rounded border text-xs space-y-2 transition-all ${
+                    rec.archived 
+                    ? 'bg-gray-100/50 dark:bg-gray-900/35 border-gray-300 dark:border-gray-800 opacity-60' 
+                    : 'bg-white dark:bg-gray-900/80 border-gtk-lightborder dark:border-gtk-darkborder'
+                }`;
+
+                item.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span class="font-bold block ${rec.archived ? 'line-through text-gray-400' : 'text-gray-800 dark:text-gray-200'}">${rec.title}</span>
+                            <span class="text-[9px] text-gray-400 block">${rec.savedAt} • ${rec.bpm} BPM • ${rec.totalBars} Bars</span>
+                        </div>
+                        <span class="text-[9px] bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 px-1 py-0.5 rounded font-mono">${rec.scale}</span>
+                    </div>
+                    <div class="flex justify-end gap-1 text-[10px] pt-1">
+                        <button onclick="loadTuneFromRecord('${rec.id}')" class="bg-indigo-600 hover:bg-indigo-500 text-white px-2 py-1 rounded">Load</button>
+                        <button onclick="toggleArchiveRecord('${rec.id}')" class="bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 px-2 py-1 rounded text-gray-500">${rec.archived ? 'Unarchive' : 'Archive'}</button>
+                        <button onclick="deleteTuneRecord('${rec.id}')" class="bg-red-500/10 hover:bg-red-500/30 text-red-500 px-2 py-1 rounded">✕</button>
+                    </div>
+                `;
+
+                libraryItemsContainer.appendChild(item);
+            });
+        }
+
+        // Theme control switcher
+        function toggleTheme(theme) {
+            if (theme === 'dark') {
+                document.documentElement.classList.add('dark');
+                themeDarkBtn.className = "px-2 py-1 rounded-md bg-white dark:bg-gray-700 shadow-sm font-semibold text-gray-800 dark:text-white transition-all";
+                themeLightBtn.className = "px-2 py-1 rounded-md text-gray-400 hover:text-gray-600 transition-all";
+            } else {
+                document.documentElement.classList.remove('dark');
+                themeLightBtn.className = "px-2 py-1 rounded-md bg-white dark:bg-gray-700 shadow-sm font-semibold text-gray-800 dark:text-white transition-all";
+                themeDarkBtn.className = "px-2 py-1 rounded-md text-gray-400 hover:text-gray-600 transition-all";
+            }
+        }
+
+        themeLightBtn.addEventListener('click', () => toggleTheme('light'));
+        themeDarkBtn.addEventListener('click', () => toggleTheme('dark'));
+
+        // Trigger safe status alerts
+        function triggerStatusAlert(msg) {
+            statusText.innerText = msg;
+            setTimeout(() => {
+                if (!isPlaying) {
+                    statusText.innerText = "Ready";
+                } else {
+                    statusText.innerText = "Live Sequencer Playing";
+                }
+            }, 3000);
+        }
+
+        // BIND EVENT LISTENERS
+
+        // Transport Panel
+        playBtn.addEventListener('click', () => {
+            if (isPlaying) pauseSequencer();
+            else playSequencer();
+        });
+        pauseBtn.addEventListener('click', pauseSequencer);
+        stopBtn.addEventListener('click', stopAndReset);
+
+        homeBtn.addEventListener('click', () => {
+            currentStep = 0;
+            updatePlayhead(0);
+            triggerStatusAlert("Rewound to Start");
+        });
+
+        endBtn.addEventListener('click', () => {
+            const currentTab = getActiveTab();
+            currentStep = (currentTab.totalBars * 16) - 1;
+            updatePlayhead(currentStep);
+            triggerStatusAlert("Skipped to End of Loop");
+        });
+
+        // Tabs
+        newTabBtn.addEventListener('click', () => {
+            const freshId = 'tab_user_' + Date.now();
+            const freshTab = {
+                id: freshId,
+                title: `Idea Project ${tabs.length + 1}`,
+                gridState: Array(NOTES.length).fill().map(() => Array(16 * 4).fill(false)),
+                totalBars: 4,
+                bpm: 110,
+                scale: scaleSelect.value,
+                vibe: vibeSelect.value,
+                synth: selectedSynth
+            };
+            tabs.push(freshTab);
+            activeTabId = freshId;
+            syncTabStateToInputs();
+            renderTabs();
+            buildGridUI();
+            triggerStatusAlert("Created a new tab session!");
+        });
+
+        // Zooms
+        zoomHSlider.addEventListener('input', (e) => {
+            cellWidth = parseInt(e.target.value);
+            applyZoom();
+        });
+
+        zoomVSlider.addEventListener('input', (e) => {
+            rowHeight = parseInt(e.target.value);
+            applyZoom();
+        });
+
+        // Grid Size Buttons
+        document.querySelectorAll('.bar-len-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const barSize = parseInt(btn.dataset.bars);
+                const currentTab = getActiveTab();
+                currentTab.totalBars = barSize;
+                
+                document.querySelectorAll('.bar-len-btn').forEach(b => {
+                    b.className = "bar-len-btn py-1 px-1.5 text-[11px] rounded bg-gray-200 dark:bg-gray-800 text-gray-800 dark:text-gray-100 hover:bg-gray-300 dark:hover:bg-gray-700 transition";
+                });
+                btn.className = "bar-len-btn py-1 px-1.5 text-[11px] rounded bg-indigo-600 text-white font-bold transition";
+                
+                buildGridUI();
+            });
+        });
+
+        // Duplicate & Transpose utils
+        dupFirstBarBtn.addEventListener('click', repeatFirstBar);
+        doubleLengthBtn.addEventListener('click', doubleLengthAndCopy);
+        transposeUpBtn.addEventListener('click', () => transposeOctave('up'));
+        transposeDownBtn.addEventListener('click', () => transposeOctave('down'));
+
+        // Save Flow controls
+        saveTuneBtn.addEventListener('click', () => {
+            tuneNameInput.value = getActiveTab().title;
+            saveDialog.classList.remove('hidden');
+        });
+        cancelSaveBtn.addEventListener('click', () => saveDialog.classList.add('hidden'));
+        confirmSaveBtn.addEventListener('click', saveCurrentTuneToLocalStorage);
+
+        // Slide out Catalog lists
+        openLibraryBtn.addEventListener('click', () => {
+            renderLibraryItems();
+            libraryPanel.classList.remove('translate-x-full');
+        });
+        closeLibraryBtn.addEventListener('click', () => libraryPanel.classList.add('translate-x-full'));
+
+        // Export dropdown menus
+        exportMenuBtn.addEventListener('click', () => {
+            exportMenu.classList.toggle('hidden');
+        });
+
+        // Close dropdown when clicking elsewhere
+        window.addEventListener('click', (e) => {
+            if (!exportMenuBtn.contains(e.target)) {
+                exportMenu.classList.add('hidden');
+            }
+        });
+
+        closeExportBtn.addEventListener('click', () => {
+            exportDialog.classList.add('hidden');
+            exportAudioPlayer.pause();
+            exportAudioPlayer.src = "";
+        });
+
+        exportMp3Btn.addEventListener('click', exportMp3);
+        exportWavBtn.addEventListener('click', exportSunoWav);
+        exportMidiBtn.addEventListener('click', exportMidiFile);
+        importMidiInput.addEventListener('change', importMidiFile);
+
+        // Synth selectors
+        document.querySelectorAll('#synthSelector button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('#synthSelector button').forEach(b => {
+                    b.className = "py-1 px-2 text-xs rounded bg-gray-200 dark:bg-gray-800 text-gray-800 dark:text-gray-100 hover:bg-gray-300 dark:hover:bg-gray-700 transition";
+                });
+                btn.className = "py-1 px-2 text-xs rounded bg-emerald-600 text-white font-bold transition";
+                selectedSynth = btn.dataset.type;
+                writeInputsToTabState();
+            });
+        });
+
+        // Randomizer parameter trackers
+        densitySlider.addEventListener('input', (e) => {
+            const v = parseInt(e.target.value);
+            densityVal.innerText = v === 1 ? 'Sparse' : (v === 2 ? 'Medium' : 'Dense');
+        });
+
+        durationSlider.addEventListener('input', (e) => {
+            const v = parseInt(e.target.value);
+            durationVal.innerText = v === 1 ? 'Staccato' : (v === 2 ? 'Standard' : 'Legato');
+        });
+
+        bpmSlider.addEventListener('input', (e) => {
+            bpm = parseInt(e.target.value);
+            bpmInput.value = bpm;
+            writeInputsToTabState();
+            recalculateDurationEst();
+        });
+
+        bpmInput.addEventListener('change', (e) => {
+            let val = parseInt(e.target.value);
+            if (val < 60) val = 60;
+            if (val > 180) val = 180;
+            bpm = val;
+            bpmSlider.value = val;
+            writeInputsToTabState();
+            recalculateDurationEst();
+        });
+
+        // Metronome Click Event Listener
+        metroBtn.addEventListener('click', () => {
+            metronomeActive = !metronomeActive;
+            if (metronomeActive) {
+                metroBtn.className = "bg-indigo-600/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 px-2 py-1 rounded-md text-xs font-semibold transition-all";
+                metroBtn.innerText = "🔔 Click: On";
+            } else {
+                metroBtn.className = "bg-gray-300 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-1 rounded-md text-xs font-semibold transition-all";
+                metroBtn.innerText = "🔔 Click: Off";
+            }
+        });
+
+        randomizeBtn.addEventListener('click', runScaleVibeGenerator);
+        clearBtn.addEventListener('click', clearGrid);
+
+        // Bidirectional scrolling sync
+        gridWorkspace.addEventListener('scroll', () => {
+            rulerContainer.scrollLeft = gridWorkspace.scrollLeft;
+            pianoKeyboard.scrollTop = gridWorkspace.scrollTop;
+        });
+
+        // Scroll wheel sync on pianoKeyboard to navigate main workspace vertically
+        pianoKeyboard.addEventListener('wheel', (e) => {
+            gridWorkspace.scrollTop += e.deltaY;
+            e.preventDefault();
+        }, { passive: false });
+
+        // Global mouse listeners
+        window.addEventListener('mouseup', () => {
+            isMouseDown = false;
+        });
+
+        // Keyboard Spacebar Transport hotkey helper
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                if (isPlaying) pauseSequencer();
+                else playSequencer();
+            }
+        });
+
+        // Sniff System Colors Preferences
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+            toggleTheme('light');
+        } else {
+            toggleTheme('dark');
+        }
+
+        // Set default minimum startup values for UI controls & configs on load
+        zoomHSlider.value = 20;
+        zoomVSlider.value = 18;
+        cellWidth = 20;
+        rowHeight = 18;
+
+        // Initialize state on render
+        renderTabs();
+        buildGridUI();
+        applyZoom();
+    </script>
+</body>
+</html>
