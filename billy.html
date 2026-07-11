@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { display: flex; flex-direction: column; align-items: center; background: #222; margin: 0; padding: 20px; }
+        canvas { border: 1px solid #444; background: transparent; max-width: 100%; height: auto; }
+        button { padding: 15px 40px; font-size: 1.5rem; margin-top: 20px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<canvas id="gameCanvas" width="400" height="400"></canvas>
+<br>
+<button onclick="playPunch()">Punch</button>
+
+<script>
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+const standing = new Image();
+const punching = new Image();
+standing.crossOrigin = "Anonymous";
+punching.crossOrigin = "Anonymous";
+
+standing.src = 'https://trancedemon-collab.github.io/my_apps/billy-standing.png';
+punching.src = 'https://trancedemon-collab.github.io/my_apps/billy-punching.png';
+
+let currentImg = standing;
+
+function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Maintain aspect ratio
+    const imgRatio = currentImg.width / currentImg.height;
+    const canvasRatio = canvas.width / canvas.height;
+    let w, h, x, y;
+
+    if (imgRatio > canvasRatio) {
+        w = canvas.width;
+        h = canvas.width / imgRatio;
+    } else {
+        h = canvas.height;
+        w = canvas.height * imgRatio;
+    }
+    x = (canvas.width - w) / 2;
+    y = (canvas.height - h) / 2;
+
+    ctx.drawImage(currentImg, x, y, w, h);
+    
+    // Green screen filter
+    let frame = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    let data = frame.data;
+    for (let i = 0; i < data.length; i += 4) {
+        if (data[i+1] > 150 && data[i] < 100 && data[i+2] < 100) {
+            data[i+3] = 0;
+        }
+    }
+    ctx.putImageData(frame, 0, 0);
+    requestAnimationFrame(draw);
+}
+
+function playPunch() {
+    currentImg = punching;
+    setTimeout(() => { currentImg = standing; }, 500);
+}
+
+// Start once images load
+let loaded = 0;
+const onImgLoad = () => { if (++loaded === 2) draw(); };
+standing.onload = onImgLoad;
+punching.onload = onImgLoad;
+</script>
+</body>
+</html>
