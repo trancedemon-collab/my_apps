@@ -1,16 +1,28 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body { display: flex; flex-direction: column; align-items: center; background: #222; margin: 0; padding: 20px; }
-        canvas { border: 1px solid #444; background: transparent; max-width: 100%; height: auto; }
-        button { padding: 15px 40px; font-size: 1.5rem; margin-top: 20px; cursor: pointer; }
+        body { 
+            display: flex; flex-direction: column; align-items: center; 
+            background: #222; margin: 0; padding: 10px; height: 100vh;
+            box-sizing: border-box; overflow: hidden;
+        }
+        /* Canvas takes 75% of vertical space, leaving 25% for buttons/padding */
+        canvas { 
+            width: 100%; max-width: 500px; height: 75vh; 
+            border: 1px solid #444; background: transparent; 
+        }
+        button { 
+            padding: 20px 60px; font-size: 1.5rem; margin-top: 20px; 
+            cursor: pointer; border-radius: 12px; border: none; 
+            background: #007bff; color: white; touch-action: manipulation;
+        }
     </style>
 </head>
 <body>
 
-<canvas id="gameCanvas" width="400" height="400"></canvas>
-<br>
+<canvas id="gameCanvas"></canvas>
 <button onclick="playPunch()">Punch</button>
 
 <script>
@@ -27,10 +39,15 @@ punching.src = 'https://trancedemon-collab.github.io/my_apps/billy-punching.png'
 
 let currentImg = standing;
 
+// Dynamically set canvas internal resolution
+function resize() {
+    canvas.width = canvas.clientWidth;
+    canvas.height = canvas.clientHeight;
+}
+
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    // Maintain aspect ratio
     const imgRatio = currentImg.width / currentImg.height;
     const canvasRatio = canvas.width / canvas.height;
     let w, h, x, y;
@@ -47,13 +64,10 @@ function draw() {
 
     ctx.drawImage(currentImg, x, y, w, h);
     
-    // Green screen filter
     let frame = ctx.getImageData(0, 0, canvas.width, canvas.height);
     let data = frame.data;
     for (let i = 0; i < data.length; i += 4) {
-        if (data[i+1] > 150 && data[i] < 100 && data[i+2] < 100) {
-            data[i+3] = 0;
-        }
+        if (data[i+1] > 150 && data[i] < 100 && data[i+2] < 100) data[i+3] = 0;
     }
     ctx.putImageData(frame, 0, 0);
     requestAnimationFrame(draw);
@@ -64,7 +78,8 @@ function playPunch() {
     setTimeout(() => { currentImg = standing; }, 500);
 }
 
-// Start once images load
+window.addEventListener('resize', resize);
+resize();
 let loaded = 0;
 const onImgLoad = () => { if (++loaded === 2) draw(); };
 standing.onload = onImgLoad;
