@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="system">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JSON CV Editor & Inspector</title>
+  <style>
+    /* ==========================================================================
+       1. GTK THEME VARIABLES
+       ========================================================================== */
+    :root[data-theme="light"],
+    :root[data-theme="system"] {
+      --gtk-bg: #e8e8e7;
+      --gtk-header-bg: #f6f6f5;
+      --gtk-fg: #2e3436;
+      --gtk-border: #cdc7c2;
+      --gtk-btn-bg: #ffffff;
+      --gtk-btn-hover: #f4f4f4;
+      --gtk-accent: #3584e4;
+      --gtk-accent-fg: #ffffff;
+      --gtk-danger: #e01b24;
+      --cv-paper-bg: #ffffff;
+      --cv-paper-fg: #1c1c1c;
+      --cv-border: #e0e0e0;
+      --json-bg: #1e1e1e;
+      --json-fg: #d4d4d4;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root[data-theme="system"] {
+        --gtk-bg: #2d2d2d;
+        --gtk-header-bg: #353535;
+        --gtk-fg: #eeeeec;
+        --gtk-border: #1b1b1b;
+        --gtk-btn-bg: #3c3c3c;
+        --gtk-btn-hover: #4a4a4a;
+        --gtk-accent: #3584e4;
+        --gtk-accent-fg: #ffffff;
+        --gtk-danger: #c01c28;
+        --cv-paper-bg: #ffffff;
+        --cv-paper-fg: #1c1c1c;
+        --cv-border: #e0e0e0;
+        --json-bg: #181818;
+        --json-fg: #d4d4d4;
+      }
+    }
+
+    :root[data-theme="dark"] {
+      --gtk-bg: #2d2d2d;
+      --gtk-header-bg: #353535;
+      --gtk-fg: #eeeeec;
+      --gtk-border: #1b1b1b;
+      --gtk-btn-bg: #3c3c3c;
+      --gtk-btn-hover: #4a4a4a;
+      --gtk-accent: #3584e4;
+      --gtk-accent-fg: #ffffff;
+      --gtk-danger: #c01c28;
+      --cv-paper-bg: #ffffff;
+      --cv-paper-fg: #1c1c1c;
+      --cv-border: #e0e0e0;
+      --json-bg: #181818;
+      --json-fg: #d4d4d4;
+    }
+
+    /* ==========================================================================
+       2. GENERAL APP LAYOUT & GTK HEADER BAR
+       ========================================================================== */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: cantarell, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--gtk-bg);
+      color: var(--gtk-fg);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    header {
+      background-color: var(--gtk-header-bg);
+      border-bottom: 1px solid var(--gtk-border);
+      padding: 8px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      user-select: none;
+      z-index: 10;
+    }
+
+    .header-group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .app-title { font-weight: bold; font-size: 0.95rem; margin-right: 12px; }
+
+    .gtk-btn {
+      background-color: var(--gtk-btn-bg);
+      color: var(--gtk-fg);
+      border: 1px solid var(--gtk-border);
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background-color 0.15s ease;
+    }
+
+    .gtk-btn:hover { background-color: var(--gtk-btn-hover); }
+    .gtk-btn.primary { background-color: var(--gtk-accent); color: var(--gtk-accent-fg); border-color: var(--gtk-accent); }
+    .gtk-btn.danger { background-color: var(--gtk-danger); color: #fff; border-color: var(--gtk-danger); }
+    .gtk-btn.active { outline: 2px solid var(--gtk-accent); font-weight: bold; }
+    .gtk-btn-sm { padding: 2px 6px; font-size: 0.75rem; border-radius: 4px; }
+
+    select.gtk-btn {
+      appearance: none;
+      padding-right: 24px;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 6px center;
+      background-size: 12px;
+    }
+
+    .formatting-bar {
+      background-color: var(--gtk-header-bg);
+      border-bottom: 1px solid var(--gtk-border);
+      padding: 4px 16px;
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      font-size: 0.8rem;
+    }
+
+    .app-workspace {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+      position: relative;
+    }
+
+    main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 30px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    /* ==========================================================================
+       3. FLUID CANVAS & READ-ONLY ENFORCEMENT
+       ========================================================================== */
+    .cv-card {
+      background-color: var(--cv-paper-bg);
+      color: var(--cv-paper-fg);
+      width: 100%;
+      max-width: 850px;
+      min-height: 500px;
+      padding: 40px 48px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+      border-radius: 4px;
+      line-height: 1.5;
+      font-size: 10pt;
+    }
+
+    .cv-header {
+      border-bottom: 2px solid var(--cv-paper-fg);
+      padding-bottom: 12px;
+      margin-bottom: 20px;
+    }
+    .cv-header h1 { font-size: 22pt; text-transform: uppercase; letter-spacing: 0.5px; }
+    .cv-header .subtitle { font-size: 11pt; color: #444; font-weight: 600; margin-top: 2px; }
+    .cv-contact { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 8px; font-size: 9pt; color: #555; }
+
+    .cv-section { margin-bottom: 20px; position: relative; }
+    .cv-section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--cv-border);
+      padding-bottom: 4px;
+      margin-bottom: 10px;
+    }
+    .cv-section-title {
+      font-size: 11pt;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: bold;
+      color: #111;
+    }
+
+    .cv-item { margin-bottom: 14px; position: relative; border-radius: 4px; padding: 2px 4px; }
+    .cv-item-header { display: flex; justify-content: space-between; font-weight: bold; }
+    .cv-item-sub { display: flex; justify-content: space-between; font-style: italic; color: #555; margin-bottom: 4px; }
+    .cv-item-desc { font-size: 9.5pt; color: #333; margin-top: 4px; text-align: justify; }
+
+    .skill-group { margin-bottom: 8px; padding: 2px 4px; }
+    .skill-title { font-weight: bold; text-transform: capitalize; }
+
+    ul.cv-list { padding-left: 18px; margin-top: 4px; }
+    ul.cv-list li { margin-bottom: 4px; padding: 2px 4px; }
+
+    .edit-controls { display: inline-flex; gap: 4px; margin-left: 8px; vertical-align: middle; }
+    
+    /* STRICT READ-ONLY MODE CONTROLS */
+    body.read-mode .edit-controls,
+    body.read-mode .formatting-bar { display: none !important; }
+
+    body.edit-mode [contenteditable="true"] {
+      outline: 1px dashed #b0b0b0;
+      transition: outline 0.15s ease, background-color 0.15s ease;
+      border-radius: 2px;
+      min-width: 20px;
+    }
+    body.edit-mode [contenteditable="true"]:hover {
+      outline: 1px dashed #3584e4;
+      background-color: rgba(53, 132, 228, 0.05);
+    }
+
+    /* Inspector Canvas Selection Highlighting */
+    .inspector-highlight {
+      outline: 2px solid #3584e4 !important;
+      background-color: rgba(53, 132, 228, 0.12) !important;
+    }
+
+    /* ==========================================================================
+       4. NOTEPAD-STYLE JSON TEXTAREA INSPECTOR
+       ========================================================================== */
+    .json-panel {
+      width: 480px;
+      background-color: var(--json-bg);
+      border-left: 1px solid var(--gtk-border);
+      display: flex;
+      flex-direction: column;
+      transition: margin-right 0.2s ease-in-out;
+    }
+
+    .json-panel.hidden { margin-right: -480px; }
+
+    .json-panel-header {
+      background-color: var(--gtk-header-bg);
+      color: var(--gtk-fg);
+      padding: 8px 12px;
+      font-size: 0.85rem;
+      font-weight: bold;
+      border-bottom: 1px solid var(--gtk-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .json-error-banner {
+      background-color: var(--gtk-danger);
+      color: #fff;
+      font-size: 0.8rem;
+      padding: 6px 12px;
+      display: none;
+      font-weight: 500;
+    }
+
+    .notepad-textarea {
+      flex: 1;
+      width: 100%;
+      background-color: var(--json-bg);
+      color: var(--json-fg);
+      border: none;
+      padding: 12px;
+      font-family: "Cascadia Code", "Fira Code", "Courier New", monospace;
+      font-size: 0.85rem;
+      line-height: 1.45;
+      resize: none;
+      outline: none;
+      tab-size: 2;
+      white-space: pre;
+      overflow: auto;
+    }
+
+    #fileInput { display: none; }
+
+    /* ==========================================================================
+       5. PRINT MEDIA
+       ========================================================================== */
+    @media print {
+      body { background-color: #fff !important; height: auto; overflow: visible; }
+      header, .formatting-bar, .edit-controls, .json-panel { display: none !important; }
+      main { padding: 0 !important; overflow: visible !important; display: block !important; }
+      .cv-card { box-shadow: none !important; width: 100% !important; max-width: 100% !important; padding: 0 !important; }
+      [contenteditable="true"] { outline: none !important; background-color: transparent !important; }
+      @page { size: A4; margin: 15mm; }
+    }
+  </style>
+</head>
+<body class="edit-mode">
+
+  <header>
+    <div class="header-group">
+      <span class="app-title">CV Inspector & Editor</span>
+      <button class="gtk-btn" onclick="document.getElementById('fileInput').click()">📁 Load JSON</button>
+      <input type="file" id="fileInput" accept=".json" onchange="handleFileSelect(event)">
+      <button class="gtk-btn primary" onclick="saveJSON()">💾 Save JSON</button>
+      <button class="gtk-btn" onclick="window.print()">🖨️ Print / PDF</button>
+    </div>
+
+    <div class="header-group">
+      <button id="btnEditMode" class="gtk-btn active" onclick="setMode('edit')">✏️ Edit Mode</button>
+      <button id="btnReadMode" class="gtk-btn" onclick="setMode('read')">👁️ Read Only</button>
+      <button id="btnToggleJson" class="gtk-btn active" onclick="toggleJsonPanel()">🔍 Code Inspector</button>
+      
+      <label for="themeSelect" style="font-size: 0.85rem; margin-left: 8px;">Theme:</label>
+      <select id="themeSelect" class="gtk-btn" onchange="changeTheme(this.value)">
+        <option value="system">GTK System</option>
+        <option value="light">GTK Light</option>
+        <option value="dark">GTK Dark</option>
+      </select>
+    </div>
+  </header>
+
+  <div class="formatting-bar">
+    <span style="font-size: 0.75rem; font-weight: bold; margin-right: 4px;">Formatting:</span>
+    <button class="gtk-btn gtk-btn-sm" onclick="execCmd('bold')"><b>B</b></button>
+    <button class="gtk-btn gtk-btn-sm" onclick="execCmd('italic')"><i>I</i></button>
+    <button class="gtk-btn gtk-btn-sm" onclick="execCmd('insertUnorderedList')">• Bullet List</button>
+    <button class="gtk-btn gtk-btn-sm" onclick="execCmd('removeFormat')">✕ Clear</button>
+    <span style="margin-left: auto; font-size: 0.75rem; color: #777;">Double-click or select text on the left to locate and highlight it in the Notepad Inspector</span>
+  </div>
+
+  <div class="app-workspace">
+    <main>
+      <div class="cv-card" id="cvContainer"></div>
+    </main>
+
+    <!-- Plain Text Notepad Style JSON Code Inspector -->
+    <div class="json-panel" id="jsonPanel">
+      <div class="json-panel-header">
+        <span>JSON Code Inspector (Notepad)</span>
+        <button class="gtk-btn gtk-btn-sm" onclick="toggleJsonPanel()">✕</button>
+      </div>
+      <div class="json-error-banner" id="jsonError">⚠️ Syntax Error: Invalid JSON structure</div>
+      <textarea class="notepad-textarea" id="jsonNotepad" oninput="handleNotepadInput()" spellcheck="false"></textarea>
+    </div>
+  </div>
+
+  <script>
+    let cvData = {
+      personal_info: {
+        name: "Bradford Risbert",
+        title: "AI-Powered Content Creator, Creative & Technical Professional",
+        contact: {
+          phone: "9821320459",
+          email: "trancedemon@gmail.com",
+          linkedin: "https://www.linkedin.com/in/bradford-risbert-68202348/"
+        }
+      },
+      summary: "A highly creative and technically proficient professional with a strong interest in AI-powered content creation, problem-solving, and utilizing AI tools for high-quality video, music, and graphic content. Over 12 years of proven success in customer support across technical and non-technical domains.",
+      skills: {
+        technical_tools: ["AI Prompting (Vibe Coding)", "Generative Prompt Engineering", "Python", "HTML", "Salesforce", "Jira", "Slack", "OS Installation (Linux/Windows)"],
+        creative_production: ["Advanced Generative Imaging", "3D Modeling (Blender)", "Video/Music Editing", "Graphic Design", "Script Writing", "Content Planning", "Social Media Content"]
+      },
+      work_experience: [
+        {
+          role: "Client Success Manager",
+          company: "Code My Mobile",
+          dates: "Oct 2020 - Mar 2023",
+          location: "Jaipur, Rajasthan",
+          description: "Managed technical support and client relations for the Upkeep CMMS system. Key responsibilities included extensive troubleshooting, bug reporting, and crucial data normalization."
+        },
+        { role: "Senior Customer Service Executive", company: "Teleperformance", dates: "Aug 2017 - Mar 2019", location: "Malad West, Mumbai" },
+        { role: "Tech Support Advisor", company: "Tech Mahindra", dates: "Aug 2015 - Nov 2016", location: "Malad West, Mumbai" },
+        { role: "Sr. CSR", company: "Altisource Business Solutions Pvt. Ltd.", dates: "Jun 2013 - Apr 2015", location: "Vashi, Navi Mumbai" }
+      ],
+      education: [
+        { degree: "HSC (12th)", institution: "Rizvi College, Bandra", year: 2001 },
+        { degree: "SSC (10th)", institution: "St. Stanislaus High School, Bandra", year: 1998 }
+      ],
+      certifications: [
+        "Computer Hardware (AIIT)",
+        "3D Studio Max, Soundforge, Dreamweaver (Arena Multimedia)",
+        "CorelDRAW, Photoshop (FICER)"
+      ],
+      custom_sections: []
+    };
+
+    let isInternalUpdate = false;
+
+    // Strict Mode Switcher
+    function setMode(mode) {
+      const editables = document.querySelectorAll('#cvContainer [contenteditable]');
+      const notepad = document.getElementById('jsonNotepad');
+
+      if (mode === 'edit') {
+        document.body.classList.remove('read-mode');
+        document.body.classList.add('edit-mode');
+        document.getElementById('btnEditMode').classList.add('active');
+        document.getElementById('btnReadMode').classList.remove('active');
+        
+        editables.forEach(el => el.setAttribute('contenteditable', 'true'));
+        notepad.removeAttribute('readonly');
+      } else {
+        document.body.classList.remove('edit-mode');
+        document.body.classList.add('read-mode');
+        document.getElementById('btnReadMode').classList.add('active');
+        document.getElementById('btnEditMode').classList.remove('active');
+        
+        // Disable editing in Read-Only
+        editables.forEach(el => el.setAttribute('contenteditable', 'false'));
+        notepad.setAttribute('readonly', 'true');
+      }
+    }
+
+    function toggleJsonPanel() {
+      const panel = document.getElementById('jsonPanel');
+      const btn = document.getElementById('btnToggleJson');
+      panel.classList.toggle('hidden');
+      btn.classList.toggle('active');
+    }
+
+    function execCmd(command, value = null) {
+      if (document.body.classList.contains('read-mode')) return;
+      document.execCommand(command, false, value);
+    }
+
+    // Render Canvas UI
+    function renderCV() {
+      const container = document.getElementById('cvContainer');
+      const info = cvData.personal_info || cvData;
+      const contact = info.contact || cvData.contact || {};
+      const expList = cvData.work_experience || cvData.experience || [];
+      const eduList = cvData.education || [];
+      const certsList = cvData.certifications || [];
+      const customSecs = cvData.custom_sections || [];
+
+      let skillsHtml = '';
+      if (cvData.skills) {
+        if (Array.isArray(cvData.skills)) {
+          skillsHtml = `<p contenteditable="true" onblur="updateSkillsArray(this.innerText)">${cvData.skills.join(', ')}</p>`;
+        } else if (typeof cvData.skills === 'object') {
+          skillsHtml = Object.keys(cvData.skills).map(groupKey => `
+            <div class="skill-group">
+              <span class="skill-title">${groupKey.replace('_', ' ')}:</span>
+              <span contenteditable="true" onblur="updateSkillGroup('${groupKey}', this.innerText)">
+                ${cvData.skills[groupKey].join(', ')}
+              </span>
+            </div>
+          `).join('');
+        }
+      }
+
+      container.innerHTML = `
+        <div class="cv-header">
+          <h1 contenteditable="true" onblur="updateNested('personal_info', 'name', this.innerText)">${info.name || ''}</h1>
+          <div class="subtitle" contenteditable="true" onblur="updateNested('personal_info', 'title', this.innerText)">${info.title || ''}</div>
+          <div class="cv-contact">
+            <div>Phone: <span contenteditable="true" onblur="updateContact('phone', this.innerText)">${contact.phone || ''}</span></div>
+            <div>Email: <span contenteditable="true" onblur="updateContact('email', this.innerText)">${contact.email || ''}</span></div>
+            <div>LinkedIn: <span contenteditable="true" onblur="updateContact('linkedin', this.innerText)">${contact.linkedin || ''}</span></div>
+          </div>
+        </div>
+
+        ${cvData.summary !== undefined ? `
+        <div class="cv-section">
+          <div class="cv-section-header">
+            <div class="cv-section-title">Professional Summary</div>
+          </div>
+          <p contenteditable="true" onblur="updateField('summary', this.innerText)">${cvData.summary}</p>
+        </div>` : ''}
+
+        <div class="cv-section">
+          <div class="cv-section-header">
+            <div class="cv-section-title">Work Experience</div>
+            <div class="edit-controls">
+              <button class="gtk-btn gtk-btn-sm" onclick="addWorkExperience()">+ Add Job</button>
+            </div>
+          </div>
+          ${expList.map((exp, idx) => `
+            <div class="cv-item">
+              <div class="cv-item-header">
+                <span contenteditable="true" onblur="updateArrayObj('work_experience', ${idx}, 'role', this.innerText)">${exp.role || exp.title || 'Job Title'}</span>
+                <span>
+                  <span contenteditable="true" onblur="updateArrayObj('work_experience', ${idx}, 'dates', this.innerText)">${exp.dates || exp.period || 'Dates'}</span>
+                  <span class="edit-controls"><button class="gtk-btn gtk-btn-sm danger" onclick="removeWorkExperience(${idx})">🗑️</button></span>
+                </span>
+              </div>
+              <div class="cv-item-sub">
+                <span contenteditable="true" onblur="updateArrayObj('work_experience', ${idx}, 'company', this.innerText)">${exp.company || 'Company'}</span>
+                <span contenteditable="true" onblur="updateArrayObj('work_experience', ${idx}, 'location', this.innerText)">${exp.location || 'Location'}</span>
+              </div>
+              <div class="cv-item-desc" contenteditable="true" onblur="updateArrayObj('work_experience', ${idx}, 'description', this.innerHTML)">${exp.description || ''}</div>
+            </div>
+          `).join('')}
+        </div>
+
+        ${skillsHtml ? `
+        <div class="cv-section">
+          <div class="cv-section-header">
+            <div class="cv-section-title">Skills & Competencies</div>
+          </div>
+          ${skillsHtml}
+        </div>` : ''}
+
+        <div class="cv-section">
+          <div class="cv-section-header">
+            <div class="cv-section-title">Education</div>
+            <div class="edit-controls">
+              <button class="gtk-btn gtk-btn-sm" onclick="addEducation()">+ Add Education</button>
+            </div>
+          </div>
+          ${eduList.map((edu, idx) => `
+            <div class="cv-item">
+              <div class="cv-item-header">
+                <span contenteditable="true" onblur="updateArrayObj('education', ${idx}, 'degree', this.innerText)">${edu.degree || 'Degree'}</span>
+                <span>
+                  <span contenteditable="true" onblur="updateArrayObj('education', ${idx}, 'year', this.innerText)">${edu.year || 'Year'}</span>
+                  <span class="edit-controls"><button class="gtk-btn gtk-btn-sm danger" onclick="removeEducation(${idx})">🗑️</button></span>
+                </span>
+              </div>
+              <div class="cv-item-sub">
+                <span contenteditable="true" onblur="updateArrayObj('education', ${idx}, 'institution', this.innerText)">${edu.institution || 'Institution'}</span>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+
+        <div class="cv-section">
+          <div class="cv-section-header">
+            <div class="cv-section-title">Certifications</div>
+            <div class="edit-controls">
+              <button class="gtk-btn gtk-btn-sm" onclick="addCertification()">+ Add Certification</button>
+            </div>
+          </div>
+          <ul class="cv-list">
+            ${certsList.map((cert, idx) => `
+              <li>
+                <span contenteditable="true" onblur="updateCert(${idx}, this.innerText)">${cert}</span>
+                <span class="edit-controls"><button class="gtk-btn gtk-btn-sm danger" onclick="removeCertification(${idx})">🗑️</button></span>
+              </li>
+            `).join('')}
+          </ul>
+        </div>
+
+        <div class="cv-section edit-controls" style="margin-top: 15px;">
+          <button class="gtk-btn gtk-btn-sm" onclick="addCustomSection()">+ Add Custom Heading/Section</button>
+        </div>
+      `;
+
+      bindSelectionSync();
+      syncNotepadView();
+      if (document.body.classList.contains('read-mode')) setMode('read');
+    }
+
+    function syncNotepadView() {
+      if (isInternalUpdate) return;
+      const notepad = document.getElementById('jsonNotepad');
+      notepad.value = JSON.stringify(cvData, null, 2);
+      document.getElementById('jsonError').style.display = 'none';
+    }
+
+    function handleNotepadInput() {
+      const notepad = document.getElementById('jsonNotepad');
+      const errBanner = document.getElementById('jsonError');
+
+      try {
+        const parsed = JSON.parse(notepad.value);
+        cvData = parsed;
+        errBanner.style.display = 'none';
+        isInternalUpdate = true;
+        renderCV();
+        isInternalUpdate = false;
+      } catch (err) {
+        errBanner.innerText = `⚠️ Syntax Error: ${err.message}`;
+        errBanner.style.display = 'block';
+      }
+    }
+
+    // Auto-Search & Highlight Selected Canvas Word inside Inspector Notepad
+    function bindSelectionSync() {
+      const container = document.getElementById('cvContainer');
+      
+      const handleSync = () => {
+        const selectedText = window.getSelection().toString().trim();
+        if (!selectedText || selectedText.length < 2) return;
+
+        const notepad = document.getElementById('jsonNotepad');
+        const rawContent = notepad.value;
+        const matchIndex = rawContent.indexOf(selectedText);
+
+        if (matchIndex !== -1) {
+          notepad.focus();
+          notepad.setSelectionRange(matchIndex, matchIndex + selectedText.length);
+        }
+      };
+
+      container.addEventListener('mouseup', handleSync);
+      container.addEventListener('dblclick', handleSync);
+    }
+
+    // Dynamic Block Manipulators
+    function addWorkExperience() {
+      if (!cvData.work_experience) cvData.work_experience = [];
+      cvData.work_experience.unshift({ role: "New Position", company: "Company Name", dates: "Date Joined - Date Left", location: "Location", description: "Responsibilities..." });
+      renderCV();
+    }
+    function removeWorkExperience(idx) { cvData.work_experience.splice(idx, 1); renderCV(); }
+
+    function addEducation() {
+      if (!cvData.education) cvData.education = [];
+      cvData.education.push({ degree: "Degree / Qualification", institution: "Institution / Board", year: "Year" });
+      renderCV();
+    }
+    function removeEducation(idx) { cvData.education.splice(idx, 1); renderCV(); }
+
+    function addCertification() {
+      if (!cvData.certifications) cvData.certifications = [];
+      cvData.certifications.push("New Certification");
+      renderCV();
+    }
+    function removeCertification(idx) { cvData.certifications.splice(idx, 1); renderCV(); }
+
+    // JSON Sync Mutators
+    function updateField(key, val) { cvData[key] = val.trim(); syncNotepadView(); }
+    function updateNested(parent, key, val) {
+      if (!cvData[parent]) cvData[parent] = {};
+      cvData[parent][key] = val.trim();
+      syncNotepadView();
+    }
+    function updateContact(key, val) {
+      const parent = cvData.personal_info ? cvData.personal_info : cvData;
+      if (!parent.contact) parent.contact = {};
+      parent.contact[key] = val.trim();
+      syncNotepadView();
+    }
+    function updateArrayObj(arrKey, idx, key, val) {
+      const targetArr = cvData[arrKey] || cvData['experience'];
+      if (targetArr && targetArr[idx]) targetArr[idx][key] = val.trim();
+      syncNotepadView();
+    }
+    function updateSkillGroup(key, val) {
+      cvData.skills[key] = val.split(',').map(s => s.trim()).filter(Boolean);
+      syncNotepadView();
+    }
+    function updateSkillsArray(val) {
+      cvData.skills = val.split(',').map(s => s.trim()).filter(Boolean);
+      syncNotepadView();
+    }
+    function updateCert(idx, val) {
+      cvData.certifications[idx] = val.trim();
+      syncNotepadView();
+    }
+
+    function changeTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+    }
+
+    function handleFileSelect(evt) {
+      const file = evt.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          cvData = JSON.parse(e.target.result);
+          renderCV();
+        } catch (err) {
+          alert("Invalid JSON file format.");
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function saveJSON() {
+      const notepad = document.getElementById('jsonNotepad');
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(notepad.value);
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", "updated_resume.json");
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    }
+
+    // Initialize App
+    renderCV();
+  </script>
+</body>
+</html>

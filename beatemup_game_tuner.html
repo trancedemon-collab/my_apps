@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Beat 'Em Up Engine & Sprite Tuner</title>
+  <style>
+    :root {
+      --bg: #353535;
+      --header-bg: #2d2d2d;
+      --panel-bg: #2b2b2b;
+      --card-bg: #242424;
+      --text: #eeeeee;
+      --text-muted: #9e9e9e;
+      --accent: #3584e4;
+      --accent-hover: #1c71d8;
+      --border: #1b1b1b;
+      --input-bg: #1e1e1e;
+      --radius: 6px;
+    }
+
+    [data-theme="gtk-light"] {
+      --bg: #f6f5f4;
+      --header-bg: #e8e6e1;
+      --panel-bg: #ffffff;
+      --card-bg: #f0ede6;
+      --text: #2e3436;
+      --text-muted: #77767b;
+      --accent: #3584e4;
+      --accent-hover: #1c71d8;
+      --border: #cdc7c2;
+      --input-bg: #ffffff;
+    }
+
+    [data-theme="gtk-dark"] {
+      --bg: #353535;
+      --header-bg: #2d2d2d;
+      --panel-bg: #2b2b2b;
+      --card-bg: #242424;
+      --text: #eeeeee;
+      --text-muted: #9e9e9e;
+      --accent: #3584e4;
+      --accent-hover: #1c71d8;
+      --border: #1b1b1b;
+      --input-bg: #1e1e1e;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); padding: 16px; min-height: 100vh; display: flex; flex-direction: column; gap: 16px; }
+
+    header { display: flex; justify-content: space-between; align-items: center; background: var(--header-bg); padding: 12px 20px; border-radius: var(--radius); border: 1px solid var(--border); }
+    h1 { font-size: 1.1rem; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+
+    .theme-select { padding: 6px 12px; background: var(--input-bg); color: var(--text); border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; outline: none; }
+
+    .tabs { display: flex; gap: 8px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+    .tab-btn { padding: 8px 16px; background: var(--panel-bg); color: var(--text-muted); border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; font-weight: 500; font-size: 0.9rem; transition: all 0.2s ease; }
+    .tab-btn.active { background: var(--accent); color: #ffffff; border-color: var(--accent-hover); }
+
+    .view-content { display: none; gap: 16px; grid-template-columns: 1fr; }
+    .view-content.active { display: grid; }
+    @media (min-width: 960px) { .view-content.active { grid-template-columns: 380px 1fr; } }
+
+    .panel { background: var(--panel-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; display: flex; flex-direction: column; gap: 14px; max-height: 85vh; overflow-y: auto; }
+    .panel h2 { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); padding-bottom: 6px; border-bottom: 1px solid var(--border); margin-top: 4px; }
+
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    label { font-size: 0.8rem; font-weight: 500; color: var(--text-muted); display: flex; justify-content: space-between; align-items: center; }
+    input[type="number"], input[type="text"], select { padding: 8px 10px; background: var(--input-bg); color: var(--text); border: 1px solid var(--border); border-radius: var(--radius); font-size: 0.85rem; outline: none; width: 100%; }
+    input[type="range"] { width: 100%; accent-color: var(--accent); }
+    input[type="color"] { width: 100%; height: 36px; border-radius: var(--radius); border: 1px solid var(--border); cursor: pointer; background: var(--input-bg); }
+    input[type="file"] { font-size: 0.8rem; color: var(--text); }
+    input[type="checkbox"] { accent-color: var(--accent); transform: scale(1.1); margin-right: 6px; }
+
+    .btn { padding: 8px 14px; background: var(--accent); color: white; border: none; border-radius: var(--radius); cursor: pointer; font-size: 0.85rem; font-weight: 500; text-align: center; transition: background 0.15s ease; }
+    .btn:hover { background: var(--accent-hover); }
+    .btn-secondary { background: var(--card-bg); color: var(--text); border: 1px solid var(--border); }
+    .btn-secondary:hover { background: var(--header-bg); }
+
+    .tool-group { display: flex; gap: 8px; margin-top: 4px; }
+    .tool-btn { flex: 1; padding: 8px; background: var(--card-bg); border: 1px solid var(--border); color: var(--text); border-radius: var(--radius); cursor: pointer; font-weight: 500; font-size: 0.8rem; text-align: center; }
+    .tool-btn.active { background: var(--accent); color: white; border-color: var(--accent-hover); }
+
+    .canvas-container { background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); overflow: auto; position: relative; display: flex; justify-content: center; align-items: center; min-height: 500px; padding: 12px; }
+    .canvas-wrapper { position: relative; width: 800px; height: 400px; }
+    .canvas-wrapper canvas { position: absolute; top: 0; left: 0; display: block; image-rendering: pixelated; }
+
+    .preview-box { display: flex; align-items: center; gap: 16px; padding: 12px; background: var(--card-bg); border-radius: var(--radius); border: 1px solid var(--border); }
+    #previewCanvas { width: 96px; height: 96px; border: 1px dashed var(--border); background-size: 12px 12px; background-image: repeating-conic-gradient(#303030 0% 25%, #202020 0% 50%); }
+
+    .char-card { display: flex; flex-direction: column; gap: 8px; padding: 10px; background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius); font-size: 0.85rem; }
+    .char-card-header { display: flex; justify-content: space-between; align-items: center; }
+    .sub-panel { background: var(--input-bg); padding: 10px; border-radius: var(--radius); border: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px; }
+  </style>
+</head>
+<body data-theme="gtk-dark">
+
+  <header>
+    <h1>🕹️ Beat 'Em Up Engine & Sprite Tuner</h1>
+    <div>
+      <select id="themeSelect" class="theme-select">
+        <option value="gtk-dark">GTK Dark</option>
+        <option value="gtk-light">GTK Light</option>
+        <option value="auto">System Auto</option>
+      </select>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab-btn active" onclick="switchTab('stageView', this)">Stage & Collision Painter</button>
+    <button class="tab-btn" onclick="switchTab('spriteView', this)">Sprite Sheet Library & Tuner</button>
+  </nav>
+
+  <main id="stageView" class="view-content active">
+    <aside class="panel">
+      <h2>1. Environment & Stage</h2>
+      <div class="form-group">
+        <label>Upload Background Image</label>
+        <input type="file" id="bgInput" accept="image/*" />
+      </div>
+
+      <h2>2. Walkable Y-Boundaries</h2>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Horizon Y (Min)</label>
+          <input type="number" id="boundsYMin" value="220" />
+        </div>
+        <div class="form-group">
+          <label>Bottom Y (Max)</label>
+          <input type="number" id="boundsYMax" value="380" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label><input type="checkbox" id="showBoundsCheck" checked /> Show Y-Depth Bounds</label>
+      </div>
+
+      <h2>3. 🚫 Obstacle Mask Painter</h2>
+      <div class="form-group">
+        <label>Paint Tool</label>
+        <div class="tool-group">
+          <button id="toolPaint" class="tool-btn active" onclick="setMaskTool('paint')">🖌️ Paint Obstacle</button>
+          <button id="toolErase" class="tool-btn" onclick="setMaskTool('erase')">🧽 Eraser</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Brush Size: <span id="brushSizeVal">24px</span></label>
+        <input type="range" id="brushSize" min="6" max="80" value="24" oninput="document.getElementById('brushSizeVal').innerText = this.value + 'px'" />
+      </div>
+      <div class="form-group">
+        <label><input type="checkbox" id="showMaskCheck" checked /> Show Mask Overlay (Design Mode)</label>
+      </div>
+      <button class="btn btn-secondary" onclick="clearMaskCanvas()">🗑️ Clear Painted Obstacles</button>
+
+      <h2>4. Character Instances & Behaviors</h2>
+      <button class="btn" onclick="addCharacter()">+ Add Character Instance</button>
+      <div id="characterList" style="display:flex; flex-direction:column; gap:10px;"></div>
+    </aside>
+
+    <section class="canvas-container">
+      <div class="canvas-wrapper">
+        <canvas id="stageCanvas" width="800" height="400"></canvas>
+        <canvas id="maskCanvas" width="800" height="400"></canvas>
+      </div>
+    </section>
+  </main>
+
+  <main id="spriteView" class="view-content">
+    <aside class="panel">
+      <h2>1. Select / Add Sprite Preset</h2>
+      <div class="form-group">
+        <label>Active Sprite Profile</label>
+        <select id="profileSelect" onchange="switchProfile(this.value)"></select>
+      </div>
+      <button class="btn btn-secondary" onclick="createNewProfile()">+ Create New Sprite Profile</button>
+      
+      <h2>2. Upload Sprite Sheet</h2>
+      <div class="form-group">
+        <label>Upload Sheet Image</label>
+        <input type="file" id="spriteInput" accept="image/*" />
+      </div>
+
+      <h2>3. Global Cropping Region</h2>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Crop X (px)</label>
+          <input type="number" id="cropX" value="0" min="0" />
+        </div>
+        <div class="form-group">
+          <label>Crop Y (px)</label>
+          <input type="number" id="cropY" value="0" min="0" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Crop Width (px)</label>
+          <input type="number" id="cropW" value="0" min="0" placeholder="0 = Auto Full" />
+        </div>
+        <div class="form-group">
+          <label>Crop Height (px)</label>
+          <input type="number" id="cropH" value="0" min="0" placeholder="0 = Auto Full" />
+        </div>
+      </div>
+
+      <h2>4. Grid Slicing Setup</h2>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Columns</label>
+          <input type="number" id="gridCols" value="4" min="1" />
+        </div>
+        <div class="form-group">
+          <label>Rows</label>
+          <input type="number" id="gridRows" value="2" min="1" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Offset X (px)</label>
+          <input type="number" id="offsetX" value="0" />
+        </div>
+        <div class="form-group">
+          <label>Offset Y (px)</label>
+          <input type="number" id="offsetY" value="0" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Spacing X (px)</label>
+          <input type="number" id="spacingX" value="0" />
+        </div>
+        <div class="form-group">
+          <label>Spacing Y (px)</label>
+          <input type="number" id="spacingY" value="0" />
+        </div>
+      </div>
+
+      <h2>5. Chroma Transparency Filter</h2>
+      <div class="form-group">
+        <label><input type="checkbox" id="chromaEnable" /> Enable Chroma Key</label>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Key Color</label>
+          <input type="color" id="chromaColor" value="#00ff00" />
+        </div>
+        <div class="form-group">
+          <label>Tolerance <span id="tolVal">60</span></label>
+          <input type="range" id="chromaTolerance" min="1" max="200" value="60" />
+        </div>
+      </div>
+
+      <h2>6. Stage Render Scale</h2>
+      <div class="form-group">
+        <label>Draw Scale <span id="scaleVal">0.5x</span></label>
+        <input type="range" id="drawScale" min="0.1" max="2.0" step="0.05" value="0.5" />
+      </div>
+
+      <h2>7. Sprite Orientation & Tuning</h2>
+      <div class="form-group">
+        <label><input type="checkbox" id="invertSprite" /> Invert Base Facing (Check if sprite faces LEFT by default)</label>
+      </div>
+
+      <h2>Live Frame Preview</h2>
+      <div class="preview-box">
+        <canvas id="previewCanvas" width="96" height="96"></canvas>
+        <div class="form-group" style="flex:1;">
+          <label>Anim Row</label>
+          <input type="number" id="animRow" value="0" min="0" />
+          <label style="margin-top:4px;">FPS</label>
+          <input type="number" id="animFps" value="6" min="1" max="60" />
+        </div>
+      </div>
+
+      <button class="btn btn-secondary" onclick="saveProfilesToStorage()">💾 Save All Profiles to LocalStorage</button>
+    </aside>
+
+    <section class="canvas-container">
+      <canvas id="tunerCanvas" width="800" height="400"></canvas>
+    </section>
+  </main>
+
+  <script>
+    // Theme Manager
+    const themeSelect = document.getElementById('themeSelect');
+    themeSelect.addEventListener('change', (e) => {
+      if (e.target.value === 'auto') {
+        const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.body.setAttribute('data-theme', isDark ? 'gtk-dark' : 'gtk-light');
+      } else {
+        document.body.setAttribute('data-theme', e.target.value);
+      }
+    });
+
+    function switchTab(tabId, btn) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.view-content').forEach(v => v.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(tabId).classList.add('active');
+    }
+
+    // Engine Canvases
+    const stageCanvas = document.getElementById('stageCanvas');
+    const stageCtx = stageCanvas.getContext('2d');
+    const maskCanvas = document.getElementById('maskCanvas');
+    const maskCtx = maskCanvas.getContext('2d');
+
+    const tunerCanvas = document.getElementById('tunerCanvas');
+    const tunerCtx = tunerCanvas.getContext('2d');
+    const previewCanvas = document.getElementById('previewCanvas');
+    const previewCtx = previewCanvas.getContext('2d');
+
+    // MASK PAINTING SYSTEM
+    let maskTool = 'paint';
+    let isPainting = false;
+
+    function setMaskTool(tool) {
+      maskTool = tool;
+      document.getElementById('toolPaint').classList.toggle('active', tool === 'paint');
+      document.getElementById('toolErase').classList.toggle('active', tool === 'erase');
+    }
+
+    function clearMaskCanvas() {
+      if (confirm("Are you sure you want to clear all painted obstacle masks?")) {
+        maskCtx.clearRect(0, 0, maskCanvas.width, maskCanvas.height);
+        saveMaskToStorage();
+      }
+    }
+
+    function getCanvasPos(e) {
+      const rect = maskCanvas.getBoundingClientRect();
+      const scaleX = maskCanvas.width / rect.width;
+      const scaleY = maskCanvas.height / rect.height;
+      return {
+        x: (e.clientX - rect.left) * scaleX,
+        y: (e.clientY - rect.top) * scaleY
+      };
+    }
+
+    function paintMaskAt(pos) {
+      const size = parseInt(document.getElementById('brushSize').value) || 24;
+      maskCtx.save();
+      if (maskTool === 'paint') {
+        maskCtx.globalCompositeOperation = 'source-over';
+        maskCtx.fillStyle = 'rgba(224, 27, 36, 0.65)';
+        maskCtx.beginPath();
+        maskCtx.arc(pos.x, pos.y, size / 2, 0, Math.PI * 2);
+        maskCtx.fill();
+      } else {
+        maskCtx.globalCompositeOperation = 'destination-out';
+        maskCtx.beginPath();
+        maskCtx.arc(pos.x, pos.y, size / 2, 0, Math.PI * 2);
+        maskCtx.fill();
+      }
+      maskCtx.restore();
+    }
+
+    maskCanvas.addEventListener('mousedown', (e) => {
+      isPainting = true;
+      paintMaskAt(getCanvasPos(e));
+    });
+    maskCanvas.addEventListener('mousemove', (e) => {
+      if (isPainting) paintMaskAt(getCanvasPos(e));
+    });
+    window.addEventListener('mouseup', () => {
+      if (isPainting) {
+        isPainting = false;
+        saveMaskToStorage();
+      }
+    });
+
+    function saveMaskToStorage() {
+      try {
+        const dataUrl = maskCanvas.toDataURL();
+        localStorage.setItem('beatemup_obstacle_mask', dataUrl);
+      } catch(e) {}
+    }
+
+    function loadMaskFromStorage() {
+      const savedMask = localStorage.getItem('beatemup_obstacle_mask');
+      if (savedMask) {
+        const img = new Image();
+        img.onload = () => {
+          maskCtx.clearRect(0, 0, maskCanvas.width, maskCanvas.height);
+          maskCtx.drawImage(img, 0, 0);
+        };
+        img.src = savedMask;
+      }
+    }
+    loadMaskFromStorage();
+
+    function isPositionBlocked(x, y) {
+      if (x < 0 || x >= maskCanvas.width || y < 0 || y >= maskCanvas.height) return true;
+      const pixel = maskCtx.getImageData(Math.floor(x), Math.floor(y), 1, 1).data;
+      return pixel[3] > 20;
+    }
+
+    function createDefaultSprite(color1, color2) {
+      const cv = document.createElement('canvas');
+      cv.width = 128; cv.height = 64;
+      const ctx = cv.getContext('2d');
+      for(let f = 0; f < 4; f++) {
+        const x = f * 32;
+        ctx.fillStyle = color1; ctx.fillRect(x + 10, 8, 12, 14);
+        ctx.fillStyle = '#f6d32d'; ctx.fillRect(x + 11, 2, 10, 8);
+        ctx.fillStyle = color2;
+        ctx.fillRect(x + 9 + (f % 2)*2, 22, 5, 8);
+        ctx.fillRect(x + 17 - (f % 2)*2, 22, 5, 8);
+      }
+      return cv;
+    }
+
+    // MULTI-SPRITE PROFILES LIBRARY (WITH CROP SETTINGS)
+    let spriteProfiles = {
+      'profile_blue': {
+        id: 'profile_blue',
+        name: 'Hero Blue',
+        rawImg: createDefaultSprite('#3584e4', '#e01b24'),
+        processedCanvas: document.createElement('canvas'),
+        needsUpdate: true,
+        cropX: 0, cropY: 0, cropW: 0, cropH: 0,
+        cols: 4, rows: 2, offsetX: 0, offsetY: 0, spacingX: 0, spacingY: 0,
+        chromaEnable: false, chromaColor: '#00ff00', chromaTolerance: 60, drawScale: 1.0,
+        invertSprite: false
+      },
+      'profile_green': {
+        id: 'profile_green',
+        name: 'Rival Green',
+        rawImg: createDefaultSprite('#2ec27e', '#f5c211'),
+        processedCanvas: document.createElement('canvas'),
+        needsUpdate: true,
+        cropX: 0, cropY: 0, cropW: 0, cropH: 0,
+        cols: 4, rows: 2, offsetX: 0, offsetY: 0, spacingX: 0, spacingY: 0,
+        chromaEnable: false, chromaColor: '#00ff00', chromaTolerance: 60, drawScale: 1.0,
+        invertSprite: false
+      }
+    };
+
+    let activeProfileId = 'profile_blue';
+
+    function createNewProfile() {
+      const id = 'profile_' + Date.now();
+      const name = prompt("Enter profile name:", "Custom Sprite " + Object.keys(spriteProfiles).length);
+      if(!name) return;
+      
+      spriteProfiles[id] = {
+        id: id,
+        name: name,
+        rawImg: createDefaultSprite('#9141ac', '#f66151'),
+        processedCanvas: document.createElement('canvas'),
+        needsUpdate: true,
+        cropX: 0, cropY: 0, cropW: 0, cropH: 0,
+        cols: 4, rows: 2, offsetX: 0, offsetY: 0, spacingX: 0, spacingY: 0,
+        chromaEnable: false, chromaColor: '#00ff00', chromaTolerance: 60, drawScale: 1.0,
+        invertSprite: false
+      };
+      
+      updateProfileDropdowns();
+      switchProfile(id);
+    }
+
+    function switchProfile(id) {
+      activeProfileId = id;
+      const p = spriteProfiles[id];
+      document.getElementById('cropX').value = p.cropX;
+      document.getElementById('cropY').value = p.cropY;
+      document.getElementById('cropW').value = p.cropW;
+      document.getElementById('cropH').value = p.cropH;
+      document.getElementById('gridCols').value = p.cols;
+      document.getElementById('gridRows').value = p.rows;
+      document.getElementById('offsetX').value = p.offsetX;
+      document.getElementById('offsetY').value = p.offsetY;
+      document.getElementById('spacingX').value = p.spacingX;
+      document.getElementById('spacingY').value = p.spacingY;
+      document.getElementById('chromaEnable').checked = p.chromaEnable;
+      document.getElementById('chromaColor').value = p.chromaColor;
+      document.getElementById('chromaTolerance').value = p.chromaTolerance;
+      document.getElementById('drawScale').value = p.drawScale;
+      document.getElementById('invertSprite').checked = !!p.invertSprite;
+      document.getElementById('tolVal').innerText = p.chromaTolerance;
+      document.getElementById('scaleVal').innerText = p.drawScale + 'x';
+      document.getElementById('profileSelect').value = id;
+      p.needsUpdate = true;
+    }
+
+    function updateProfileDropdowns() {
+      const sel = document.getElementById('profileSelect');
+      sel.innerHTML = '';
+      Object.values(spriteProfiles).forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.id;
+        opt.innerText = p.name;
+        sel.appendChild(opt);
+      });
+      sel.value = activeProfileId;
+      renderCharacterListUI();
+    }
+
+    function syncActiveProfile() {
+      const p = spriteProfiles[activeProfileId];
+      if (!p) return;
+
+      p.cropX = parseInt(document.getElementById('cropX').value) || 0;
+      p.cropY = parseInt(document.getElementById('cropY').value) || 0;
+      p.cropW = parseInt(document.getElementById('cropW').value) || 0;
+      p.cropH = parseInt(document.getElementById('cropH').value) || 0;
+      p.cols = parseInt(document.getElementById('gridCols').value) || 1;
+      p.rows = parseInt(document.getElementById('gridRows').value) || 1;
+      p.offsetX = parseInt(document.getElementById('offsetX').value) || 0;
+      p.offsetY = parseInt(document.getElementById('offsetY').value) || 0;
+      p.spacingX = parseInt(document.getElementById('spacingX').value) || 0;
+      p.spacingY = parseInt(document.getElementById('spacingY').value) || 0;
+      p.chromaEnable = document.getElementById('chromaEnable').checked;
+      p.chromaColor = document.getElementById('chromaColor').value;
+      p.chromaTolerance = parseInt(document.getElementById('chromaTolerance').value) || 60;
+      p.drawScale = parseFloat(document.getElementById('drawScale').value) || 1.0;
+      p.invertSprite = document.getElementById('invertSprite').checked;
+
+      document.getElementById('tolVal').innerText = p.chromaTolerance;
+      document.getElementById('scaleVal').innerText = p.drawScale + 'x';
+      p.needsUpdate = true;
+    }
+
+    ['cropX','cropY','cropW','cropH','gridCols','gridRows','offsetX','offsetY','spacingX','spacingY','chromaEnable','chromaColor','chromaTolerance','drawScale','invertSprite'].forEach(id => {
+      document.getElementById(id).addEventListener('input', syncActiveProfile);
+      document.getElementById(id).addEventListener('change', syncActiveProfile);
+    });
+
+    // File Uploads
+    let bgImage = null;
+    function createFallbackBG() {
+      const cv = document.createElement('canvas');
+      cv.width = 800; cv.height = 400;
+      const ctx = cv.getContext('2d');
+      ctx.fillStyle = '#1a1c23'; ctx.fillRect(0, 0, 800, 220);
+      ctx.fillStyle = '#2a2d37';
+      for(let i = 0; i < 800; i += 80) ctx.fillRect(i, 80 + (i%3)*20, 60, 140);
+      ctx.fillStyle = '#40444f'; ctx.fillRect(0, 220, 800, 180);
+      ctx.fillStyle = '#686d7c'; ctx.fillRect(0, 215, 800, 10);
+
+      ctx.fillStyle = '#555555'; ctx.fillRect(360, 280, 28, 36);
+      ctx.fillStyle = '#333333'; ctx.fillRect(356, 276, 36, 6);
+      return cv;
+    }
+    bgImage = createFallbackBG();
+
+    document.getElementById('bgInput').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const img = new Image();
+        img.onload = () => { bgImage = img; };
+        img.src = URL.createObjectURL(file);
+      }
+    });
+
+    document.getElementById('spriteInput').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const img = new Image();
+        img.onload = () => {
+          spriteProfiles[activeProfileId].rawImg = img;
+          spriteProfiles[activeProfileId].needsUpdate = true;
+        };
+        img.src = URL.createObjectURL(file);
+      }
+    });
+
+    function processProfileChroma(p) {
+      if (!p.rawImg) return;
+
+      p.processedCanvas.width = p.rawImg.width;
+      p.processedCanvas.height = p.rawImg.height;
+      const pCtx = p.processedCanvas.getContext('2d');
+      pCtx.clearRect(0, 0, p.processedCanvas.width, p.processedCanvas.height);
+      pCtx.drawImage(p.rawImg, 0, 0);
+
+      if (!p.chromaEnable) {
+        p.needsUpdate = false;
+        return;
+      }
+
+      const imgData = pCtx.getImageData(0, 0, p.processedCanvas.width, p.processedCanvas.height);
+      const data = imgData.data;
+
+      const hex = p.chromaColor.replace('#', '');
+      const targetR = parseInt(hex.substring(0, 2), 16);
+      const targetG = parseInt(hex.substring(2, 4), 16);
+      const targetB = parseInt(hex.substring(4, 6), 16);
+      const tol = p.chromaTolerance;
+
+      for (let i = 0; i < data.length; i += 4) {
+        const dist = Math.sqrt(
+          (data[i] - targetR)**2 + (data[i+1] - targetG)**2 + (data[i+2] - targetB)**2
+        );
+        if (dist < tol) data[i + 3] = 0;
+      }
+
+      pCtx.putImageData(imgData, 0, 0);
+      p.needsUpdate = false;
+    }
+
+    function saveProfilesToStorage() {
+      const exportData = {};
+      Object.keys(spriteProfiles).forEach(k => {
+        const p = spriteProfiles[k];
+        exportData[k] = {
+          id: p.id, name: p.name, cropX: p.cropX, cropY: p.cropY, cropW: p.cropW, cropH: p.cropH,
+          cols: p.cols, rows: p.rows, offsetX: p.offsetX, offsetY: p.offsetY, spacingX: p.spacingX, spacingY: p.spacingY,
+          chromaEnable: p.chromaEnable, chromaColor: p.chromaColor, chromaTolerance: p.chromaTolerance, drawScale: p.drawScale,
+          invertSprite: p.invertSprite
+        };
+      });
+      localStorage.setItem('beatemup_multi_profiles', JSON.stringify(exportData));
+      alert('All sprite profile parameters saved to LocalStorage!');
+    }
+
+    let characters = [];
+    let keysPressed = {};
+
+    window.addEventListener('keydown', e => keysPressed[e.key.toLowerCase()] = true);
+    window.addEventListener('keyup', e => keysPressed[e.key.toLowerCase()] = false);
+
+    function addCharacter() {
+      const id = Date.now();
+      characters.push({
+        id: id,
+        profileId: activeProfileId,
+        x: 100 + Math.random() * 200,
+        y: 250 + Math.random() * 100,
+        vx: 0,
+        vy: 0,
+        facingLeft: false,
+        behavior: 'random',
+        
+        baseSpeed: 2.5,
+        pauseChance: 0.005,
+        continuousMove: true,
+        pauseDuration: 0,
+        xRatio: 0.7,
+        targetId: 'none',
+        fleeDistance: 150,
+        
+        animFrame: 0,
+        animTimer: 0
+      });
+      renderCharacterListUI();
+    }
+
+    // SMART STEERING & WAYFINDING HELPER
+    function findSmartClearDirection(char, desiredVx, desiredVy, yMin, yMax) {
+      const currentSpeed = Math.hypot(desiredVx, desiredVy) || char.baseSpeed;
+      const baseAngle = Math.atan2(desiredVy, desiredVx);
+
+      // Probe angles: 0° (direct), then ±35°, ±70°, ±110°, ±150°, 180° (full rebound)
+      const testAngles = [0, 0.6, -0.6, 1.2, -1.2, 1.9, -1.9, Math.PI];
+
+      for (let offset of testAngles) {
+        const testAngle = baseAngle + offset;
+        const testVx = Math.cos(testAngle) * currentSpeed;
+        const testVy = Math.sin(testAngle) * currentSpeed;
+
+        const checkX = Math.max(20, Math.min(stageCanvas.width - 20, char.x + testVx * 2));
+        const checkY = Math.max(yMin, Math.min(yMax, char.y + testVy * 2));
+
+        if (!isPositionBlocked(checkX, checkY)) {
+          return { vx: testVx, vy: testVy };
+        }
+      }
+
+      // Default bounce back
+      return { vx: -desiredVx || (Math.random() > 0.5 ? 2 : -2), vy: -desiredVy || (Math.random() > 0.5 ? 1 : -1) };
+    }
+
+    function removeCharacter(id) {
+      characters = characters.filter(c => c.id !== id);
+      renderCharacterListUI();
+    }
+
+    function renderCharacterListUI() {
+      const list = document.getElementById('characterList');
+      list.innerHTML = '';
+
+      characters.forEach((char, idx) => {
+        const card = document.createElement('div');
+        card.className = 'char-card';
+
+        const otherChars = characters.filter(c => c.id !== char.id);
+        let targetOptions = `<option value="none">-- None / Closest --</option>`;
+        otherChars.forEach((oc) => {
+          targetOptions += `<option value="${oc.id}" ${char.targetId==oc.id?'selected':''}>Char #${characters.indexOf(oc)+1}</option>`;
+        });
+
+        card.innerHTML = `
+          <div class="char-card-header">
+            <strong>Char #${idx + 1}</strong>
+            <button class="btn btn-secondary" style="padding:2px 6px; font-size:0.75rem;" onclick="removeCharacter(${char.id})">✕ Remove</button>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Sprite Profile</label>
+              <select onchange="updateCharProp(${char.id}, 'profileId', this.value)">
+                ${Object.values(spriteProfiles).map(p => `<option value="${p.id}" ${char.profileId===p.id?'selected':''}>${p.name}</option>`).join('')}
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Behavior Mode</label>
+              <select onchange="updateCharProp(${char.id}, 'behavior', this.value)">
+                <option value="random" ${char.behavior==='random'?'selected':''}>Random Walk</option>
+                <option value="chase" ${char.behavior==='chase'?'selected':''}>Chase Target</option>
+                <option value="flee" ${char.behavior==='flee'?'selected':''}>Flee Target</option>
+                <option value="manual" ${char.behavior==='manual'?'selected':''}>Manual (WASD)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="sub-panel">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Speed (px/f)</label>
+                <input type="number" step="0.2" value="${char.baseSpeed}" onchange="updateCharProp(${char.id}, 'baseSpeed', parseFloat(this.value))">
+              </div>
+              <div class="form-group">
+                <label>Horiz/Vert Bias</label>
+                <input type="range" min="0.1" max="0.9" step="0.1" value="${char.xRatio}" oninput="updateCharProp(${char.id}, 'xRatio', parseFloat(this.value))">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label><input type="checkbox" ${char.continuousMove ? 'checked' : ''} onchange="updateCharProp(${char.id}, 'continuousMove', this.checked)"> Continuous Movement (Disable Pausing)</label>
+            </div>
+
+            ${char.behavior === 'random' && !char.continuousMove ? `
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Pause Chance</label>
+                  <input type="range" min="0.005" max="0.08" step="0.005" value="${char.pauseChance}" oninput="updateCharProp(${char.id}, 'pauseChance', parseFloat(this.value))">
+                </div>
+              </div>
+            ` : ''}
+
+            ${(char.behavior === 'chase' || char.behavior === 'flee') ? `
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Specific Target</label>
+                  <select onchange="updateCharProp(${char.id}, 'targetId', this.value)">
+                    ${targetOptions}
+                  </select>
+                </div>
+                ${char.behavior === 'flee' ? `
+                  <div class="form-group">
+                    <label>Flee Dist (px)</label>
+                    <input type="number" value="${char.fleeDistance}" onchange="updateCharProp(${char.id}, 'fleeDistance', parseInt(this.value))">
+                  </div>
+                ` : ''}
+              </div>
+            ` : ''}
+          </div>
+        `;
+        list.appendChild(card);
+      });
+    }
+
+    function updateCharProp(id, prop, value) {
+      const char = characters.find(c => c.id === id);
+      if (char) {
+        char[prop] = value;
+        if (prop === 'behavior' || prop === 'continuousMove') renderCharacterListUI();
+      }
+    }
+
+    updateProfileDropdowns();
+    addCharacter();
+    addCharacter();
+    characters[1].profileId = 'profile_green';
+
+    let lastTime = performance.now();
+
+    function loop(currentTime) {
+      const delta = (currentTime - lastTime) / 1000;
+      lastTime = currentTime;
+
+      Object.values(spriteProfiles).forEach(p => {
+        if (p.needsUpdate) processProfileChroma(p);
+      });
+
+      const showMask = document.getElementById('showMaskCheck').checked;
+      maskCanvas.style.display = showMask ? 'block' : 'none';
+
+      // --- 1. RENDER SPRITE TUNER CANVAS ---
+      const activeProf = spriteProfiles[activeProfileId];
+      tunerCanvas.width = activeProf.processedCanvas.width || 800;
+      tunerCanvas.height = activeProf.processedCanvas.height || 400;
+      tunerCtx.clearRect(0, 0, tunerCanvas.width, tunerCanvas.height);
+
+      if (activeProf.processedCanvas) {
+        tunerCtx.drawImage(activeProf.processedCanvas, 0, 0);
+
+        const cropX = activeProf.cropX || 0;
+        const cropY = activeProf.cropY || 0;
+        const cropW = activeProf.cropW > 0 ? activeProf.cropW : activeProf.processedCanvas.width - cropX;
+        const cropH = activeProf.cropH > 0 ? activeProf.cropH : activeProf.processedCanvas.height - cropY;
+
+        // Draw Global Crop Box (Yellow Dashed Line)
+        tunerCtx.strokeStyle = '#f5c211';
+        tunerCtx.lineWidth = 2;
+        tunerCtx.setLineDash([6, 4]);
+        tunerCtx.strokeRect(cropX, cropY, cropW, cropH);
+        tunerCtx.setLineDash([]);
+
+        // Grid Slicing inside Crop Region
+        const cellW = (cropW - activeProf.offsetX - (activeProf.cols - 1) * activeProf.spacingX) / activeProf.cols;
+        const cellH = (cropH - activeProf.offsetY - (activeProf.rows - 1) * activeProf.spacingY) / activeProf.rows;
+
+        tunerCtx.strokeStyle = '#3584e4';
+        tunerCtx.lineWidth = 1.5;
+
+        for (let r = 0; r < activeProf.rows; r++) {
+          for (let c = 0; c < activeProf.cols; c++) {
+            const x = cropX + activeProf.offsetX + c * (cellW + activeProf.spacingX);
+            const y = cropY + activeProf.offsetY + r * (cellH + activeProf.spacingY);
+            tunerCtx.strokeRect(x, y, cellW, cellH);
+          }
+        }
+
+        const animRow = parseInt(document.getElementById('animRow').value) || 0;
+        const fps = parseInt(document.getElementById('animFps').value) || 6;
+        const currentFrame = Math.floor(currentTime * (fps / 1000)) % activeProf.cols;
+
+        previewCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+        const srcX = cropX + activeProf.offsetX + currentFrame * (cellW + activeProf.spacingX);
+        const srcY = cropY + activeProf.offsetY + (animRow % activeProf.rows) * (cellH + activeProf.spacingY);
+
+        previewCtx.drawImage(
+          activeProf.processedCanvas,
+          srcX, srcY, cellW, cellH,
+          0, 0, previewCanvas.width, previewCanvas.height
+        );
+      }
+
+      // --- 2. UPDATE & RENDER STAGE CANVAS ---
+      stageCtx.clearRect(0, 0, stageCanvas.width, stageCanvas.height);
+      stageCtx.drawImage(bgImage, 0, 0, stageCanvas.width, stageCanvas.height);
+
+      const yMin = parseInt(document.getElementById('boundsYMin').value) || 220;
+      const yMax = parseInt(document.getElementById('boundsYMax').value) || 380;
+
+      if (document.getElementById('showBoundsCheck').checked) {
+        stageCtx.fillStyle = 'rgba(46, 194, 126, 0.15)';
+        stageCtx.fillRect(0, yMin, stageCanvas.width, yMax - yMin);
+        stageCtx.strokeStyle = 'rgba(46, 194, 126, 0.6)';
+        stageCtx.beginPath();
+        stageCtx.moveTo(0, yMin); stageCtx.lineTo(stageCanvas.width, yMin);
+        stageCtx.moveTo(0, yMax); stageCtx.lineTo(stageCanvas.width, yMax);
+        stageCtx.stroke();
+      }
+
+      // UPDATE CHARACTER POSITIONS WITH MASK COLLISION CHECK
+      characters.forEach(char => {
+        if (char.behavior === 'manual') {
+          char.vx = 0; char.vy = 0;
+          if (keysPressed['a'] || keysPressed['arrowleft']) char.vx = -char.baseSpeed;
+          if (keysPressed['d'] || keysPressed['arrowright']) char.vx = char.baseSpeed;
+          if (keysPressed['w'] || keysPressed['arrowup']) char.vy = -char.baseSpeed * 0.7;
+          if (keysPressed['s'] || keysPressed['arrowdown']) char.vy = char.baseSpeed * 0.7;
+        } 
+        else if (char.behavior === 'random') {
+          if (!char.continuousMove && char.pauseDuration > 0) {
+            char.pauseDuration -= delta;
+            char.vx = 0; char.vy = 0;
+          } else {
+            if (!char.continuousMove && Math.random() < char.pauseChance) {
+              char.pauseDuration = 0.4 + Math.random() * 1.2;
+            } else if (Math.hypot(char.vx, char.vy) < 0.1 || Math.random() < 0.02) {
+              const angle = Math.random() * Math.PI * 2;
+              const speed = char.baseSpeed;
+              char.vx = Math.cos(angle) * speed * char.xRatio;
+              char.vy = Math.sin(angle) * speed * (1 - char.xRatio);
+            }
+          }
+        } 
+        else if (char.behavior === 'chase' || char.behavior === 'flee') {
+          let target = null;
+          if (char.targetId !== 'none') {
+            target = characters.find(c => c.id == char.targetId);
+          } else {
+            let minDist = Infinity;
+            characters.forEach(other => {
+              if (other.id !== char.id) {
+                const d = Math.hypot(other.x - char.x, other.y - char.y);
+                if (d < minDist) { minDist = d; target = other; }
+              }
+            });
+          }
+
+          if (target) {
+            const dx = target.x - char.x;
+            const dy = target.y - char.y;
+            const dist = Math.hypot(dx, dy) || 1;
+
+            if (char.behavior === 'chase') {
+              if (dist > 25) { // Stop close to target
+                const desiredVx = (dx / dist) * char.baseSpeed * char.xRatio;
+                const desiredVy = (dy / dist) * char.baseSpeed * (1 - char.xRatio);
+                const steered = findSmartClearDirection(char, desiredVx, desiredVy, yMin, yMax);
+                char.vx = steered.vx;
+                char.vy = steered.vy;
+              } else {
+                char.vx = 0; char.vy = 0;
+              }
+            } else if (char.behavior === 'flee') {
+              if (dist < char.fleeDistance) {
+                const desiredVx = -(dx / dist) * char.baseSpeed * char.xRatio;
+                const desiredVy = -(dy / dist) * char.baseSpeed * (1 - char.xRatio);
+                const steered = findSmartClearDirection(char, desiredVx, desiredVy, yMin, yMax);
+                char.vx = steered.vx;
+                char.vy = steered.vy;
+              } else {
+                char.vx = 0; char.vy = 0;
+              }
+            }
+          }
+        }
+
+        if (char.vx !== 0) char.facingLeft = char.vx < 0;
+
+        let nextX = Math.max(20, Math.min(stageCanvas.width - 20, char.x + char.vx));
+        let nextY = Math.max(yMin, Math.min(yMax, char.y + char.vy));
+
+        // CHECK FEET COLLISION & APPLY SMART OBSTACLE AVOIDANCE/REBOUND
+        if (!isPositionBlocked(nextX, nextY)) {
+          char.x = nextX;
+          char.y = nextY;
+        } else {
+          // Attempt sliding X or Y first
+          if (!isPositionBlocked(nextX, char.y)) {
+            char.x = nextX;
+            char.vy = -char.vy * 0.8; // Smooth rebound off Y barrier
+          } else if (!isPositionBlocked(char.x, nextY)) {
+            char.y = nextY;
+            char.vx = -char.vx * 0.8; // Smooth rebound off X barrier
+          } else {
+            // Dead end reached! Rebound & redirect smartly
+            const steered = findSmartClearDirection(char, -char.vx, -char.vy, yMin, yMax);
+            char.vx = steered.vx;
+            char.vy = steered.vy;
+          }
+        }
+
+        // Animation Step
+        if (char.vx !== 0 || char.vy !== 0) {
+          char.animTimer += delta * 8;
+          const prof = spriteProfiles[char.profileId] || activeProf;
+          char.animFrame = Math.floor(char.animTimer) % (prof.cols || 1);
+        } else {
+          char.animFrame = 0;
+        }
+      });
+
+      // Depth Sorting (Y-ordering)
+      characters.sort((a, b) => a.y - b.y);
+
+      // Render Each Character using its Cropped & Chroma Processed Canvas
+      characters.forEach(char => {
+        const prof = spriteProfiles[char.profileId];
+        if (!prof || !prof.processedCanvas) return;
+
+        const cropX = prof.cropX || 0;
+        const cropY = prof.cropY || 0;
+        const cropW = prof.cropW > 0 ? prof.cropW : prof.processedCanvas.width - cropX;
+        const cropH = prof.cropH > 0 ? prof.cropH : prof.processedCanvas.height - cropY;
+
+        const cellW = (cropW - prof.offsetX - (prof.cols - 1) * prof.spacingX) / prof.cols || 32;
+        const cellH = (cropH - prof.offsetY - (prof.rows - 1) * prof.spacingY) / prof.rows || 32;
+
+        const drawW = cellW * prof.drawScale;
+        const drawH = cellH * prof.drawScale;
+
+        stageCtx.save();
+        stageCtx.translate(char.x, char.y);
+
+        // Ground Shadow
+        stageCtx.fillStyle = 'rgba(0,0,0,0.3)';
+        stageCtx.beginPath();
+        stageCtx.ellipse(0, 0, drawW * 0.35, drawH * 0.1, 0, 0, Math.PI * 2);
+        stageCtx.fill();
+
+        // Calculate Horizontal Facing with Base Sprite Flip setting
+        let flip = char.facingLeft;
+        if (prof.invertSprite) flip = !flip;
+        if (flip) stageCtx.scale(-1, 1);
+
+        const srcX = cropX + prof.offsetX + (char.animFrame % prof.cols) * (cellW + prof.spacingX);
+        const srcY = cropY + prof.offsetY;
+
+        stageCtx.drawImage(
+          prof.processedCanvas,
+          srcX, srcY, cellW, cellH,
+          -drawW / 2, -drawH + 4, drawW, drawH
+        );
+
+        stageCtx.restore();
+      });
+
+      requestAnimationFrame(loop);
+    }
+
+    requestAnimationFrame(loop);
+  </script>
+</body>
+</html>

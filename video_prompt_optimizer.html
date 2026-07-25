@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Video Prompt Optimizer</title>
+  <style>
+    /* GTK Theme Variables */
+    :root {
+      color-scheme: light dark;
+      
+      --gtk-bg: light-dark(#f6f6f7, #1e1e22);
+      --gtk-card: light-dark(#ffffff, #2a2a30);
+      --gtk-border: light-dark(#dcdcdc, #3e3e48);
+      --gtk-text: light-dark(#1c1c1e, #f0f0f2);
+      --gtk-muted: light-dark(#6c6c70, #9e9ea6);
+      
+      --gtk-accent: #3584e4;
+      --gtk-accent-hover: #1c71d8;
+      --gtk-danger: #e01b24;
+      --gtk-output-bg: light-dark(#f0f4f8, #16181d);
+      --gtk-output-text: light-dark(#0b6bcb, #58a6ff);
+    }
+
+    [data-theme="light"] {
+      color-scheme: light;
+      --gtk-bg: #f6f6f7;
+      --gtk-card: #ffffff;
+      --gtk-border: #dcdcdc;
+      --gtk-text: #1c1c1e;
+      --gtk-muted: #6c6c70;
+      --gtk-output-bg: #f0f4f8;
+      --gtk-output-text: #0b6bcb;
+    }
+
+    [data-theme="dark"] {
+      color-scheme: dark;
+      --gtk-bg: #1e1e22;
+      --gtk-card: #2a2a30;
+      --gtk-border: #3e3e48;
+      --gtk-text: #f0f0f2;
+      --gtk-muted: #9e9ea6;
+      --gtk-output-bg: #16181d;
+      --gtk-output-text: #58a6ff;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+    body { background-color: var(--gtk-bg); color: var(--gtk-text); padding: 24px; min-height: 100vh; overflow-y: auto; }
+
+    .header-bar {
+      max-width: 1600px;
+      margin: 0 auto 20px auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--gtk-border);
+      padding-bottom: 12px;
+    }
+
+    .app-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      max-width: 1600px;
+      margin: 0 auto;
+      align-items: start;
+    }
+
+    .panel {
+      background-color: var(--gtk-card);
+      border: 1px solid var(--gtk-border);
+      border-radius: 8px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+
+    h2 { font-size: 0.9rem; font-weight: 700; color: var(--gtk-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    label { font-size: 0.85rem; font-weight: 600; color: var(--gtk-text); display: block; margin-bottom: 4px; }
+    
+    input[type="text"], textarea, select {
+      width: 100%;
+      background: var(--gtk-bg);
+      border: 1px solid var(--gtk-border);
+      color: var(--gtk-text);
+      padding: 10px 12px;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      outline: none;
+    }
+
+    input:focus, textarea:focus, select:focus { border-color: var(--gtk-accent); box-shadow: 0 0 0 2px rgba(53, 132, 228, 0.2); }
+    textarea { resize: vertical; }
+
+    .mode-selector {
+      background: var(--gtk-bg);
+      border: 1px solid var(--gtk-border);
+      padding: 12px;
+      border-radius: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .character-card {
+      background: var(--gtk-bg);
+      border: 1px solid var(--gtk-border);
+      padding: 12px;
+      border-radius: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: opacity 0.2s, border-color 0.2s;
+    }
+
+    .character-card.inactive { opacity: 0.5; border-style: dashed; }
+
+    .char-card-header { display: flex; justify-content: space-between; align-items: center; }
+
+    .pos-badge {
+      font-size: 0.75rem;
+      font-weight: 700;
+      background: rgba(53, 132, 228, 0.15);
+      color: var(--gtk-accent);
+      padding: 2px 6px;
+      border-radius: 4px;
+      text-transform: uppercase;
+    }
+
+    .status-tag { font-size: 0.7rem; font-weight: 600; padding: 2px 6px; border-radius: 4px; }
+    .status-tag.active { background: rgba(38, 162, 105, 0.2); color: #26a269; }
+    .status-tag.excluded { background: rgba(224, 27, 36, 0.15); color: var(--gtk-danger); }
+
+    .btn-group { display: flex; gap: 4px; align-items: center; }
+
+    .btn {
+      background: var(--gtk-accent);
+      color: white;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: background 0.15s;
+    }
+    .btn:hover { background: var(--gtk-accent-hover); }
+
+    .btn-subtle {
+      background: var(--gtk-card);
+      border: 1px solid var(--gtk-border);
+      color: var(--gtk-text);
+      padding: 4px 10px;
+      font-size: 0.8rem;
+    }
+    .btn-subtle:hover { background: var(--gtk-border); }
+
+    .btn-danger {
+      background: transparent;
+      color: var(--gtk-danger);
+      border: 1px solid var(--gtk-border);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-danger:hover { background: var(--gtk-danger); color: white; }
+
+    .output-box {
+      background: var(--gtk-output-bg);
+      border: 1px solid var(--gtk-border);
+      border-radius: 6px;
+      padding: 16px;
+      min-height: 420px;
+      font-family: monospace;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: var(--gtk-output-text);
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .action-bar { display: flex; justify-content: space-between; align-items: center; }
+    .badge { background: var(--gtk-accent); color: #fff; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; font-family: monospace; }
+  </style>
+</head>
+<body>
+
+<div class="header-bar">
+  <h1 style="font-size: 1.2rem; font-weight: 700;">Video Prompt Optimizer</h1>
+  <div style="display: flex; align-items: center; gap: 12px;">
+    <button class="btn-danger" onclick="clearEntireProject()">Clear Project</button>
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <label for="themeSelect" style="margin: 0; font-size: 0.85rem;">Theme:</label>
+      <select id="themeSelect" onchange="setTheme(this.value)" style="width: auto; padding: 4px 8px;">
+        <option value="auto" selected>System Default</option>
+        <option value="light">Light Theme</option>
+        <option value="dark">Dark Theme</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<div class="app-container">
+  <!-- LEFT PANEL: INPUT FORM -->
+  <div class="panel">
+    <div class="mode-selector">
+      <label for="refMode">Reference Method</label>
+      <select id="refMode" onchange="updatePrompt()">
+        <option value="single_sheet" selected>Single Multi-Character Reference Sheet (1 Collage File)</option>
+        <option value="multi_images">Multiple Separate Images (ren.jpg, seraphim.jpg)</option>
+        <option value="text_only">Text-Only (No Reference Images)</option>
+      </select>
+    </div>
+
+    <h2>1. Priority Parameters: Style & Environment</h2>
+    <div>
+      <label for="style">1. Core Style & Medium</label>
+      <input type="text" id="style" placeholder="e.g., Sakuga anime style, high-octane fluid animation, cel-shaded">
+    </div>
+    
+    <div>
+      <label for="environment">2. Environment & Lighting</label>
+      <textarea id="environment" rows="2" placeholder="e.g., Grassy lawn, soft golden evening light, atmospheric dust particles"></textarea>
+    </div>
+
+    <div class="action-bar">
+      <h2>2. Master Cast Sheet (Top = Left, Bottom = Right)</h2>
+      <button class="btn" onclick="addCharacter()">+ Add Character</button>
+    </div>
+    <div id="character-list" style="display: flex; flex-direction: column; gap: 8px;"></div>
+
+    <h2>3. Priority Parameters: Framing & Integrated Action</h2>
+    <div>
+      <label for="camera">3. Camera Angle & Movement</label>
+      <input type="text" id="camera" placeholder="e.g., Medium dynamic two-shot, low-angle tracking shot">
+    </div>
+
+    <div>
+      <label for="action">4. Integrated Action & Spoken Dialogue</label>
+      <textarea id="action" rows="6" placeholder="e.g., Ren delivers a quick jab landing on Seraphim, causing her to stumble back. Ren says &quot;What do you think of that?&quot; Seraphim smirks and replies &quot;Not bad.&quot;"></textarea>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL: GENERATED OUTPUT -->
+  <div class="panel">
+    <div class="action-bar">
+      <h2>Engine-Ready Shot Prompt</h2>
+      <button class="btn" onclick="copyPrompt()">Copy Prompt</button>
+    </div>
+    <div style="display: flex; gap: 8px; align-items: center;">
+      <span id="mode-badge" class="badge">Mode: Single Sheet</span>
+      <p style="font-size: 0.8rem; color: var(--gtk-muted);" id="mode-desc">
+        Inline actions and spoken quotes anchored to spatial positions.
+      </p>
+    </div>
+    <div class="output-box" id="output"></div>
+  </div>
+</div>
+
+<script>
+  let characterCount = 0;
+  const STORAGE_KEY = "video_prompt_optimizer_data";
+
+  function setTheme(theme) {
+    if (theme === 'auto') {
+      document.documentElement.removeAttribute('data-theme');
+    } else {
+      document.documentElement.setAttribute('data-theme', theme);
+    }
+    saveToLocalStorage();
+  }
+
+  function getPositionLabel(index, total) {
+    if (total === 1) return "center";
+    if (total === 2) return index === 0 ? "left" : "right";
+    if (total === 3) {
+      if (index === 0) return "far-left";
+      if (index === 1) return "center";
+      if (index === 2) return "far-right";
+    }
+    const pos = ["far-left", "center-left", "center", "center-right", "far-right"];
+    return pos[index] || `position ${index + 1}`;
+  }
+
+  function addCharacter(name = '', visualTag = '', isForced = false) {
+    characterCount++;
+    const id = `char_${characterCount}`;
+    const charHtml = `
+      <div class="character-card" id="${id}">
+        <div class="char-card-header">
+          <div style="display: flex; gap: 6px; align-items: center;">
+            <span class="pos-badge">Position...</span>
+            <span class="status-tag active">Detected</span>
+          </div>
+          <div class="btn-group">
+            <label style="font-size: 0.75rem; display: flex; align-items: center; gap: 4px; margin: 0 4px; cursor: pointer;">
+              <input type="checkbox" class="force-include" ${isForced ? 'checked' : ''} onchange="updatePrompt()"> Force
+            </label>
+            <button class="btn btn-subtle" onclick="moveCharacter('${id}', -1)">▲</button>
+            <button class="btn btn-subtle" onclick="moveCharacter('${id}', 1)">▼</button>
+            <button class="btn btn-danger" style="padding: 2px 6px; font-size: 0.75rem;" onclick="removeCharacter('${id}')">✕</button>
+          </div>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <input type="text" placeholder="Name (e.g. Ren)" class="char-name" value="${name}" oninput="updatePrompt()" style="width: 35%;">
+          <input type="text" placeholder="Visual Tag (Text fallback)" class="char-desc" value="${visualTag}" oninput="updatePrompt()" style="width: 65%;">
+        </div>
+      </div>
+    `;
+    document.getElementById('character-list').insertAdjacentHTML('beforeend', charHtml);
+    updatePrompt();
+  }
+
+  function removeCharacter(id) {
+    document.getElementById(id).remove();
+    updatePrompt();
+  }
+
+  function moveCharacter(id, direction) {
+    const card = document.getElementById(id);
+    if (direction === -1 && card.previousElementSibling) {
+      card.parentNode.insertBefore(card, card.previousElementSibling);
+    } else if (direction === 1 && card.nextElementSibling) {
+      card.parentNode.insertBefore(card.nextElementSibling, card);
+    }
+    updatePrompt();
+  }
+
+  function updatePrompt() {
+    const refMode = document.getElementById('refMode').value;
+    const style = document.getElementById('style').value.trim();
+    const env = document.getElementById('environment').value.trim();
+    const camera = document.getElementById('camera').value.trim();
+    let action = document.getElementById('action').value.trim();
+
+    // Mode UI Info
+    const modeBadge = document.getElementById('mode-badge');
+    const modeDesc = document.getElementById('mode-desc');
+    
+    if (refMode === "single_sheet") {
+      modeBadge.innerText = "Mode: Single Sheet Collage";
+      modeBadge.style.background = "#26a269";
+      modeDesc.innerText = "Inline actions and spoken quotes anchored to spatial positions.";
+    } else if (refMode === "multi_images") {
+      modeBadge.innerText = "Mode: Multiple Images";
+      modeBadge.style.background = "#3584e4";
+      modeDesc.innerText = "Anchored to image attachment indexes.";
+    } else {
+      modeBadge.innerText = "Mode: Text-Only";
+      modeBadge.style.background = "#9141ac";
+      modeDesc.innerText = "Full physical text descriptions enabled.";
+    }
+
+    const allCards = document.querySelectorAll('.character-card');
+    const totalMasterChars = allCards.length;
+
+    // STEP 1: Determine Active Characters in Action Text
+    let activeCards = [];
+    allCards.forEach((card, masterIndex) => {
+      const name = card.querySelector('.char-name').value.trim();
+      const isForced = card.querySelector('.force-include').checked;
+      const statusTag = card.querySelector('.status-tag');
+
+      const isMentionedInAction = name && new RegExp(`\\b${name}\\b`, 'i').test(action);
+      const isActive = !action || isMentionedInAction || isForced;
+
+      if (isActive) {
+        activeCards.push({ card, name, desc: card.querySelector('.char-desc').value.trim(), masterIndex });
+        card.classList.remove('inactive');
+        statusTag.innerText = isForced ? "Forced" : "Active";
+        statusTag.className = "status-tag active";
+      } else {
+        card.classList.add('inactive');
+        statusTag.innerText = "Auto-Omitted";
+        statusTag.className = "status-tag excluded";
+      }
+    });
+
+    // STEP 2: Build Anchors & Spatial Mapping
+    let charHeaderParts = [];
+    let charMap = [];
+
+    activeCards.forEach((item) => {
+      const { name, desc, masterIndex } = item;
+      const imgIndex = masterIndex + 1;
+      const masterPosLabel = getPositionLabel(masterIndex, totalMasterChars);
+
+      const badge = item.card.querySelector('.pos-badge');
+      if (refMode === "single_sheet") {
+        badge.innerText = `Sheet: ${masterPosLabel}`;
+      } else if (refMode === "multi_images") {
+        badge.innerText = `Image ${imgIndex}`;
+      } else {
+        badge.innerText = `Char ${imgIndex}`;
+      }
+
+      if (name) {
+        let anchorStr = "";
+        if (refMode === "single_sheet") {
+          charHeaderParts.push(`${name} (${masterPosLabel} figure on the reference sheet)`);
+          anchorStr = `the character ${name} from the ${masterPosLabel} of the reference sheet`;
+        } else if (refMode === "multi_images") {
+          charHeaderParts.push(`[Image ${imgIndex}: ${name}]`);
+          anchorStr = `the character from [Image ${imgIndex}]`;
+        } else {
+          if (desc) charHeaderParts.push(`a character named ${name}, who is a ${desc}`);
+          anchorStr = `the ${desc || name}`;
+        }
+
+        charMap.push({ 
+          rawName: name,
+          regexName: new RegExp(`\\b${name}\\b`, 'gi'), 
+          anchor: anchorStr 
+        });
+      }
+    });
+
+    // STEP 3: Transform Dialogue Sentences inside Action Text
+    charMap.forEach(item => {
+      const dialoguePattern = new RegExp(`\\b${item.rawName}\\b\\s+(says|replies|shouts|asks|exclaims|mumbles)\\s+([\"'\`][^\n\"'\`]+[\"'\`])`, 'gi');
+      action = action.replace(dialoguePattern, (match, verb, quote) => {
+        return `${item.anchor} ${verb}, saying ${quote} with visible lip synchronization`;
+      });
+
+      action = action.replace(item.regexName, item.anchor);
+    });
+
+    // STEP 4: Assemble Final Engine Prompt
+    let promptParts = [];
+
+    if (style) promptParts.push(style.replace(/\.$/, '') + '.');
+
+    if (refMode === "single_sheet" && charHeaderParts.length > 0) {
+      promptParts.push(`Based on the character reference sheet featuring ${charHeaderParts.join(', ')}.`);
+    } else if (refMode === "multi_images" && charHeaderParts.length > 0) {
+      promptParts.push(charHeaderParts.join(' ') + '.');
+    } else if (refMode === "text_only" && charHeaderParts.length > 0) {
+      promptParts.push(`Featuring ${charHeaderParts.join(', ')}.`);
+    }
+
+    if (camera) promptParts.push(camera.replace(/\.$/, '') + '.');
+    if (env) promptParts.push(`Setting: ${env.replace(/\.$/, '')}.`);
+
+    if (action) promptParts.push(`Action Sequence: ${action.replace(/\.$/, '')}.`);
+
+    const finalPrompt = promptParts.join(' ').replace(/\s+/g, ' ');
+    document.getElementById('output').innerText = finalPrompt || "Fill out the fields on the left to build your prompt...";
+
+    saveToLocalStorage();
+  }
+
+  function copyPrompt() {
+    const text = document.getElementById('output').innerText;
+    navigator.clipboard.writeText(text);
+    alert('Prompt copied to clipboard!');
+  }
+
+  function saveToLocalStorage() {
+    const charData = [];
+    document.querySelectorAll('.character-card').forEach(card => {
+      charData.push({
+        name: card.querySelector('.char-name').value,
+        desc: card.querySelector('.char-desc').value,
+        isForced: card.querySelector('.force-include').checked
+      });
+    });
+
+    const projectData = {
+      theme: document.getElementById('themeSelect').value,
+      refMode: document.getElementById('refMode').value,
+      style: document.getElementById('style').value,
+      environment: document.getElementById('environment').value,
+      camera: document.getElementById('camera').value,
+      action: document.getElementById('action').value,
+      characters: charData
+    };
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(projectData));
+  }
+
+  function loadFromLocalStorage() {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (!saved) return;
+
+    try {
+      const data = JSON.parse(saved);
+      if (data.theme) {
+        document.getElementById('themeSelect').value = data.theme;
+        setTheme(data.theme);
+      }
+      if (data.refMode) document.getElementById('refMode').value = data.refMode;
+      if (data.style) document.getElementById('style').value = data.style;
+      if (data.environment) document.getElementById('environment').value = data.environment;
+      if (data.camera) document.getElementById('camera').value = data.camera;
+      if (data.action) document.getElementById('action').value = data.action;
+
+      if (data.characters && Array.isArray(data.characters)) {
+        document.getElementById('character-list').innerHTML = '';
+        data.characters.forEach(c => addCharacter(c.name, c.desc, c.isForced));
+      }
+    } catch (e) {
+      console.error("Failed to restore saved prompt state", e);
+    }
+  }
+
+  function clearEntireProject() {
+    if (confirm("Are you sure you want to clear the entire project and start fresh?")) {
+      localStorage.removeItem(STORAGE_KEY);
+      document.getElementById('style').value = '';
+      document.getElementById('environment').value = '';
+      document.getElementById('camera').value = '';
+      document.getElementById('action').value = '';
+      document.getElementById('refMode').value = 'single_sheet';
+      document.getElementById('character-list').innerHTML = '';
+      updatePrompt();
+    }
+  }
+
+  // Event Listeners
+  document.getElementById('refMode').addEventListener('change', updatePrompt);
+  document.getElementById('style').addEventListener('input', updatePrompt);
+  document.getElementById('environment').addEventListener('input', updatePrompt);
+  document.getElementById('camera').addEventListener('input', updatePrompt);
+  document.getElementById('action').addEventListener('input', updatePrompt);
+
+  // Initialize on load
+  window.addEventListener('DOMContentLoaded', () => {
+    loadFromLocalStorage();
+    updatePrompt();
+  });
+</script>
+
+</body>
+</html>
