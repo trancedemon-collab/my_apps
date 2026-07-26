@@ -613,7 +613,7 @@
           {
             id: "welcome-note-1",
             title: "📌 GTK Board Welcome Note",
-            content: "Welcome to your spatial sticky notes dashboard!\n\nInteractive mechanics:\n- Panning: Drag with middle-mouse button, or hold Spacebar and drag with left-click.\n- Zooming: Use your mouse wheel to zoom in/out.\n- New Notes: Click '+ New Note' button and the viewport will auto-focus on it.\n- Read-Only Mode: Notes are read-only by default. Click the 📝 Edit button to enable editing.\n- Archive: Hide notes in the Cabinet without deleting them.\n- Settings: Configure auto-delete, note sizes, and smart placement behavior.",
+            content: "Welcome to your spatial sticky notes dashboard!\n\nInteractive mechanics:\n- Panning: Drag with middle-mouse button, or hold Spacebar and drag with left-click.\n- Zooming: Use your mouse wheel to zoom in/out.\n- New Notes: Click '+ New Note' button and the viewport will auto-focus on it.\n- Edit/Read-Only Toggle: Click the 📝/🔒 button to switch between editing and read-only modes.\n- Archive: Hide notes in the Cabinet without deleting them.\n- Settings: Configure auto-delete, note sizes, and smart placement behavior.",
             x: 100,
             y: 100,
             w: 400,
@@ -624,7 +624,7 @@
             archived: false,
             minimized: false,
             zIndex: 11,
-            isReadOnly: true,
+            isReadOnly: false,
             createdAt: Date.now()
           },
           {
@@ -641,7 +641,7 @@
             archived: false,
             minimized: false,
             zIndex: 12,
-            isReadOnly: true,
+            isReadOnly: false,
             createdAt: Date.now()
           }
         ];
@@ -1513,13 +1513,13 @@
           notes = importData.notes.map(n => ({
             ...n,
             createdAt: n.createdAt || Date.now(),
-            isReadOnly: n.isReadOnly !== undefined ? n.isReadOnly : true
+            isReadOnly: n.isReadOnly !== undefined ? n.isReadOnly : false
           }));
         } else if (Array.isArray(importData)) {
           notes = importData.map(n => ({
             ...n,
             createdAt: n.createdAt || Date.now(),
-            isReadOnly: n.isReadOnly !== undefined ? n.isReadOnly : true
+            isReadOnly: n.isReadOnly !== undefined ? n.isReadOnly : false
           }));
         }
         saveDatabase();
@@ -1583,11 +1583,11 @@
       if (saved) {
         try {
           notes = JSON.parse(saved);
-          // Ensure all notes have createdAt and isReadOnly properties
+          // Ensure all notes have createdAt and isReadOnly properties (default to editable)
           notes = notes.map(n => ({
             ...n,
             createdAt: n.createdAt || Date.now(),
-            isReadOnly: n.isReadOnly !== undefined ? n.isReadOnly : true
+            isReadOnly: n.isReadOnly !== undefined ? n.isReadOnly : false
           }));
         } catch (e) {
           console.warn('Failed to parse notes:', e);
