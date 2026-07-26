@@ -200,6 +200,16 @@
       border-color: var(--accent-color); /* Highlight active note borders */
     }
 
+    /* Read-only indicator */
+    .note-readonly {
+      opacity: 0.85;
+    }
+    
+    .note-readonly textarea {
+      background: var(--bg-color) !important;
+      cursor: not-allowed !important;
+    }
+
     /* Customizable border modes override classes */
     .border-style-solid { border-width: 2px; border-style: solid; border-color: var(--border-color); }
     .border-style-double { border-width: 6px; border-style: double; border-color: var(--border-color); }
@@ -293,7 +303,7 @@
       </button>
 
       <!-- View Navigation Home -->
-      <button onclick="recenterCanvas()" class="px-3 py-1.5 bg-[var(--header-bg)] hover:bg-[var(--border-color)] text-[var(--card-fg)] text-xs font-bold rounded-md transition border border-[var(--panel-border)]" title="Recenter to Viewport Origin">
+      <button onclick="recenterCanvas()" class="px-3 py-1.5 bg-[var(--header-bg)] hover:bg-[var(--border-color)] text-[var(--card-fg)] text-xs font-bold rounded-md transition border border-[var(--panel-border)]">
         Recenter (0,0)
       </button>
 
@@ -303,7 +313,7 @@
       <!-- Theme Selector Dropdown Menu -->
       <div class="flex items-center space-x-1">
         <span class="text-[10px] font-bold text-gray-500 uppercase">Theme:</span>
-        <select id="theme-selector" onchange="changeTheme(this.value)" class="bg-[var(--header-bg)] border border-[var(--panel-border)] text-[11px] text-[var(--card-fg)] rounded px-2 py-1 outline-none font-bold cursor-pointer">
+        <select id="theme-selector" onchange="changeTheme(this.value)" class="bg-[var(--header-bg)] border border-[var(--panel-border)] text-[11px] text-[var(--card-fg)] rounded px-2 py-1 outline-none focus:ring-1 focus:ring-[var(--accent-color)]">
           <option value="gtk-light">GTK Light</option>
           <option value="gtk-dark">GTK Dark</option>
           <option value="adwaita-light">Adwaita Light</option>
@@ -317,13 +327,17 @@
       <div class="h-6 w-[1px] bg-[var(--panel-border)] mx-2"></div>
 
       <!-- Utilities Dropdowns / Sidebar triggers -->
-      <button onclick="toggleArchiveSidebar()" class="relative px-3 py-1.5 bg-[var(--header-bg)] hover:bg-[var(--border-color)] text-[var(--card-fg)] text-xs font-bold rounded-md transition border border-[var(--panel-border)] flex items-center space-x-1">
+      <button onclick="toggleArchiveSidebar()" class="relative px-3 py-1.5 bg-[var(--header-bg)] hover:bg-[var(--border-color)] text-[var(--card-fg)] text-xs font-bold rounded-md transition border border-[var(--panel-border)]">
         <span>Cabinet</span>
         <span id="archive-count" class="bg-[var(--accent-color)] text-[10px] text-white px-1.5 py-0.2 rounded-full hidden">0</span>
       </button>
 
       <button onclick="openImportExportModal()" class="px-3 py-1.5 bg-[var(--header-bg)] hover:bg-[var(--border-color)] text-[var(--card-fg)] text-xs font-bold rounded-md transition border border-[var(--panel-border)]">
         Import / Export
+      </button>
+
+      <button onclick="openSettingsModal()" class="px-3 py-1.5 bg-[var(--header-bg)] hover:bg-[var(--border-color)] text-[var(--card-fg)] text-xs font-bold rounded-md transition border border-[var(--panel-border)]">
+        ⚙️ Settings
       </button>
 
       <button onclick="triggerNukeDialog()" class="px-3 py-1.5 bg-red-100 dark:bg-red-950/40 hover:bg-red-200 dark:hover:bg-red-950/70 border border-red-300 dark:border-red-800 text-red-700 dark:text-red-300 text-xs font-bold rounded-md transition">
@@ -370,7 +384,7 @@
   </main>
 
   <!-- Side Cabinet: Archived Notes Dashboard -->
-  <aside id="archive-sidebar" class="fixed right-0 top-14 bottom-0 w-80 bg-[var(--bg-color)] border-l border-[var(--panel-border)] z-40 transform translate-x-full transition-transform duration-300 shadow-2xl flex flex-col">
+  <aside id="archive-sidebar" class="fixed right-0 top-14 bottom-0 w-80 bg-[var(--bg-color)] border-l border-[var(--panel-border)] z-40 transform translate-x-full transition-transform duration-300 shadow-lg overflow-hidden flex flex-col">
     <div class="p-4 border-b border-[var(--panel-border)] flex items-center justify-between bg-[var(--panel-bg)]">
       <h3 class="font-bold text-sm text-[var(--card-fg)] flex items-center space-x-2">
         <span>📦 Archived Cabinet</span>
@@ -394,19 +408,19 @@
       <div class="p-4 space-y-4">
         <div>
           <label class="block text-xs font-bold text-gray-500 mb-1">Backup Export (Copy your workspace configuration)</label>
-          <textarea id="export-textarea" readonly onclick="this.select()" class="w-full h-24 bg-[var(--bg-color)] border border-[var(--panel-border)] p-2 text-xs font-mono rounded text-[var(--accent-color)] focus:outline-none focus:border-[var(--accent-color)] cursor-pointer"></textarea>
+          <textarea id="export-textarea" readonly onclick="this.select()" class="w-full h-24 bg-[var(--bg-color)] border border-[var(--panel-border)] p-2 text-xs font-mono rounded text-[var(--card-fg)]" style="resize: none;"></textarea>
           <div class="flex space-x-2 mt-1">
-            <button onclick="copyExportText()" class="text-[11px] bg-[var(--header-bg)] text-[var(--card-fg)] px-3 py-1 rounded hover:bg-[var(--border-color)] transition border border-[var(--panel-border)] font-semibold">Copy to Clipboard</button>
+            <button onclick="copyExportText()" class="text-[11px] bg-[var(--header-bg)] text-[var(--card-fg)] px-3 py-1 rounded hover:bg-[var(--border-color)] transition border border-[var(--panel-border)]">Copy Text</button>
             <button onclick="downloadJsonFile()" class="text-[11px] bg-[var(--accent-color)] text-white px-3 py-1 rounded hover:bg-[var(--accent-hover)] transition font-semibold">Download .json File</button>
           </div>
         </div>
         <hr class="border-[var(--panel-border)]">
         <div>
           <label class="block text-xs font-bold text-gray-500 mb-1">Import System State (Paste and apply JSON file configuration)</label>
-          <textarea id="import-textarea" placeholder="Paste your saved dashboard JSON configuration here..." class="w-full h-24 bg-[var(--card-bg)] border border-[var(--panel-border)] p-2 text-xs font-mono rounded text-orange-600 focus:outline-none focus:border-orange-500"></textarea>
+          <textarea id="import-textarea" placeholder="Paste your saved dashboard JSON configuration here..." class="w-full h-24 bg-[var(--card-bg)] border border-[var(--panel-border)] p-2 text-xs font-mono rounded text-[var(--card-fg)]" style="resize: none;"></textarea>
           <div class="flex justify-between items-center mt-1">
             <input type="file" id="import-file-selector" accept=".json" class="hidden" onchange="handleFileSelected(event)">
-            <button onclick="document.getElementById('import-file-selector').click()" class="text-[11px] bg-[var(--header-bg)] text-[var(--card-fg)] px-3 py-1 rounded hover:bg-[var(--border-color)] transition border border-[var(--panel-border)] font-semibold">Choose JSON File...</button>
+            <button onclick="document.getElementById('import-file-selector').click()" class="text-[11px] bg-[var(--header-bg)] text-[var(--card-fg)] px-3 py-1 rounded hover:bg-[var(--border-color)] transition border border-[var(--panel-border)]">Load .json File</button>
             <button onclick="runJSONImport()" class="text-[11px] bg-[#2ec27e] text-white px-4 py-1.5 font-bold rounded hover:bg-[#26a269] transition">Process Import State</button>
           </div>
         </div>
@@ -414,7 +428,78 @@
     </div>
   </div>
 
-  <!-- Dialog 2: Safe Confirmation Modal -->
+  <!-- Dialog 2: Settings Modal -->
+  <div id="modal-settings" class="fixed inset-0 bg-black/40 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+    <div class="w-full max-w-md bg-[var(--card-bg)] border border-[var(--panel-border)] rounded-lg overflow-hidden shadow-2xl flex flex-col">
+      <div class="bg-[var(--header-bg)] px-4 py-3 border-b border-[var(--panel-border)] flex justify-between items-center">
+        <span class="text-sm font-bold text-[var(--card-fg)]">⚙️ Application Settings</span>
+        <button onclick="closeSettingsModal()" class="text-gray-500 hover:text-[var(--card-fg)] text-xs font-mono font-bold">✕</button>
+      </div>
+      <div class="p-5 space-y-4 overflow-y-auto max-h-96">
+        
+        <!-- Default Note Size -->
+        <div class="space-y-2">
+          <label class="block text-xs font-bold text-[var(--card-fg)]">📐 Default New Note Size (Width)</label>
+          <div class="flex items-center space-x-2">
+            <input type="range" id="settings-note-width" min="300" max="1200" step="50" value="700" class="flex-1" oninput="updateSettingsDisplay()">
+            <input type="number" id="settings-note-width-input" min="300" max="1200" step="50" value="700" class="w-16 bg-[var(--bg-color)] border border-[var(--panel-border)] p-1 text-xs rounded" oninput="syncSettingInput('width')">
+            <span class="text-xs text-gray-500">px</span>
+          </div>
+        </div>
+
+        <div class="space-y-2">
+          <label class="block text-xs font-bold text-[var(--card-fg)]">📐 Default New Note Size (Height)</label>
+          <div class="flex items-center space-x-2">
+            <input type="range" id="settings-note-height" min="200" max="900" step="50" value="400" class="flex-1" oninput="updateSettingsDisplay()">
+            <input type="number" id="settings-note-height-input" min="200" max="900" step="50" value="400" class="w-16 bg-[var(--bg-color)] border border-[var(--panel-border)] p-1 text-xs rounded" oninput="syncSettingInput('height')">
+            <span class="text-xs text-gray-500">px</span>
+          </div>
+        </div>
+
+        <!-- Auto-Delete Old Notes -->
+        <div class="border-t border-[var(--panel-border)] pt-3">
+          <label class="flex items-center space-x-3 cursor-pointer">
+            <input type="checkbox" id="settings-auto-delete" class="w-4 h-4 cursor-pointer" onchange="saveSettings()">
+            <span class="text-xs font-bold text-[var(--card-fg)]">Auto-Delete Notes Older Than</span>
+          </label>
+          <div class="flex items-center space-x-2 mt-2 ml-7">
+            <input type="number" id="settings-delete-days" min="1" max="365" value="7" class="w-16 bg-[var(--bg-color)] border border-[var(--panel-border)] p-1 text-xs rounded" onchange="saveSettings()">
+            <span class="text-xs text-gray-500">days</span>
+            <span class="text-[10px] text-gray-400">(includes archived)</span>
+          </div>
+        </div>
+
+        <!-- Smart Placement -->
+        <div class="border-t border-[var(--panel-border)] pt-3">
+          <label class="flex items-center space-x-3 cursor-pointer">
+            <input type="checkbox" id="settings-smart-placement" class="w-4 h-4 cursor-pointer" checked onchange="saveSettings()">
+            <span class="text-xs font-bold text-[var(--card-fg)]">Smart Placement (Avoid Overlaps)</span>
+          </label>
+          <p class="text-[10px] text-gray-500 ml-7 mt-1">Auto-position new notes away from existing ones</p>
+        </div>
+
+        <!-- Auto-Focus New Notes -->
+        <div class="border-t border-[var(--panel-border)] pt-3">
+          <label class="flex items-center space-x-3 cursor-pointer">
+            <input type="checkbox" id="settings-auto-focus" class="w-4 h-4 cursor-pointer" checked onchange="saveSettings()">
+            <span class="text-xs font-bold text-[var(--card-fg)]">Auto-Focus New Notes</span>
+          </label>
+          <p class="text-[10px] text-gray-500 ml-7 mt-1">Pan viewport to center on newly created notes</p>
+        </div>
+
+        <!-- Auto-Delete Maintenance Button -->
+        <div class="border-t border-[var(--panel-border)] pt-3">
+          <button onclick="runAutoDeleteOldNotes()" class="w-full px-3 py-2 bg-orange-100 dark:bg-orange-950/40 hover:bg-orange-200 dark:hover:bg-orange-950/70 border border-orange-300 dark:border-orange-800 text-orange-700 dark:text-orange-300 text-xs font-bold rounded-md transition">
+            🗑️ Run Manual Cleanup (Delete Old Notes Now)
+          </button>
+          <p class="text-[10px] text-gray-500 mt-1.5">Manually scan and delete all notes (active + archived) older than the configured threshold</p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Dialog 3: Safe Confirmation Modal -->
   <div id="modal-confirm" class="fixed inset-0 bg-black/40 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
     <div class="w-full max-w-sm bg-[var(--card-bg)] border border-red-200 rounded-lg overflow-hidden shadow-2xl">
       <div class="bg-red-50 dark:bg-red-950/40 px-4 py-3 border-b border-red-100 dark:border-red-900/40 flex items-center space-x-2">
@@ -434,7 +519,7 @@
   </div>
 
   <!-- Toast Notification Overlay -->
-  <div id="toast-overlay" class="fixed bottom-6 right-6 z-50 bg-[var(--card-bg)] border border-[var(--panel-border)] text-xs px-4 py-3 rounded-lg shadow-xl translate-y-20 opacity-0 transition-all duration-300 flex items-center space-x-2 select-none text-[var(--card-fg)] font-medium">
+  <div id="toast-overlay" class="fixed bottom-6 right-6 z-50 bg-[var(--card-bg)] border border-[var(--panel-border)] text-xs px-4 py-3 rounded-lg shadow-xl translate-y-20 opacity-0 transition-all duration-300 pointer-events-none flex items-center space-x-2">
     <span id="toast-icon">ℹ️</span>
     <span id="toast-text">System updated successfully</span>
   </div>
@@ -447,6 +532,16 @@
     let panY = 0;
     let snapToGrid = false;
     const gridSize = 20;
+
+    // Settings state
+    let appSettings = {
+      defaultNoteWidth: 700,
+      defaultNoteHeight: 400,
+      autoDeleteEnabled: false,
+      autoDeleteDays: 7,
+      smartPlacement: true,
+      autoFocusNewNotes: true
+    };
 
     // Viewport dragging states
     let isPanning = false;
@@ -499,10 +594,18 @@
       document.getElementById('theme-selector').value = savedTheme;
       changeTheme(savedTheme, false);
 
+      // Load app settings
+      loadSettings();
+
       loadDatabase();
       initCanvasListeners();
       renderBoard();
       updateCoordinatesDisplay();
+
+      // Run auto-delete on startup if enabled
+      if (appSettings.autoDeleteEnabled) {
+        autoDeleteOldNotes();
+      }
 
       if (notes.length === 0) {
         // Build generic workspace startup layout
@@ -510,32 +613,36 @@
           {
             id: "welcome-note-1",
             title: "📌 GTK Board Welcome Note",
-            content: "Welcome to your spatial light sticky dashboard!\n\nInteractive mechanics:\n- Panning: Drag with middle-mouse button, or hold Spacebar and drag with left-click.\n- Zooming: Use your mouse scrollwheel to focus on any area.\n- Double-click the header to toggle Minimize/Maximize.\n- Alt + Left Drag: Drag this note from ANY section (including this textarea).\n- Alt + Right Drag: Resize this note from ANY section.\n\nNow simplified to pure plain-text notes using monospace font settings!",
+            content: "Welcome to your spatial sticky notes dashboard!\n\nInteractive mechanics:\n- Panning: Drag with middle-mouse button, or hold Spacebar and drag with left-click.\n- Zooming: Use your mouse wheel to zoom in/out.\n- New Notes: Click '+ New Note' button and the viewport will auto-focus on it.\n- Read-Only Mode: Notes are read-only by default. Click the 📝 Edit button to enable editing.\n- Archive: Hide notes in the Cabinet without deleting them.\n- Settings: Configure auto-delete, note sizes, and smart placement behavior.",
             x: 100,
             y: 100,
-            w: 320,
-            h: 340,
+            w: 400,
+            h: 280,
             colorIndex: 0,
             borderStyle: "solid",
-            fontSize: 14,
-            archived: false,
-            minimized: false,
-            zIndex: 11
-          },
-          {
-            id: "welcome-note-2",
-            title: "💡 Fixed Width Text",
-            content: "This application now uses JetBrains Mono for clean alignment.\n\nChecklist representations:\n[ ] Test checklist integration\n[x] Highly responsive GTK Light Theme\n[ ] Zero overlap physics engine\n\nEnjoy structured plain text note layouts!",
-            x: 460,
-            y: 100,
-            w: 280,
-            h: 240,
-            colorIndex: 1,
-            borderStyle: "double",
             fontSize: 13,
             archived: false,
             minimized: false,
-            zIndex: 12
+            zIndex: 11,
+            isReadOnly: true,
+            createdAt: Date.now()
+          },
+          {
+            id: "welcome-note-2",
+            title: "💡 Tips & Tricks",
+            content: "• Alt + Left-Drag: Move notes anywhere on the infinite canvas\n• Alt + Right-Drag: Resize notes by dragging the bottom-right corner\n• Double-click any note to bring it to front\n• Use Snap Grid for pixel-perfect alignment\n• Export your board as JSON for backup or sharing\n• Settings panel lets you customize default note sizes and auto-delete old notes",
+            x: 540,
+            y: 100,
+            w: 380,
+            h: 240,
+            colorIndex: 1,
+            borderStyle: "double",
+            fontSize: 12,
+            archived: false,
+            minimized: false,
+            zIndex: 12,
+            isReadOnly: true,
+            createdAt: Date.now()
           }
         ];
         saveDatabase();
@@ -544,6 +651,100 @@
 
       recenterCanvas();
     };
+
+    // --- SETTINGS MANAGEMENT ---
+    function loadSettings() {
+      const saved = localStorage.getItem('stickyboard_settings');
+      if (saved) {
+        try {
+          appSettings = JSON.parse(saved);
+        } catch (e) {
+          console.warn('Failed to parse settings:', e);
+        }
+      }
+      updateSettingsUI();
+    }
+
+    function saveSettings() {
+      appSettings.defaultNoteWidth = parseInt(document.getElementById('settings-note-width').value);
+      appSettings.defaultNoteHeight = parseInt(document.getElementById('settings-note-height').value);
+      appSettings.autoDeleteEnabled = document.getElementById('settings-auto-delete').checked;
+      appSettings.autoDeleteDays = parseInt(document.getElementById('settings-delete-days').value);
+      appSettings.smartPlacement = document.getElementById('settings-smart-placement').checked;
+      appSettings.autoFocusNewNotes = document.getElementById('settings-auto-focus').checked;
+      
+      localStorage.setItem('stickyboard_settings', JSON.stringify(appSettings));
+      showToast('Settings saved successfully', '✅');
+    }
+
+    function updateSettingsUI() {
+      document.getElementById('settings-note-width').value = appSettings.defaultNoteWidth;
+      document.getElementById('settings-note-width-input').value = appSettings.defaultNoteWidth;
+      document.getElementById('settings-note-height').value = appSettings.defaultNoteHeight;
+      document.getElementById('settings-note-height-input').value = appSettings.defaultNoteHeight;
+      document.getElementById('settings-auto-delete').checked = appSettings.autoDeleteEnabled;
+      document.getElementById('settings-delete-days').value = appSettings.autoDeleteDays;
+      document.getElementById('settings-smart-placement').checked = appSettings.smartPlacement;
+      document.getElementById('settings-auto-focus').checked = appSettings.autoFocusNewNotes;
+    }
+
+    function updateSettingsDisplay() {
+      document.getElementById('settings-note-width-input').value = document.getElementById('settings-note-width').value;
+      document.getElementById('settings-note-height-input').value = document.getElementById('settings-note-height').value;
+    }
+
+    function syncSettingInput(type) {
+      if (type === 'width') {
+        document.getElementById('settings-note-width').value = document.getElementById('settings-note-width-input').value;
+      } else if (type === 'height') {
+        document.getElementById('settings-note-height').value = document.getElementById('settings-note-height-input').value;
+      }
+    }
+
+    function openSettingsModal() {
+      updateSettingsUI();
+      document.getElementById('modal-settings').classList.remove('hidden');
+      document.getElementById('modal-settings').classList.add('flex');
+    }
+
+    function closeSettingsModal() {
+      document.getElementById('modal-settings').classList.add('hidden');
+      document.getElementById('modal-settings').classList.remove('flex');
+    }
+
+    // --- AUTO-DELETE FUNCTIONALITY ---
+    function autoDeleteOldNotes() {
+      const now = Date.now();
+      const thresholdMs = appSettings.autoDeleteDays * 24 * 60 * 60 * 1000;
+      let deletedCount = 0;
+
+      notes = notes.filter(note => {
+        const createdAt = note.createdAt || 0;
+        const age = now - createdAt;
+        
+        if (age > thresholdMs) {
+          deletedCount++;
+          return false;
+        }
+        return true;
+      });
+
+      if (deletedCount > 0) {
+        saveDatabase();
+        renderBoard();
+      }
+
+      return deletedCount;
+    }
+
+    function runAutoDeleteOldNotes() {
+      const deleted = autoDeleteOldNotes();
+      if (deleted > 0) {
+        showToast(`Deleted ${deleted} old note(s)`, '🗑️');
+      } else {
+        showToast('No notes older than ' + appSettings.autoDeleteDays + ' days found', 'ℹ️');
+      }
+    }
 
     // Theme Switcher Implementation
     function changeTheme(themeName, triggerToast = true) {
@@ -762,6 +963,48 @@
       return { x: solvedX, y: solvedY };
     }
 
+    function findNonOverlappingPosition(targetW, targetH, excludeNoteId = null) {
+      // Get all active notes
+      const activeNotes = notes.filter(n => !n.archived && n.id !== excludeNoteId);
+      
+      let x = 100;
+      let y = 100;
+      const spacing = 30;
+      let attempts = 0;
+      const maxAttempts = 50;
+
+      while (attempts < maxAttempts) {
+        let overlapping = false;
+
+        for (const note of activeNotes) {
+          // Check if new position overlaps with this note
+          if (x < note.x + note.w + spacing &&
+              x + targetW + spacing > note.x &&
+              y < note.y + note.h + spacing &&
+              y + targetH + spacing > note.y) {
+            overlapping = true;
+            break;
+          }
+        }
+
+        if (!overlapping) {
+          return { x, y };
+        }
+
+        // Move to the right, then down
+        x += targetW + spacing;
+        if (x > 3000) { // Wrap to next row
+          x = 100;
+          y += targetH + spacing;
+        }
+
+        attempts++;
+      }
+
+      // Fallback: staircase pattern
+      return { x: 100 + attempts * 50, y: 100 + attempts * 50 };
+    }
+
     function toggleSnapToGrid() {
       snapToGrid = !snapToGrid;
       const indicator = document.getElementById('snap-indicator');
@@ -793,42 +1036,93 @@
     // --- NOTE ENGINE ACTIONS & RENDER SYSTEM ---
     function createNewNote() {
       const viewport = document.getElementById('viewport');
-      const midX = (-panX + (viewport.clientWidth / 2) - 150) / zoom;
-      const midY = (-panY + (viewport.clientHeight / 2) - 150) / zoom;
+      let spawnX, spawnY;
 
-      const randomId = 'note-' + Date.now();
-      
-      let spawnX = midX;
-      let spawnY = midY;
+      if (appSettings.smartPlacement) {
+        const pos = findNonOverlappingPosition(appSettings.defaultNoteWidth, appSettings.defaultNoteHeight);
+        spawnX = pos.x;
+        spawnY = pos.y;
+      } else {
+        const midX = (-panX + (viewport.clientWidth / 2) - (appSettings.defaultNoteWidth / 2)) / zoom;
+        const midY = (-panY + (viewport.clientHeight / 2) - (appSettings.defaultNoteHeight / 2)) / zoom;
+        spawnX = midX;
+        spawnY = midY;
+      }
 
       if (snapToGrid) {
         spawnX = Math.round(spawnX / gridSize) * gridSize;
         spawnY = Math.round(spawnY / gridSize) * gridSize;
       }
 
-      const resolved = resolveCollisions(randomId, spawnX, spawnY, 300, 250);
+      const randomId = 'note-' + Date.now();
       maxZIndex++;
 
       const newNote = {
         id: randomId,
         title: "📄 New Monospace Sticky",
-        content: "Write plain text notes here...",
-        x: resolved.x,
-        y: resolved.y,
-        w: 300,
-        h: 250,
-        colorIndex: 0, // Default to Gray index
+        content: "Write your notes here...",
+        x: spawnX,
+        y: spawnY,
+        w: appSettings.defaultNoteWidth,
+        h: appSettings.defaultNoteHeight,
+        colorIndex: 0,
         borderStyle: "solid",
         fontSize: 14,
         archived: false,
         minimized: false,
-        zIndex: maxZIndex
+        zIndex: maxZIndex,
+        isReadOnly: false,
+        createdAt: Date.now()
       };
 
       notes.push(newNote);
       saveDatabase();
       renderBoard();
-      showToast("Note spawned on canvas.", "✨");
+      showToast("New note created. Start typing!", "✨");
+
+      // Auto-focus on new note if enabled
+      if (appSettings.autoFocusNewNotes) {
+        setTimeout(() => {
+          focusOnNote(randomId);
+        }, 50);
+      }
+    }
+
+    function focusOnNote(noteId) {
+      const note = notes.find(n => n.id === noteId);
+      if (!note) return;
+
+      const viewport = document.getElementById('viewport');
+      const viewportW = viewport.clientWidth;
+      const viewportH = viewport.clientHeight;
+
+      // Center the note in the viewport
+      zoom = 1.0;
+      panX = (viewportW / 2) - (note.x + note.w / 2);
+      panY = (viewportH / 2) - (note.y + note.h / 2);
+
+      applyCanvasTransform();
+      updateCoordinatesDisplay();
+
+      // Focus the textarea
+      setTimeout(() => {
+        const textarea = document.getElementById(`note-content-${noteId}`);
+        if (textarea) {
+          textarea.focus();
+          textarea.select();
+        }
+      }, 100);
+    }
+
+    function toggleNoteReadOnly(noteId) {
+      const note = notes.find(n => n.id === noteId);
+      if (note) {
+        note.isReadOnly = !note.isReadOnly;
+        saveDatabase();
+        renderBoard();
+        const status = note.isReadOnly ? 'Read-Only' : 'Editing Enabled';
+        showToast(status, note.isReadOnly ? '🔒' : '✏️');
+      }
     }
 
     function renderBoard() {
@@ -840,6 +1134,7 @@
       notes.forEach((note) => {
         if (note.archived) {
           archiveCount++;
+          renderArchivedNote(note);
           return;
         }
 
@@ -847,7 +1142,7 @@
         
         const noteWindow = document.createElement('div');
         noteWindow.id = `note-win-${note.id}`;
-        noteWindow.className = `absolute gtk-window flex flex-col border-style-${note.borderStyle}`;
+        noteWindow.className = `absolute gtk-window flex flex-col border-style-${note.borderStyle} ${note.isReadOnly ? 'note-readonly' : ''}`;
         noteWindow.style.left = `${note.x}px`;
         noteWindow.style.top = `${note.y}px`;
         noteWindow.style.width = `${note.w}px`;
@@ -917,6 +1212,9 @@
           <button onclick="copyNoteContent('${note.id}')" title="Copy Full Note Text" class="titlebar-btn">
             📋
           </button>
+          <button onclick="toggleNoteReadOnly('${note.id}')" title="${note.isReadOnly ? 'Enable Editing' : 'Read-Only Mode'}" class="titlebar-btn">
+            ${note.isReadOnly ? '🔒' : '✏️'}
+          </button>
           <button onclick="toggleOptionsDrawer('${note.id}')" title="Configure Style Borders" class="titlebar-btn">
             ⚙️
           </button>
@@ -944,15 +1242,15 @@
         optionsDrawer.innerHTML = `
           <div class="flex items-center space-x-2">
             <span class="text-[10px] font-bold opacity-75">Border Style:</span>
-            <select onchange="updateNoteBorder('${note.id}', this.value)" class="bg-white dark:bg-neutral-800 border border-black/20 text-xs rounded px-1 py-0.5 outline-none focus:ring-1 focus:ring-blue-500 font-semibold">
+            <select onchange="updateNoteBorder('${note.id}', this.value)" class="bg-white dark:bg-neutral-800 border border-black/20 text-xs rounded px-1 py-0.5 outline-none focus:ring-1 focus:ring-blue-400">
               ${borderStyles.map(s => `<option value="${s}" ${note.borderStyle === s ? 'selected' : ''}>${s.toUpperCase()}</option>`).join('')}
             </select>
           </div>
           <div class="flex items-center space-x-1.5">
             <span class="text-[10px] font-bold opacity-75">Text Size:</span>
-            <button onclick="adjustNoteFont('${note.id}', -1)" class="w-5 h-4 bg-white dark:bg-neutral-800 hover:bg-neutral-100 rounded border border-black/20 flex items-center justify-center font-bold text-[9px]">-</button>
+            <button onclick="adjustNoteFont('${note.id}', -1)" class="w-5 h-4 bg-white dark:bg-neutral-800 hover:bg-neutral-100 rounded border border-black/20 flex items-center justify-center font-bold text-[10px]">−</button>
             <span class="font-mono text-[10px] font-bold">${note.fontSize}px</span>
-            <button onclick="adjustNoteFont('${note.id}', 1)" class="w-5 h-4 bg-white dark:bg-neutral-800 hover:bg-neutral-100 rounded border border-black/20 flex items-center justify-center font-bold text-[9px]">+</button>
+            <button onclick="adjustNoteFont('${note.id}', 1)" class="w-5 h-4 bg-white dark:bg-neutral-800 hover:bg-neutral-100 rounded border border-black/20 flex items-center justify-center font-bold text-[10px]">+</button>
           </div>
         `;
         noteWindow.appendChild(optionsDrawer);
@@ -963,9 +1261,11 @@
           editorWrapper.className = "flex-1 flex flex-col min-h-0 relative";
 
           const contentArea = document.createElement('textarea');
+          contentArea.id = `note-content-${note.id}`;
           contentArea.className = "flex-1 w-full h-full p-3 bg-transparent border-none outline-none resize-none font-mono text-xs focus:ring-0 leading-relaxed overflow-y-auto rounded-b-[var(--window-radius)]";
           contentArea.style.fontSize = `${note.fontSize}px`;
           contentArea.style.color = colorSet.text;
+          contentArea.readOnly = note.isReadOnly;
           
           // Migrate old HTML format notes gracefully to clean plain text on focus/rendering
           contentArea.value = cleanHtmlToPlainText(note.content);
@@ -1003,70 +1303,78 @@
         workspace.appendChild(noteWindow);
       });
 
-      const badge = document.getElementById('archive-count');
+      // Update archive count
+      const archiveCountBadge = document.getElementById('archive-count');
       if (archiveCount > 0) {
-        badge.innerText = archiveCount;
-        badge.classList.remove('hidden');
+        archiveCountBadge.textContent = archiveCount;
+        archiveCountBadge.classList.remove('hidden');
       } else {
-        badge.classList.add('hidden');
+        archiveCountBadge.classList.add('hidden');
       }
-      repopulateArchiveSidebarList();
     }
 
-    function bringToFront(id) {
-      const note = notes.find(n => n.id === id);
+    function renderArchivedNote(note) {
+      const colorSet = gtkColors[note.colorIndex] || gtkColors[0];
+      const archiveList = document.getElementById('archive-list');
+
+      const card = document.createElement('div');
+      card.className = "bg-[var(--card-bg)] border border-[var(--panel-border)] rounded-lg p-3 space-y-2 hover:shadow-md transition";
+      card.innerHTML = `
+        <div class="flex items-start justify-between gap-2">
+          <div class="flex-1 min-w-0">
+            <h4 class="text-xs font-bold text-[var(--card-fg)] truncate">${note.title}</h4>
+            <p class="text-[10px] text-gray-500 line-clamp-2 mt-1">${note.content.substring(0, 80)}...</p>
+          </div>
+        </div>
+        <div class="flex items-center justify-between gap-1 text-[10px]">
+          <button onclick="unarchiveNote('${note.id}')" class="flex-1 px-2 py-1 bg-emerald-100 dark:bg-emerald-950/40 hover:bg-emerald-200 dark:hover:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300 rounded font-bold transition">
+            Restore
+          </button>
+          <button onclick="deleteNote('${note.id}')" class="flex-1 px-2 py-1 bg-red-100 dark:bg-red-950/40 hover:bg-red-200 dark:hover:bg-red-950/70 text-red-700 dark:text-red-300 rounded font-bold transition">
+            Delete
+          </button>
+        </div>
+      `;
+      archiveList.appendChild(card);
+    }
+
+    function copyNoteContent(noteId) {
+      const note = notes.find(n => n.id === noteId);
       if (note) {
-        const currentMax = Math.max(...notes.map(n => n.zIndex || 10), 10);
-        if (note.zIndex !== currentMax || notes.length === 1) {
-          maxZIndex = currentMax + 1;
-          note.zIndex = maxZIndex;
-          
-          const elem = document.getElementById(`note-win-${id}`);
-          if (elem) {
-            elem.style.zIndex = note.zIndex;
-          }
-          saveDatabase();
-        }
+        const content = `${note.title}\n\n${note.content}`;
+        navigator.clipboard.writeText(content).then(() => {
+          showToast("Note copied to clipboard", "📋");
+        });
       }
     }
 
-    function toggleMinimizeNote(id) {
-      const note = notes.find(n => n.id === id);
-      if (note) {
-        note.minimized = !note.minimized;
-        saveDatabase();
-        renderBoard();
-      }
-    }
-
-    // Toggle options drawer
-    function toggleOptionsDrawer(id) {
-      const drawer = document.getElementById(`options-drawer-${id}`);
+    function toggleOptionsDrawer(noteId) {
+      const drawer = document.getElementById(`options-drawer-${noteId}`);
       if (drawer) {
         drawer.classList.toggle('hidden');
       }
     }
 
-    function updateNoteBorder(id, styleName) {
-      const note = notes.find(n => n.id === id);
+    function updateNoteBorder(noteId, style) {
+      const note = notes.find(n => n.id === noteId);
       if (note) {
-        note.borderStyle = styleName;
+        note.borderStyle = style;
         saveDatabase();
         renderBoard();
       }
     }
 
-    function adjustNoteFont(id, direction) {
-      const note = notes.find(n => n.id === id);
+    function adjustNoteFont(noteId, delta) {
+      const note = notes.find(n => n.id === noteId);
       if (note) {
-        note.fontSize = Math.min(32, Math.max(10, note.fontSize + direction));
+        note.fontSize = Math.max(8, Math.min(32, note.fontSize + delta));
         saveDatabase();
         renderBoard();
       }
     }
 
-    function cycleNoteColor(id) {
-      const note = notes.find(n => n.id === id);
+    function cycleNoteColor(noteId) {
+      const note = notes.find(n => n.id === noteId);
       if (note) {
         note.colorIndex = (note.colorIndex + 1) % gtkColors.length;
         saveDatabase();
@@ -1074,144 +1382,106 @@
       }
     }
 
-    // --- COPY NOTE CONTENT HELPER ---
-    function copyNoteContent(id) {
-      const note = notes.find(n => n.id === id);
+    function toggleMinimizeNote(noteId) {
+      const note = notes.find(n => n.id === noteId);
       if (note) {
-        const plainText = cleanHtmlToPlainText(note.content);
-        
-        // Robust fallback-compatible iframe copy utility
-        const tempTextarea = document.createElement('textarea');
-        tempTextarea.value = plainText;
-        document.body.appendChild(tempTextarea);
-        tempTextarea.select();
-        document.execCommand('copy');
-        document.body.removeChild(tempTextarea);
-        
-        showToast("Full note content copied!", "📋");
+        note.minimized = !note.minimized;
+        saveDatabase();
+        renderBoard();
       }
     }
 
-    // --- ARCHIVE & CABINET SYSTEM ---
-    function archiveNote(id) {
-      const note = notes.find(n => n.id === id);
+    function archiveNote(noteId) {
+      const note = notes.find(n => n.id === noteId);
       if (note) {
         note.archived = true;
         saveDatabase();
         renderBoard();
-        showToast("Note relocated to Archive Cabinet.", "📦");
+        showToast("Note archived to cabinet", "📦");
       }
     }
 
-    function restoreNote(id) {
-      const note = notes.find(n => n.id === id);
+    function unarchiveNote(noteId) {
+      const note = notes.find(n => n.id === noteId);
       if (note) {
         note.archived = false;
-        
-        const resolved = resolveCollisions(note.id, note.x, note.y, note.w, note.h);
-        note.x = resolved.x;
-        note.y = resolved.y;
-
         saveDatabase();
         renderBoard();
-        showToast("Note recovered back to Canvas.", "♻️");
+        showToast("Note restored from archive", "✨");
+        toggleArchiveSidebar();
       }
     }
 
-    // Delete note
-    function deleteNote(id) {
-      const noteIdx = notes.findIndex(n => n.id === id);
-      if (noteIdx > -1) {
-        notes.splice(noteIdx, 1);
+    function deleteNote(noteId) {
+      const note = notes.find(n => n.id === noteId);
+      if (note) {
+        triggerConfirmDialog(
+          `Are you sure you want to delete "${note.title}"? This cannot be undone.`,
+          () => {
+            notes = notes.filter(n => n.id !== noteId);
+            saveDatabase();
+            renderBoard();
+            showToast("Note permanently deleted", "🗑️");
+          }
+        );
+      }
+    }
+
+    function bringToFront(noteId) {
+      const note = notes.find(n => n.id === noteId);
+      if (note) {
+        maxZIndex++;
+        note.zIndex = maxZIndex;
         saveDatabase();
         renderBoard();
-        showToast("Note removed permanently.", "🗑️");
       }
     }
 
     function toggleArchiveSidebar() {
-      const bar = document.getElementById('archive-sidebar');
-      bar.classList.toggle('translate-x-full');
+      const sidebar = document.getElementById('archive-sidebar');
+      sidebar.classList.toggle('translate-x-full');
+      renderBoard();
     }
 
-    function repopulateArchiveSidebarList() {
-      const listContainer = document.getElementById('archive-list');
-      listContainer.innerHTML = "";
-
-      const archivedNotes = notes.filter(n => n.archived);
-
-      if (archivedNotes.length === 0) {
-        listContainer.innerHTML = `
-          <div class="text-center py-10 text-gray-400 text-xs font-semibold">
-            Cabinet is empty. No archived notes stored yet.
-          </div>
-        `;
-        return;
-      }
-
-      archivedNotes.forEach((note) => {
-        const item = document.createElement('div');
-        item.className = "p-3 bg-[var(--card-bg)] border border-[var(--panel-border)] rounded-lg flex flex-col space-y-2 text-xs shadow-sm";
-        item.innerHTML = `
-          <div class="flex items-center justify-between">
-            <span class="font-bold text-[var(--card-fg)] truncate w-[60%]">${note.title || "Untitled Stick"}</span>
-            <div class="flex items-center space-x-1 shrink-0">
-              <button onclick="restoreNote('${note.id}')" class="px-1.5 py-0.5 bg-[var(--accent-color)] hover:bg-[var(--accent-hover)] text-white rounded text-[10px] font-semibold transition" title="Restore to workspace">Restore</button>
-              <button onclick="deleteNote('${note.id}')" class="px-1.5 py-0.5 bg-red-100 hover:bg-red-200 text-red-700 rounded text-[10px] font-semibold transition" title="Delete forever">Delete</button>
-            </div>
-          </div>
-          <div class="text-[10px] text-gray-400 truncate max-h-12 overflow-hidden bg-[var(--bg-color)] p-1.5 rounded font-mono">
-            ${cleanHtmlToPlainText(note.content) || '(Empty contents)'}
-          </div>
-        `;
-        listContainer.appendChild(item);
-      });
-    }
-
-    // --- NUKE DATABASE ---
-    function triggerNukeDialog() {
-      const msg = "WARNING: You are about to completely wipe and delete all sticky notes currently saved inside your dashboard environment. This is irreversible!";
-      triggerConfirmModal(msg, () => {
-        notes = [];
-        saveDatabase();
-        renderBoard();
-        recenterCanvas();
-        showToast("Database completely wiped.", "💣");
-      });
-    }
-
-    // --- SYSTEM BACKUP PORTABILITY MODALS (EXPORT / IMPORT JSON) ---
     function openImportExportModal() {
-      const stringified = JSON.stringify(notes, null, 2);
-      document.getElementById('export-textarea').value = stringified;
-      document.getElementById('import-textarea').value = "";
-
+      const exportData = {
+        notes: notes,
+        exportedAt: new Date().toISOString()
+      };
+      document.getElementById('export-textarea').value = JSON.stringify(exportData, null, 2);
       document.getElementById('modal-import-export').classList.remove('hidden');
       document.getElementById('modal-import-export').classList.add('flex');
     }
 
     function closeImportExportModal() {
-      document.getElementById('modal-import-export').classList.remove('flex');
       document.getElementById('modal-import-export').classList.add('hidden');
+      document.getElementById('modal-import-export').classList.remove('flex');
     }
 
-    // Secure clipboard copy
     function copyExportText() {
-      const area = document.getElementById('export-textarea');
-      area.select();
-      document.execCommand('copy');
-      showToast("JSON Board data copied to Clipboard!", "📋");
+      const textarea = document.getElementById('export-textarea');
+      textarea.select();
+      navigator.clipboard.writeText(textarea.value).then(() => {
+        showToast("Export copied to clipboard", "📋");
+      });
     }
 
     function downloadJsonFile() {
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(notes, null, 2));
-      const downloadAnchor = document.createElement('a');
-      downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", `stickyboard_backup_${Date.now()}.json`);
-      document.body.appendChild(downloadAnchor);
-      downloadAnchor.click();
-      downloadAnchor.remove();
-      showToast("Download backup initiated.", "💾");
+      const exportData = {
+        notes: notes,
+        exportedAt: new Date().toISOString()
+      };
+      const jsonString = JSON.stringify(exportData, null, 2);
+      const blob = new Blob([jsonString], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `stickyboard-backup-${Date.now()}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast("Backup downloaded", "💾");
     }
 
     function handleFileSelected(event) {
@@ -1219,107 +1489,110 @@
       if (!file) return;
 
       const reader = new FileReader();
-      reader.onload = function(e) {
-        document.getElementById('import-textarea').value = e.target.result;
+      reader.onload = (e) => {
+        try {
+          const content = e.target.result;
+          document.getElementById('import-textarea').value = content;
+        } catch (err) {
+          showToast("Failed to read file", "❌");
+        }
       };
       reader.readAsText(file);
     }
 
     function runJSONImport() {
-      const input = document.getElementById('import-textarea').value.trim();
-      if (!input) {
-        showToast("No configuration data entered to import.", "❌");
+      const importText = document.getElementById('import-textarea').value.trim();
+      if (!importText) {
+        showToast("Please paste or load a JSON file", "⚠️");
         return;
       }
 
       try {
-        const parsed = JSON.parse(input);
-        
-        if (Array.isArray(parsed)) {
-          const sanitiSed = parsed.map(note => ({
-            id: note.id || 'note-' + Math.random().toString(36).substr(2, 9),
-            title: note.title || 'Imported Note',
-            content: cleanHtmlToPlainText(note.content) || 'No text content loaded.',
-            x: Number(note.x) || 100,
-            y: Number(note.y) || 100,
-            w: Number(note.w) || 280,
-            h: Number(note.h) || 220,
-            colorIndex: Number(note.colorIndex) || 0,
-            borderStyle: note.borderStyle || 'solid',
-            fontSize: Number(note.fontSize) || 14,
-            archived: !!note.archived,
-            minimized: !!note.minimized,
-            zIndex: Number(note.zIndex) || 10
+        const importData = JSON.parse(importText);
+        if (Array.isArray(importData.notes)) {
+          notes = importData.notes.map(n => ({
+            ...n,
+            createdAt: n.createdAt || Date.now(),
+            isReadOnly: n.isReadOnly !== undefined ? n.isReadOnly : true
           }));
-
-          notes = sanitiSed;
-          saveDatabase();
-          renderBoard();
-          closeImportExportModal();
-          showToast("Workspace configuration updated successfully!", "🎉");
-          recenterCanvas();
-        } else {
-          showToast("Invalid format: Root component must be an Array.", "❌");
+        } else if (Array.isArray(importData)) {
+          notes = importData.map(n => ({
+            ...n,
+            createdAt: n.createdAt || Date.now(),
+            isReadOnly: n.isReadOnly !== undefined ? n.isReadOnly : true
+          }));
         }
+        saveDatabase();
+        renderBoard();
+        closeImportExportModal();
+        showToast("Import successful", "✅");
       } catch (err) {
-        showToast(`Import Failed: ${err.message}`, "❌");
+        showToast("Invalid JSON format", "❌");
       }
     }
 
-    // --- SECURE CONFIRMATION WRAPPER SYSTEM ---
-    let activeConfirmCallback = null;
+    function triggerNukeDialog() {
+      triggerConfirmDialog(
+        "⚠️ NUCLEAR OPTION: This will PERMANENTLY DELETE all notes (active and archived). This cannot be undone.",
+        () => {
+          notes = [];
+          saveDatabase();
+          renderBoard();
+          showToast("Board has been nuked", "💣");
+        }
+      );
+    }
 
-    function triggerConfirmModal(textMessage, callbackFn) {
-      document.getElementById('confirm-message').innerText = textMessage;
-      activeConfirmCallback = callbackFn;
-      
-      const modal = document.getElementById('modal-confirm');
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
+    function triggerConfirmDialog(message, onConfirm) {
+      const confirmMsg = document.getElementById('confirm-message');
+      const confirmBtn = document.getElementById('confirm-execute-btn');
+      confirmMsg.textContent = message;
+      confirmBtn.onclick = () => {
+        onConfirm();
+        closeConfirmationDialog();
+      };
+      document.getElementById('modal-confirm').classList.remove('hidden');
+      document.getElementById('modal-confirm').classList.add('flex');
     }
 
     function closeConfirmationDialog() {
-      document.getElementById('modal-confirm').classList.remove('flex');
       document.getElementById('modal-confirm').classList.add('hidden');
-      activeConfirmCallback = null;
+      document.getElementById('modal-confirm').classList.remove('flex');
     }
 
-    document.getElementById('confirm-execute-btn').addEventListener('click', () => {
-      if (activeConfirmCallback) {
-        activeConfirmCallback();
-      }
-      closeConfirmationDialog();
-    });
-
-    // --- TOAST SYSTEM OVERLAYS ---
     function showToast(message, icon = "ℹ️") {
       const toast = document.getElementById('toast-overlay');
-      document.getElementById('toast-icon').innerText = icon;
-      document.getElementById('toast-text').innerText = message;
+      document.getElementById('toast-icon').textContent = icon;
+      document.getElementById('toast-text').textContent = message;
+      toast.style.opacity = '1';
+      toast.style.transform = 'translateY(0)';
 
-      toast.classList.remove('translate-y-20', 'opacity-0');
-      toast.classList.add('translate-y-0', 'opacity-100');
-
-      setTimeout(() => {
-        toast.classList.remove('translate-y-0', 'opacity-100');
-        toast.classList.add('translate-y-20', 'opacity-0');
-      }, 3000);
+      clearTimeout(toast.timeoutId);
+      toast.timeoutId = setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(20px)';
+      }, 2500);
     }
 
-    // --- SYSTEM PERSISTENCE UTILITIES ---
     function saveDatabase() {
-      localStorage.setItem('gtk_stickyboard_notes', JSON.stringify(notes));
+      localStorage.setItem('stickyboard_notes', JSON.stringify(notes));
     }
 
     function loadDatabase() {
-      try {
-        const payload = localStorage.getItem('gtk_stickyboard_notes');
-        if (payload) {
-          notes = JSON.parse(payload);
+      const saved = localStorage.getItem('stickyboard_notes');
+      if (saved) {
+        try {
+          notes = JSON.parse(saved);
+          // Ensure all notes have createdAt and isReadOnly properties
+          notes = notes.map(n => ({
+            ...n,
+            createdAt: n.createdAt || Date.now(),
+            isReadOnly: n.isReadOnly !== undefined ? n.isReadOnly : true
+          }));
+        } catch (e) {
+          console.warn('Failed to parse notes:', e);
+          notes = [];
         }
-      } catch (err) {
-        console.error("Storage read exception: ", err);
-        notes = [];
       }
     }
   </script>
