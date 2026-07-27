@@ -26,9 +26,8 @@
       --banner-bg: #f1f0ee;
       --banner-fg: #2e3440;
       
-      /* Window Geometry */
       --window-radius: 12px;
-      --btn-radius: 9999px; /* Gnome flat circular buttons */
+      --btn-radius: 9999px;
       --title-align: left;
       --window-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.15), 0 8px 18px -3px rgba(0, 0, 0, 0.08);
       --window-shadow-focus: 0 25px 50px -10px rgba(0, 0, 0, 0.25), 0 12px 24px -5px rgba(0, 0, 0, 0.12);
@@ -49,7 +48,6 @@
       --banner-bg: #2d2d2d;
       --banner-fg: #eeeeee;
       
-      /* Window Geometry */
       --window-radius: 12px;
       --btn-radius: 9999px;
       --title-align: left;
@@ -72,7 +70,6 @@
       --banner-bg: #e8e8e7;
       --banner-fg: #2e3440;
       
-      /* Window Geometry */
       --window-radius: 12px;
       --btn-radius: 9999px;
       --title-align: left;
@@ -95,7 +92,6 @@
       --banner-bg: #2d2d2d;
       --banner-fg: #ffffff;
       
-      /* Window Geometry */
       --window-radius: 12px;
       --btn-radius: 9999px;
       --title-align: left;
@@ -112,19 +108,18 @@
       --panel-bg: #eff0f1;
       --panel-border: #bdc3c7;
       --border-color: #bdc3c7;
-      --accent-color: #3daee9; /* Breeze Cyan Blue */
+      --accent-color: #3daee9;
       --accent-hover: #1d99db;
       --header-bg: #e0e2e4;
       --banner-bg: #e0e2e4;
       --banner-fg: #232629;
       
-      /* Window Geometry */
-      --window-radius: 4px; /* Crisp KDE breeze corners */
-      --btn-radius: 4px; /* Blockier KDE controls */
-      --title-align: center; /* KDE Plasma centers headers by default */
+      --window-radius: 4px;
+      --btn-radius: 4px;
+      --title-align: center;
       --window-shadow: 0 8px 16px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.05);
       --window-shadow-focus: 0 15px 30px rgba(0, 0, 0, 0.15), 0 2px 8px rgba(0, 0, 0, 0.08);
-      --close-hover-bg: #da4453; /* Breeze system red */
+      --close-hover-bg: #da4453;
     }
 
     .theme-breeze-dark {
@@ -141,7 +136,6 @@
       --banner-bg: #2a2e32;
       --banner-fg: #fcfcfc;
       
-      /* Window Geometry */
       --window-radius: 4px;
       --btn-radius: 4px;
       --title-align: center;
@@ -168,7 +162,6 @@
         linear-gradient(to bottom, var(--bg-grid) 1px, transparent 1px);
     }
 
-    /* Scrollbars GTK/KDE style mapping */
     ::-webkit-scrollbar {
       width: 8px;
       height: 8px;
@@ -184,7 +177,6 @@
       background: var(--accent-color);
     }
 
-    /* Note window structure dynamic adaptation */
     .gtk-window {
       background: var(--card-bg);
       color: var(--card-fg);
@@ -197,10 +189,9 @@
     .gtk-window:focus-within {
       box-shadow: var(--window-shadow-focus);
       transform: translateY(-2px);
-      border-color: var(--accent-color); /* Highlight active note borders */
+      border-color: var(--accent-color);
     }
 
-    /* Customizable border modes override classes */
     .border-style-solid { border-width: 2px; border-style: solid; border-color: var(--border-color); }
     .border-style-double { border-width: 6px; border-style: double; border-color: var(--border-color); }
     .border-style-dashed { border-width: 2px; border-style: dashed; border-color: var(--border-color); }
@@ -212,7 +203,6 @@
       box-shadow: 0 0 15px rgba(53, 132, 228, 0.35), inset 0 0 6px rgba(53, 132, 228, 0.15);
     }
 
-    /* Adaptive Titlebar Buttons styled as larger, borderless modern icons */
     .titlebar-btn {
       width: 28px;
       height: 28px;
@@ -220,17 +210,13 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      font-size: 15px; /* Bigger and clearer emoji icon size */
+      font-size: 15px;
       transition: all 0.15s ease;
       background: transparent;
       border: none;
       cursor: pointer;
     }
     
-    .theme-gtk-dark .titlebar-btn, .theme-adwaita-dark .titlebar-btn, .theme-breeze-dark .titlebar-btn {
-      background: transparent;
-    }
-
     .titlebar-btn:hover {
       background: rgba(0, 0, 0, 0.08);
       transform: scale(1.15);
@@ -240,21 +226,11 @@
       background: rgba(255, 255, 255, 0.12);
     }
 
-    /* Close Button Native Hover red effect */
     .titlebar-btn-close:hover {
       background-color: var(--close-hover-bg) !important;
       color: #ffffff !important;
     }
 
-    /* Note Content Styles */
-    .note-editable-area {
-      outline: none;
-      word-break: break-word;
-      user-select: text !important;
-      -webkit-user-select: text !important;
-    }
-
-    /* Dynamic cursor/drag handling state overrides */
     .drag-active * {
       user-select: none !important;
       -webkit-user-select: none !important;
@@ -263,10 +239,8 @@
 </head>
 <body class="w-screen h-screen overflow-hidden flex flex-col relative theme-gtk-light">
 
-  <!-- Top Global GTK/KDE Panel Header -->
   <header class="w-full h-14 bg-[var(--panel-bg)] border-b border-[var(--panel-border)] px-4 flex items-center justify-between z-40 select-none shadow-sm transition-all">
     <div class="flex items-center space-x-3">
-      <!-- Minimalist GTK Icon -->
       <div class="w-8 h-8 rounded-lg bg-[var(--accent-color)] flex items-center justify-center font-bold text-white shadow-md transition-all">
         🗒️
       </div>
@@ -278,26 +252,29 @@
 
     <!-- Active Navigation Tools -->
     <div class="flex items-center space-x-2">
-      <!-- Spawn Button -->
       <button onclick="createNewNote()" class="flex items-center space-x-1.5 px-3 py-1.5 bg-[var(--accent-color)] hover:bg-[var(--accent-hover)] text-white text-xs font-bold rounded-md transition shadow-sm">
         <span>+ New Note</span>
       </button>
 
-      <!-- Vertical Divider -->
       <div class="h-6 w-[1px] bg-[var(--panel-border)] mx-2"></div>
 
-      <!-- Snap To Grid Toggle -->
+      <button onclick="zoomToFitAllNotes()" class="px-3 py-1.5 bg-[var(--header-bg)] hover:bg-[var(--border-color)] text-[var(--card-fg)] text-xs font-bold rounded-md transition border border-[var(--panel-border)]" title="Zoom to Fit All Active Notes">
+        🔍 Fit All
+      </button>
+
+      <button onclick="autoArrangeNotes()" class="px-3 py-1.5 bg-[var(--header-bg)] hover:bg-[var(--border-color)] text-[var(--card-fg)] text-xs font-bold rounded-md transition border border-[var(--panel-border)]" title="Auto-arrange Notes in a Clean Grid">
+        🧩 Auto Arrange
+      </button>
+
       <button id="snap-toggle-btn" onclick="toggleSnapToGrid()" class="flex items-center space-x-1 px-3 py-1.5 bg-[var(--header-bg)] hover:bg-[var(--border-color)] text-[var(--card-fg)] text-xs font-bold rounded-md transition border border-[var(--panel-border)]">
         <span class="w-2.5 h-2.5 rounded-full bg-red-500 inline-block mr-1" id="snap-indicator"></span>
         <span>Snap Grid</span>
       </button>
 
-      <!-- View Navigation Home -->
       <button onclick="recenterCanvas()" class="px-3 py-1.5 bg-[var(--header-bg)] hover:bg-[var(--border-color)] text-[var(--card-fg)] text-xs font-bold rounded-md transition border border-[var(--panel-border)]" title="Recenter to Viewport Origin">
         Recenter (0,0)
       </button>
 
-      <!-- Vertical Divider -->
       <div class="h-6 w-[1px] bg-[var(--panel-border)] mx-2"></div>
 
       <!-- Theme Selector Dropdown Menu -->
@@ -313,17 +290,20 @@
         </select>
       </div>
 
-      <!-- Vertical Divider -->
       <div class="h-6 w-[1px] bg-[var(--panel-border)] mx-2"></div>
 
-      <!-- Utilities Dropdowns / Sidebar triggers -->
       <button onclick="toggleArchiveSidebar()" class="relative px-3 py-1.5 bg-[var(--header-bg)] hover:bg-[var(--border-color)] text-[var(--card-fg)] text-xs font-bold rounded-md transition border border-[var(--panel-border)] flex items-center space-x-1">
-        <span>Cabinet</span>
+        <span>Cabinet / Trash</span>
         <span id="archive-count" class="bg-[var(--accent-color)] text-[10px] text-white px-1.5 py-0.2 rounded-full hidden">0</span>
       </button>
 
       <button onclick="openImportExportModal()" class="px-3 py-1.5 bg-[var(--header-bg)] hover:bg-[var(--border-color)] text-[var(--card-fg)] text-xs font-bold rounded-md transition border border-[var(--panel-border)]">
         Import / Export
+      </button>
+
+      <!-- Control Panel Button -->
+      <button onclick="openControlPanelModal()" class="px-3 py-1.5 bg-[var(--header-bg)] hover:bg-[var(--border-color)] text-[var(--card-fg)] text-xs font-bold rounded-md transition border border-[var(--panel-border)] flex items-center space-x-1" title="Open Dashboard Settings Control Panel">
+        <span>⚙️ Control Panel</span>
       </button>
 
       <button onclick="triggerNukeDialog()" class="px-3 py-1.5 bg-red-100 dark:bg-red-950/40 hover:bg-red-200 dark:hover:bg-red-950/70 border border-red-300 dark:border-red-800 text-red-700 dark:text-red-300 text-xs font-bold rounded-md transition">
@@ -332,8 +312,7 @@
     </div>
   </header>
 
-  <!-- App Info, Donations, Monitors and Warning Banner -->
-  <div class="w-full bg-[var(--banner-bg)] border-b border-[var(--panel-border)] px-4 py-2.5 flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4 text-xs z-30 shadow-sm transition-all">
+  <div class="w-full bg-[var(--banner-bg)] border-b border-[var(--panel-border)] px-4 py-2 flex flex-col xl:flex-row xl:items-center xl:justify-between gap-3 text-xs z-30 shadow-sm transition-all select-text">
     <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
       <span class="font-bold text-[var(--banner-fg)] flex items-center">
         👤 Created by Bradford R.
@@ -346,34 +325,54 @@
       </a>
     </div>
 
-    <!-- Integrated Dynamic Coordinate Monitor -->
-    <div class="flex flex-wrap items-center gap-2">
-      <!-- Coordinate Monitor -->
+    <!-- Instruction Hint & Command Helpers -->
+    <div class="bg-purple-100 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800/60 rounded-md px-3 py-1 text-[11px] text-purple-900 dark:text-purple-200 font-medium flex items-center space-x-2 flex-wrap">
+      <span>✨ <strong>Commands & Shortcuts:</strong></span>
+      <span title="Clean up extra spaces & line breaks"><code class="bg-purple-200 dark:bg-purple-900/60 px-1 rounded font-mono font-bold">@whitespace</code></span>
+      <span title="New Note Shortcut"><code class="bg-purple-200 dark:bg-purple-900/60 px-1 rounded font-mono font-bold">Ctrl+Shift+N</code></span>
+      <span title="Trash Note Shortcut"><code class="bg-purple-200 dark:bg-purple-900/60 px-1 rounded font-mono font-bold">Ctrl+Shift+D</code></span>
+      <span title="Pan Canvas"><code class="bg-purple-200 dark:bg-purple-900/60 px-1 rounded font-mono font-bold">Arrow Keys</code></span>
+      <span title="Zoom Canvas"><code class="bg-purple-200 dark:bg-purple-900/60 px-1 rounded font-mono font-bold">+ / -</code></span>
+    </div>
+
+    <div class="flex items-center space-x-2">
       <div class="bg-[var(--panel-bg)] border border-[var(--panel-border)] px-2.5 py-1 rounded-md text-[10px] text-[var(--card-fg)] font-mono flex items-center space-x-2.5">
         <div>X: <span id="coord-x" class="font-bold">0</span></div>
         <div>Y: <span id="coord-y" class="font-bold">0</span></div>
         <div class="text-[var(--accent-color)] font-bold">Zoom: <span id="coord-zoom">100%</span></div>
       </div>
     </div>
-
-    <div class="text-[10px] text-amber-800 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/40 rounded-md px-3 py-1.5 max-w-2xl leading-tight">
-      ⚠️ <strong>Attention:</strong> Uses <strong>Local Storage</strong>. Clearing site data causes data loss. Use <strong>Import/Export</strong> as dynamic backups!
-    </div>
   </div>
 
-  <!-- Interactive Infinite Canvas Workspace Viewport -->
   <main id="viewport" class="flex-1 relative w-full h-full overflow-hidden blueprint-grid cursor-grab active:cursor-grabbing" style="background-color: var(--bg-color);">
-    <!-- The Infinite Workspace Element that accepts transforms -->
     <div id="workspace" class="absolute w-0 h-0 top-0 left-0 transform-gpu" style="transform: translate(0px, 0px) scale(1);">
       <!-- Render area for all individual GTK Note components dynamically placed here -->
     </div>
+
+    <!-- Floating Canvas Navigation Controls Overlay -->
+    <div class="absolute bottom-5 left-5 z-40 bg-[var(--card-bg)] border border-[var(--panel-border)] rounded-lg shadow-xl p-2 flex items-center space-x-2 text-xs select-none">
+      <div class="flex items-center space-x-1 border-r border-[var(--panel-border)] pr-2">
+        <button onclick="shiftCanvas(-100, 0)" class="w-7 h-7 bg-[var(--header-bg)] hover:bg-[var(--border-color)] text-[var(--card-fg)] rounded flex items-center justify-center font-bold" title="Pan Left">⬅️</button>
+        <div class="flex flex-col space-y-1">
+          <button onclick="shiftCanvas(0, -100)" class="w-7 h-6 bg-[var(--header-bg)] hover:bg-[var(--border-color)] text-[var(--card-fg)] rounded flex items-center justify-center font-bold text-[10px]" title="Pan Up">⬆️</button>
+          <button onclick="shiftCanvas(0, 100)" class="w-7 h-6 bg-[var(--header-bg)] hover:bg-[var(--border-color)] text-[var(--card-fg)] rounded flex items-center justify-center font-bold text-[10px]" title="Pan Down">⬇️</button>
+        </div>
+        <button onclick="shiftCanvas(100, 0)" class="w-7 h-7 bg-[var(--header-bg)] hover:bg-[var(--border-color)] text-[var(--card-fg)] rounded flex items-center justify-center font-bold" title="Pan Right">➡️</button>
+      </div>
+
+      <div class="flex items-center space-x-1">
+        <button onclick="zoomCanvasDelta(0.15)" class="w-7 h-7 bg-[var(--header-bg)] hover:bg-[var(--border-color)] text-[var(--card-fg)] rounded font-bold text-sm flex items-center justify-center" title="Zoom In (+)">＋</button>
+        <button onclick="zoomCanvasDelta(-0.15)" class="w-7 h-7 bg-[var(--header-bg)] hover:bg-[var(--border-color)] text-[var(--card-fg)] rounded font-bold text-sm flex items-center justify-center" title="Zoom Out (-)">－</button>
+        <button onclick="recenterCanvas()" class="px-2 h-7 bg-[var(--header-bg)] hover:bg-[var(--border-color)] text-[var(--card-fg)] rounded font-bold text-[11px] flex items-center justify-center" title="Reset Zoom to 100%">100%</button>
+        <button onclick="zoomToFitAllNotes()" class="px-2 h-7 bg-[var(--accent-color)] hover:bg-[var(--accent-hover)] text-white rounded font-bold text-[11px] flex items-center justify-center" title="Fit All Notes">🔍 Fit All</button>
+      </div>
+    </div>
   </main>
 
-  <!-- Side Cabinet: Archived Notes Dashboard -->
   <aside id="archive-sidebar" class="fixed right-0 top-14 bottom-0 w-80 bg-[var(--bg-color)] border-l border-[var(--panel-border)] z-40 transform translate-x-full transition-transform duration-300 shadow-2xl flex flex-col">
     <div class="p-4 border-b border-[var(--panel-border)] flex items-center justify-between bg-[var(--panel-bg)]">
       <h3 class="font-bold text-sm text-[var(--card-fg)] flex items-center space-x-2">
-        <span>📦 Archived Cabinet</span>
+        <span>📦 Cabinet / Trash</span>
       </h3>
       <button onclick="toggleArchiveSidebar()" class="text-gray-500 hover:text-[var(--card-fg)] text-xs px-2 py-1 bg-[var(--header-bg)] rounded border border-[var(--panel-border)]">Close</button>
     </div>
@@ -383,7 +382,6 @@
     </div>
   </aside>
 
-  <!-- Custom GTK/KDE Styling Modal Context System -->
   <!-- Dialog 1: Import/Export JSON Interface -->
   <div id="modal-import-export" class="fixed inset-0 bg-black/40 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
     <div class="w-full max-w-lg bg-[var(--card-bg)] border border-[var(--panel-border)] rounded-lg overflow-hidden shadow-2xl flex flex-col">
@@ -433,6 +431,118 @@
     </div>
   </div>
 
+  <!-- Dialog 3: Master Control Panel Modal -->
+  <div id="modal-control-panel" class="fixed inset-0 bg-black/40 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+    <div class="w-full max-w-lg bg-[var(--card-bg)] border border-[var(--panel-border)] rounded-lg overflow-hidden shadow-2xl flex flex-col">
+      <div class="bg-[var(--header-bg)] px-4 py-3 border-b border-[var(--panel-border)] flex justify-between items-center">
+        <span class="text-sm font-bold text-[var(--card-fg)] flex items-center space-x-1.5">
+          <span>⚙️ System Control Panel</span>
+        </span>
+        <button onclick="closeControlPanelModal()" class="text-gray-500 hover:text-[var(--card-fg)] text-xs font-mono font-bold">✕</button>
+      </div>
+      <div class="p-5 space-y-4 max-h-[80vh] overflow-y-auto text-xs text-[var(--card-fg)]">
+        
+        <!-- Toggle: Keyboard Shortcuts -->
+        <div class="flex items-center justify-between p-2.5 bg-[var(--bg-color)] rounded border border-[var(--panel-border)]">
+          <div>
+            <div class="font-bold">Enable Keyboard Shortcuts</div>
+            <div class="text-[10px] text-gray-500">Enable Ctrl+Shift+N (New Note) and Ctrl+Shift+D (Trash Note).</div>
+          </div>
+          <input type="checkbox" id="setting-shortcuts-enabled" onchange="updateSettings()" class="w-4 h-4 accent-blue-600 cursor-pointer">
+        </div>
+
+        <!-- Toggle: Minimize Notes -->
+        <div class="flex items-center justify-between p-2.5 bg-[var(--bg-color)] rounded border border-[var(--panel-border)]">
+          <div>
+            <div class="font-bold">Enable Minimize Button</div>
+            <div class="text-[10px] text-gray-500">Show collapse button on note window headers.</div>
+          </div>
+          <input type="checkbox" id="setting-minimize-enabled" onchange="updateSettings()" class="w-4 h-4 accent-blue-600 cursor-pointer">
+        </div>
+
+        <!-- Toggle: Auto-Trash Settings -->
+        <div class="p-2.5 bg-[var(--bg-color)] rounded border border-[var(--panel-border)] space-y-2">
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="font-bold">Enable Auto-Trash Inactive Notes</div>
+              <div class="text-[10px] text-gray-500">Move notes to Trash if not accessed/viewed after duration.</div>
+            </div>
+            <input type="checkbox" id="setting-autotrash-enabled" onchange="updateSettings()" class="w-4 h-4 accent-amber-600 cursor-pointer">
+          </div>
+          <div class="flex items-center space-x-2 pt-1 border-t border-[var(--panel-border)]">
+            <label class="text-[10px] text-gray-500 font-bold whitespace-nowrap">Inactive Duration (Days):</label>
+            <input type="number" id="setting-autotrash-days" value="1" min="1" onchange="updateSettings()" class="w-full bg-[var(--card-bg)] border border-[var(--panel-border)] p-1.5 rounded font-mono text-xs">
+          </div>
+        </div>
+
+        <!-- Toggle: Trash Purge Settings -->
+        <div class="p-2.5 bg-[var(--bg-color)] rounded border border-[var(--panel-border)] space-y-2">
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="font-bold">Enable Periodic Trash Purge</div>
+              <div class="text-[10px] text-gray-500">Permanently delete trashed/archived notes older than duration.</div>
+            </div>
+            <input type="checkbox" id="setting-trashpurge-enabled" onchange="updateSettings()" class="w-4 h-4 accent-red-600 cursor-pointer">
+          </div>
+          <div class="flex items-center space-x-2 pt-1 border-t border-[var(--panel-border)]">
+            <label class="text-[10px] text-gray-500 font-bold whitespace-nowrap">Purge After (Days):</label>
+            <input type="number" id="setting-trashpurge-days" value="7" min="1" onchange="updateSettings()" class="w-full bg-[var(--card-bg)] border border-[var(--panel-border)] p-1.5 rounded font-mono text-xs">
+          </div>
+        </div>
+
+        <!-- Default Dimensions -->
+        <div class="p-2.5 bg-[var(--bg-color)] rounded border border-[var(--panel-border)] space-y-2">
+          <div class="font-bold">Default New Note Dimensions</div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[10px] text-gray-500 mb-1">Width (px)</label>
+              <input type="number" id="setting-default-w" value="800" onchange="updateSettings()" class="w-full bg-[var(--card-bg)] border border-[var(--panel-border)] p-1.5 rounded font-mono text-xs">
+            </div>
+            <div>
+              <label class="block text-[10px] text-gray-500 mb-1">Height (px)</label>
+              <input type="number" id="setting-default-h" value="600" onchange="updateSettings()" class="w-full bg-[var(--card-bg)] border border-[var(--panel-border)] p-1.5 rounded font-mono text-xs">
+            </div>
+          </div>
+        </div>
+
+        <!-- Toggle: Default Auto-Size New Notes -->
+        <div class="flex items-center justify-between p-2.5 bg-[var(--bg-color)] rounded border border-[var(--panel-border)]">
+          <div>
+            <div class="font-bold">Auto-Size New Notes by Default</div>
+            <div class="text-[10px] text-gray-500">Automatically adjust width and height based on text content (Max 2000x2000px).</div>
+          </div>
+          <input type="checkbox" id="setting-default-autosize" onchange="updateSettings()" class="w-4 h-4 accent-blue-600 cursor-pointer">
+        </div>
+
+        <!-- Toggle: Auto-Title Settings -->
+        <div class="p-2.5 bg-[var(--bg-color)] rounded border border-[var(--panel-border)] space-y-2">
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="font-bold">Enable Auto-Titling for Unnamed Notes</div>
+              <div class="text-[10px] text-gray-500">Automatically sets the note title from the first line of content if not manually renamed.</div>
+            </div>
+            <input type="checkbox" id="setting-autotitle-enabled" onchange="updateSettings()" class="w-4 h-4 accent-blue-600 cursor-pointer">
+          </div>
+          <div class="flex items-center space-x-2 pt-1 border-t border-[var(--panel-border)]">
+            <label class="text-[10px] text-gray-500 font-bold whitespace-nowrap">Auto-Title After (Minutes):</label>
+            <input type="number" id="setting-autotitle-minutes" value="5" min="1" onchange="updateSettings()" class="w-full bg-[var(--card-bg)] border border-[var(--panel-border)] p-1.5 rounded font-mono text-xs">
+          </div>
+        </div>
+
+        <!-- Macros / Text Expansion Configuration -->
+        <div class="p-2.5 bg-[var(--bg-color)] rounded border border-[var(--panel-border)] space-y-2">
+          <div class="font-bold">Text Expansion Macros & Abbreviations</div>
+          <div class="text-[10px] text-gray-500">Format: <code>abbr::[expansion text]</code>. Type abbreviation + Space/Enter inside a note to expand.</div>
+          <textarea id="setting-macros-text" onchange="updateSettings()" rows="5" placeholder="my_name::[Bradford R.]&#10;sig::[Best regards,&#10;Bradford R.]" class="w-full bg-[var(--card-bg)] border border-[var(--panel-border)] p-2 rounded font-mono text-xs focus:outline-none focus:border-[var(--accent-color)] leading-relaxed"></textarea>
+        </div>
+
+        <div class="flex items-center justify-end pt-2">
+          <button onclick="closeControlPanelModal()" class="px-4 py-1.5 bg-[var(--accent-color)] hover:bg-[var(--accent-hover)] text-white text-xs font-bold rounded transition">Done</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Notification Overlay -->
   <div id="toast-overlay" class="fixed bottom-6 right-6 z-50 bg-[var(--card-bg)] border border-[var(--panel-border)] text-xs px-4 py-3 rounded-lg shadow-xl translate-y-20 opacity-0 transition-all duration-300 flex items-center space-x-2 select-none text-[var(--card-fg)] font-medium">
     <span id="toast-icon">ℹ️</span>
@@ -440,13 +550,29 @@
   </div>
 
   <script>
-    // --- STATE ENGINE DECLARATION ---
     let notes = [];
     let zoom = 1.0;
     let panX = 0;
     let panY = 0;
     let snapToGrid = false;
     const gridSize = 20;
+    let maxZIndex = 10;
+
+    // System Control Settings
+    let appSettings = {
+      shortcutsEnabled: true,
+      minimizeEnabled: true,
+      autoTrashEnabled: true,
+      autoTrashDays: 1,
+      trashPurgeEnabled: true,
+      trashPurgeDays: 7,
+      defaultW: 800,
+      defaultH: 600,
+      defaultAutoSize: false,
+      autoTitleEnabled: true,
+      autoTitleMinutes: 5,
+      macrosText: "my_name::[Bradford R.]\nsig::[Best regards,\nBradford R.]"
+    };
 
     // Viewport dragging states
     let isPanning = false;
@@ -468,10 +594,6 @@
     let noteOriginalW = 0;
     let noteOriginalH = 0;
 
-    // Depth ordering helper state
-    let maxZIndex = 10;
-
-    // Default note colors configured under premium GTK Light / Adwaita palette styles
     const gtkColors = [
       { name: "Adwaita Light Gray", header: "var(--header-bg)", body: "var(--card-bg)", text: "var(--card-fg)" },
       { name: "Minty Light Teal", header: "#c3f2d0", body: "#e8fcf0", text: "#1a4c2e" },
@@ -483,59 +605,732 @@
 
     const borderStyles = ["solid", "double", "dashed", "groove", "neon"];
 
-    // Helper to strip HTML and extract clean plain text (useful during database loading/import)
+    function saveDatabase() {
+      try {
+        localStorage.setItem('stickyboard_notes_v2', JSON.stringify(notes));
+      } catch(e) {
+        console.error("Save failed:", e);
+      }
+    }
+
+    function loadDatabase() {
+      try {
+        const saved = localStorage.getItem('stickyboard_notes_v2');
+        if (saved) {
+          notes = JSON.parse(saved);
+          notes.forEach(n => {
+            if (n.zIndex && n.zIndex > maxZIndex) maxZIndex = n.zIndex;
+          });
+        }
+      } catch(e) {
+        console.error("Load failed:", e);
+        notes = [];
+      }
+    }
+
+    function loadSettings() {
+      try {
+        const saved = localStorage.getItem('stickyboard_settings');
+        if (saved) {
+          appSettings = { ...appSettings, ...JSON.parse(saved) };
+        }
+      } catch (e) {
+        console.warn("Failed to load settings:", e);
+      }
+    }
+
+    function saveSettings() {
+      localStorage.setItem('stickyboard_settings', JSON.stringify(appSettings));
+    }
+
+    function showToast(msg, icon = "ℹ️") {
+      const toast = document.getElementById('toast-overlay');
+      const iconEl = document.getElementById('toast-icon');
+      const textEl = document.getElementById('toast-text');
+      if (!toast || !iconEl || !textEl) return;
+
+      iconEl.innerText = icon;
+      textEl.innerText = msg;
+
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      if (window.toastTimeout) clearTimeout(window.toastTimeout);
+      window.toastTimeout = setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-20', 'opacity-0');
+      }, 3000);
+    }
+
     function cleanHtmlToPlainText(htmlContent) {
       if (!htmlContent) return "";
       const tempDiv = document.createElement("div");
       tempDiv.innerHTML = htmlContent.replace(/<br\s*\/?>/gi, '\n').replace(/<\/div>/gi, '\n').replace(/<\/li>/gi, '\n');
-      const text = tempDiv.innerText || tempDiv.textContent || "";
-      return text.trim();
+      return (tempDiv.innerText || tempDiv.textContent || "").trim();
     }
 
-    // Initialize core parameters on document payload ready
+    function bringToFront(id) {
+      const note = notes.find(n => n.id === id);
+      if (note) {
+        maxZIndex++;
+        note.zIndex = maxZIndex;
+        const elem = document.getElementById(`note-win-${id}`);
+        if (elem) elem.style.zIndex = maxZIndex;
+      }
+    }
+
+    function changeTheme(themeName, notify = true) {
+      document.body.className = `w-screen h-screen overflow-hidden flex flex-col relative theme-${themeName}`;
+      localStorage.setItem('stickyboard_theme', themeName);
+      if (notify) showToast(`Theme updated to ${themeName}`, "🎨");
+    }
+
+    function openControlPanelModal() {
+      document.getElementById('setting-shortcuts-enabled').checked = appSettings.shortcutsEnabled !== false;
+      document.getElementById('setting-minimize-enabled').checked = appSettings.minimizeEnabled;
+      document.getElementById('setting-autotrash-enabled').checked = appSettings.autoTrashEnabled;
+      document.getElementById('setting-autotrash-days').value = appSettings.autoTrashDays || (appSettings.autoTrashHours ? Math.ceil(appSettings.autoTrashHours / 24) : 1);
+      document.getElementById('setting-trashpurge-enabled').checked = appSettings.trashPurgeEnabled;
+      document.getElementById('setting-trashpurge-days').value = appSettings.trashPurgeDays || 7;
+      document.getElementById('setting-default-w').value = appSettings.defaultW || 800;
+      document.getElementById('setting-default-h').value = appSettings.defaultH || 600;
+      document.getElementById('setting-default-autosize').checked = !!appSettings.defaultAutoSize;
+      document.getElementById('setting-autotitle-enabled').checked = appSettings.autoTitleEnabled !== false;
+      document.getElementById('setting-autotitle-minutes').value = appSettings.autoTitleMinutes || 5;
+      document.getElementById('setting-macros-text').value = appSettings.macrosText || "";
+
+      const modal = document.getElementById('modal-control-panel');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeControlPanelModal() {
+      const modal = document.getElementById('modal-control-panel');
+      modal.classList.remove('flex');
+      modal.classList.add('hidden');
+    }
+
+    function updateSettings() {
+      appSettings.shortcutsEnabled = document.getElementById('setting-shortcuts-enabled').checked;
+      appSettings.minimizeEnabled = document.getElementById('setting-minimize-enabled').checked;
+      appSettings.autoTrashEnabled = document.getElementById('setting-autotrash-enabled').checked;
+      appSettings.autoTrashDays = Math.max(1, parseFloat(document.getElementById('setting-autotrash-days').value) || 1);
+      appSettings.trashPurgeEnabled = document.getElementById('setting-trashpurge-enabled').checked;
+      appSettings.trashPurgeDays = Math.max(1, parseFloat(document.getElementById('setting-trashpurge-days').value) || 7);
+      appSettings.defaultW = parseInt(document.getElementById('setting-default-w').value) || 800;
+      appSettings.defaultH = parseInt(document.getElementById('setting-default-h').value) || 600;
+      appSettings.defaultAutoSize = document.getElementById('setting-default-autosize').checked;
+      appSettings.autoTitleEnabled = document.getElementById('setting-autotitle-enabled').checked;
+      appSettings.autoTitleMinutes = Math.max(1, parseFloat(document.getElementById('setting-autotitle-minutes').value) || 5);
+      appSettings.macrosText = document.getElementById('setting-macros-text').value;
+
+      saveSettings();
+      renderBoard();
+      showToast("Control Panel settings saved.", "⚙️");
+    }
+
+    function computeAndApplyAutoSize(note, windowElem) {
+      if (!note.autoSize) return;
+
+      const fontSize = note.fontSize || 14;
+      const text = cleanHtmlToPlainText(note.content) || '';
+
+      const lines = text.split('\n');
+      let maxLineLength = 0;
+      lines.forEach(l => { if (l.length > maxLineLength) maxLineLength = l.length; });
+
+      const charWidth = fontSize * 0.605;
+      const calculatedW = Math.ceil(maxLineLength * charWidth) + 48;
+
+      const measurer = document.getElementById('auto-size-measurer') || (() => {
+        const el = document.createElement('div');
+        el.id = 'auto-size-measurer';
+        el.style.cssText = 'position:absolute;top:-9999px;left:-9999px;visibility:hidden;white-space:pre-wrap;word-break:break-word;font-family:"JetBrains Mono",monospace;box-sizing:border-box;padding:12px;';
+        document.body.appendChild(el);
+        return el;
+      })();
+
+      const targetW = Math.max(280, Math.min(2000, calculatedW));
+      measurer.style.fontSize = fontSize + 'px';
+      measurer.style.width = (targetW - 16) + 'px';
+      measurer.textContent = text || ' ';
+
+      const calculatedH = measurer.offsetHeight + 56;
+      const targetH = Math.max(120, Math.min(2000, calculatedH));
+
+      note.w = targetW;
+      note.h = targetH;
+
+      if (windowElem) {
+        windowElem.style.width = `${targetW}px`;
+        windowElem.style.height = `${targetH}px`;
+      }
+    }
+
+    function toggleNoteAutoSize(id) {
+      const note = notes.find(n => n.id === id);
+      if (note) {
+        note.autoSize = !note.autoSize;
+        if (note.autoSize) {
+          const winElem = document.getElementById(`note-win-${id}`);
+          computeAndApplyAutoSize(note, winElem);
+          showToast("Auto-Size enabled (Max 2000x2000px)", "📐");
+        } else {
+          showToast("Auto-Size disabled", "📐");
+        }
+        saveDatabase();
+        renderBoard();
+      }
+    }
+
+    function parseMacros(text) {
+      const map = {};
+      if (!text) return map;
+      const lines = text.split('\n');
+      lines.forEach(line => {
+        const parts = line.split('::');
+        if (parts.length >= 2) {
+          const abbr = parts[0].trim();
+          let val = parts.slice(1).join('::').trim();
+          if (val.startsWith('[') && val.endsWith(']')) {
+            val = val.substring(1, val.length - 1);
+          }
+          if (abbr) map[abbr] = val;
+        }
+      });
+      return map;
+    }
+
+    function checkAndExpandMacro(textarea, keyTrigger) {
+      if (!appSettings.macrosText) return false;
+      const cursor = textarea.selectionStart;
+      const textBefore = textarea.value.substring(0, cursor);
+      const match = textBefore.match(/([a-zA-Z0-9_\-]+)$/);
+      if (!match) return false;
+
+      const abbr = match[1];
+      const macros = parseMacros(appSettings.macrosText);
+      if (macros[abbr] !== undefined) {
+        const replacement = macros[abbr];
+        const start = cursor - abbr.length;
+        const textAfter = textarea.value.substring(cursor);
+        
+        textarea.value = textarea.value.substring(0, start) + replacement + (keyTrigger === 'Space' ? ' ' : '\n') + textAfter;
+        const newCursor = start + replacement.length + 1;
+        textarea.selectionStart = newCursor;
+        textarea.selectionEnd = newCursor;
+        return true;
+      }
+      return false;
+    }
+
+    function processWhitespaceCommand(noteId) {
+      const note = notes.find(n => n.id === noteId);
+      if (!note) return;
+
+      let raw = note.content.replace(/@whitespace/gi, '');
+      const lines = raw.split('\n').map(l => l.trimEnd());
+      raw = lines.join('\n');
+      raw = raw.replace(/\n{3,}/g, '\n\n').trim();
+
+      note.content = raw;
+      note.updatedAt = Date.now();
+      saveDatabase();
+      renderBoard();
+      showToast("Whitespace & line breaks optimized!", "🧹");
+    }
+
+    function findNonOverlappingSpawnPos(w, h) {
+      const viewport = document.getElementById('viewport');
+      let baseVirtX = (-panX + (viewport.clientWidth / 2) - (w / 2)) / zoom;
+      let baseVirtY = (-panY + (viewport.clientHeight / 2) - (h / 2)) / zoom;
+
+      let candidateX = baseVirtX;
+      let candidateY = baseVirtY;
+      let step = 40;
+      let offsetIndex = 0;
+
+      while (true) {
+        let hasOverlap = false;
+        for (let other of notes) {
+          if (other.archived) continue;
+          if (candidateX < other.x + other.w &&
+              candidateX + w > other.x &&
+              candidateY < other.y + other.h &&
+              candidateY + h > other.y) {
+            hasOverlap = true;
+            break;
+          }
+        }
+
+        if (!hasOverlap || offsetIndex > 50) break;
+
+        offsetIndex++;
+        candidateX = baseVirtX + (offsetIndex * step);
+        candidateY = baseVirtY + (offsetIndex * step);
+      }
+
+      if (snapToGrid) {
+        candidateX = Math.round(candidateX / gridSize) * gridSize;
+        candidateY = Math.round(candidateY / gridSize) * gridSize;
+      }
+
+      return { x: candidateX, y: candidateY };
+    }
+
+    function shiftFocusToNote(note) {
+      const viewport = document.getElementById('viewport');
+      const viewW = viewport.clientWidth;
+      const viewH = viewport.clientHeight;
+
+      const noteCenterX = note.x + (note.w / 2);
+      const noteCenterY = note.y + (note.h / 2);
+
+      panX = (viewW / 2) - (noteCenterX * zoom);
+      panY = (viewH / 2) - (noteCenterY * zoom);
+
+      applyCanvasTransform();
+      updateCoordinatesDisplay(note.x, note.y);
+    }
+
+    function createNewNote() {
+      const defaultW = appSettings.defaultW || 800;
+      const defaultH = appSettings.defaultH || 600;
+      const spawnPos = findNonOverlappingSpawnPos(defaultW, defaultH);
+
+      const randomId = 'note-' + Date.now();
+      maxZIndex++;
+
+      const now = Date.now();
+      const newNote = {
+        id: randomId,
+        title: "📄 New Sticky Note",
+        content: "",
+        x: spawnPos.x,
+        y: spawnPos.y,
+        w: defaultW,
+        h: defaultH,
+        colorIndex: 0,
+        borderStyle: "solid",
+        fontSize: 14,
+        archived: false,
+        minimized: false,
+        autoSize: !!appSettings.defaultAutoSize,
+        titleManuallySet: false,
+        zIndex: maxZIndex,
+        createdAt: now,
+        updatedAt: now,
+        lastViewedAt: now
+      };
+
+      if (newNote.autoSize) {
+        computeAndApplyAutoSize(newNote);
+      }
+
+      notes.push(newNote);
+      saveDatabase();
+      renderBoard();
+
+      shiftFocusToNote(newNote);
+      showToast(`New blank note created!`, "✨");
+    }
+
+    function zoomToFitAllNotes() {
+      const activeNotes = notes.filter(n => !n.archived);
+      if (activeNotes.length === 0) {
+        recenterCanvas();
+        return;
+      }
+
+      let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+      activeNotes.forEach(n => {
+        if (n.x < minX) minX = n.x;
+        if (n.y < minY) minY = n.y;
+        if (n.x + n.w > maxX) maxX = n.x + n.w;
+        if (n.y + n.h > maxY) maxY = n.y + n.h;
+      });
+
+      const bboxW = maxX - minX;
+      const bboxH = maxY - minY;
+      const centerX = minX + bboxW / 2;
+      const centerY = minY + bboxH / 2;
+
+      const viewport = document.getElementById('viewport');
+      const viewW = viewport.clientWidth;
+      const viewH = viewport.clientHeight;
+
+      const padding = 120;
+      const scaleX = viewW / (bboxW + padding * 2);
+      const scaleY = viewH / (bboxH + padding * 2);
+
+      zoom = Math.min(2.0, Math.max(0.2, Math.min(scaleX, scaleY)));
+      panX = (viewW / 2) - (centerX * zoom);
+      panY = (viewH / 2) - (centerY * zoom);
+
+      applyCanvasTransform();
+      updateCoordinatesDisplay();
+      showToast("Zoomed to fit all active notes.", "🔍");
+    }
+
+    function autoArrangeNotes() {
+      const activeNotes = notes.filter(n => !n.archived);
+      if (activeNotes.length === 0) return;
+
+      const cols = Math.max(1, Math.floor(Math.sqrt(activeNotes.length * 1.5)));
+      const padding = 40;
+      const startX = 100;
+      const startY = 100;
+
+      activeNotes.forEach((note, index) => {
+        const col = index % cols;
+        const row = Math.floor(index / cols);
+
+        note.x = startX + col * (note.w + padding);
+        note.y = startY + row * (note.h + padding);
+
+        if (snapToGrid) {
+          note.x = Math.round(note.x / gridSize) * gridSize;
+          note.y = Math.round(note.y / gridSize) * gridSize;
+        }
+      });
+
+      saveDatabase();
+      renderBoard();
+      zoomToFitAllNotes();
+      showToast("Notes auto-arranged neatly into grid layout.", "🧩");
+    }
+
+    function copyNoteContent(id) {
+      const note = notes.find(n => n.id === id);
+      if (!note) return;
+      const text = cleanHtmlToPlainText(note.content);
+      
+      const el = document.createElement('textarea');
+      el.value = text;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+
+      showToast("Note content copied to clipboard!", "📋");
+    }
+
+    function cycleNoteColor(id) {
+      const note = notes.find(n => n.id === id);
+      if (note) {
+        note.colorIndex = (note.colorIndex + 1) % gtkColors.length;
+        saveDatabase();
+        renderBoard();
+      }
+    }
+
+    function toggleMinimizeNote(id) {
+      const note = notes.find(n => n.id === id);
+      if (note) {
+        note.minimized = !note.minimized;
+        saveDatabase();
+        renderBoard();
+      }
+    }
+
+    function toggleOptionsDrawer(id) {
+      const drawer = document.getElementById(`options-drawer-${id}`);
+      if (drawer) {
+        drawer.classList.toggle('hidden');
+      }
+    }
+
+    function updateNoteBorder(id, val) {
+      const note = notes.find(n => n.id === id);
+      if (note) {
+        note.borderStyle = val;
+        saveDatabase();
+        renderBoard();
+      }
+    }
+
+    function adjustNoteFont(id, delta) {
+      const note = notes.find(n => n.id === id);
+      if (note) {
+        note.fontSize = Math.min(28, Math.max(10, (note.fontSize || 14) + delta));
+        saveDatabase();
+        renderBoard();
+      }
+    }
+
+    function archiveNote(id) {
+      const note = notes.find(n => n.id === id);
+      if (note) {
+        note.archived = true;
+        note.trashedAt = Date.now();
+        saveDatabase();
+        renderBoard();
+        showToast("Note moved to Cabinet / Trash", "📦");
+      }
+    }
+
+    function deleteNote(id) {
+      notes = notes.filter(n => n.id !== id);
+      saveDatabase();
+      renderBoard();
+      showToast("Note permanently deleted", "🗑️");
+    }
+
+    function restoreNote(id) {
+      const note = notes.find(n => n.id === id);
+      if (note) {
+        note.archived = false;
+        delete note.trashedAt;
+        note.lastViewedAt = Date.now();
+        saveDatabase();
+        renderBoard();
+        shiftFocusToNote(note);
+        showToast("Note restored from Cabinet!", "♻️");
+      }
+    }
+
+    function purgeNote(id) {
+      deleteNote(id);
+    }
+
+    function toggleArchiveSidebar() {
+      const sidebar = document.getElementById('archive-sidebar');
+      if (sidebar) {
+        sidebar.classList.toggle('translate-x-full');
+      }
+    }
+
+    function repopulateArchiveSidebarList() {
+      const list = document.getElementById('archive-list');
+      if (!list) return;
+      list.innerHTML = "";
+
+      const archived = notes.filter(n => n.archived);
+      if (archived.length === 0) {
+        list.innerHTML = `<div class="text-xs text-gray-400 italic text-center py-8">Cabinet / Trash is empty</div>`;
+        return;
+      }
+
+      archived.forEach(note => {
+        const card = document.createElement('div');
+        card.className = "p-3 bg-[var(--card-bg)] border border-[var(--panel-border)] rounded-md shadow-sm space-y-2 text-xs";
+        const previewText = cleanHtmlToPlainText(note.content).substring(0, 80) || "*(Empty note)*";
+        const dateStr = new Date(note.trashedAt || note.updatedAt || Date.now()).toLocaleDateString();
+
+        card.innerHTML = `
+          <div class="font-bold text-[var(--card-fg)] truncate">${note.title || "Untitled"}</div>
+          <div class="text-[11px] text-gray-500 line-clamp-2 font-mono">${previewText}</div>
+          <div class="flex items-center justify-between text-[10px] text-gray-400 pt-1 border-t border-[var(--panel-border)]">
+            <span>Trashed: ${dateStr}</span>
+            <div class="space-x-1">
+              <button onclick="restoreNote('${note.id}')" class="px-2 py-0.5 bg-[var(--accent-color)] text-white font-bold rounded hover:bg-[var(--accent-hover)] transition">Restore</button>
+              <button onclick="purgeNote('${note.id}')" class="px-2 py-0.5 bg-red-600 text-white font-bold rounded hover:bg-red-700 transition">Delete</button>
+            </div>
+          </div>
+        `;
+        list.appendChild(card);
+      });
+    }
+
+    function openImportExportModal() {
+      const modal = document.getElementById('modal-import-export');
+      const textarea = document.getElementById('export-textarea');
+      if (textarea) {
+        textarea.value = JSON.stringify({ notes, appSettings }, null, 2);
+      }
+      if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      }
+    }
+
+    function closeImportExportModal() {
+      const modal = document.getElementById('modal-import-export');
+      if (modal) {
+        modal.classList.remove('flex');
+        modal.classList.add('hidden');
+      }
+    }
+
+    function copyExportText() {
+      const textarea = document.getElementById('export-textarea');
+      if (textarea) {
+        textarea.select();
+        document.execCommand('copy');
+        showToast("JSON export copied to clipboard!", "📋");
+      }
+    }
+
+    function downloadJsonFile() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ notes, appSettings }, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `stickyboard_backup_${Date.now()}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    }
+
+    function handleFileSelected(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        document.getElementById('import-textarea').value = evt.target.result;
+      };
+      reader.readAsText(file);
+    }
+
+    function runJSONImport() {
+      const val = document.getElementById('import-textarea').value.trim();
+      if (!val) return;
+      try {
+        const data = JSON.parse(val);
+        if (Array.isArray(data)) {
+          notes = data;
+        } else if (data.notes) {
+          notes = data.notes;
+          if (data.appSettings) appSettings = { ...appSettings, ...data.appSettings };
+        }
+        saveDatabase();
+        saveSettings();
+        renderBoard();
+        closeImportExportModal();
+        showToast("Workspace successfully imported!", "📥");
+      } catch(e) {
+        showToast("Invalid JSON data provided", "⚠️");
+      }
+    }
+
+    function triggerNukeDialog() {
+      const modal = document.getElementById('modal-confirm');
+      const confirmBtn = document.getElementById('confirm-execute-btn');
+      document.getElementById('confirm-message').innerText = "Are you sure you want to delete ALL notes? This action cannot be undone.";
+      confirmBtn.onclick = function() {
+        notes = [];
+        saveDatabase();
+        renderBoard();
+        closeConfirmationDialog();
+        showToast("Workspace completely reset!", "💥");
+      };
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeConfirmationDialog() {
+      const modal = document.getElementById('modal-confirm');
+      modal.classList.remove('flex');
+      modal.classList.add('hidden');
+    }
+
+    function runAutoTrashAndPurgeChecks() {
+      const now = Date.now();
+      const autoTrashDays = appSettings.autoTrashDays || (appSettings.autoTrashHours ? (appSettings.autoTrashHours / 24) : 1);
+      const autoTrashMs = autoTrashDays * 24 * 60 * 60 * 1000;
+      const trashPurgeMs = (appSettings.trashPurgeDays || 7) * 24 * 60 * 60 * 1000;
+      let stateChanged = false;
+
+      notes.forEach(note => {
+        if (appSettings.autoTrashEnabled && !note.archived) {
+          const lastAccess = note.lastViewedAt || note.updatedAt || note.createdAt || now;
+          if (now - lastAccess > autoTrashMs) {
+            note.archived = true;
+            note.trashedAt = now;
+            stateChanged = true;
+          }
+        }
+
+        if (appSettings.trashPurgeEnabled && note.archived) {
+          const trashedTime = note.trashedAt || note.updatedAt || note.createdAt || now;
+          if (now - trashedTime > trashPurgeMs) {
+            note._markedForPurge = true;
+            stateChanged = true;
+          }
+        }
+      });
+
+      if (appSettings.trashPurgeEnabled) {
+        notes = notes.filter(n => !n._markedForPurge);
+      }
+
+      if (stateChanged) {
+        saveDatabase();
+      }
+    }
+
+    function runAutoTitleCheck() {
+      if (!appSettings.autoTitleEnabled) return;
+      const now = Date.now();
+      const autoTitleMs = (appSettings.autoTitleMinutes || 5) * 60 * 1000;
+      let stateChanged = false;
+
+      notes.forEach(note => {
+        if (note.archived || note.titleManuallySet) return;
+
+        const lastTouch = note.updatedAt || note.createdAt || now;
+        const textContent = cleanHtmlToPlainText(note.content).trim();
+
+        if (textContent && (now - lastTouch >= autoTitleMs)) {
+          const firstLine = textContent.split('\n')[0].trim();
+          if (firstLine) {
+            let autoTitle = firstLine.substring(0, 30);
+            if (firstLine.length > 30) autoTitle += '…';
+
+            if (note.title !== autoTitle) {
+              note.title = autoTitle;
+              stateChanged = true;
+            }
+          }
+        }
+      });
+
+      if (stateChanged) {
+        saveDatabase();
+        renderBoard();
+      }
+    }
+
     window.onload = function() {
-      // Load saved theme or match system theme
+      loadSettings();
+      
       const savedTheme = localStorage.getItem('stickyboard_theme') || 'gtk-light';
       document.getElementById('theme-selector').value = savedTheme;
       changeTheme(savedTheme, false);
 
       loadDatabase();
+      runAutoTrashAndPurgeChecks();
+      runAutoTitleCheck();
+      
+      setInterval(() => {
+        runAutoTrashAndPurgeChecks();
+        runAutoTitleCheck();
+      }, 30000);
+
       initCanvasListeners();
       renderBoard();
       updateCoordinatesDisplay();
 
       if (notes.length === 0) {
-        // Build generic workspace startup layout
         notes = [
           {
             id: "welcome-note-1",
             title: "📌 GTK Board Welcome Note",
-            content: "Welcome to your spatial light sticky dashboard!\n\nInteractive mechanics:\n- Panning: Drag with middle-mouse button, or hold Spacebar and drag with left-click.\n- Zooming: Use your mouse scrollwheel to focus on any area.\n- Double-click the header to toggle Minimize/Maximize.\n- Alt + Left Drag: Drag this note from ANY section (including this textarea).\n- Alt + Right Drag: Resize this note from ANY section.\n\nNow simplified to pure plain-text notes using monospace font settings!",
+            content: "Welcome to your spatial sticky dashboard!\n\nInteractive mechanics:\n- Panning: Drag empty background, or hold Spacebar + drag with left click.\n- Zooming: Mouse scroll or use floating control buttons.\n- Alt + Left Drag: Drag this note from ANY section.\n- Alt + Right Drag: Resize this note from ANY section.\n\n✨ COMMANDS & MACROS:\nType @whitespace inside a note and press Enter to optimize extra blank lines instantly!",
             x: 100,
             y: 100,
-            w: 320,
-            h: 340,
+            w: 800,
+            h: 600,
             colorIndex: 0,
             borderStyle: "solid",
             fontSize: 14,
             archived: false,
             minimized: false,
-            zIndex: 11
-          },
-          {
-            id: "welcome-note-2",
-            title: "💡 Fixed Width Text",
-            content: "This application now uses JetBrains Mono for clean alignment.\n\nChecklist representations:\n[ ] Test checklist integration\n[x] Highly responsive GTK Light Theme\n[ ] Zero overlap physics engine\n\nEnjoy structured plain text note layouts!",
-            x: 460,
-            y: 100,
-            w: 280,
-            h: 240,
-            colorIndex: 1,
-            borderStyle: "double",
-            fontSize: 13,
-            archived: false,
-            minimized: false,
-            zIndex: 12
+            autoSize: false,
+            titleManuallySet: true,
+            zIndex: 11,
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+            lastViewedAt: Date.now()
           }
         ];
         saveDatabase();
@@ -545,46 +1340,318 @@
       recenterCanvas();
     };
 
-    // Theme Switcher Implementation
-    function changeTheme(themeName, triggerToast = true) {
-      // Remove all theme classes
-      document.body.className = "w-screen h-screen overflow-hidden flex flex-col relative";
-      
-      // Apply the targeted theme class
-      document.body.classList.add(`theme-${themeName}`);
-      localStorage.setItem('stickyboard_theme', themeName);
-      
-      if (triggerToast) {
-        showToast(`Switched theme to ${themeName.toUpperCase().replace('-', ' ')}`, "🎨");
+    function renderBoard() {
+      const workspace = document.getElementById('workspace');
+      workspace.innerHTML = "";
+
+      let archiveCount = 0;
+
+      notes.forEach((note) => {
+        if (note.archived) {
+          archiveCount++;
+          return;
+        }
+
+        const colorSet = gtkColors[note.colorIndex] || gtkColors[0];
+        
+        const noteWindow = document.createElement('div');
+        noteWindow.id = `note-win-${note.id}`;
+        noteWindow.className = `absolute gtk-window rounded-lg flex flex-col border-style-${note.borderStyle}`;
+        noteWindow.style.left = `${note.x}px`;
+        noteWindow.style.top = `${note.y}px`;
+        noteWindow.style.width = `${note.w}px`;
+        noteWindow.style.height = (note.minimized && appSettings.minimizeEnabled) ? '42px' : `${note.h}px`;
+        noteWindow.style.backgroundColor = colorSet.body;
+        noteWindow.style.color = colorSet.text;
+        noteWindow.style.zIndex = note.zIndex || 10;
+
+        noteWindow.addEventListener('mousedown', (e) => {
+          bringToFront(note.id);
+          note.lastViewedAt = Date.now();
+          saveDatabase();
+
+          if (e.altKey) {
+            if (e.button === 0) {
+              e.preventDefault();
+              activeDraggingNote = note;
+              dragStartX = e.clientX;
+              dragStartY = e.clientY;
+              noteOriginalX = note.x;
+              noteOriginalY = note.y;
+              document.body.classList.add('drag-active');
+            } else if (e.button === 2) {
+              e.preventDefault();
+              if (note.autoSize) note.autoSize = false;
+              activeResizingNote = note;
+              resizeStartX = e.clientX;
+              resizeStartY = e.clientY;
+              noteOriginalW = note.w;
+              noteOriginalH = note.h;
+              document.body.classList.add('drag-active');
+            }
+          }
+        });
+
+        const headerBar = document.createElement('div');
+        headerBar.className = `h-10 px-2 flex items-center justify-between border-b cursor-move select-none rounded-t-lg shrink-0`;
+        headerBar.style.backgroundColor = colorSet.header;
+        headerBar.style.borderColor = `rgba(0,0,0,0.08)`;
+        
+        headerBar.addEventListener('mousedown', (e) => {
+          if (e.target.closest('.header-btn-bypass')) return;
+
+          activeDraggingNote = note;
+          dragStartX = e.clientX;
+          dragStartY = e.clientY;
+          noteOriginalX = note.x;
+          noteOriginalY = note.y;
+          document.body.classList.add('drag-active');
+          bringToFront(note.id);
+        });
+
+        const leftHeaderGroup = document.createElement('div');
+        leftHeaderGroup.className = "flex items-center space-x-1.5 flex-1 min-w-0 mr-1";
+
+        const dragGrip = document.createElement('span');
+        dragGrip.className = "text-gray-400 font-bold text-xs cursor-move px-0.5 opacity-60 hover:opacity-100 select-none";
+        dragGrip.innerText = "⋮⋮";
+
+        const titleInput = document.createElement('input');
+        titleInput.type = "text";
+        titleInput.value = note.title;
+        titleInput.className = "bg-transparent font-bold text-xs border-none outline-none focus:ring-1 focus:ring-blue-400 rounded px-1 w-full truncate font-mono";
+        titleInput.style.color = colorSet.text;
+        
+        titleInput.addEventListener('mousedown', (e) => {
+          e.stopPropagation();
+          bringToFront(note.id);
+        });
+
+        titleInput.addEventListener('change', (e) => {
+          note.title = e.target.value;
+          note.titleManuallySet = true;
+          note.updatedAt = Date.now();
+          saveDatabase();
+        });
+
+        leftHeaderGroup.appendChild(dragGrip);
+        leftHeaderGroup.appendChild(titleInput);
+
+        const controls = document.createElement('div');
+        controls.className = "flex items-center space-x-1 header-btn-bypass shrink-0";
+        
+        const minimizeBtnHTML = appSettings.minimizeEnabled ? `
+          <button onclick="toggleMinimizeNote('${note.id}')" title="Collapse Window" class="titlebar-btn font-bold leading-none">
+            ${note.minimized ? '🗖' : '🗕'}
+          </button>
+        ` : '';
+
+        const autoSizeClass = note.autoSize ? 'bg-[var(--accent-color)] text-white rounded' : '';
+
+        controls.innerHTML = `
+          <button onclick="toggleNoteAutoSize('${note.id}')" title="Toggle Auto-Size Content (Max 2000x2000)" class="titlebar-btn ${autoSizeClass}">
+            📐
+          </button>
+          <button onclick="copyNoteContent('${note.id}')" title="Copy Full Note Text" class="titlebar-btn">
+            📋
+          </button>
+          <button onclick="toggleOptionsDrawer('${note.id}')" title="Configure Style Borders & Info" class="titlebar-btn">
+            ⚙️
+          </button>
+          <button onclick="cycleNoteColor('${note.id}')" title="Cycle GTK Preset Color" class="titlebar-btn">
+            🎨
+          </button>
+          ${minimizeBtnHTML}
+          <button onclick="archiveNote('${note.id}')" title="Send to Cabinet" class="titlebar-btn">
+            📦
+          </button>
+          <button onclick="deleteNote('${note.id}')" title="Permanent Delete" class="titlebar-btn titlebar-btn-close font-bold">
+            ✕
+          </button>
+        `;
+
+        headerBar.appendChild(leftHeaderGroup);
+        headerBar.appendChild(controls);
+        noteWindow.appendChild(headerBar);
+
+        const optionsDrawer = document.createElement('div');
+        optionsDrawer.id = `options-drawer-${note.id}`;
+        optionsDrawer.className = "hidden bg-black/[0.02] border-b border-black/5 px-3 py-2 flex flex-col space-y-1.5 text-xs transition-all shrink-0 select-none";
+        
+        const createdDateStr = new Date(note.createdAt || Date.now()).toLocaleString();
+        const updatedDateStr = new Date(note.updatedAt || Date.now()).toLocaleString();
+        const viewedDateStr = new Date(note.lastViewedAt || Date.now()).toLocaleString();
+
+        optionsDrawer.innerHTML = `
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+              <span class="text-[10px] font-bold opacity-75">Border:</span>
+              <select onchange="updateNoteBorder('${note.id}', this.value)" class="bg-white dark:bg-neutral-800 border border-black/20 text-xs rounded px-1 py-0.5 outline-none font-semibold">
+                ${borderStyles.map(s => `<option value="${s}" ${note.borderStyle === s ? 'selected' : ''}>${s.toUpperCase()}</option>`).join('')}
+              </select>
+            </div>
+            <div class="flex items-center space-x-1.5">
+              <span class="text-[10px] font-bold opacity-75">Font:</span>
+              <button onclick="adjustNoteFont('${note.id}', -1)" class="w-5 h-4 bg-white dark:bg-neutral-800 rounded border border-black/20 flex items-center justify-center font-bold text-[9px]">-</button>
+              <span class="font-mono text-[10px] font-bold">${note.fontSize}px</span>
+              <button onclick="adjustNoteFont('${note.id}', 1)" class="w-5 h-4 bg-white dark:bg-neutral-800 rounded border border-black/20 flex items-center justify-center font-bold text-[9px]">+</button>
+            </div>
+          </div>
+          <div class="text-[9px] text-gray-500 font-mono flex items-center justify-between border-t border-black/5 pt-1">
+            <span>Created: ${createdDateStr}</span>
+            <span>Viewed: ${viewedDateStr}</span>
+          </div>
+        `;
+        noteWindow.appendChild(optionsDrawer);
+
+        if (!note.minimized || !appSettings.minimizeEnabled) {
+          const editorWrapper = document.createElement('div');
+          editorWrapper.className = "flex-1 flex flex-col min-h-0 relative";
+
+          const contentArea = document.createElement('textarea');
+          contentArea.className = "flex-1 w-full h-full p-3 bg-transparent border-none outline-none resize-none font-mono text-xs focus:ring-0 leading-relaxed overflow-y-auto rounded-b-[var(--window-radius)]";
+          contentArea.style.fontSize = `${note.fontSize}px`;
+          contentArea.style.color = colorSet.text;
+          
+          contentArea.value = cleanHtmlToPlainText(note.content);
+
+          contentArea.addEventListener('input', () => {
+            note.content = contentArea.value;
+            note.updatedAt = Date.now();
+            
+            if (note.autoSize) {
+              computeAndApplyAutoSize(note, noteWindow);
+            }
+            
+            saveDatabase();
+          });
+
+          contentArea.addEventListener('keydown', (e) => {
+            if (e.key === ' ' || e.code === 'Space') {
+              if (checkAndExpandMacro(contentArea, 'Space')) {
+                e.preventDefault();
+                note.content = contentArea.value;
+                note.updatedAt = Date.now();
+                saveDatabase();
+              }
+            } else if (e.key === 'Enter') {
+              const text = contentArea.value;
+              if (/@whitespace/i.test(text)) {
+                e.preventDefault();
+                processWhitespaceCommand(note.id);
+              } else if (checkAndExpandMacro(contentArea, 'Enter')) {
+                e.preventDefault();
+                note.content = contentArea.value;
+                note.updatedAt = Date.now();
+                saveDatabase();
+              }
+            }
+          });
+
+          contentArea.addEventListener('focus', () => {
+            bringToFront(note.id);
+            note.lastViewedAt = Date.now();
+            saveDatabase();
+          });
+
+          editorWrapper.appendChild(contentArea);
+
+          const resizeHandle = document.createElement('div');
+          resizeHandle.className = "absolute bottom-1 right-1 w-4 h-4 cursor-se-resize bg-black/10 hover:bg-black/20 rounded-tl transition z-10 flex items-center justify-center text-[9px] font-bold select-none";
+          resizeHandle.innerHTML = "◿";
+          resizeHandle.addEventListener('mousedown', (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            if (note.autoSize) {
+              note.autoSize = false;
+            }
+            activeResizingNote = note;
+            resizeStartX = e.clientX;
+            resizeStartY = e.clientY;
+            noteOriginalW = note.w;
+            noteOriginalH = note.h;
+            document.body.classList.add('drag-active');
+            bringToFront(note.id);
+          });
+
+          editorWrapper.appendChild(resizeHandle);
+          noteWindow.appendChild(editorWrapper);
+        }
+
+        if (note.autoSize && !note.minimized) {
+          computeAndApplyAutoSize(note, noteWindow);
+        }
+
+        workspace.appendChild(noteWindow);
+      });
+
+      const badge = document.getElementById('archive-count');
+      if (archiveCount > 0) {
+        badge.innerText = archiveCount;
+        badge.classList.remove('hidden');
+      } else {
+        badge.classList.add('hidden');
       }
-      
-      // Re-render board color sets to ensure correct mappings
-      renderBoard();
+      repopulateArchiveSidebarList();
     }
 
-    // --- VIEWPORT NAVIGATION (PANNING & ZOOMING) ---
     function initCanvasListeners() {
       const viewport = document.getElementById('viewport');
-      const workspace = document.getElementById('workspace');
 
-      // Intercept context menu to prevent browser native dropdown during Alt + Right Click drag
       window.addEventListener('contextmenu', (e) => {
         if (e.altKey) {
           e.preventDefault();
         }
       });
 
-      // Key Events for spacebar detection
       window.addEventListener('keydown', (e) => {
-        if (e.code === 'Space') {
-          const active = document.activeElement;
-          if (active && (
-            active.tagName === 'INPUT' ||
-            active.tagName === 'TEXTAREA' ||
-            active.tagName === 'SELECT'
-          )) {
+        const active = document.activeElement;
+        const isEditingText = active && (
+          active.tagName === 'INPUT' ||
+          active.tagName === 'TEXTAREA' ||
+          active.tagName === 'SELECT'
+        );
+
+        if (appSettings.shortcutsEnabled !== false && e.ctrlKey && e.shiftKey) {
+          if (e.code === 'KeyN') {
+            e.preventDefault();
+            createNewNote();
+            return;
+          } else if (e.code === 'KeyD') {
+            e.preventDefault();
+            const activeNotes = notes.filter(n => !n.archived);
+            if (activeNotes.length > 0) {
+              const topNote = activeNotes.reduce((prev, curr) => (curr.zIndex > prev.zIndex ? curr : prev), activeNotes[0]);
+              archiveNote(topNote.id);
+            }
             return;
           }
+        }
+
+        if (!isEditingText) {
+          if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            shiftCanvas(0, 80);
+          } else if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            shiftCanvas(0, -80);
+          } else if (e.key === 'ArrowLeft') {
+            e.preventDefault();
+            shiftCanvas(80, 0);
+          } else if (e.key === 'ArrowRight') {
+            e.preventDefault();
+            shiftCanvas(-80, 0);
+          } else if (e.key === '+' || e.key === '=') {
+            e.preventDefault();
+            zoomCanvasDelta(0.15);
+          } else if (e.key === '-' || e.key === '_') {
+            e.preventDefault();
+            zoomCanvasDelta(-0.15);
+          }
+        }
+
+        if (e.code === 'Space') {
+          if (isEditingText) return;
           spacebarDown = true;
           viewport.classList.add('cursor-grab');
           e.preventDefault();
@@ -598,23 +1665,53 @@
         }
       });
 
-      // Mouse Press Events on Background Canvas
-      viewport.addEventListener('mousedown', (e) => {
-        if (e.target !== viewport && e.target !== workspace) return;
+      const startPan = (clientX, clientY) => {
+        isPanning = true;
+        startPanX = clientX - panX;
+        startPanY = clientY - panY;
+        viewport.classList.remove('cursor-grab');
+        viewport.classList.add('cursor-grabbing');
+        document.body.classList.add('drag-active');
+      };
 
-        // Spacebar key, or middle mouse drag, or left-drag directly to pan
-        if (e.button === 1 || spacebarDown || e.button === 0) {
-          isPanning = true;
-          startPanX = e.clientX - panX;
-          startPanY = e.clientY - panY;
-          viewport.classList.add('cursor-grabbing');
-          document.body.classList.add('drag-active');
+      viewport.addEventListener('mousedown', (e) => {
+        if (e.target.closest('.gtk-window')) return;
+
+        if (e.button === 0 || e.button === 1 || spacebarDown) {
+          startPan(e.clientX, e.clientY);
           e.preventDefault();
         }
       });
 
+      viewport.addEventListener('touchstart', (e) => {
+        if (e.target.closest('.gtk-window')) return;
+        if (e.touches.length === 1) {
+          const touch = e.touches[0];
+          startPan(touch.clientX, touch.clientY);
+        }
+      }, { passive: false });
+
+      window.addEventListener('touchmove', (e) => {
+        if (isPanning && e.touches.length === 1) {
+          const touch = e.touches[0];
+          panX = touch.clientX - startPanX;
+          panY = touch.clientY - startPanY;
+          applyCanvasTransform();
+          updateCoordinatesDisplay();
+          e.preventDefault();
+        }
+      }, { passive: false });
+
+      window.addEventListener('touchend', () => {
+        if (isPanning) {
+          isPanning = false;
+          viewport.classList.remove('cursor-grabbing');
+          viewport.classList.add('cursor-grab');
+          document.body.classList.remove('drag-active');
+        }
+      });
+
       window.addEventListener('mousemove', (e) => {
-        // Pan Canvas
         if (isPanning) {
           panX = e.clientX - startPanX;
           panY = e.clientY - startPanY;
@@ -623,7 +1720,6 @@
           return;
         }
 
-        // Move Active Dragging Note
         if (activeDraggingNote) {
           const dx = (e.clientX - dragStartX) / zoom;
           const dy = (e.clientY - dragStartY) / zoom;
@@ -650,7 +1746,6 @@
           return;
         }
 
-        // Handle Resizing Action on Notes
         if (activeResizingNote) {
           const dx = (e.clientX - resizeStartX) / zoom;
           const dy = (e.clientY - resizeStartY) / zoom;
@@ -681,7 +1776,6 @@
           viewport.classList.remove('cursor-grabbing');
         }
         
-        // Unconditionally remove selection restrictions on mouseup
         document.body.classList.remove('drag-active');
 
         if (activeDraggingNote) {
@@ -694,10 +1788,9 @@
         }
       });
 
-      // RESTRICT SCROLL ZOOMING WHEN OVER A STICKY NOTE
       viewport.addEventListener('wheel', (e) => {
-        // If the scroll event originates inside a sticky note window, allow standard textarea scrolling
-        if (e.target.closest('.gtk-window')) {
+        const targetTextarea = e.target.closest('textarea');
+        if (targetTextarea && targetTextarea.scrollHeight > targetTextarea.clientHeight) {
           return;
         }
 
@@ -727,13 +1820,48 @@
 
     function applyCanvasTransform() {
       const workspace = document.getElementById('workspace');
-      workspace.style.transform = `translate(${panX}px, ${panY}px) scale(${zoom})`;
+      if (workspace) {
+        workspace.style.transform = `translate(${panX}px, ${panY}px) scale(${zoom})`;
+      }
     }
 
-    function updateCoordinatesDisplay(xVal = 0, yVal = 0) {
-      document.getElementById('coord-x').innerText = Math.round(xVal || -panX);
-      document.getElementById('coord-y').innerText = Math.round(yVal || -panY);
-      document.getElementById('coord-zoom').innerText = `${Math.round(zoom * 100)}%`;
+    function shiftCanvas(deltaX, deltaY) {
+      panX += deltaX;
+      panY += deltaY;
+      applyCanvasTransform();
+      updateCoordinatesDisplay();
+    }
+
+    function zoomCanvasDelta(deltaZoom) {
+      const viewport = document.getElementById('viewport');
+      const viewW = viewport.clientWidth;
+      const viewH = viewport.clientHeight;
+      const mouseX = viewW / 2;
+      const mouseY = viewH / 2;
+
+      const virtX = (mouseX - panX) / zoom;
+      const virtY = (mouseY - panY) / zoom;
+
+      zoom = Math.min(3.0, Math.max(0.15, zoom + deltaZoom));
+
+      panX = mouseX - virtX * zoom;
+      panY = mouseY - virtY * zoom;
+
+      applyCanvasTransform();
+      updateCoordinatesDisplay();
+    }
+
+    function updateCoordinatesDisplay(xVal, yVal) {
+      const displayX = (xVal !== undefined && xVal !== null) ? Math.round(xVal) : Math.round(-panX);
+      const displayY = (yVal !== undefined && yVal !== null) ? Math.round(yVal) : Math.round(-panY);
+      
+      const elX = document.getElementById('coord-x');
+      const elY = document.getElementById('coord-y');
+      const elZ = document.getElementById('coord-zoom');
+
+      if (elX) elX.innerText = displayX;
+      if (elY) elY.innerText = displayY;
+      if (elZ) elZ.innerText = `${Math.round(zoom * 100)}%`;
     }
 
     function recenterCanvas() {
@@ -749,7 +1877,6 @@
       showToast("Workspace centered.", "🧭");
     }
 
-    // --- COLLISION RESOLUTION LOGIC (OVERLAPPING ENABLED) ---
     function resolveCollisions(draggingNoteId, newX, newY, w, h) {
       let solvedX = newX;
       let solvedY = newY;
@@ -767,13 +1894,17 @@
       const indicator = document.getElementById('snap-indicator');
 
       if (snapToGrid) {
-        indicator.classList.remove('bg-red-500');
-        indicator.classList.add('bg-emerald-500');
+        if (indicator) {
+          indicator.classList.remove('bg-red-500');
+          indicator.classList.add('bg-emerald-500');
+        }
         showToast("Snap-to-Grid Enabled", "📏");
         snapAllNotesToGrid();
       } else {
-        indicator.classList.remove('bg-emerald-500');
-        indicator.classList.add('bg-red-500');
+        if (indicator) {
+          indicator.classList.remove('bg-emerald-500');
+          indicator.classList.add('bg-red-500');
+        }
         showToast("Snap-to-Grid Disabled", "📏");
       }
     }
@@ -788,539 +1919,6 @@
       });
       saveDatabase();
       renderBoard();
-    }
-
-    // --- NOTE ENGINE ACTIONS & RENDER SYSTEM ---
-    function createNewNote() {
-      const viewport = document.getElementById('viewport');
-      const midX = (-panX + (viewport.clientWidth / 2) - 150) / zoom;
-      const midY = (-panY + (viewport.clientHeight / 2) - 150) / zoom;
-
-      const randomId = 'note-' + Date.now();
-      
-      let spawnX = midX;
-      let spawnY = midY;
-
-      if (snapToGrid) {
-        spawnX = Math.round(spawnX / gridSize) * gridSize;
-        spawnY = Math.round(spawnY / gridSize) * gridSize;
-      }
-
-      const resolved = resolveCollisions(randomId, spawnX, spawnY, 300, 250);
-      maxZIndex++;
-
-      const newNote = {
-        id: randomId,
-        title: "📄 New Monospace Sticky",
-        content: "Write plain text notes here...",
-        x: resolved.x,
-        y: resolved.y,
-        w: 300,
-        h: 250,
-        colorIndex: 0, // Default to Gray index
-        borderStyle: "solid",
-        fontSize: 14,
-        archived: false,
-        minimized: false,
-        zIndex: maxZIndex
-      };
-
-      notes.push(newNote);
-      saveDatabase();
-      renderBoard();
-      showToast("Note spawned on canvas.", "✨");
-    }
-
-    function renderBoard() {
-      const workspace = document.getElementById('workspace');
-      workspace.innerHTML = "";
-
-      let archiveCount = 0;
-
-      notes.forEach((note) => {
-        if (note.archived) {
-          archiveCount++;
-          return;
-        }
-
-        const colorSet = gtkColors[note.colorIndex] || gtkColors[0];
-        
-        const noteWindow = document.createElement('div');
-        noteWindow.id = `note-win-${note.id}`;
-        noteWindow.className = `absolute gtk-window flex flex-col border-style-${note.borderStyle}`;
-        noteWindow.style.left = `${note.x}px`;
-        noteWindow.style.top = `${note.y}px`;
-        noteWindow.style.width = `${note.w}px`;
-        noteWindow.style.height = note.minimized ? '42px' : `${note.h}px`;
-        noteWindow.style.backgroundColor = colorSet.body;
-        noteWindow.style.color = colorSet.text;
-        noteWindow.style.zIndex = note.zIndex || 10;
-
-        // Bring any clicked note instantly to the front using Z-Index (Preserves typing focus)
-        noteWindow.addEventListener('mousedown', (e) => {
-          bringToFront(note.id);
-
-          // Custom Alt + Click Shortcuts on any part of the note window
-          if (e.altKey) {
-            if (e.button === 0) { // Alt + Left Drag to Move Note
-              e.preventDefault();
-              activeDraggingNote = note;
-              dragStartX = e.clientX;
-              dragStartY = e.clientY;
-              noteOriginalX = note.x;
-              noteOriginalY = note.y;
-              document.body.classList.add('drag-active');
-            } else if (e.button === 2) { // Alt + Right Drag to Resize Note
-              e.preventDefault();
-              activeResizingNote = note;
-              resizeStartX = e.clientX;
-              resizeStartY = e.clientY;
-              noteOriginalW = note.w;
-              noteOriginalH = note.h;
-              document.body.classList.add('drag-active');
-            }
-          }
-        });
-
-        const headerBar = document.createElement('div');
-        headerBar.className = `h-10 px-3 flex items-center justify-between border-b cursor-grab active:cursor-grabbing select-none rounded-t-[var(--window-radius)] shrink-0`;
-        headerBar.style.backgroundColor = colorSet.header;
-        headerBar.style.borderColor = `rgba(0,0,0,0.08)`;
-        
-        headerBar.addEventListener('mousedown', (e) => {
-          if (e.target.closest('.header-btn-bypass')) return;
-          if (e.altKey) return; // Allow Alt+Drag listener on noteWindow container to take priority
-
-          activeDraggingNote = note;
-          dragStartX = e.clientX;
-          dragStartY = e.clientY;
-          noteOriginalX = note.x;
-          noteOriginalY = note.y;
-          document.body.classList.add('drag-active');
-          bringToFront(note.id);
-        });
-
-        const titleInput = document.createElement('input');
-        titleInput.type = "text";
-        titleInput.value = note.title;
-        titleInput.className = "bg-transparent font-bold text-xs font-mono border-none outline-none focus:ring-1 focus:ring-blue-400 rounded px-1 w-[45%] truncate header-btn-bypass note-title-input";
-        titleInput.style.color = colorSet.text;
-        titleInput.style.textAlign = "var(--title-align)";
-        titleInput.addEventListener('change', (e) => {
-          note.title = e.target.value;
-          saveDatabase();
-        });
-
-        const controls = document.createElement('div');
-        controls.className = "flex items-center space-x-1.5 header-btn-bypass shrink-0";
-        controls.innerHTML = `
-          <button onclick="copyNoteContent('${note.id}')" title="Copy Full Note Text" class="titlebar-btn">
-            📋
-          </button>
-          <button onclick="toggleOptionsDrawer('${note.id}')" title="Configure Style Borders" class="titlebar-btn">
-            ⚙️
-          </button>
-          <button onclick="cycleNoteColor('${note.id}')" title="Cycle GTK Preset Color" class="titlebar-btn">
-            🎨
-          </button>
-          <button onclick="toggleMinimizeNote('${note.id}')" title="Collapse Window" class="titlebar-btn font-bold leading-none">
-            ${note.minimized ? '🗖' : '🗕'}
-          </button>
-          <button onclick="archiveNote('${note.id}')" title="Send to Cabinet" class="titlebar-btn">
-            📦
-          </button>
-          <button onclick="deleteNote('${note.id}')" title="Permanent Delete" class="titlebar-btn titlebar-btn-close font-bold">
-            ✕
-          </button>
-        `;
-
-        headerBar.appendChild(titleInput);
-        headerBar.appendChild(controls);
-        noteWindow.appendChild(headerBar);
-
-        const optionsDrawer = document.createElement('div');
-        optionsDrawer.id = `options-drawer-${note.id}`;
-        optionsDrawer.className = "hidden bg-black/[0.02] border-b border-black/5 px-3 py-1.5 flex items-center justify-between text-xs transition-all shrink-0 select-none";
-        optionsDrawer.innerHTML = `
-          <div class="flex items-center space-x-2">
-            <span class="text-[10px] font-bold opacity-75">Border Style:</span>
-            <select onchange="updateNoteBorder('${note.id}', this.value)" class="bg-white dark:bg-neutral-800 border border-black/20 text-xs rounded px-1 py-0.5 outline-none focus:ring-1 focus:ring-blue-500 font-semibold">
-              ${borderStyles.map(s => `<option value="${s}" ${note.borderStyle === s ? 'selected' : ''}>${s.toUpperCase()}</option>`).join('')}
-            </select>
-          </div>
-          <div class="flex items-center space-x-1.5">
-            <span class="text-[10px] font-bold opacity-75">Text Size:</span>
-            <button onclick="adjustNoteFont('${note.id}', -1)" class="w-5 h-4 bg-white dark:bg-neutral-800 hover:bg-neutral-100 rounded border border-black/20 flex items-center justify-center font-bold text-[9px]">-</button>
-            <span class="font-mono text-[10px] font-bold">${note.fontSize}px</span>
-            <button onclick="adjustNoteFont('${note.id}', 1)" class="w-5 h-4 bg-white dark:bg-neutral-800 hover:bg-neutral-100 rounded border border-black/20 flex items-center justify-center font-bold text-[9px]">+</button>
-          </div>
-        `;
-        noteWindow.appendChild(optionsDrawer);
-
-        // Core Window Text-Editor Workspace Element (Rendered as robust <textarea> for plain text representation)
-        if (!note.minimized) {
-          const editorWrapper = document.createElement('div');
-          editorWrapper.className = "flex-1 flex flex-col min-h-0 relative";
-
-          const contentArea = document.createElement('textarea');
-          contentArea.className = "flex-1 w-full h-full p-3 bg-transparent border-none outline-none resize-none font-mono text-xs focus:ring-0 leading-relaxed overflow-y-auto rounded-b-[var(--window-radius)]";
-          contentArea.style.fontSize = `${note.fontSize}px`;
-          contentArea.style.color = colorSet.text;
-          
-          // Migrate old HTML format notes gracefully to clean plain text on focus/rendering
-          contentArea.value = cleanHtmlToPlainText(note.content);
-
-          contentArea.addEventListener('input', () => {
-            note.content = contentArea.value;
-            saveDatabase();
-          });
-
-          contentArea.addEventListener('focus', () => {
-            bringToFront(note.id);
-          });
-
-          editorWrapper.appendChild(contentArea);
-
-          const resizeHandle = document.createElement('div');
-          resizeHandle.className = "absolute bottom-1 right-1 w-3 h-3 cursor-se-resize bg-black/5 hover:bg-black/10 rounded-tl transition z-10 flex items-center justify-center text-[8px] font-bold";
-          resizeHandle.innerHTML = "◿";
-          resizeHandle.addEventListener('mousedown', (e) => {
-            e.stopPropagation();
-            e.preventDefault();
-            activeResizingNote = note;
-            resizeStartX = e.clientX;
-            resizeStartY = e.clientY;
-            noteOriginalW = note.w;
-            noteOriginalH = note.h;
-            document.body.classList.add('drag-active');
-            bringToFront(note.id);
-          });
-
-          editorWrapper.appendChild(resizeHandle);
-          noteWindow.appendChild(editorWrapper);
-        }
-
-        workspace.appendChild(noteWindow);
-      });
-
-      const badge = document.getElementById('archive-count');
-      if (archiveCount > 0) {
-        badge.innerText = archiveCount;
-        badge.classList.remove('hidden');
-      } else {
-        badge.classList.add('hidden');
-      }
-      repopulateArchiveSidebarList();
-    }
-
-    function bringToFront(id) {
-      const note = notes.find(n => n.id === id);
-      if (note) {
-        const currentMax = Math.max(...notes.map(n => n.zIndex || 10), 10);
-        if (note.zIndex !== currentMax || notes.length === 1) {
-          maxZIndex = currentMax + 1;
-          note.zIndex = maxZIndex;
-          
-          const elem = document.getElementById(`note-win-${id}`);
-          if (elem) {
-            elem.style.zIndex = note.zIndex;
-          }
-          saveDatabase();
-        }
-      }
-    }
-
-    function toggleMinimizeNote(id) {
-      const note = notes.find(n => n.id === id);
-      if (note) {
-        note.minimized = !note.minimized;
-        saveDatabase();
-        renderBoard();
-      }
-    }
-
-    // Toggle options drawer
-    function toggleOptionsDrawer(id) {
-      const drawer = document.getElementById(`options-drawer-${id}`);
-      if (drawer) {
-        drawer.classList.toggle('hidden');
-      }
-    }
-
-    function updateNoteBorder(id, styleName) {
-      const note = notes.find(n => n.id === id);
-      if (note) {
-        note.borderStyle = styleName;
-        saveDatabase();
-        renderBoard();
-      }
-    }
-
-    function adjustNoteFont(id, direction) {
-      const note = notes.find(n => n.id === id);
-      if (note) {
-        note.fontSize = Math.min(32, Math.max(10, note.fontSize + direction));
-        saveDatabase();
-        renderBoard();
-      }
-    }
-
-    function cycleNoteColor(id) {
-      const note = notes.find(n => n.id === id);
-      if (note) {
-        note.colorIndex = (note.colorIndex + 1) % gtkColors.length;
-        saveDatabase();
-        renderBoard();
-      }
-    }
-
-    // --- COPY NOTE CONTENT HELPER ---
-    function copyNoteContent(id) {
-      const note = notes.find(n => n.id === id);
-      if (note) {
-        const plainText = cleanHtmlToPlainText(note.content);
-        
-        // Robust fallback-compatible iframe copy utility
-        const tempTextarea = document.createElement('textarea');
-        tempTextarea.value = plainText;
-        document.body.appendChild(tempTextarea);
-        tempTextarea.select();
-        document.execCommand('copy');
-        document.body.removeChild(tempTextarea);
-        
-        showToast("Full note content copied!", "📋");
-      }
-    }
-
-    // --- ARCHIVE & CABINET SYSTEM ---
-    function archiveNote(id) {
-      const note = notes.find(n => n.id === id);
-      if (note) {
-        note.archived = true;
-        saveDatabase();
-        renderBoard();
-        showToast("Note relocated to Archive Cabinet.", "📦");
-      }
-    }
-
-    function restoreNote(id) {
-      const note = notes.find(n => n.id === id);
-      if (note) {
-        note.archived = false;
-        
-        const resolved = resolveCollisions(note.id, note.x, note.y, note.w, note.h);
-        note.x = resolved.x;
-        note.y = resolved.y;
-
-        saveDatabase();
-        renderBoard();
-        showToast("Note recovered back to Canvas.", "♻️");
-      }
-    }
-
-    // Delete note
-    function deleteNote(id) {
-      const noteIdx = notes.findIndex(n => n.id === id);
-      if (noteIdx > -1) {
-        notes.splice(noteIdx, 1);
-        saveDatabase();
-        renderBoard();
-        showToast("Note removed permanently.", "🗑️");
-      }
-    }
-
-    function toggleArchiveSidebar() {
-      const bar = document.getElementById('archive-sidebar');
-      bar.classList.toggle('translate-x-full');
-    }
-
-    function repopulateArchiveSidebarList() {
-      const listContainer = document.getElementById('archive-list');
-      listContainer.innerHTML = "";
-
-      const archivedNotes = notes.filter(n => n.archived);
-
-      if (archivedNotes.length === 0) {
-        listContainer.innerHTML = `
-          <div class="text-center py-10 text-gray-400 text-xs font-semibold">
-            Cabinet is empty. No archived notes stored yet.
-          </div>
-        `;
-        return;
-      }
-
-      archivedNotes.forEach((note) => {
-        const item = document.createElement('div');
-        item.className = "p-3 bg-[var(--card-bg)] border border-[var(--panel-border)] rounded-lg flex flex-col space-y-2 text-xs shadow-sm";
-        item.innerHTML = `
-          <div class="flex items-center justify-between">
-            <span class="font-bold text-[var(--card-fg)] truncate w-[60%]">${note.title || "Untitled Stick"}</span>
-            <div class="flex items-center space-x-1 shrink-0">
-              <button onclick="restoreNote('${note.id}')" class="px-1.5 py-0.5 bg-[var(--accent-color)] hover:bg-[var(--accent-hover)] text-white rounded text-[10px] font-semibold transition" title="Restore to workspace">Restore</button>
-              <button onclick="deleteNote('${note.id}')" class="px-1.5 py-0.5 bg-red-100 hover:bg-red-200 text-red-700 rounded text-[10px] font-semibold transition" title="Delete forever">Delete</button>
-            </div>
-          </div>
-          <div class="text-[10px] text-gray-400 truncate max-h-12 overflow-hidden bg-[var(--bg-color)] p-1.5 rounded font-mono">
-            ${cleanHtmlToPlainText(note.content) || '(Empty contents)'}
-          </div>
-        `;
-        listContainer.appendChild(item);
-      });
-    }
-
-    // --- NUKE DATABASE ---
-    function triggerNukeDialog() {
-      const msg = "WARNING: You are about to completely wipe and delete all sticky notes currently saved inside your dashboard environment. This is irreversible!";
-      triggerConfirmModal(msg, () => {
-        notes = [];
-        saveDatabase();
-        renderBoard();
-        recenterCanvas();
-        showToast("Database completely wiped.", "💣");
-      });
-    }
-
-    // --- SYSTEM BACKUP PORTABILITY MODALS (EXPORT / IMPORT JSON) ---
-    function openImportExportModal() {
-      const stringified = JSON.stringify(notes, null, 2);
-      document.getElementById('export-textarea').value = stringified;
-      document.getElementById('import-textarea').value = "";
-
-      document.getElementById('modal-import-export').classList.remove('hidden');
-      document.getElementById('modal-import-export').classList.add('flex');
-    }
-
-    function closeImportExportModal() {
-      document.getElementById('modal-import-export').classList.remove('flex');
-      document.getElementById('modal-import-export').classList.add('hidden');
-    }
-
-    // Secure clipboard copy
-    function copyExportText() {
-      const area = document.getElementById('export-textarea');
-      area.select();
-      document.execCommand('copy');
-      showToast("JSON Board data copied to Clipboard!", "📋");
-    }
-
-    function downloadJsonFile() {
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(notes, null, 2));
-      const downloadAnchor = document.createElement('a');
-      downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", `stickyboard_backup_${Date.now()}.json`);
-      document.body.appendChild(downloadAnchor);
-      downloadAnchor.click();
-      downloadAnchor.remove();
-      showToast("Download backup initiated.", "💾");
-    }
-
-    function handleFileSelected(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        document.getElementById('import-textarea').value = e.target.result;
-      };
-      reader.readAsText(file);
-    }
-
-    function runJSONImport() {
-      const input = document.getElementById('import-textarea').value.trim();
-      if (!input) {
-        showToast("No configuration data entered to import.", "❌");
-        return;
-      }
-
-      try {
-        const parsed = JSON.parse(input);
-        
-        if (Array.isArray(parsed)) {
-          const sanitiSed = parsed.map(note => ({
-            id: note.id || 'note-' + Math.random().toString(36).substr(2, 9),
-            title: note.title || 'Imported Note',
-            content: cleanHtmlToPlainText(note.content) || 'No text content loaded.',
-            x: Number(note.x) || 100,
-            y: Number(note.y) || 100,
-            w: Number(note.w) || 280,
-            h: Number(note.h) || 220,
-            colorIndex: Number(note.colorIndex) || 0,
-            borderStyle: note.borderStyle || 'solid',
-            fontSize: Number(note.fontSize) || 14,
-            archived: !!note.archived,
-            minimized: !!note.minimized,
-            zIndex: Number(note.zIndex) || 10
-          }));
-
-          notes = sanitiSed;
-          saveDatabase();
-          renderBoard();
-          closeImportExportModal();
-          showToast("Workspace configuration updated successfully!", "🎉");
-          recenterCanvas();
-        } else {
-          showToast("Invalid format: Root component must be an Array.", "❌");
-        }
-      } catch (err) {
-        showToast(`Import Failed: ${err.message}`, "❌");
-      }
-    }
-
-    // --- SECURE CONFIRMATION WRAPPER SYSTEM ---
-    let activeConfirmCallback = null;
-
-    function triggerConfirmModal(textMessage, callbackFn) {
-      document.getElementById('confirm-message').innerText = textMessage;
-      activeConfirmCallback = callbackFn;
-      
-      const modal = document.getElementById('modal-confirm');
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
-    }
-
-    function closeConfirmationDialog() {
-      document.getElementById('modal-confirm').classList.remove('flex');
-      document.getElementById('modal-confirm').classList.add('hidden');
-      activeConfirmCallback = null;
-    }
-
-    document.getElementById('confirm-execute-btn').addEventListener('click', () => {
-      if (activeConfirmCallback) {
-        activeConfirmCallback();
-      }
-      closeConfirmationDialog();
-    });
-
-    // --- TOAST SYSTEM OVERLAYS ---
-    function showToast(message, icon = "ℹ️") {
-      const toast = document.getElementById('toast-overlay');
-      document.getElementById('toast-icon').innerText = icon;
-      document.getElementById('toast-text').innerText = message;
-
-      toast.classList.remove('translate-y-20', 'opacity-0');
-      toast.classList.add('translate-y-0', 'opacity-100');
-
-      setTimeout(() => {
-        toast.classList.remove('translate-y-0', 'opacity-100');
-        toast.classList.add('translate-y-20', 'opacity-0');
-      }, 3000);
-    }
-
-    // --- SYSTEM PERSISTENCE UTILITIES ---
-    function saveDatabase() {
-      localStorage.setItem('gtk_stickyboard_notes', JSON.stringify(notes));
-    }
-
-    function loadDatabase() {
-      try {
-        const payload = localStorage.getItem('gtk_stickyboard_notes');
-        if (payload) {
-          notes = JSON.parse(payload);
-        }
-      } catch (err) {
-        console.error("Storage read exception: ", err);
-        notes = [];
-      }
     }
   </script>
 </body>
