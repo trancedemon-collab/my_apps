@@ -1,0 +1,1450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GTK Melody DAW - Suno AI Loop Composer</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        gtk: {
+                            blue: '#3584e4',
+                            blueHover: '#1c71d8',
+                            bgLight: '#f6f5f4',
+                            cardLight: '#ffffff',
+                            borderLight: '#deddda',
+                            textLight: '#2e3436',
+                            bgDark: '#1e1e1e',
+                            cardDark: '#2d2d2d',
+                            borderDark: '#3a3a3a',
+                            textDark: '#eeeeec',
+                            accent: '#3584e4'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Cantarell', 'Inter', 'system-ui', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'Fira Code', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Tone.js for Audio Synthesis -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <!-- LameJS for MP3 Encoding -->
+    <script src="https://cdn.jsdelivr.net/npm/lamejs@1.2.1/lame.min.js"></script>
+    <!-- React & ReactDOM -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(150, 150, 150, 0.3);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(150, 150, 150, 0.5);
+        }
+        .piano-roll-grid {
+            background-size: 24px 20px;
+            background-image: 
+                linear-gradient(to right, rgba(128, 128, 128, 0.15) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(128, 128, 128, 0.15) 1px, transparent 1px);
+        }
+    </style>
+</head>
+<body class="bg-gtk-bgLight dark:bg-gtk-bgDark text-gtk-textLight dark:text-gtk-textDark font-sans antialiased select-none h-screen overflow-hidden flex flex-col">
+
+    <div id="root" class="h-full flex flex-col"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef, useMemo } = React;
+
+        const PITCHES = [
+            'C5', 'B4', 'A#4', 'A4', 'G#4', 'G4', 'F#4', 'F4', 'E4', 'D#4', 'D4', 'C#4',
+            'C4', 'B3', 'A#3', 'A3', 'G#3', 'G3', 'F#3', 'F3', 'E3', 'D#3', 'D3', 'C#3', 'C3'
+        ].filter((item, index, self) => self.indexOf(item) === index);
+
+        const INSTRUMENTS = [
+            { id: 'synth_lead', name: 'Lead Synth', type: 'synth', osc: 'sawtooth' },
+            { id: 'synth_pad', name: 'Warm Pad', type: 'synth', osc: 'triangle' },
+            { id: 'synth_pluck', name: 'Pluck Synth', type: 'synth', osc: 'square' },
+            { id: 'synth_bass', name: 'Punchy Bass', type: 'synth', osc: 'fmsawtooth' },
+            { id: 'drums', name: '808 Beat Kit', type: 'drums' }
+        ];
+
+        const INITIAL_TRACKS = [
+            {
+                id: 'trk-1',
+                name: 'Melodic Lead',
+                instrument: 'synth_lead',
+                color: '#3584e4',
+                muted: false,
+                solo: false,
+                volume: 0,
+                notes: [
+                    { pitch: 'C4', step: 0, duration: 2 },
+                    { pitch: 'E4', step: 2, duration: 2 },
+                    { pitch: 'G4', step: 4, duration: 2 },
+                    { pitch: 'B4', step: 6, duration: 2 },
+                    { pitch: 'C5', step: 8, duration: 4 },
+                    { pitch: 'G4', step: 12, duration: 4 }
+                ]
+            },
+            {
+                id: 'trk-2',
+                name: 'Bassline Loop',
+                instrument: 'synth_bass',
+                color: '#e01b24',
+                muted: false,
+                solo: false,
+                volume: 0,
+                notes: [
+                    { pitch: 'C3', step: 0, duration: 4 },
+                    { pitch: 'C3', step: 4, duration: 4 },
+                    { pitch: 'G3', step: 8, duration: 4 },
+                    { pitch: 'F3', step: 12, duration: 4 }
+                ]
+            }
+        ];
+
+        function generateMIDIFile(tracks, bpm) {
+            const header = [
+                0x4d, 0x54, 0x68, 0x64, 0x00, 0x00, 0x00, 0x06, 0x00, 0x01,
+                (tracks.length >> 8) & 0xff, tracks.length & 0xff, 0x01, 0xe0
+            ];
+            const trackChunks = [];
+            tracks.forEach(track => {
+                const events = [];
+                const microsecondsPerQuarter = Math.round(60000000 / bpm);
+                events.push({
+                    time: 0,
+                    data: [0xff, 0x51, 0x03, (microsecondsPerQuarter >> 16) & 0xff, (microsecondsPerQuarter >> 8) & 0xff, microsecondsPerQuarter & 0xff]
+                });
+                const sortedNotes = [...track.notes].sort((a, b) => a.step - b.step);
+                sortedNotes.forEach(note => {
+                    const midiPitch = Tone.Frequency(note.pitch).toMidi();
+                    const startTick = note.step * 120;
+                    const endTick = (note.step + note.duration) * 120;
+                    events.push({ time: startTick, data: [0x90, midiPitch, 0x64] });
+                    events.push({ time: endTick, data: [0x80, midiPitch, 0x00] });
+                });
+                events.sort((a, b) => a.time - b.time);
+                let lastTime = 0;
+                let trackBytes = [];
+                events.forEach(ev => {
+                    const deltaTime = ev.time - lastTime;
+                    lastTime = ev.time;
+                    let buffer = [];
+                    let value = deltaTime;
+                    do {
+                        let b = value & 0x7f;
+                        value >>= 7;
+                        if (buffer.length > 0) b |= 0x80;
+                        buffer.unshift(b);
+                    } while (value > 0);
+                    trackBytes.push(...buffer, ...ev.data);
+                });
+                trackBytes.push(0x00, 0xff, 0x2f, 0x00);
+                const trackLen = trackBytes.length;
+                const trackHeader = [
+                    0x4d, 0x54, 0x72, 0x6b,
+                    (trackLen >> 24) & 0xff, (trackLen >> 16) & 0xff,
+                    (trackLen >> 8) & 0xff, trackLen & 0xff
+                ];
+                trackChunks.push(...trackHeader, ...trackBytes);
+            });
+            return new Uint8Array([...header, ...trackChunks]);
+        }
+
+        function audioBufferToWav(buffer) {
+            const numChannels = buffer.numberOfChannels;
+            const sampleRate = buffer.sampleRate;
+            let result = numChannels === 2 ? interleave(buffer.getChannelData(0), buffer.getChannelData(1)) : buffer.getChannelData(0);
+            return createWavBlob(result, numChannels, sampleRate, 16);
+        }
+
+        function interleave(inputL, inputR) {
+            const length = inputL.length + inputR.length;
+            const result = new Float32Array(length);
+            let index = 0, inputIndex = 0;
+            while (index < length) {
+                result[index++] = inputL[inputIndex];
+                result[index++] = inputR[inputIndex];
+                inputIndex++;
+            }
+            return result;
+        }
+
+        function createWavBlob(samples, numChannels, sampleRate, bitDepth) {
+            const bytesPerSample = bitDepth / 8;
+            const blockAlign = numChannels * bytesPerSample;
+            const dataSize = samples.length * bytesPerSample;
+            const buffer = new ArrayBuffer(44 + dataSize);
+            const view = new DataView(buffer);
+
+            writeString(view, 0, 'RIFF');
+            view.setUint32(4, 36 + dataSize, true);
+            writeString(view, 8, 'WAVE');
+            writeString(view, 12, 'fmt ');
+            view.setUint32(16, 16, true);
+            view.setUint16(20, 1, true);
+            view.setUint16(22, numChannels, true);
+            view.setUint32(24, sampleRate, true);
+            view.setUint32(28, sampleRate * blockAlign, true);
+            view.setUint16(32, blockAlign, true);
+            view.setUint16(34, bitDepth, true);
+            writeString(view, 36, 'data');
+            view.setUint32(40, dataSize, true);
+
+            let offset = 44;
+            for (let i = 0; i < samples.length; i++, offset += 2) {
+                const s = Math.max(-1, Math.min(1, samples[i]));
+                view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+            }
+            return new Blob([buffer], { type: 'audio/wav' });
+        }
+
+        function encodeMp3FromBuffer(buffer, bitrate = 192) {
+            if (typeof lamejs === 'undefined' || !lamejs.Mp3Encoder) {
+                throw new Error('MP3 encoder library is unavailable. Please export as WAV instead.');
+            }
+            const channels = buffer.numberOfChannels;
+            const sampleRate = buffer.sampleRate;
+            const mp3encoder = new lamejs.Mp3Encoder(channels, sampleRate, bitrate);
+            const mp3Data = [];
+
+            const sampleBlockSize = 1152;
+            const left = buffer.getChannelData(0);
+            const right = channels > 1 ? buffer.getChannelData(1) : left;
+
+            const leftInt16 = new Int16Array(left.length);
+            const rightInt16 = new Int16Array(right.length);
+            for (let i = 0; i < left.length; i++) {
+                const sL = Math.max(-1, Math.min(1, left[i]));
+                leftInt16[i] = sL < 0 ? sL * 0x8000 : sL * 0x7FFF;
+                const sR = Math.max(-1, Math.min(1, right[i]));
+                rightInt16[i] = sR < 0 ? sR * 0x8000 : sR * 0x7FFF;
+            }
+
+            for (let i = 0; i < leftInt16.length; i += sampleBlockSize) {
+                const leftChunk = leftInt16.subarray(i, i + sampleBlockSize);
+                let mp3buf;
+                if (channels === 2) {
+                    const rightChunk = rightInt16.subarray(i, i + sampleBlockSize);
+                    mp3buf = mp3encoder.encodeBuffer(leftChunk, rightChunk);
+                } else {
+                    mp3buf = mp3encoder.encodeBuffer(leftChunk);
+                }
+                if (mp3buf.length > 0) mp3Data.push(mp3buf);
+            }
+            const mp3buf = mp3encoder.flush();
+            if (mp3buf.length > 0) mp3Data.push(mp3buf);
+
+            return new Blob(mp3Data, { type: 'audio/mp3' });
+        }
+
+        function writeString(view, offset, string) {
+            for (let i = 0; i < string.length; i++) {
+                view.setUint8(offset + i, string.charCodeAt(i));
+            }
+        }
+
+        function parseImportData(text) {
+            const trimmed = text.trim();
+            if (!trimmed) throw new Error('Input text is empty.');
+
+            // 1. Try JSON
+            try {
+                const data = JSON.parse(trimmed);
+                if (data && data.tracks && Array.isArray(data.tracks)) {
+                    return {
+                        projectName: data.projectName || 'Imported_Project',
+                        bpm: Number(data.bpm) || 120,
+                        stepCount: Number(data.stepCount) || 16,
+                        tracks: data.tracks.map((t, idx) => ({
+                            id: t.id || 'trk-' + Date.now() + '-' + idx,
+                            name: t.name || `Track ${idx + 1}`,
+                            instrument: t.instrument || 'synth_lead',
+                            color: t.color || '#3584e4',
+                            muted: !!t.muted,
+                            solo: !!t.solo,
+                            volume: t.volume || 0,
+                            notes: Array.isArray(t.notes) ? t.notes : []
+                        }))
+                    };
+                }
+            } catch (e) {}
+
+            // 2. Try XML
+            try {
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(trimmed, "text/xml");
+                const projectElem = xmlDoc.getElementsByTagName("project")[0];
+                if (projectElem) {
+                    const name = projectElem.getAttribute("name") || "Imported_Project";
+                    const bpm = Number(projectElem.getAttribute("bpm")) || 120;
+                    const stepCount = Number(projectElem.getAttribute("steps")) || 16;
+                    const trackNodes = xmlDoc.getElementsByTagName("track");
+                    const parsedTracks = [];
+                    for (let i = 0; i < trackNodes.length; i++) {
+                        const trkNode = trackNodes[i];
+                        const trkName = trkNode.getAttribute("name") || `Track ${i + 1}`;
+                        const instrument = trkNode.getAttribute("instrument") || "synth_lead";
+                        const color = trkNode.getAttribute("color") || "#3584e4";
+                        const noteNodes = trkNode.getElementsByTagName("note");
+                        const notes = [];
+                        for (let j = 0; j < noteNodes.length; j++) {
+                            const nNode = noteNodes[j];
+                            notes.push({
+                                pitch: nNode.getAttribute("pitch"),
+                                step: Number(nNode.getAttribute("step")),
+                                duration: Number(nNode.getAttribute("duration")) || 2
+                            });
+                        }
+                        parsedTracks.push({
+                            id: 'trk-' + Date.now() + '-' + i,
+                            name: trkName,
+                            instrument,
+                            color,
+                            muted: false,
+                            solo: false,
+                            volume: 0,
+                            notes
+                        });
+                    }
+                    if (parsedTracks.length > 0) {
+                        return { projectName: name, bpm, stepCount, tracks: parsedTracks };
+                    }
+                }
+            } catch (e) {}
+
+            // 3. Try Text Specification Parsing
+            const bpmMatch = trimmed.match(/BPM:\s*(\d+)/i);
+            const stepsMatch = trimmed.match(/Length:\s*(\d+)\s*steps/i);
+            const projMatch = trimmed.match(/Project:\s*(.+)/i);
+
+            const bpm = bpmMatch ? parseInt(bpmMatch[1], 10) : 120;
+            const stepCount = stepsMatch ? parseInt(stepsMatch[1], 10) : 16;
+            const projectName = projMatch ? projMatch[1].trim() : 'Imported_Loop';
+
+            const trackRegex = /Track\s*\d+:\s*([^\n\[]+)(?:\[Instrument:\s*([^\]]+)\])?\s*\n\s*Notes:\s*([^\n]+)/gi;
+            let match;
+            const tracks = [];
+            const colors = ['#3584e4', '#e01b24', '#26a269', '#e5a50a', '#9141ac', '#119da4'];
+
+            while ((match = trackRegex.exec(trimmed)) !== null) {
+                const trackName = match[1].trim();
+                const instName = match[2] ? match[2].trim() : 'Lead Synth';
+                const notesStr = match[3].trim();
+
+                let instrument = 'synth_lead';
+                if (/bass/i.test(instName)) instrument = 'synth_bass';
+                else if (/pad/i.test(instName)) instrument = 'synth_pad';
+                else if (/pluck/i.test(instName)) instrument = 'synth_pluck';
+                else if (/drum|808|beat|kit|rhythm/i.test(instName)) instrument = 'drums';
+
+                const notes = [];
+                const noteRegex = /([A-G][#b]?\d)\s*\(\s*(?:step:)?(\d+)\s*,\s*(?:dur:)?(\d+)\s*\)/gi;
+                let noteMatch;
+                while ((noteMatch = noteRegex.exec(notesStr)) !== null) {
+                    notes.push({
+                        pitch: noteMatch[1].toUpperCase(),
+                        step: parseInt(noteMatch[2], 10),
+                        duration: parseInt(noteMatch[3], 10)
+                    });
+                }
+
+                tracks.push({
+                    id: 'trk-' + Date.now() + '-' + tracks.length,
+                    name: trackName,
+                    instrument,
+                    color: colors[tracks.length % colors.length],
+                    muted: false,
+                    solo: false,
+                    volume: 0,
+                    notes
+                });
+            }
+
+            if (tracks.length > 0) {
+                return { projectName, bpm, stepCount, tracks };
+            }
+
+            throw new Error('Unsupported format. Please paste valid JSON, XML, or Text DAW Specification.');
+        }
+
+        function App() {
+            const [themeMode, setThemeMode] = useState(() => localStorage.getItem('gtk_theme_mode') || 'auto');
+            const [isPlaying, setIsPlaying] = useState(false);
+            const [bpm, setBpm] = useState(120);
+            const [stepCount, setStepCount] = useState(16);
+            const [currentStep, setCurrentStep] = useState(0);
+            const [activeTrackId, setActiveTrackId] = useState('trk-1');
+            const [noteDuration, setNoteDuration] = useState(2);
+            const [projectName, setProjectName] = useState('Melody_Loop_01');
+            
+            // Modals & Banners
+            const [showExportModal, setShowExportModal] = useState(false);
+            const [showImportModal, setShowImportModal] = useState(false);
+            const [importInput, setImportInput] = useState('');
+            const [importError, setImportError] = useState('');
+            const [exportError, setExportError] = useState('');
+            const [copiedNotice, setCopiedNotice] = useState('');
+            const [isExportingAudio, setIsExportingAudio] = useState(false);
+
+            const [exportLoops, setExportLoops] = useState(4);
+
+            // Tracks state & persistent ref sync
+            const [tracks, setTracks] = useState(() => {
+                const saved = localStorage.getItem('gtk_daw_tracks');
+                return saved ? JSON.parse(saved) : INITIAL_TRACKS;
+            });
+
+            const tracksRef = useRef(tracks);
+            useEffect(() => {
+                tracksRef.current = tracks;
+            }, [tracks]);
+
+            const stepCountRef = useRef(stepCount);
+            useEffect(() => {
+                stepCountRef.current = stepCount;
+            }, [stepCount]);
+
+            const synthsRef = useRef({});
+            const drumSynthRef = useRef(null);
+
+            useEffect(() => {
+                localStorage.setItem('gtk_theme_mode', themeMode);
+                const root = document.documentElement;
+                const applyDark = (isDark) => {
+                    if (isDark) root.classList.add('dark');
+                    else root.classList.remove('dark');
+                };
+
+                if (themeMode === 'auto') {
+                    const media = window.matchMedia('(prefers-color-scheme: dark)');
+                    applyDark(media.matches);
+                    const listener = (e) => applyDark(e.matches);
+                    media.addEventListener('change', listener);
+                    return () => media.removeEventListener('change', listener);
+                } else {
+                    applyDark(themeMode === 'dark');
+                }
+            }, [themeMode]);
+
+            useEffect(() => {
+                localStorage.setItem('gtk_daw_tracks', JSON.stringify(tracks));
+            }, [tracks]);
+
+            useEffect(() => {
+                Tone.Transport.bpm.value = bpm;
+            }, [bpm]);
+
+            useEffect(() => {
+                const synths = {};
+                tracks.forEach(trk => {
+                    if (trk.instrument !== 'drums') {
+                        const instData = INSTRUMENTS.find(i => i.id === trk.instrument);
+                        const synth = new Tone.PolySynth(Tone.Synth, {
+                            oscillator: { type: instData?.osc || 'sawtooth' },
+                            envelope: { attack: 0.01, decay: 0.2, sustain: 0.5, release: 0.4 }
+                        }).toDestination();
+                        synth.volume.value = trk.volume;
+                        synths[trk.id] = synth;
+                    }
+                });
+
+                synthsRef.current = synths;
+
+                drumSynthRef.current = {
+                    kick: new Tone.MembraneSynth({ volume: 2 }).toDestination(),
+                    snare: new Tone.NoiseSynth({
+                        noise: { type: 'white' },
+                        envelope: { attack: 0.001, decay: 0.15, sustain: 0 }
+                    }).toDestination(),
+                    hihat: new Tone.MetalSynth({
+                        frequency: 200,
+                        envelope: { attack: 0.001, decay: 0.05, release: 0.05 },
+                        harmonicity: 5.1,
+                        modulationIndex: 32,
+                        resonance: 4000,
+                        octaves: 1.5
+                    }).toDestination()
+                };
+
+                return () => {
+                    Object.values(synths).forEach(s => s.dispose());
+                    if (drumSynthRef.current) {
+                        drumSynthRef.current.kick.dispose();
+                        drumSynthRef.current.snare.dispose();
+                        drumSynthRef.current.hihat.dispose();
+                    }
+                };
+            }, [tracks.map(t => t.id + t.instrument).join(',')]);
+
+            useEffect(() => {
+                let step = 0;
+                const loop = new Tone.Loop((time) => {
+                    Tone.Draw.schedule(() => {
+                        setCurrentStep(step);
+                    }, time);
+
+                    const currentTracks = tracksRef.current;
+                    const currentStepCount = stepCountRef.current;
+                    const hasSolo = currentTracks.some(t => t.solo);
+
+                    currentTracks.forEach(trk => {
+                        if (trk.muted) return;
+                        if (hasSolo && !trk.solo) return;
+
+                        const currentNotes = trk.notes.filter(n => n.step === step);
+                        currentNotes.forEach(note => {
+                            if (trk.instrument === 'drums') {
+                                if (note.pitch.startsWith('C3') || note.pitch.startsWith('C4')) {
+                                    drumSynthRef.current?.kick?.triggerAttackRelease('C1', '8n', time);
+                                } else if (note.pitch.startsWith('D3') || note.pitch.startsWith('D4')) {
+                                    drumSynthRef.current?.snare?.triggerAttackRelease('16n', time);
+                                } else {
+                                    drumSynthRef.current?.hihat?.triggerAttackRelease('32n', time);
+                                }
+                            } else {
+                                const synth = synthsRef.current[trk.id];
+                                if (synth) {
+                                    const durInSec = Tone.Time('16n').toSeconds() * note.duration;
+                                    try {
+                                        synth.triggerAttackRelease(note.pitch, durInSec, time);
+                                    } catch(e) {}
+                                }
+                            }
+                        });
+                    });
+
+                    step = (step + 1) % currentStepCount;
+                }, '16n');
+
+                loop.start(0);
+
+                return () => {
+                    loop.dispose();
+                };
+            }, []);
+
+            const togglePlay = async () => {
+                await Tone.start();
+                if (isPlaying) {
+                    Tone.Transport.stop();
+                    Tone.Transport.position = 0;
+                    setIsPlaying(false);
+                    setCurrentStep(0);
+                } else {
+                    Tone.Transport.position = 0;
+                    Tone.Transport.start();
+                    setIsPlaying(true);
+                }
+            };
+
+            const triggerPreviewNote = (pitch) => {
+                Tone.start();
+                const activeTrk = tracks.find(t => t.id === activeTrackId);
+                if (!activeTrk) return;
+
+                if (activeTrk.instrument === 'drums') {
+                    if (pitch.startsWith('C3') || pitch.startsWith('C4')) drumSynthRef.current?.kick?.triggerAttackRelease('C1', '8n');
+                    else if (pitch.startsWith('D3') || pitch.startsWith('D4')) drumSynthRef.current?.snare?.triggerAttackRelease('16n');
+                    else drumSynthRef.current?.hihat?.triggerAttackRelease('32n');
+                } else {
+                    const synth = synthsRef.current[activeTrk.id];
+                    if (synth) {
+                        try {
+                            synth.triggerAttackRelease(pitch, '8n');
+                        } catch(e) {}
+                    }
+                }
+            };
+
+            const handleCellClick = (pitch, stepIdx) => {
+                setTracks(prev => prev.map(trk => {
+                    if (trk.id !== activeTrackId) return trk;
+
+                    const existingIndex = trk.notes.findIndex(n => n.pitch === pitch && n.step === stepIdx);
+
+                    let newNotes = [...trk.notes];
+                    if (existingIndex >= 0) {
+                        newNotes.splice(existingIndex, 1);
+                    } else {
+                        triggerPreviewNote(pitch);
+                        newNotes.push({
+                            pitch,
+                            step: stepIdx,
+                            duration: Math.min(noteDuration, stepCount - stepIdx)
+                        });
+                    }
+
+                    return { ...trk, notes: newNotes };
+                }));
+            };
+
+            const addTrack = () => {
+                const newId = 'trk-' + Date.now();
+                const colors = ['#3584e4', '#e01b24', '#26a269', '#e5a50a', '#9141ac', '#119da4'];
+                const randomColor = colors[tracks.length % colors.length];
+                const newTrk = {
+                    id: newId,
+                    name: `Track ${tracks.length + 1}`,
+                    instrument: 'synth_lead',
+                    color: randomColor,
+                    muted: false,
+                    solo: false,
+                    volume: 0,
+                    notes: []
+                };
+                setTracks([...tracks, newTrk]);
+                setActiveTrackId(newId);
+            };
+
+            const deleteTrack = (id) => {
+                if (tracks.length <= 1) return;
+                const filtered = tracks.filter(t => t.id !== id);
+                setTracks(filtered);
+                if (activeTrackId === id) {
+                    setActiveTrackId(filtered[0].id);
+                }
+            };
+
+            const updateTrackProp = (id, prop, val) => {
+                setTracks(prev => prev.map(t => t.id === id ? { ...t, [prop]: val } : t));
+            };
+
+            const clearAllNotes = () => {
+                setTracks(prev => prev.map(t => ({ ...t, notes: [] })));
+            };
+
+            const handleExportMIDI = () => {
+                const midiBytes = generateMIDIFile(tracks, bpm);
+                const blob = new Blob([midiBytes], { type: 'audio/midi' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${projectName}.mid`;
+                a.click();
+                URL.revokeObjectURL(url);
+            };
+
+            const renderOfflineAudio = async (repeatCount = exportLoops) => {
+                const secondsPerStep = 60 / bpm / 4;
+                const singleLoopDuration = stepCount * secondsPerStep;
+                const totalDuration = singleLoopDuration * repeatCount;
+
+                return await Tone.Offline(({ transport }) => {
+                    transport.bpm.value = bpm;
+                    const offlineSynths = {};
+                    let offlineDrums = null;
+
+                    tracks.forEach(trk => {
+                        if (trk.muted) return;
+                        if (trk.instrument !== 'drums') {
+                            const instData = INSTRUMENTS.find(i => i.id === trk.instrument);
+                            const synth = new Tone.PolySynth(Tone.Synth, {
+                                oscillator: { type: instData?.osc || 'sawtooth' }
+                            }).toDestination();
+                            synth.volume.value = trk.volume;
+                            offlineSynths[trk.id] = synth;
+                        }
+                    });
+
+                    const hasDrums = tracks.some(t => !t.muted && t.instrument === 'drums');
+                    if (hasDrums) {
+                        offlineDrums = {
+                            kick: new Tone.MembraneSynth({ volume: 2 }).toDestination(),
+                            snare: new Tone.NoiseSynth({
+                                noise: { type: 'white' },
+                                envelope: { attack: 0.001, decay: 0.15, sustain: 0 }
+                            }).toDestination(),
+                            hihat: new Tone.MetalSynth({
+                                frequency: 200,
+                                envelope: { attack: 0.001, decay: 0.05, release: 0.05 },
+                                harmonicity: 5.1,
+                                modulationIndex: 32,
+                                resonance: 4000,
+                                octaves: 1.5
+                            }).toDestination()
+                        };
+                    }
+
+                    const hasSolo = tracks.some(t => t.solo);
+                    const allEvents = [];
+
+                    for (let l = 0; l < repeatCount; l++) {
+                        const loopOffset = l * singleLoopDuration;
+
+                        tracks.forEach(trk => {
+                            if (trk.muted) return;
+                            if (hasSolo && !trk.solo) return;
+
+                            trk.notes.forEach(note => {
+                                const startTime = loopOffset + (note.step * secondsPerStep);
+                                const durTime = Math.max(0.01, note.duration * secondsPerStep);
+                                allEvents.push({
+                                    trackId: trk.id,
+                                    instrument: trk.instrument,
+                                    pitch: note.pitch,
+                                    startTime,
+                                    durTime
+                                });
+                            });
+                        });
+                    }
+
+                    // Sort events strictly by start time
+                    allEvents.sort((a, b) => a.startTime - b.startTime);
+
+                    const synthGroupMap = {};
+                    const lastDrumTimes = { kick: -0.01, snare: -0.01, hihat: -0.01 };
+
+                    allEvents.forEach(ev => {
+                        if (ev.instrument === 'drums' && offlineDrums) {
+                            if (ev.pitch.startsWith('C3') || ev.pitch.startsWith('C4')) {
+                                let triggerTime = ev.startTime;
+                                if (triggerTime <= lastDrumTimes.kick) triggerTime = lastDrumTimes.kick + 0.001;
+                                lastDrumTimes.kick = triggerTime;
+                                try { offlineDrums.kick.triggerAttackRelease('C1', '8n', triggerTime); } catch(e){}
+                            } else if (ev.pitch.startsWith('D3') || ev.pitch.startsWith('D4')) {
+                                let triggerTime = ev.startTime;
+                                if (triggerTime <= lastDrumTimes.snare) triggerTime = lastDrumTimes.snare + 0.001;
+                                lastDrumTimes.snare = triggerTime;
+                                try { offlineDrums.snare.triggerAttackRelease('16n', triggerTime); } catch(e){}
+                            } else {
+                                let triggerTime = ev.startTime;
+                                if (triggerTime <= lastDrumTimes.hihat) triggerTime = lastDrumTimes.hihat + 0.001;
+                                lastDrumTimes.hihat = triggerTime;
+                                try { offlineDrums.hihat.triggerAttackRelease('32n', triggerTime); } catch(e){}
+                            }
+                        } else if (offlineSynths[ev.trackId]) {
+                            const groupKey = `${ev.trackId}_${ev.startTime.toFixed(4)}_${ev.durTime.toFixed(4)}`;
+                            if (!synthGroupMap[groupKey]) {
+                                synthGroupMap[groupKey] = {
+                                    trackId: ev.trackId,
+                                    synth: offlineSynths[ev.trackId],
+                                    pitches: [],
+                                    durTime: ev.durTime,
+                                    startTime: ev.startTime
+                                };
+                            }
+                            if (!synthGroupMap[groupKey].pitches.includes(ev.pitch)) {
+                                synthGroupMap[groupKey].pitches.push(ev.pitch);
+                            }
+                        }
+                    });
+
+                    // Sort note groups strictly by start time to guarantee strictly increasing automation times
+                    const sortedGroups = Object.values(synthGroupMap).sort((a, b) => a.startTime - b.startTime);
+                    
+                    const lastSynthTimes = {};
+                    sortedGroups.forEach(group => {
+                        let triggerTime = group.startTime;
+                        const prevTime = lastSynthTimes[group.trackId] ?? -0.01;
+                        if (triggerTime <= prevTime) {
+                            triggerTime = prevTime + 0.001;
+                        }
+                        lastSynthTimes[group.trackId] = triggerTime;
+
+                        try {
+                            group.synth.triggerAttackRelease(group.pitches, group.durTime, triggerTime);
+                        } catch(e) {}
+                    });
+
+                    transport.start(0);
+                }, totalDuration);
+            };
+
+            const handleExportWAV = async () => {
+                setIsExportingAudio(true);
+                setExportError('');
+                try {
+                    const buffer = await renderOfflineAudio(exportLoops);
+                    const wavBlob = audioBufferToWav(buffer.get());
+                    const url = URL.createObjectURL(wavBlob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `${projectName}_${exportLoops}x.wav`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                } catch(e) {
+                    setExportError('WAV Export Error: ' + e.message);
+                } finally {
+                    setIsExportingAudio(false);
+                }
+            };
+
+            const handleExportMP3 = async () => {
+                setIsExportingAudio(true);
+                setExportError('');
+                try {
+                    const buffer = await renderOfflineAudio(exportLoops);
+                    const mp3Blob = encodeMp3FromBuffer(buffer.get(), 192);
+                    const url = URL.createObjectURL(mp3Blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `${projectName}_${exportLoops}x.mp3`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                } catch(e) {
+                    setExportError(e.message + ' Attempting automatic WAV export instead...');
+                    handleExportWAV();
+                } finally {
+                    setIsExportingAudio(false);
+                }
+            };
+
+            const generateAITextFormat = useMemo(() => {
+                let text = `=== DAW MELODY LOOP SPECIFICATION ===\n`;
+                text += `Project: ${projectName}\nBPM: ${bpm} | Length: ${stepCount} steps (${stepCount/16} Bar)\n\n`;
+
+                text += `--- TRACK & NOTE DATA ---\n`;
+                tracks.forEach((trk, idx) => {
+                    const inst = INSTRUMENTS.find(i => i.id === trk.instrument)?.name || trk.instrument;
+                    text += `Track ${idx + 1}: ${trk.name} [Instrument: ${inst}]\n`;
+                    if (trk.notes.length === 0) {
+                        text += `  Notes: (No notes)\n`;
+                    } else {
+                        const noteStrings = trk.notes
+                            .slice()
+                            .sort((a,b) => a.step - b.step)
+                            .map(n => `${n.pitch}(step:${n.step},dur:${n.duration})`)
+                            .join(', ');
+                        text += `  Notes: ${noteStrings}\n`;
+                    }
+                });
+
+                text += `\n--- SUNO AI PROMPT & STYLE SUGGESTIONS ---\n`;
+                const leadTrack = tracks.find(t => t.instrument.includes('lead')) || tracks[0];
+                const leadNotes = leadTrack?.notes.map(n => n.pitch).join(' - ') || 'C4 - E4 - G4 - B4';
+
+                text += `[Style Tag]: Catchy Electronic Loop, ${bpm} BPM, Bright Synth Lead, Punchy Bassline, High Energy, Melodic\n`;
+                text += `[Melodic Hook Sequence]: ${leadNotes}\n`;
+                text += `[Instruction for AI]: Create a full-length production inspired by this short chord/melody loop structure. Keep the core synth hook prominent during chorus and drop.\n`;
+
+                return text;
+            }, [tracks, bpm, stepCount, projectName]);
+
+            const generateJSONFormat = useMemo(() => {
+                return JSON.stringify({
+                    projectName,
+                    bpm,
+                    stepCount,
+                    tracks
+                }, null, 2);
+            }, [tracks, bpm, stepCount, projectName]);
+
+            const generateXMLFormat = useMemo(() => {
+                let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
+                xml += `<project name="${projectName}" bpm="${bpm}" steps="${stepCount}">\n`;
+                xml += `  <tracks>\n`;
+                tracks.forEach(trk => {
+                    xml += `    <track name="${trk.name}" instrument="${trk.instrument}" color="${trk.color}">\n`;
+                    trk.notes.forEach(n => {
+                        xml += `      <note pitch="${n.pitch}" step="${n.step}" duration="${n.duration}" />\n`;
+                    });
+                    xml += `    </track>\n`;
+                });
+                xml += `  </tracks>\n`;
+                xml += `</project>`;
+                return xml;
+            }, [tracks, bpm, stepCount, projectName]);
+
+            const copyToClipboard = (content, label) => {
+                const textarea = document.createElement('textarea');
+                textarea.value = content;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+
+                setCopiedNotice(label);
+                setTimeout(() => setCopiedNotice(''), 2500);
+            };
+
+            const handleImportSubmit = () => {
+                setImportError('');
+                try {
+                    const parsed = parseImportData(importInput);
+                    setProjectName(parsed.projectName);
+                    setBpm(parsed.bpm);
+                    setStepCount(parsed.stepCount);
+                    setTracks(parsed.tracks);
+                    if (parsed.tracks.length > 0) setActiveTrackId(parsed.tracks[0].id);
+                    setShowImportModal(false);
+                    setImportInput('');
+                } catch (e) {
+                    setImportError(e.message || 'Error parsing import data.');
+                }
+            };
+
+            const handleFileUpload = (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    setImportInput(event.target.result);
+                };
+                reader.readAsText(file);
+            };
+
+            const activeTrack = tracks.find(t => t.id === activeTrackId) || tracks[0];
+
+            return (
+                <div className="flex flex-col h-full bg-gtk-bgLight dark:bg-gtk-bgDark text-gtk-textLight dark:text-gtk-textDark">
+                    
+                    {/* GTK Header Bar */}
+                    <header className="h-12 bg-gtk-cardLight dark:bg-gtk-cardDark border-b border-gtk-borderLight dark:border-gtk-borderDark flex items-center justify-between px-3 shrink-0 shadow-sm">
+                        
+                        <div className="flex items-center space-x-3">
+                            <div className="flex space-x-1.5">
+                                <span className="w-3 h-3 rounded-full bg-red-500 opacity-80 inline-block"></span>
+                                <span className="w-3 h-3 rounded-full bg-yellow-500 opacity-80 inline-block"></span>
+                                <span className="w-3 h-3 rounded-full bg-green-500 opacity-80 inline-block"></span>
+                            </div>
+                            <span className="font-bold text-xs uppercase tracking-wider text-gtk-blue">GTK DAW</span>
+                            <span className="text-gray-400">/</span>
+                            <input
+                                type="text"
+                                value={projectName}
+                                onChange={(e) => setProjectName(e.target.value)}
+                                className="bg-transparent font-medium text-sm border-b border-transparent hover:border-gtk-borderLight dark:hover:border-gtk-borderDark focus:border-gtk-blue focus:outline-none px-1 py-0.5 rounded"
+                            />
+                        </div>
+
+                        {/* Transport Bar Controls */}
+                        <div className="flex items-center space-x-3">
+                            <button
+                                onClick={togglePlay}
+                                className={`px-4 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1 transition-all ${
+                                    isPlaying 
+                                        ? 'bg-amber-600 text-white hover:bg-amber-700 shadow-sm' 
+                                        : 'bg-gtk-blue text-white hover:bg-gtk-blueHover shadow-sm'
+                                }`}
+                            >
+                                <span>{isPlaying ? '⏸ Pause' : '▶ Play Loop'}</span>
+                            </button>
+
+                            <div className="flex items-center space-x-2 bg-gtk-bgLight dark:bg-gtk-bgDark px-2 py-1 rounded-md border border-gtk-borderLight dark:border-gtk-borderDark">
+                                <span className="text-xs font-medium text-gray-500">BPM</span>
+                                <input
+                                    type="number"
+                                    min="60"
+                                    max="200"
+                                    value={bpm}
+                                    onChange={(e) => setBpm(Number(e.target.value))}
+                                    className="w-12 bg-transparent text-xs text-center font-mono focus:outline-none font-bold"
+                                />
+                            </div>
+
+                            <div className="flex items-center space-x-2 bg-gtk-bgLight dark:bg-gtk-bgDark px-2 py-1 rounded-md border border-gtk-borderLight dark:border-gtk-borderDark">
+                                <span className="text-xs font-medium text-gray-500">Grid Steps</span>
+                                <select
+                                    value={stepCount}
+                                    onChange={(e) => setStepCount(Number(e.target.value))}
+                                    className="bg-transparent text-xs font-mono focus:outline-none"
+                                >
+                                    <option value={16}>16 Steps (1 Bar)</option>
+                                    <option value={32}>32 Steps (2 Bars)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        {/* Header Right Actions */}
+                        <div className="flex items-center space-x-2">
+                            <button
+                                onClick={() => setShowImportModal(true)}
+                                className="px-3 py-1 bg-neutral-200 dark:bg-neutral-700 hover:bg-neutral-300 dark:hover:bg-neutral-600 rounded-md text-xs font-medium flex items-center space-x-1"
+                            >
+                                <span>📥 Import</span>
+                            </button>
+
+                            <button
+                                onClick={() => setShowExportModal(true)}
+                                className="px-3 py-1 bg-gtk-blue hover:bg-gtk-blueHover text-white rounded-md text-xs font-semibold flex items-center space-x-1 shadow-xs"
+                            >
+                                <span>✨ Export / AI Hub</span>
+                            </button>
+
+                            <div className="bg-neutral-200 dark:bg-neutral-800 p-0.5 rounded-lg flex text-xs">
+                                <button
+                                    onClick={() => setThemeMode('light')}
+                                    className={`px-2 py-0.5 rounded-md transition-all ${themeMode === 'light' ? 'bg-white dark:bg-neutral-700 shadow text-gtk-blue font-bold' : 'text-gray-500'}`}
+                                    title="Light Mode"
+                                >
+                                    ☀️
+                                </button>
+                                <button
+                                    onClick={() => setThemeMode('auto')}
+                                    className={`px-2 py-0.5 rounded-md transition-all ${themeMode === 'auto' ? 'bg-white dark:bg-neutral-700 shadow text-gtk-blue font-bold' : 'text-gray-500'}`}
+                                    title="Auto/System Theme"
+                                >
+                                    🌓
+                                </button>
+                                <button
+                                    onClick={() => setThemeMode('dark')}
+                                    className={`px-2 py-0.5 rounded-md transition-all ${themeMode === 'dark' ? 'bg-white dark:bg-neutral-700 shadow text-gtk-blue font-bold' : 'text-gray-500'}`}
+                                    title="Dark Mode"
+                                >
+                                    🌙
+                                </button>
+                            </div>
+                        </div>
+                    </header>
+
+                    {/* Main Work Area */}
+                    <div className="flex-1 flex overflow-hidden">
+
+                        {/* Track List Control Column */}
+                        <div className="w-72 bg-gtk-cardLight dark:bg-gtk-cardDark border-r border-gtk-borderLight dark:border-gtk-borderDark flex flex-col shrink-0">
+                            
+                            <div className="p-2 border-b border-gtk-borderLight dark:border-gtk-borderDark flex items-center justify-between">
+                                <span className="text-xs font-bold uppercase text-gray-500 tracking-wider">Tracks ({tracks.length})</span>
+                                <div className="flex space-x-1">
+                                    <button
+                                        onClick={clearAllNotes}
+                                        className="px-2 py-0.5 text-xs bg-red-100 text-red-600 dark:bg-red-950 dark:text-red-300 rounded hover:opacity-80"
+                                        title="Clear all notes"
+                                    >
+                                        Clear
+                                    </button>
+                                    <button
+                                        onClick={addTrack}
+                                        className="px-2 py-0.5 text-xs bg-gtk-blue text-white rounded hover:bg-gtk-blueHover"
+                                    >
+                                        + Track
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="flex-1 overflow-y-auto divide-y divide-gtk-borderLight dark:divide-gtk-borderDark">
+                                {tracks.map(trk => {
+                                    const isActive = trk.id === activeTrackId;
+                                    return (
+                                        <div
+                                            key={trk.id}
+                                            onClick={() => setActiveTrackId(trk.id)}
+                                            className={`p-2.5 cursor-pointer transition-all ${
+                                                isActive 
+                                                    ? 'bg-gtk-blue/10 border-l-4 border-gtk-blue' 
+                                                    : 'hover:bg-black/5 dark:hover:bg-white/5 border-l-4 border-transparent'
+                                            }`}
+                                        >
+                                            <div className="flex items-center justify-between mb-1.5">
+                                                <div className="flex items-center space-x-2">
+                                                    <span
+                                                        className="w-2.5 h-2.5 rounded-full"
+                                                        style={{ backgroundColor: trk.color }}
+                                                    ></span>
+                                                    <input
+                                                        type="text"
+                                                        value={trk.name}
+                                                        onChange={(e) => updateTrackProp(trk.id, 'name', e.target.value)}
+                                                        className="font-medium text-xs bg-transparent border-b border-transparent focus:border-gtk-blue focus:outline-none w-28"
+                                                    />
+                                                </div>
+
+                                                <div className="flex items-center space-x-1">
+                                                    <button
+                                                        onClick={(e) => { e.stopPropagation(); updateTrackProp(trk.id, 'muted', !trk.muted); }}
+                                                        className={`w-5 h-5 text-[10px] font-bold rounded ${trk.muted ? 'bg-red-500 text-white' : 'bg-gray-200 dark:bg-neutral-700 text-gray-600 dark:text-gray-300'}`}
+                                                    >
+                                                        M
+                                                    </button>
+                                                    <button
+                                                        onClick={(e) => { e.stopPropagation(); updateTrackProp(trk.id, 'solo', !trk.solo); }}
+                                                        className={`w-5 h-5 text-[10px] font-bold rounded ${trk.solo ? 'bg-amber-500 text-white' : 'bg-gray-200 dark:bg-neutral-700 text-gray-600 dark:text-gray-300'}`}
+                                                    >
+                                                        S
+                                                    </button>
+                                                    {tracks.length > 1 && (
+                                                        <button
+                                                            onClick={(e) => { e.stopPropagation(); deleteTrack(trk.id); }}
+                                                            className="w-5 h-5 text-[10px] text-gray-400 hover:text-red-500"
+                                                        >
+                                                            ✕
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            <div className="flex items-center justify-between text-xs text-gray-500">
+                                                <select
+                                                    value={trk.instrument}
+                                                    onChange={(e) => updateTrackProp(trk.id, 'instrument', e.target.value)}
+                                                    className="bg-gtk-bgLight dark:bg-gtk-bgDark border border-gtk-borderLight dark:border-gtk-borderDark rounded px-1.5 py-0.5 text-xs text-gtk-textLight dark:text-gtk-textDark focus:outline-none w-full"
+                                                >
+                                                    {INSTRUMENTS.map(i => (
+                                                        <option key={i.id} value={i.id}>{i.name}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+
+                            <div className="p-3 border-t border-gtk-borderLight dark:border-gtk-borderDark bg-gtk-bgLight dark:bg-gtk-bgDark">
+                                <div className="text-xs font-semibold mb-1">Draw Note Duration</div>
+                                <div className="grid grid-cols-4 gap-1">
+                                    {[1, 2, 4, 8].map(d => (
+                                        <button
+                                            key={d}
+                                            onClick={() => setNoteDuration(d)}
+                                            className={`py-1 text-xs rounded font-mono ${
+                                                noteDuration === d 
+                                                    ? 'bg-gtk-blue text-white font-bold' 
+                                                    : 'bg-gtk-cardLight dark:bg-gtk-cardDark border border-gtk-borderLight dark:border-gtk-borderDark'
+                                            }`}
+                                        >
+                                            {d === 1 ? '1/16' : d === 2 ? '1/8' : d === 4 ? '1/4' : '1/2'}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Piano Roll Grid Panel */}
+                        <div className="flex-1 flex flex-col bg-gtk-bgLight dark:bg-gtk-bgDark overflow-hidden relative">
+                            
+                            <div className="h-7 bg-gtk-cardLight dark:bg-gtk-cardDark border-b border-gtk-borderLight dark:border-gtk-borderDark flex shrink-0 pl-16">
+                                {Array.from({ length: stepCount }).map((_, stepIdx) => {
+                                    const isCurrent = currentStep === stepIdx && isPlaying;
+                                    const isBarStart = stepIdx % 4 === 0;
+                                    return (
+                                        <div
+                                            key={stepIdx}
+                                            className={`flex-1 border-r border-gtk-borderLight dark:border-gtk-borderDark flex items-center justify-center text-[10px] font-mono font-semibold ${
+                                                isCurrent ? 'bg-gtk-blue text-white' : isBarStart ? 'text-gtk-blue font-bold' : 'text-gray-400'
+                                            }`}
+                                        >
+                                            {stepIdx + 1}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+
+                            <div className="flex-1 flex overflow-y-auto overflow-x-auto relative">
+                                
+                                <div className="w-16 sticky left-0 z-20 bg-gtk-cardLight dark:bg-gtk-cardDark border-r border-gtk-borderLight dark:border-gtk-borderDark shrink-0">
+                                    {PITCHES.map(pitch => {
+                                        const isAccidental = pitch.includes('#');
+                                        return (
+                                            <div
+                                                key={pitch}
+                                                onClick={() => triggerPreviewNote(pitch)}
+                                                className={`h-5 border-b border-gtk-borderLight dark:border-gtk-borderDark flex items-center justify-end pr-1 text-[10px] font-mono cursor-pointer transition-colors ${
+                                                    isAccidental 
+                                                        ? 'bg-neutral-800 text-white hover:bg-neutral-700' 
+                                                        : 'bg-white text-neutral-800 hover:bg-neutral-100 dark:bg-neutral-200'
+                                                }`}
+                                            >
+                                                {pitch}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+
+                                <div className="flex-1 flex flex-col min-w-[600px] piano-roll-grid relative">
+                                    
+                                    {isPlaying && (
+                                        <div
+                                            className="absolute top-0 bottom-0 w-0.5 bg-red-500 z-10 pointer-events-none transition-all duration-75 shadow-[0_0_8px_rgba(239,68,68,0.8)]"
+                                            style={{ left: `${(currentStep / stepCount) * 100}%` }}
+                                        ></div>
+                                    )}
+
+                                    {PITCHES.map(pitch => (
+                                        <div key={pitch} className="h-5 flex border-b border-black/5 dark:border-white/5">
+                                            {Array.from({ length: stepCount }).map((_, stepIdx) => {
+                                                const isBarLine = (stepIdx + 1) % 4 === 0;
+                                                const activeNote = activeTrack?.notes.find(n => n.pitch === pitch && n.step === stepIdx);
+                                                const ghostTrack = tracks.find(t => t.id !== activeTrackId && t.notes.some(n => n.pitch === pitch && n.step === stepIdx));
+
+                                                return (
+                                                    <div
+                                                        key={stepIdx}
+                                                        onClick={() => handleCellClick(pitch, stepIdx)}
+                                                        className={`flex-1 border-r ${isBarLine ? 'border-r-gray-400/40 dark:border-r-gray-600/40' : 'border-r-black/5 dark:border-white/5'} relative cursor-pointer hover:bg-gtk-blue/20 transition-colors`}
+                                                    >
+                                                        {!activeNote && ghostTrack && (
+                                                            <div
+                                                                className="absolute inset-0.5 rounded-xs opacity-30 pointer-events-none"
+                                                                style={{ backgroundColor: ghostTrack.color }}
+                                                            ></div>
+                                                        )}
+
+                                                        {activeNote && (
+                                                            <div
+                                                                className="absolute top-0.5 bottom-0.5 left-0.5 z-10 rounded-xs shadow-sm flex items-center justify-between px-1 text-[9px] font-bold text-white overflow-hidden pointer-events-none"
+                                                                style={{
+                                                                    backgroundColor: activeTrack.color,
+                                                                    width: `calc(${activeNote.duration * 100}% - 2px)`
+                                                                }}
+                                                            >
+                                                                <span>{pitch}</span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    ))}
+
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    {/* Import Specification Modal */}
+                    {showImportModal && (
+                        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+                            <div className="bg-gtk-cardLight dark:bg-gtk-cardDark border border-gtk-borderLight dark:border-gtk-borderDark rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
+                                <div className="p-4 border-b border-gtk-borderLight dark:border-gtk-borderDark flex items-center justify-between bg-gtk-bgLight dark:bg-gtk-bgDark">
+                                    <div className="flex items-center space-x-2">
+                                        <span className="text-base">📥</span>
+                                        <h3 className="font-bold text-sm">Import Song Loop / Specification</h3>
+                                    </div>
+                                    <button
+                                        onClick={() => setShowImportModal(false)}
+                                        className="text-gray-400 hover:text-gray-600 dark:hover:text-white font-bold text-sm"
+                                    >
+                                        ✕
+                                    </button>
+                                </div>
+
+                                <div className="p-4 overflow-y-auto space-y-4">
+                                    <div className="text-xs text-gray-500">
+                                        Paste AI-generated text, DAW spec, JSON, or XML below to import tracks & notes directly into the piano roll:
+                                    </div>
+
+                                    <div className="flex items-center justify-between bg-gtk-bgLight dark:bg-gtk-bgDark p-2 rounded-lg border border-gtk-borderLight dark:border-gtk-borderDark">
+                                        <span className="text-xs font-medium text-gray-600 dark:text-gray-300">Load File (.json or .xml):</span>
+                                        <input
+                                            type="file"
+                                            accept=".json,.xml,.txt"
+                                            onChange={handleFileUpload}
+                                            className="text-xs text-gray-500 file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-gtk-blue file:text-white hover:file:bg-gtk-blueHover"
+                                        />
+                                    </div>
+
+                                    <textarea
+                                        rows="10"
+                                        value={importInput}
+                                        onChange={(e) => setImportInput(e.target.value)}
+                                        placeholder="Paste JSON, XML, or DAW Text format here..."
+                                        className="w-full bg-gtk-bgLight dark:bg-gtk-bgDark border border-gtk-borderLight dark:border-gtk-borderDark rounded-lg p-3 text-xs font-mono text-gtk-textLight dark:text-gtk-textDark focus:outline-none"
+                                    ></textarea>
+
+                                    {importError && (
+                                        <div className="p-2.5 bg-red-100 text-red-600 dark:bg-red-950 dark:text-red-300 text-xs rounded-lg border border-red-300 flex items-center justify-between">
+                                            <span>⚠️ {importError}</span>
+                                            <button onClick={() => setImportError('')} className="font-bold ml-2">✕</button>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="p-3 border-t border-gtk-borderLight dark:border-gtk-borderDark bg-gtk-bgLight dark:bg-gtk-bgDark flex justify-between items-center">
+                                    <button
+                                        onClick={() => setShowImportModal(false)}
+                                        className="px-3 py-1.5 bg-neutral-200 dark:bg-neutral-700 text-xs font-medium rounded-lg"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={handleImportSubmit}
+                                        className="px-4 py-1.5 bg-gtk-blue hover:bg-gtk-blueHover text-white rounded-lg text-xs font-semibold shadow-sm"
+                                    >
+                                        Load into Engine
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Export / Suno AI Hub Modal */}
+                    {showExportModal && (
+                        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+                            <div className="bg-gtk-cardLight dark:bg-gtk-cardDark border border-gtk-borderLight dark:border-gtk-borderDark rounded-xl shadow-2xl w-full max-w-3xl overflow-hidden flex flex-col max-h-[90vh]">
+                                
+                                <div className="p-4 border-b border-gtk-borderLight dark:border-gtk-borderDark flex items-center justify-between bg-gtk-bgLight dark:bg-gtk-bgDark">
+                                    <div className="flex items-center space-x-2">
+                                        <span className="text-base">🚀</span>
+                                        <h3 className="font-bold text-sm">Export & Suno AI Hub</h3>
+                                    </div>
+                                    <button
+                                        onClick={() => setShowExportModal(false)}
+                                        className="text-gray-400 hover:text-gray-600 dark:hover:text-white font-bold text-sm"
+                                    >
+                                        ✕
+                                    </button>
+                                </div>
+
+                                <div className="p-4 overflow-y-auto space-y-4">
+                                    
+                                    {/* Export Status / Error Notification */}
+                                    {exportError && (
+                                        <div className="p-2.5 bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-200 text-xs rounded-lg border border-amber-300 flex items-center justify-between">
+                                            <span>⚠️ {exportError}</span>
+                                            <button onClick={() => setExportError('')} className="font-bold ml-2">✕</button>
+                                        </div>
+                                    )}
+
+                                    {/* Suno Audio Duration Loop Multiplier Control */}
+                                    <div className="bg-gtk-bgLight dark:bg-gtk-bgDark p-3 rounded-xl border border-gtk-borderLight dark:border-gtk-borderDark space-y-2">
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center space-x-2">
+                                                <span className="text-xs font-bold text-gtk-blue uppercase tracking-wider">🔁 Export Loop Count</span>
+                                                <span className="bg-amber-100 text-amber-800 text-[10px] font-semibold px-2 py-0.5 rounded-full dark:bg-amber-950 dark:text-amber-300">
+                                                    Suno AI Audio Length Fix
+                                                </span>
+                                            </div>
+                                            <span className="text-xs font-mono font-bold text-gtk-blue">
+                                                Est. Duration: {((stepCount * (60 / bpm / 4)) * exportLoops).toFixed(1)}s
+                                            </span>
+                                        </div>
+
+                                        <div className="flex items-center space-x-2">
+                                            {[1, 2, 3, 4, 8].map(count => (
+                                                <button
+                                                    key={count}
+                                                    onClick={() => setExportLoops(count)}
+                                                    className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-semibold transition-all ${
+                                                        exportLoops === count
+                                                            ? 'bg-gtk-blue text-white shadow-sm'
+                                                            : 'bg-gtk-cardLight dark:bg-gtk-cardDark border border-gtk-borderLight dark:border-gtk-borderDark hover:bg-neutral-200 dark:hover:bg-neutral-700'
+                                                    }`}
+                                                >
+                                                    {count}x {count === 4 ? '(Recommended)' : ''}
+                                                </button>
+                                            ))}
+                                        </div>
+
+                                        <p className="text-[11px] text-gray-500">
+                                            💡 <strong>Why loop?</strong> Suno AI requires uploaded audio clips to be at least 6–10 seconds long. Setting this to <strong>4x (or 8x)</strong> extends 1-bar or 2-bar loops so Suno AI accepts the upload cleanly.
+                                        </p>
+                                    </div>
+
+                                    {/* Audio & MIDI Downloads */}
+                                    <div className="grid grid-cols-3 gap-3">
+                                        <button
+                                            onClick={handleExportMP3}
+                                            disabled={isExportingAudio}
+                                            className="p-3 bg-gtk-bgLight dark:bg-gtk-bgDark border border-gtk-borderLight dark:border-gtk-borderDark hover:border-gtk-blue rounded-lg flex items-center space-x-3 transition-all group disabled:opacity-50"
+                                        >
+                                            <span className="text-xl">{isExportingAudio ? '⏳' : '🎵'}</span>
+                                            <div className="text-left">
+                                                <div className="text-xs font-bold group-hover:text-gtk-blue">
+                                                    {isExportingAudio ? 'Rendering...' : 'Download MP3'}
+                                                </div>
+                                                <div className="text-[10px] text-gray-500">192kbps ({exportLoops}x repeated loop)</div>
+                                            </div>
+                                        </button>
+
+                                        <button
+                                            onClick={handleExportWAV}
+                                            disabled={isExportingAudio}
+                                            className="p-3 bg-gtk-bgLight dark:bg-gtk-bgDark border border-gtk-borderLight dark:border-gtk-borderDark hover:border-gtk-blue rounded-lg flex items-center space-x-3 transition-all group disabled:opacity-50"
+                                        >
+                                            <span className="text-xl">{isExportingAudio ? '⏳' : '🔊'}</span>
+                                            <div className="text-left">
+                                                <div className="text-xs font-bold group-hover:text-gtk-blue">
+                                                    {isExportingAudio ? 'Rendering...' : 'Download WAV'}
+                                                </div>
+                                                <div className="text-[10px] text-gray-500">Uncompressed PCM ({exportLoops}x loop)</div>
+                                            </div>
+                                        </button>
+
+                                        <button
+                                            onClick={handleExportMIDI}
+                                            className="p-3 bg-gtk-bgLight dark:bg-gtk-bgDark border border-gtk-borderLight dark:border-gtk-borderDark hover:border-gtk-blue rounded-lg flex items-center space-x-3 transition-all group"
+                                        >
+                                            <span className="text-xl">🎹</span>
+                                            <div className="text-left">
+                                                <div className="text-xs font-bold group-hover:text-gtk-blue">Download MIDI</div>
+                                                <div className="text-[10px] text-gray-500">Type-1 Standard MIDI file</div>
+                                            </div>
+                                        </button>
+                                    </div>
+
+                                    {/* Copy / Interchange Formats */}
+                                    <div className="space-y-2">
+                                        <div className="flex items-center justify-between">
+                                            <label className="text-xs font-semibold text-gray-600 dark:text-gray-300">
+                                                Export Specification Formats
+                                            </label>
+                                            {copiedNotice && (
+                                                <span className="text-xs text-green-500 font-medium">{copiedNotice}</span>
+                                            )}
+                                        </div>
+
+                                        <div className="grid grid-cols-3 gap-2">
+                                            <button
+                                                onClick={() => copyToClipboard(generateAITextFormat, 'Copied Text Spec to Clipboard!')}
+                                                className="px-3 py-1.5 bg-neutral-200 dark:bg-neutral-800 hover:bg-gtk-blue hover:text-white rounded text-xs font-medium transition-colors"
+                                            >
+                                                📋 Copy DAW Text Format
+                                            </button>
+                                            <button
+                                                onClick={() => copyToClipboard(generateJSONFormat, 'Copied JSON to Clipboard!')}
+                                                className="px-3 py-1.5 bg-neutral-200 dark:bg-neutral-800 hover:bg-gtk-blue hover:text-white rounded text-xs font-medium transition-colors"
+                                            >
+                                                📦 Copy JSON Format
+                                            </button>
+                                            <button
+                                                onClick={() => copyToClipboard(generateXMLFormat, 'Copied XML to Clipboard!')}
+                                                className="px-3 py-1.5 bg-neutral-200 dark:bg-neutral-800 hover:bg-gtk-blue hover:text-white rounded text-xs font-medium transition-colors"
+                                            >
+                                                📄 Copy XML Format
+                                            </button>
+                                        </div>
+
+                                        <textarea
+                                            readOnly
+                                            rows="8"
+                                            value={generateAITextFormat}
+                                            className="w-full bg-gtk-bgLight dark:bg-gtk-bgDark border border-gtk-borderLight dark:border-gtk-borderDark rounded-lg p-3 text-xs font-mono text-gtk-textLight dark:text-gtk-textDark focus:outline-none"
+                                        ></textarea>
+                                    </div>
+
+                                </div>
+
+                                <div className="p-3 border-t border-gtk-borderLight dark:border-gtk-borderDark bg-gtk-bgLight dark:bg-gtk-bgDark flex justify-between items-center">
+                                    <span className="text-[11px] text-gray-500">Tip: Export JSON or XML to save complete project sessions!</span>
+                                    <button
+                                        onClick={() => setShowExportModal(false)}
+                                        className="px-4 py-1.5 bg-gtk-blue hover:bg-gtk-blueHover text-white rounded-lg text-xs font-semibold shadow-sm"
+                                    >
+                                        Done
+                                    </button>
+                                </div>
+
+                            </div>
+                        </div>
+                    )}
+
+                </div>
+            );
+        }
+
+        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    </script>
+</body>
+</html>
