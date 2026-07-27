@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Pages Link Generator</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            900: '#312e81',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom scrollbar for better visual aesthetics */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.6);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(99, 102, 241, 0.4);
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(99, 102, 241, 0.7);
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col justify-between selection:bg-brand-500 selection:text-white antialiased">
+
+    <!-- Header -->
+    <header class="border-b border-slate-800/80 bg-slate-900/50 backdrop-blur-md sticky top-0 z-40">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-400 flex items-center justify-center shadow-lg shadow-brand-500/20 text-white font-bold text-lg">
+                    <i class="fa-solid fa-link"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold text-slate-100 leading-tight">GitHub Link Builder</h1>
+                    <p class="text-xs text-slate-400">Prefix & format your hosted web app URLs</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-2">
+                <a href="https://github.com/trancedemon-collab/my_apps" target="_blank" rel="noopener noreferrer" 
+                   class="text-xs font-medium text-slate-400 hover:text-slate-200 bg-slate-800/80 hover:bg-slate-800 px-3 py-2 rounded-lg transition flex items-center gap-2 border border-slate-700/50">
+                    <i class="fa-brands fa-github text-sm"></i>
+                    <span class="hidden sm:inline">Repository</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="max-w-6xl mx-auto px-4 py-8 flex-1 w-full grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <!-- Left Column: Input Form & Configuration -->
+        <section class="lg:col-span-5 flex flex-col gap-6">
+            
+            <!-- Base URL Prefix Setting -->
+            <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 shadow-xl relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-brand-500/5 rounded-full blur-2xl pointer-events-none"></div>
+                <label for="baseUrl" class="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center justify-between mb-2">
+                    <span>Base URL Prefix</span>
+                    <button id="resetBaseUrl" class="text-[11px] text-brand-400 hover:underline font-normal">Reset Default</button>
+                </label>
+                <div class="relative flex items-center">
+                    <i class="fa-solid fa-globe absolute left-3.5 text-slate-500 text-sm"></i>
+                    <input type="text" id="baseUrl" 
+                           value="https://trancedemon-collab.github.io/my_apps/" 
+                           class="w-full bg-slate-950 border border-slate-800 text-slate-200 text-sm font-mono rounded-xl pl-10 pr-4 py-2.5 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition">
+                </div>
+            </div>
+
+            <!-- Input Area -->
+            <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 shadow-xl flex flex-col flex-1">
+                <div class="flex items-center justify-between mb-3">
+                    <label for="fileInputs" class="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                        File Name(s) Input
+                    </label>
+                    <span class="text-[11px] text-slate-500">Supports single or multi-line</span>
+                </div>
+
+                <!-- Formatting Options Toggles -->
+                <div class="bg-slate-950/60 border border-slate-800/80 rounded-xl p-3 mb-4 space-y-2.5">
+                    <label class="flex items-center justify-between text-xs text-slate-300 cursor-pointer select-none">
+                        <span class="flex items-center gap-2">
+                            <i class="fa-solid fa-file-code text-brand-400 text-xs"></i>
+                            Auto-append <code>.html</code> if missing
+                        </span>
+                        <input type="checkbox" id="autoAppendHtml" checked class="w-4 h-4 rounded bg-slate-900 border-slate-700 text-brand-600 focus:ring-brand-500 focus:ring-offset-slate-950">
+                    </label>
+                    
+                    <label class="flex items-center justify-between text-xs text-slate-300 cursor-pointer select-none">
+                        <span class="flex items-center gap-2">
+                            <i class="fa-solid fa-wand-magic-sparkles text-brand-400 text-xs"></i>
+                            Replace spaces with hyphens (<code>-</code>)
+                        </span>
+                        <input type="checkbox" id="replaceSpaces" checked class="w-4 h-4 rounded bg-slate-900 border-slate-700 text-brand-600 focus:ring-brand-500 focus:ring-offset-slate-950">
+                    </label>
+
+                    <label class="flex items-center justify-between text-xs text-slate-300 cursor-pointer select-none">
+                        <span class="flex items-center gap-2">
+                            <i class="fa-solid fa-text-slash text-brand-400 text-xs"></i>
+                            Trim extra slashes/spaces
+                        </span>
+                        <input type="checkbox" id="trimClean" checked class="w-4 h-4 rounded bg-slate-900 border-slate-700 text-brand-600 focus:ring-brand-500 focus:ring-offset-slate-950">
+                    </label>
+                </div>
+
+                <textarea id="fileInputs" rows="8" 
+                          placeholder="Enter file names, one per line or comma separated&#10;&#10;Examples:&#10;index.html&#10;dashboard&#10;my-cool-app.html&#10;tools/calculator" 
+                          class="w-full flex-1 bg-slate-950 border border-slate-800 text-slate-200 text-sm font-mono rounded-xl p-3.5 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition resize-y min-h-[160px]"></textarea>
+
+                <!-- Action Buttons -->
+                <div class="grid grid-cols-2 gap-3 mt-4">
+                    <button id="clearBtn" class="px-4 py-2.5 rounded-xl border border-slate-800 bg-slate-900 hover:bg-slate-800 text-slate-300 font-medium text-sm transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-trash-can text-slate-500"></i> Clear
+                    </button>
+                    <button id="generateBtn" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white font-semibold text-sm transition shadow-lg shadow-brand-600/25 flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-bolt"></i> Generate
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Right Column: Results & Export Actions -->
+        <section class="lg:col-span-7 flex flex-col gap-4">
+            
+            <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 shadow-xl flex-1 flex flex-col">
+                
+                <!-- Output Header / Toolbar -->
+                <div class="flex flex-wrap items-center justify-between gap-3 pb-4 mb-4 border-b border-slate-800">
+                    <div class="flex items-center gap-2">
+                        <h2 class="text-sm font-semibold uppercase tracking-wider text-slate-300">Generated Links</h2>
+                        <span id="linkCount" class="bg-brand-500/10 text-brand-400 border border-brand-500/20 text-xs font-mono px-2 py-0.5 rounded-full font-medium">0 items</span>
+                    </div>
+
+                    <!-- Batch Operations -->
+                    <div class="flex items-center gap-2">
+                        <button id="copyAllBtn" title="Copy all URLs to clipboard" disabled 
+                                class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700/60 text-slate-300 text-xs font-medium transition disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5">
+                            <i class="fa-regular fa-copy"></i> Copy All
+                        </button>
+                        <button id="openAllBtn" title="Open all URLs in separate tabs" disabled 
+                                class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700/60 text-slate-300 text-xs font-medium transition disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5">
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i> Open All
+                        </button>
+                        <div class="h-4 w-px bg-slate-800"></div>
+                        <button id="downloadBtn" title="Download links as a markdown file" disabled 
+                                class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700/60 text-slate-300 text-xs font-medium transition disabled:opacity-40 disabled:cursor-not-allowed">
+                            <i class="fa-solid fa-download px-1"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Links List View Container -->
+                <div id="resultsContainer" class="flex-1 min-h-[300px] overflow-y-auto space-y-3 pr-1">
+                    <!-- Empty State -->
+                    <div id="emptyState" class="h-full min-h-[280px] flex flex-col items-center justify-center text-center p-8 border border-dashed border-slate-800 rounded-xl bg-slate-950/40">
+                        <div class="w-12 h-12 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-600 mb-3 text-lg">
+                            <i class="fa-solid fa-link-slash"></i>
+                        </div>
+                        <p class="text-slate-400 font-medium text-sm">No links generated yet</p>
+                        <p class="text-slate-600 text-xs max-w-xs mt-1">Type your file names in the left input box and press Generate to produce ready-to-use URLs.</p>
+                    </div>
+
+                    <!-- Dynamic List Items will be injected here -->
+                    <div id="linksList" class="space-y-2.5 hidden"></div>
+                </div>
+
+            </div>
+        </section>
+    </main>
+
+    <!-- Toast Notification Banner -->
+    <div id="toast" class="fixed bottom-6 right-6 translate-y-20 opacity-0 transition-all duration-300 bg-slate-900 border border-slate-700 text-slate-100 px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 z-50 pointer-events-none">
+        <div id="toastIcon" class="text-emerald-400">
+            <i class="fa-solid fa-circle-check"></i>
+        </div>
+        <span id="toastMsg" class="text-xs font-medium">Copied to clipboard!</span>
+    </div>
+
+    <!-- Simple Footer -->
+    <footer class="border-t border-slate-900 bg-slate-950 py-4 mt-auto">
+        <div class="max-w-6xl mx-auto px-4 text-center text-xs text-slate-600">
+            GitHub Pages Link Formatting Tool &bull; Instant URL ready-to-load generator
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const DEFAULT_BASE_URL = 'https://trancedemon-collab.github.io/my_apps/';
+
+            // UI Elements
+            const baseUrlInput = document.getElementById('baseUrl');
+            const resetBaseUrlBtn = document.getElementById('resetBaseUrl');
+            const fileInputsArea = document.getElementById('fileInputs');
+            const autoAppendHtmlCheckbox = document.getElementById('autoAppendHtml');
+            const replaceSpacesCheckbox = document.getElementById('replaceSpaces');
+            const trimCleanCheckbox = document.getElementById('trimClean');
+
+            const generateBtn = document.getElementById('generateBtn');
+            const clearBtn = document.getElementById('clearBtn');
+
+            const emptyState = document.getElementById('emptyState');
+            const linksList = document.getElementById('linksList');
+            const linkCountBadge = document.getElementById('linkCount');
+
+            const copyAllBtn = document.getElementById('copyAllBtn');
+            const openAllBtn = document.getElementById('openAllBtn');
+            const downloadBtn = document.getElementById('downloadBtn');
+
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toastMsg');
+            const toastIcon = document.getElementById('toastIcon');
+
+            let generatedUrls = [];
+
+            // Show Toast Notification function (Replaces alert)
+            function showToast(message, type = 'success') {
+                toastMsg.textContent = message;
+                if (type === 'success') {
+                    toastIcon.className = 'text-emerald-400';
+                    toastIcon.innerHTML = '<i class="fa-solid fa-circle-check"></i>';
+                } else if (type === 'info') {
+                    toastIcon.className = 'text-brand-400';
+                    toastIcon.innerHTML = '<i class="fa-solid fa-circle-info"></i>';
+                } else {
+                    toastIcon.className = 'text-rose-400';
+                    toastIcon.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
+                }
+
+                toast.classList.remove('translate-y-20', 'opacity-0');
+                toast.classList.add('translate-y-0', 'opacity-100');
+
+                setTimeout(() => {
+                    toast.classList.remove('translate-y-0', 'opacity-100');
+                    toast.classList.add('translate-y-20', 'opacity-0');
+                }, 2600);
+            }
+
+            // Copy to Clipboard Helper
+            function copyTextToClipboard(text) {
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                textarea.style.position = 'fixed';
+                textarea.style.opacity = '0';
+                document.body.appendChild(textarea);
+                textarea.select();
+                try {
+                    document.execCommand('copy');
+                    return true;
+                } catch (err) {
+                    console.error('Copy failed:', err);
+                    return false;
+                } finally {
+                    document.body.removeChild(textarea);
+                }
+            }
+
+            // Process & Format Links
+            function processLinks() {
+                let baseUrl = baseUrlInput.value.trim();
+                if (!baseUrl.endsWith('/')) {
+                    baseUrl += '/';
+                }
+
+                const rawInput = fileInputsArea.value;
+                if (!rawInput.trim()) {
+                    generatedUrls = [];
+                    renderOutput();
+                    return;
+                }
+
+                // Split input by newlines or commas
+                const lines = rawInput.split(/[\n,]+/);
+                
+                const autoAppendHtml = autoAppendHtmlCheckbox.checked;
+                const replaceSpaces = replaceSpacesCheckbox.checked;
+                const trimClean = trimCleanCheckbox.checked;
+
+                const processed = [];
+
+                lines.forEach(line => {
+                    let filename = line;
+                    
+                    if (trimClean) {
+                        filename = filename.trim();
+                    }
+
+                    if (!filename) return; // Skip empty lines
+
+                    if (replaceSpaces) {
+                        filename = filename.replace(/\s+/g, '-');
+                    }
+
+                    if (autoAppendHtml && !filename.toLowerCase().endsWith('.html')) {
+                        // Avoid adding .html if line is just a folder path ending with /
+                        if (!filename.endsWith('/')) {
+                            filename += '.html';
+                        }
+                    }
+
+                    // Remove leading slashes if present to append cleanly to base URL
+                    if (filename.startsWith('/')) {
+                        filename = filename.substring(1);
+                    }
+
+                    const fullUrl = baseUrl + filename;
+                    processed.push({
+                        original: line.trim(),
+                        filename: filename,
+                        url: fullUrl
+                    });
+                });
+
+                generatedUrls = processed;
+                renderOutput();
+            }
+
+            // Render Output List to DOM
+            function renderOutput() {
+                linksList.innerHTML = '';
+
+                if (generatedUrls.length === 0) {
+                    emptyState.classList.remove('hidden');
+                    linksList.classList.add('hidden');
+                    linkCountBadge.textContent = '0 items';
+                    copyAllBtn.disabled = true;
+                    openAllBtn.disabled = true;
+                    downloadBtn.disabled = true;
+                    return;
+                }
+
+                emptyState.classList.add('hidden');
+                linksList.classList.remove('hidden');
+                linkCountBadge.textContent = `${generatedUrls.length} ${generatedUrls.length === 1 ? 'item' : 'items'}`;
+
+                copyAllBtn.disabled = false;
+                openAllBtn.disabled = false;
+                downloadBtn.disabled = false;
+
+                generatedUrls.forEach((item, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'group bg-slate-950 border border-slate-800/90 hover:border-brand-500/50 rounded-xl p-3.5 transition-all duration-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm';
+
+                    card.innerHTML = `
+                        <div class="overflow-hidden min-w-0 flex-1">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 font-semibold">
+                                    ${item.filename.endsWith('.html') ? 'HTML' : 'LINK'}
+                                </span>
+                                <span class="text-xs font-semibold text-slate-200 truncate">
+                                    ${escapeHtml(item.filename)}
+                                </span>
+                            </div>
+                            <div class="text-xs font-mono text-brand-400 truncate hover:underline cursor-pointer url-text" title="${escapeHtml(item.url)}">
+                                ${escapeHtml(item.url)}
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-1.5 shrink-0 self-end sm:self-center pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-900 w-full sm:w-auto justify-end">
+                            <button class="copy-single-btn px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 text-xs font-medium transition flex items-center gap-1" data-url="${escapeHtml(item.url)}">
+                                <i class="fa-regular fa-copy text-slate-400"></i>
+                                <span>Copy</span>
+                            </button>
+                            <a href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer" 
+                               class="px-2.5 py-1.5 rounded-lg bg-brand-600/10 hover:bg-brand-600/20 text-brand-400 border border-brand-500/20 text-xs font-medium transition flex items-center gap-1">
+                                <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                                <span>Open</span>
+                            </a>
+                        </div>
+                    `;
+
+                    // Single copy listener
+                    const copyBtn = card.querySelector('.copy-single-btn');
+                    copyBtn.addEventListener('click', () => {
+                        if (copyTextToClipboard(item.url)) {
+                            showToast(`Copied link #${index + 1} to clipboard!`);
+                        }
+                    });
+
+                    // Click URL text to open
+                    const urlText = card.querySelector('.url-text');
+                    urlText.addEventListener('click', () => {
+                        window.open(item.url, '_blank', 'noopener,noreferrer');
+                    });
+
+                    linksList.appendChild(card);
+                });
+            }
+
+            // HTML Escape Helper
+            function escapeHtml(str) {
+                return str.replace(/[&<>"']/g, (m) => ({
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#039;'
+                })[m]);
+            }
+
+            // Event Listeners
+            generateBtn.addEventListener('click', () => {
+                processLinks();
+                if (generatedUrls.length > 0) {
+                    showToast(`Generated ${generatedUrls.length} link(s)!`, 'info');
+                } else {
+                    showToast('Please enter at least one file name.', 'warning');
+                }
+            });
+
+            // Live updates as options change or user types
+            fileInputsArea.addEventListener('input', processLinks);
+            baseUrlInput.addEventListener('input', processLinks);
+            autoAppendHtmlCheckbox.addEventListener('change', processLinks);
+            replaceSpacesCheckbox.addEventListener('change', processLinks);
+            trimCleanCheckbox.addEventListener('change', processLinks);
+
+            resetBaseUrlBtn.addEventListener('click', () => {
+                baseUrlInput.value = DEFAULT_BASE_URL;
+                processLinks();
+                showToast('Reset to default GitHub Pages URL');
+            });
+
+            clearBtn.addEventListener('click', () => {
+                fileInputsArea.value = '';
+                generatedUrls = [];
+                renderOutput();
+                showToast('Cleared inputs');
+            });
+
+            // Copy All URLs
+            copyAllBtn.addEventListener('click', () => {
+                if (generatedUrls.length === 0) return;
+                const allUrlsText = generatedUrls.map(item => item.url).join('\n');
+                if (copyTextToClipboard(allUrlsText)) {
+                    showToast(`Copied all ${generatedUrls.length} links to clipboard!`);
+                }
+            });
+
+            // Open All URLs
+            openAllBtn.addEventListener('click', () => {
+                if (generatedUrls.length === 0) return;
+                
+                if (generatedUrls.length > 5) {
+                    const confirmOpen = confirm(`You are about to open ${generatedUrls.length} tabs at once. Continue?`);
+                    if (!confirmOpen) return;
+                }
+
+                generatedUrls.forEach(item => {
+                    window.open(item.url, '_blank', 'noopener,noreferrer');
+                });
+                showToast(`Opened ${generatedUrls.length} links in new tabs!`);
+            });
+
+            // Download Markdown File
+            downloadBtn.addEventListener('click', () => {
+                if (generatedUrls.length === 0) return;
+
+                let markdownContent = `# Hosted Application Links\n\n`;
+                generatedUrls.forEach(item => {
+                    markdownContent += `- [${item.filename}](${item.url})\n`;
+                });
+
+                const blob = new Blob([markdownContent], { type: 'text/markdown' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'app-links.md';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+                showToast('Downloaded links as app-links.md');
+            });
+
+            // Initial focus
+            fileInputsArea.focus();
+        });
+    </script>
+</body>
+</html>
