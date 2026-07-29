@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portfolio [Videos]</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    
+    :root {
+      --gtk-bg: #f6f6f6;
+      --gtk-card-bg: #ffffff;
+      --gtk-border: #e0e0e0;
+      --gtk-text: #2e3436;
+      --gtk-text-muted: #77767b;
+      --gtk-header-bg: #ebebeb;
+      --gtk-pill-bg: #f0f0f0;
+      --gtk-pill-hover: #e4e4e4;
+      --gtk-accent: #3584e4;
+      --gtk-accent-hover: #1c71d8;
+    }
+
+    .dark {
+      --gtk-bg: #1e1e1e;
+      --gtk-card-bg: #2d2d2d;
+      --gtk-border: #3d3d3d;
+      --gtk-text: #ffffff;
+      --gtk-text-muted: #9a9996;
+      --gtk-header-bg: #242424;
+      --gtk-pill-bg: #383838;
+      --gtk-pill-hover: #484848;
+      --gtk-accent: #3584e4;
+      --gtk-accent-hover: #62a0ea;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--gtk-bg);
+      color: var(--gtk-text);
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    /* GTK Window Card Styling */
+    .gtk-window {
+      background-color: var(--gtk-card-bg);
+      border: 1px solid var(--gtk-border);
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    /* GTK Header Bar */
+    .gtk-headerbar {
+      background-color: var(--gtk-header-bg);
+      border-bottom: 1px solid var(--gtk-border);
+      border-top-left-radius: 12px;
+      border-top-right-radius: 12px;
+    }
+
+    /* GTK Pill Buttons */
+    .gtk-pill {
+      background-color: var(--gtk-pill-bg);
+      color: var(--gtk-text);
+      border-radius: 20px;
+      transition: all 0.15s ease;
+    }
+
+    .gtk-pill:hover {
+      background-color: var(--gtk-pill-hover);
+    }
+
+    .gtk-pill-active {
+      background-color: var(--gtk-accent) !important;
+      color: #ffffff !important;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--gtk-bg);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--gtk-border);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--gtk-text-muted);
+    }
+
+    .gtk-input {
+      background-color: var(--gtk-pill-bg);
+      border: 1px solid var(--gtk-border);
+      color: var(--gtk-text);
+      border-radius: 8px;
+    }
+    .gtk-input:focus {
+      outline: 2px solid var(--gtk-accent);
+      border-color: transparent;
+    }
+  </style>
+</head>
+<body class="min-h-screen p-2 sm:p-4 md:p-6 flex flex-col items-center">
+
+  <div class="w-full max-w-5xl space-y-4">
+    
+    <!-- GTK Window Header & Contact Card -->
+    <header class="gtk-window overflow-hidden">
+      <div class="gtk-headerbar px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+        
+        <!-- Title & Window Controls -->
+        <div class="flex items-center space-x-3">
+          <div class="flex items-center space-x-1.5">
+            <span class="w-3 h-3 rounded-full bg-red-500/80 inline-block"></span>
+            <span class="w-3 h-3 rounded-full bg-amber-500/80 inline-block"></span>
+            <span class="w-3 h-3 rounded-full bg-emerald-500/80 inline-block"></span>
+          </div>
+          <h1 class="font-bold text-base sm:text-lg tracking-tight flex items-center gap-2">
+            <i class="fa-solid fa-film text-blue-500"></i>
+            <span>Portfolio [Videos]</span>
+          </h1>
+        </div>
+
+        <!-- Right Controls: Theme Selector -->
+        <div class="flex items-center space-x-2">
+          <div class="gtk-pill p-1 flex items-center text-xs space-x-1 border border-[var(--gtk-border)]">
+            <button id="theme-light" onclick="setTheme('light')" class="px-2.5 py-1 rounded-full text-[11px] font-medium transition-all" title="Light Theme">
+              <i class="fa-solid fa-sun mr-1"></i> Light
+            </button>
+            <button id="theme-dark" onclick="setTheme('dark')" class="px-2.5 py-1 rounded-full text-[11px] font-medium transition-all" title="Dark Theme">
+              <i class="fa-solid fa-moon mr-1"></i> Dark
+            </button>
+            <button id="theme-auto" onclick="setTheme('auto')" class="px-2.5 py-1 rounded-full text-[11px] font-medium transition-all" title="System Auto Theme">
+              <i class="fa-solid fa-desktop mr-1"></i> Auto
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Contact Info Section -->
+      <div class="p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[var(--gtk-card-bg)]">
+        <div class="space-y-1">
+          <div class="flex items-center space-x-2">
+            <span class="text-xs uppercase tracking-wider font-semibold text-blue-500">Creator Portfolio</span>
+            <span class="text-slate-400">•</span>
+            <span class="text-xs text-[var(--gtk-text-muted)]" id="video-count-badge">Loading videos...</span>
+          </div>
+          <h2 class="text-xl sm:text-2xl font-bold tracking-tight">Bradford R.</h2>
+        </div>
+
+        <!-- Contact Buttons List -->
+        <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
+          <a href="mailto:trancedemon@gmail.com" class="gtk-pill px-3.5 py-2 text-xs font-semibold flex items-center space-x-2 border border-[var(--gtk-border)] hover:border-blue-500">
+            <i class="fa-regular fa-envelope text-blue-500"></i>
+            <span>trancedemon@gmail.com</span>
+          </a>
+          
+          <a href="tel:919821320459" class="gtk-pill px-3.5 py-2 text-xs font-semibold flex items-center space-x-2 border border-[var(--gtk-border)] hover:border-emerald-500">
+            <i class="fa-solid fa-phone text-emerald-500"></i>
+            <span>+91 9821320459</span>
+          </a>
+
+          <a href="https://wa.me/919821320459" target="_blank" rel="noopener noreferrer" class="gtk-pill px-3.5 py-2 text-xs font-semibold flex items-center space-x-2 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/20">
+            <i class="fa-brands fa-whatsapp text-emerald-500 text-sm"></i>
+            <span>WhatsApp Me</span>
+          </a>
+
+          <button onclick="copyContactInfo()" class="gtk-pill px-3 py-2 text-xs font-semibold hover:text-blue-500 border border-[var(--gtk-border)]" title="Copy Contact Details">
+            <i class="fa-regular fa-copy"></i>
+          </button>
+        </div>
+
+      </div>
+    </header>
+
+    <!-- Professional About & Creative Bio Section -->
+    <section class="gtk-window p-4 sm:p-5 space-y-3 relative">
+      <div class="flex items-center justify-between border-b border-[var(--gtk-border)] pb-2.5">
+        <div class="flex items-center space-x-2">
+          <i class="fa-solid fa-wand-magic-sparkles text-blue-500 text-sm"></i>
+          <h2 class="font-bold text-sm sm:text-base tracking-tight">About &amp; Creative Vision</h2>
+        </div>
+        <button id="btn-edit-bio" onclick="openBioEditorModal()" class="hidden gtk-pill px-2.5 py-1 text-xs font-bold text-amber-500 hover:bg-amber-500/10 border border-amber-500/30">
+          <i class="fa-solid fa-pen-to-square mr-1"></i> Edit Bio
+        </button>
+      </div>
+
+      <div class="space-y-3 text-xs leading-relaxed text-[var(--gtk-text)]">
+        <p id="bio-text-display" class="whitespace-pre-line text-xs sm:text-sm font-normal text-slate-700 dark:text-slate-300">
+          <!-- Bio text rendered via JavaScript -->
+        </p>
+
+        <!-- Tech & Creative Stack Pills -->
+        <div class="pt-2 border-t border-[var(--gtk-border)] flex flex-wrap items-center gap-2 text-[11px]">
+          <span class="font-bold uppercase tracking-wider text-[var(--gtk-text-muted)] text-[10px] mr-1">Primary Tools:</span>
+          
+          <span class="gtk-pill px-2.5 py-1 font-semibold text-blue-500 bg-blue-500/10 border border-blue-500/20 flex items-center gap-1">
+            <i class="fa-solid fa-star text-[10px] text-amber-400"></i> Google Gemini
+          </span>
+          <span class="gtk-pill px-2.5 py-1 font-semibold text-blue-500 bg-blue-500/10 border border-blue-500/20 flex items-center gap-1">
+            <i class="fa-solid fa-star text-[10px] text-amber-400"></i> Google Flow
+          </span>
+
+          <span class="font-bold uppercase tracking-wider text-[var(--gtk-text-muted)] text-[10px] ml-2 mr-1">AI Stack:</span>
+          <span class="gtk-pill px-2.5 py-1 font-medium text-[var(--gtk-text)] border border-[var(--gtk-border)]">Suno</span>
+          <span class="gtk-pill px-2.5 py-1 font-medium text-[var(--gtk-text)] border border-[var(--gtk-border)]">ChatGPT</span>
+          <span class="gtk-pill px-2.5 py-1 font-medium text-[var(--gtk-text)] border border-[var(--gtk-border)]">Claude</span>
+          <span class="gtk-pill px-2.5 py-1 font-medium text-[var(--gtk-text)] border border-[var(--gtk-border)]">Grok</span>
+          <span class="gtk-pill px-2.5 py-1 font-medium text-[var(--gtk-text)] border border-[var(--gtk-border)]">Meta AI</span>
+
+          <span class="font-bold uppercase tracking-wider text-[var(--gtk-text-muted)] text-[10px] ml-2 mr-1">Video Editing:</span>
+          <span class="gtk-pill px-2.5 py-1 font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20">Shotcut</span>
+          <span class="gtk-pill px-2.5 py-1 font-semibold text-purple-600 dark:text-purple-400 bg-purple-500/10 border border-purple-500/20">Canva</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Edit Mode Active Notification Banner -->
+    <div id="edit-mode-banner" class="hidden bg-amber-500/10 border-2 border-amber-500/40 rounded-xl p-3 sm:p-4 space-y-3 transition-all">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div class="flex items-center space-x-2 text-amber-600 dark:text-amber-400">
+          <i class="fa-solid fa-unlock text-base"></i>
+          <span class="font-bold text-xs sm:text-sm">Edit Mode Activated (Ctrl + Alt + Shift + Space)</span>
+        </div>
+        <div class="flex items-center space-x-2">
+          <button onclick="openVideoEditorModal()" class="gtk-pill px-3 py-1.5 text-xs font-bold bg-amber-500 text-slate-950 hover:bg-amber-400 flex items-center space-x-1.5 shadow">
+            <i class="fa-solid fa-plus"></i>
+            <span>Add Video</span>
+          </button>
+          <button onclick="downloadUpdatedHTML()" class="gtk-pill px-3 py-1.5 text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-500 flex items-center space-x-1.5 shadow">
+            <i class="fa-solid fa-download"></i>
+            <span>Download for GitHub</span>
+          </button>
+          <button onclick="toggleEditMode()" class="gtk-pill px-2.5 py-1.5 text-xs font-semibold border border-amber-500/30">
+            Close
+          </button>
+        </div>
+      </div>
+      <p class="text-[11px] text-amber-700 dark:text-amber-300">
+        You can add, edit, or remove videos and bio text below. When done, click <strong>Download for GitHub</strong> to save an updated <code>index.html</code> file to upload to your repository!
+      </p>
+    </div>
+
+    <!-- Filter & Search Controls Bar -->
+    <div class="gtk-window p-3 sm:p-4 space-y-3">
+      
+      <!-- TOP ROW: Category Filters -->
+      <div class="space-y-1.5">
+        <div class="flex items-center justify-between text-xs text-[var(--gtk-text-muted)] font-medium px-1">
+          <span class="uppercase tracking-wider text-[10px] font-bold">Categories</span>
+          <span id="category-counter-text" class="text-[11px]">Showing all videos</span>
+        </div>
+        <div class="flex flex-wrap items-center gap-1.5">
+          <button onclick="filterCategory('all')" id="cat-all" class="cat-btn gtk-pill gtk-pill-active px-3 py-1.5 text-xs font-semibold flex items-center space-x-1.5">
+            <i class="fa-solid fa-layer-group text-[11px]"></i>
+            <span>All Videos</span>
+          </button>
+          <button onclick="filterCategory('starred')" id="cat-starred" class="cat-btn gtk-pill px-3 py-1.5 text-xs font-semibold flex items-center space-x-1.5 text-amber-500 hover:text-amber-400">
+            <i class="fa-solid fa-star text-[11px]"></i>
+            <span>Best Videos</span>
+          </button>
+          <button onclick="filterCategory('trance')" id="cat-trance" class="cat-btn gtk-pill px-3 py-1.5 text-xs font-semibold flex items-center space-x-1.5">
+            <i class="fa-solid fa-music text-[11px]"></i>
+            <span>Music &amp; Trance</span>
+          </button>
+          <button onclick="filterCategory('anime')" id="cat-anime" class="cat-btn gtk-pill px-3 py-1.5 text-xs font-semibold flex items-center space-x-1.5">
+            <i class="fa-solid fa-user-ninja text-[11px]"></i>
+            <span>Anime &amp; Fight</span>
+          </button>
+          <button onclick="filterCategory('ai')" id="cat-ai" class="cat-btn gtk-pill px-3 py-1.5 text-xs font-semibold flex items-center space-x-1.5">
+            <i class="fa-solid fa-robot text-[11px]"></i>
+            <span>AI Content</span>
+          </button>
+          <button onclick="filterCategory('games')" id="cat-games" class="cat-btn gtk-pill px-3 py-1.5 text-xs font-semibold flex items-center space-x-1.5">
+            <i class="fa-solid fa-gamepad text-[11px]"></i>
+            <span>Games &amp; Dinos</span>
+          </button>
+          <button onclick="filterCategory('general')" id="cat-general" class="cat-btn gtk-pill px-3 py-1.5 text-xs font-semibold flex items-center space-x-1.5">
+            <i class="fa-solid fa-folder text-[11px]"></i>
+            <span>General</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="border-t border-[var(--gtk-border)] pt-2.5 flex flex-col sm:flex-row items-center justify-between gap-2.5">
+        
+        <!-- Search Input -->
+        <div class="relative w-full sm:w-80">
+          <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-[var(--gtk-text-muted)] text-xs"></i>
+          <input type="text" id="search-input" oninput="handleSearch()" placeholder="Search video titles..." class="gtk-input w-full pl-8 pr-8 py-1.5 text-xs">
+          <button id="clear-search" onclick="clearSearch()" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--gtk-text-muted)] hover:text-[var(--gtk-text)] text-xs">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <!-- View Mode & Action Buttons -->
+        <div class="flex items-center space-x-2 w-full sm:w-auto justify-end">
+          <div class="gtk-pill p-1 flex items-center border border-[var(--gtk-border)] text-xs">
+            <button id="view-list" onclick="setViewMode('list')" class="px-2.5 py-1 rounded-full font-medium transition-all" title="List View">
+              <i class="fa-solid fa-list-ul mr-1"></i> List
+            </button>
+            <button id="view-grid" onclick="setViewMode('grid')" class="px-2.5 py-1 rounded-full font-medium transition-all" title="Grid View">
+              <i class="fa-solid fa-grip mr-1"></i> Cards
+            </button>
+          </div>
+
+          <button onclick="openExportModal()" class="gtk-pill px-3 py-1.5 text-xs font-semibold flex items-center space-x-1.5 border border-[var(--gtk-border)] hover:border-blue-500">
+            <i class="fa-solid fa-file-export text-blue-500"></i>
+            <span>Export List</span>
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Video Portfolio List Container -->
+    <main class="gtk-window p-4 min-h-[400px]">
+      <div id="video-container" class="space-y-2">
+        <!-- Videos will be dynamically rendered here via JavaScript -->
+      </div>
+
+      <!-- Empty State -->
+      <div id="empty-state" class="hidden py-16 text-center space-y-3">
+        <div class="w-12 h-12 rounded-full bg-slate-500/10 text-slate-400 flex items-center justify-center mx-auto text-xl">
+          <i class="fa-solid fa-film-slash"></i>
+        </div>
+        <div class="space-y-1">
+          <p class="font-bold text-sm">No videos found</p>
+          <p class="text-xs text-[var(--gtk-text-muted)]">Try adjusting your search query or category filter.</p>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center py-4 text-xs text-[var(--gtk-text-muted)] space-y-1">
+      <p>&copy; Bradford R. Portfolio • Powered by GTK Libadwaita Design</p>
+      <p class="text-[10px]">All links open directly on YouTube in a new tab.</p>
+    </footer>
+
+  </div>
+
+  <!-- Export Modal -->
+  <div id="export-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-6 hidden">
+    <div class="gtk-window w-full max-w-2xl bg-[var(--gtk-card-bg)] p-5 space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-[var(--gtk-border)] pb-3">
+        <h3 class="font-bold text-base flex items-center space-x-2">
+          <i class="fa-solid fa-file-export text-blue-500"></i>
+          <span>Export Video Portfolio List</span>
+        </h3>
+        <button onclick="closeExportModal()" class="text-base text-[var(--gtk-text-muted)] hover:text-[var(--gtk-text)]">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3">
+        <div class="flex items-center space-x-2 text-xs">
+          <span class="font-semibold text-[var(--gtk-text-muted)]">Format:</span>
+          <button onclick="setExportFormat('plain')" id="fmt-plain" class="fmt-btn gtk-pill gtk-pill-active px-3 py-1 text-xs">Plain Text</button>
+          <button onclick="setExportFormat('html')" id="fmt-html" class="fmt-btn gtk-pill px-3 py-1 text-xs">HTML (&lt;ul&gt;)</button>
+          <button onclick="setExportFormat('markdown')" id="fmt-markdown" class="fmt-btn gtk-pill px-3 py-1 text-xs">Markdown</button>
+          <button onclick="setExportFormat('json')" id="fmt-json" class="fmt-btn gtk-pill px-3 py-1 text-xs">JSON</button>
+        </div>
+
+        <textarea id="export-textarea" readonly class="gtk-input w-full h-64 p-3 font-mono text-xs leading-relaxed select-all" placeholder="Export output will appear here..."></textarea>
+      </div>
+
+      <div class="flex items-center justify-between pt-2">
+        <span class="text-[11px] text-[var(--gtk-text-muted)]" id="export-count-text">0 items exported</span>
+        <div class="flex items-center space-x-2">
+          <button onclick="closeExportModal()" class="gtk-pill px-4 py-1.5 text-xs font-semibold">Close</button>
+          <button onclick="copyExportText()" class="gtk-pill px-4 py-1.5 text-xs font-bold bg-blue-500 text-white hover:bg-blue-600 flex items-center space-x-1.5">
+            <i class="fa-regular fa-copy"></i>
+            <span>Copy to Clipboard</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Message -->
+  <div id="toast" class="fixed bottom-6 right-6 bg-slate-900 text-white text-xs px-4 py-3 rounded-lg shadow-xl flex items-center space-x-2 opacity-0 pointer-events-none transition-all duration-300 z-50 border border-slate-700">
+    <i class="fa-solid fa-circle-check text-emerald-400"></i>
+    <span id="toast-msg">Action complete</span>
+  </div>
+
+  <!-- Bio Editor Modal -->
+  <div id="bio-editor-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-6 hidden">
+    <div class="gtk-window w-full max-w-lg bg-[var(--gtk-card-bg)] p-5 space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-[var(--gtk-border)] pb-3">
+        <h3 class="font-bold text-base flex items-center space-x-2">
+          <i class="fa-solid fa-pen-to-square text-amber-500"></i>
+          <span>Edit Bio &amp; About Text</span>
+        </h3>
+        <button onclick="closeBioEditorModal()" class="text-base text-[var(--gtk-text-muted)] hover:text-[var(--gtk-text)]">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block font-semibold mb-1 text-[var(--gtk-text-muted)]">About Write-up</label>
+          <textarea id="edit-bio-textarea" rows="6" class="gtk-input w-full p-2.5 text-xs leading-relaxed" placeholder="Write about yourself, AI excitement, tools used..."></textarea>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end space-x-2 pt-3 border-t border-[var(--gtk-border)]">
+        <button onclick="closeBioEditorModal()" class="gtk-pill px-4 py-2 text-xs font-semibold">Cancel</button>
+        <button onclick="saveBioText()" class="gtk-pill px-4 py-2 text-xs font-bold bg-blue-500 text-white hover:bg-blue-600">Save Bio</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Video Add/Edit Modal -->
+  <div id="video-editor-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-6 hidden">
+    <div class="gtk-window w-full max-w-lg bg-[var(--gtk-card-bg)] p-5 space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-[var(--gtk-border)] pb-3">
+        <h3 id="modal-editor-title" class="font-bold text-base flex items-center space-x-2">
+          <i class="fa-solid fa-plus text-amber-500"></i>
+          <span>Add New Video</span>
+        </h3>
+        <button onclick="closeVideoEditorModal()" class="text-base text-[var(--gtk-text-muted)] hover:text-[var(--gtk-text)]">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <input type="hidden" id="edit-video-id">
+
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block font-semibold mb-1 text-[var(--gtk-text-muted)]">Video Title *</label>
+          <input type="text" id="edit-video-title" class="gtk-input w-full p-2.5 text-xs" placeholder="e.g. Quantum Dream (Melodic Extravaganza)">
+        </div>
+
+        <div>
+          <label class="block font-semibold mb-1 text-[var(--gtk-text-muted)]">YouTube Watch URL *</label>
+          <input type="text" id="edit-video-url" class="gtk-input w-full p-2.5 text-xs" placeholder="e.g. https://www.youtube.com/watch?v=rJWdDmblLJs">
+        </div>
+
+        <div>
+          <label class="block font-semibold mb-1 text-[var(--gtk-text-muted)]">Category</label>
+          <select id="edit-video-category" class="gtk-input w-full p-2.5 text-xs">
+            <option value="trance">Music &amp; Trance</option>
+            <option value="anime">Anime &amp; Fight</option>
+            <option value="ai">AI Content</option>
+            <option value="games">Games &amp; Dinos</option>
+            <option value="general">General</option>
+          </select>
+        </div>
+
+        <div class="flex items-center space-x-2 pt-1">
+          <input type="checkbox" id="edit-video-starred" class="w-4 h-4 text-amber-500 rounded border-slate-600 focus:ring-amber-500">
+          <label for="edit-video-starred" class="font-semibold text-amber-500 flex items-center gap-1 cursor-pointer">
+            <i class="fa-solid fa-star text-xs"></i>
+            <span>Feature as Top Best Video (⭐)</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end space-x-2 pt-3 border-t border-[var(--gtk-border)]">
+        <button onclick="closeVideoEditorModal()" class="gtk-pill px-4 py-2 text-xs font-semibold">Cancel</button>
+        <button onclick="saveVideoItem()" class="gtk-pill px-4 py-2 text-xs font-bold bg-amber-500 text-slate-950 hover:bg-amber-400">Save Video</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* Default Bio Text for Bradford R. */
+    const defaultBioText = `Passionate Digital Media Creator leveraging cutting-edge Artificial Intelligence to produce compelling video content, music, and visual narratives. AI deeply excites me—it unlocks endless creative possibilities, and I am always eager to take on new projects, challenges, and creative ventures.
+
+My primary AI workflow relies heavily on Google Gemini and Google Flow, augmented by tools like Suno for music generation, alongside ChatGPT, Claude, Grok, and Meta AI. For post-production and editing, I refine and polish all media using Shotcut and Canva.`;
+
+    /* Clean raw videos array with fixed syntax and valid comma separations */
+    const rawVideos = [
+      { title: "Pixel Pursuit", studioUrl: "https://studio.youtube.com/video/6nCkFvBSd7k/edit", category: "games", isStarred: false },
+      { title: "He-Man and THE EGG", studioUrl: "https://studio.youtube.com/video/CM35r4XySC8/edit", category: "games", isStarred: false },
+      { title: "Nexus Circuitry", studioUrl: "https://studio.youtube.com/video/vyMI2nOLFFU/edit", category: "ai", isStarred: false },
+      { title: "selo vs mikoz (with technicals)", studioUrl: "https://studio.youtube.com/video/2o4oTMxRTuc/edit", category: "anime", isStarred: false },
+      { title: "Selo vs Mikoz", studioUrl: "https://studio.youtube.com/video/KX9a1Vo2kgo/edit", category: "anime", isStarred: false },
+      { title: "duel for damsella", studioUrl: "https://studio.youtube.com/video/ZxBwMvo3BkQ/edit", category: "anime", isStarred: false },
+      { title: "Kiku vs Rancor (Anime Fight)", studioUrl: "https://studio.youtube.com/video/89p-77m7dqU/edit", category: "anime", isStarred: false },
+      { title: "Unchained", studioUrl: "https://studio.youtube.com/video/2h0zp8EPpGo/edit", category: "general", isStarred: false },
+      { title: "NES - Double Dragon 3 - Rosetta Stone - Mission 1 Part 1", studioUrl: "https://studio.youtube.com/video/KFuvxwfM7eE/edit", category: "games", isStarred: false },
+      { title: "Tyrannosaurus Rex Documentary", studioUrl: "https://studio.youtube.com/video/Q9h9PiwKsTg/edit", category: "games", isStarred: false },
+      { title: "Constant Chase", studioUrl: "https://studio.youtube.com/video/aWXVBylEUwU/edit", category: "general", isStarred: false },
+      { title: "Stellar Surge", studioUrl: "https://studio.youtube.com/video/q5JYhDYFosw/edit", category: "trance", isStarred: true },
+      { title: "Stellar Surge (Techno Varient)", studioUrl: "https://studio.youtube.com/video/oyVJ1jNHvg4/edit", category: "trance", isStarred: false },
+      { title: "Stellar Surge (Chillout Varient)", studioUrl: "https://studio.youtube.com/video/NRLCFqcH1xg/edit", category: "trance", isStarred: false },
+      { title: "retro toon trex", studioUrl: "https://studio.youtube.com/video/CeCACheJvDA/edit", category: "games", isStarred: false },
+      { title: "Retro toon bag snatchers", studioUrl: "https://studio.youtube.com/video/Yq9JEcKYeJo/edit", category: "games", isStarred: false },
+      { title: "Stardown", studioUrl: "https://studio.youtube.com/video/afYSAlAx524/edit", category: "general", isStarred: false },
+      { title: "Still Waters", studioUrl: "https://studio.youtube.com/video/YnvU4vSxumM/edit", category: "trance", isStarred: false },
+      { title: "Broken Factory (Extended Varient)", studioUrl: "https://studio.youtube.com/video/YNseoZjoh3w/edit", category: "trance", isStarred: false },
+      { title: "Quantum Dream", studioUrl: "https://studio.youtube.com/video/V-m2RLHv0RA/edit", category: "trance", isStarred: true },
+      { title: "Quantum Dream (Melodic Extravaganza)", studioUrl: "https://studio.youtube.com/video/rJWdDmblLJs/edit", category: "trance", isStarred: false },
+      { title: "Broken Factory", studioUrl: "https://studio.youtube.com/video/h2YUW-QZSp0/edit", category: "trance", isStarred: false },
+      { title: "Occurances", studioUrl: "https://studio.youtube.com/video/VRlOz1UQKQQ/edit", category: "general", isStarred: false },
+      { title: "Battle Arena Anime", studioUrl: "https://studio.youtube.com/video/NpURs7xHu3o/edit", category: "anime", isStarred: false },
+      { title: "Fight male vampire attacked by squad (anime) (widescreen)", studioUrl: "https://studio.youtube.com/video/FQjfgQadOYM/edit", category: "anime", isStarred: false },
+      { title: "retro s ova anime close quarter battle", studioUrl: "https://studio.youtube.com/video/dGmP576ymUg/edit", category: "anime", isStarred: false },
+      { title: "Unchained", studioUrl: "https://studio.youtube.com/video/Qqa0Xn8UFl4/edit", category: "general", isStarred: false },
+      { title: "gtk lite infinite sticky notes", studioUrl: "https://studio.youtube.com/video/yZtfWSjewsE/edit", category: "ai", isStarred: false },
+      { title: "Checkpoint (landacape)", studioUrl: "https://studio.youtube.com/video/N_Jwxtt4WFo/edit", category: "general", isStarred: false },
+      { title: "ceraphina and goro", studioUrl: "https://studio.youtube.com/video/ceeG1ta_pFc/edit", category: "general", isStarred: false },
+      { title: "cats and dinos", studioUrl: "https://studio.youtube.com/video/81AN1DvYFH0/edit", category: "games", isStarred: false },
+      { title: "Cat bully gets bullied", studioUrl: "https://studio.youtube.com/video/hQBhprfsE6g/edit", category: "games", isStarred: false },
+      { title: "New Job Vacancy Horror - Vampire Mistress Boss", studioUrl: "https://studio.youtube.com/video/DBrBBlDgdR8/edit", category: "anime", isStarred: false },
+      { title: "Desert Cravings", studioUrl: "https://studio.youtube.com/video/hNPFrEkaLdw/edit", category: "general", isStarred: false },
+      { title: "she opens difficult jam jar", studioUrl: "https://studio.youtube.com/video/nLaaElbb9gc/edit", category: "general", isStarred: false },
+      { title: "the disappearing lady", studioUrl: "https://studio.youtube.com/video/6Ftg5dl7kEA/edit", category: "general", isStarred: false },
+      { title: "Woman working on laptop seaside", studioUrl: "https://studio.youtube.com/video/IbnKzAB_EUY/edit", category: "general", isStarred: false },
+      { title: "90s OVA Anime Lady Vanity", studioUrl: "https://studio.youtube.com/video/YK0vLHsOo5Q/edit", category: "anime", isStarred: false },
+      { title: "Arena battle", studioUrl: "https://studio.youtube.com/video/lWEFVWcA8lA/edit", category: "anime", isStarred: false },
+      { title: "virar sunset timelapse to dark night", studioUrl: "https://studio.youtube.com/video/fIRRwYJvMw0/edit", category: "general", isStarred: false },
+      { title: "Nebula Haze (Extended Trance Varient)", studioUrl: "https://studio.youtube.com/video/snw_l_Yb2RU/edit", category: "trance", isStarred: false },
+      { title: "Nebula Haze", studioUrl: "https://studio.youtube.com/video/NdwBKmGvBEY/edit", category: "trance", isStarred: false },
+      { title: "Molten Passage (Varient 2 - Melodic Extravaganza)", studioUrl: "https://studio.youtube.com/video/62xUdeS2bzQ/edit", category: "trance", isStarred: false },
+      { title: "Molten Passage (Varient 1)", studioUrl: "https://studio.youtube.com/video/OTtV6C8NRCw/edit", category: "trance", isStarred: false },
+      { title: "Ropes and Knots (Ibiza Trance Varient)", studioUrl: "https://studio.youtube.com/video/JrXm3OeiGGs/edit", category: "trance", isStarred: false },
+      { title: "Salty Stone", studioUrl: "https://studio.youtube.com/video/ovmer_k71YM/edit", category: "general", isStarred: false },
+      { title: "sword lady defeats 3 ninjas meta ai, nano b2, canva, cinematic", studioUrl: "https://studio.youtube.com/video/kmwVDvbBno8/edit", category: "ai", isStarred: true },
+      { title: "c0smic (EDM Varient)", studioUrl: "https://studio.youtube.com/video/gtdrEZQZPO8/edit", category: "trance", isStarred: false },
+      { title: "c0smic (Progressive Trance Varient)", studioUrl: "https://studio.youtube.com/video/tq90GXmXDt0/edit", category: "trance", isStarred: false },
+      { title: "C0smic", studioUrl: "https://studio.youtube.com/video/E1a9ymIAENY/edit", category: "trance", isStarred: false },
+      { title: "Twisted Orbit", studioUrl: "https://studio.youtube.com/video/6ZOwuOlP2zQ/edit", category: "trance", isStarred: false },
+      { title: "my rant (video making communication practise)", studioUrl: "https://studio.youtube.com/video/Y07hA78rCcw/edit", category: "ai", isStarred: false },
+      { title: "Menace", studioUrl: "https://studio.youtube.com/video/HZbxYKYqcYg/edit", category: "general", isStarred: false },
+      { title: "Skipix (Clean Varient 1)", studioUrl: "https://studio.youtube.com/video/RTPswkXl0Gs/edit", category: "trance", isStarred: false },
+      { title: "SkipiX", studioUrl: "https://studio.youtube.com/video/XZO6TLaZKwo/edit", category: "trance", isStarred: false },
+      { title: "Lemonoid", studioUrl: "https://studio.youtube.com/video/1DgQd3X1tJI/edit", category: "general", isStarred: false },
+      { title: "Drunken Topedo", studioUrl: "https://studio.youtube.com/video/6UB9Rq7Kph8/edit", category: "general", isStarred: false },
+      { title: "Janator", studioUrl: "https://studio.youtube.com/video/nWqUvZHYE3o/edit", category: "general", isStarred: false },
+      { title: "Glamour Glide (Yamaha DS-XG MIDI Style)", studioUrl: "https://studio.youtube.com/video/_4um9iXQ0tk/edit", category: "trance", isStarred: false },
+      { title: "T-Rex vs Hiding Man: The Ultimate Game of Hide & Seek!", studioUrl: "https://studio.youtube.com/video/zjzkOPpXbEI/edit", category: "games", isStarred: true },
+      { title: "AI Siblings", studioUrl: "https://studio.youtube.com/video/I8YZP_w4nAw/edit", category: "ai", isStarred: false },
+      { title: "escape strategy scene (ai video practise)", studioUrl: "https://studio.youtube.com/video/wRPbhqkKYu4/edit", category: "ai", isStarred: false },
+      { title: "Hectar and her", studioUrl: "https://studio.youtube.com/video/4euSjrJZ8iE/edit", category: "general", isStarred: false },
+      { title: "Viking Vinegar", studioUrl: "https://studio.youtube.com/video/96o4xqOqRO0/edit", category: "general", isStarred: false },
+      { title: "Using AI to find jobs", studioUrl: "https://studio.youtube.com/video/-UzElKnSAQ4/edit", category: "ai", isStarred: false },
+      { title: "Recall (Extended Emotive Trance Varient)", studioUrl: "https://studio.youtube.com/video/9TQMAOHwFKA/edit", category: "trance", isStarred: false },
+      { title: "in love with a vampire", studioUrl: "https://studio.youtube.com/video/juzGq-OzBHE/edit", category: "anime", isStarred: false },
+      { title: "Recall", studioUrl: "https://studio.youtube.com/video/wseVxReO88Q/edit", category: "trance", isStarred: false },
+      { title: "Worthy (Trance Varient)", studioUrl: "https://studio.youtube.com/video/llnnGPW-Zaw/edit", category: "trance", isStarred: false },
+      { title: "Worthy", studioUrl: "https://studio.youtube.com/video/0YY7inH0eco/edit", category: "trance", isStarred: false },
+      { title: "Curse of Time", studioUrl: "https://studio.youtube.com/video/3wjkWO9Y-CY/edit", category: "general", isStarred: false },
+      { title: "GAVIN GOMES", studioUrl: "https://studio.youtube.com/video/WQWL1Lq1eEs/edit", category: "general", isStarred: false },
+      { title: "Tulsi", studioUrl: "https://studio.youtube.com/video/_xL1fcfsMcQ/edit", category: "general", isStarred: false },
+      { title: "Dark Lotus", studioUrl: "https://studio.youtube.com/video/MFzJe-IC-jQ/edit", category: "general", isStarred: false },
+      { title: "Unfound (Vocal Trance Varient)", studioUrl: "https://studio.youtube.com/video/66_aFaqJLOs/edit", category: "trance", isStarred: false },
+      { title: "Unfound (Emotive Trance Instrumental Varient 1)", studioUrl: "https://studio.youtube.com/video/kHMBq1dwVaQ/edit", category: "trance", isStarred: false },
+      { title: "Unfound", studioUrl: "https://studio.youtube.com/video/ke6YPE7aHS8/edit", category: "trance", isStarred: false },
+      { title: "Twilight Glory", studioUrl: "https://studio.youtube.com/video/J_uoRdrxx5E/edit", category: "trance", isStarred: false },
+      { title: "Jungle Walk", studioUrl: "https://studio.youtube.com/video/LXwOYVDH2HA/edit", category: "general", isStarred: false },
+      { title: "Mesh Rider", studioUrl: "https://studio.youtube.com/video/RhJNFoJjlDY/edit", category: "general", isStarred: false },
+      { title: "Siren Of Salema", studioUrl: "https://studio.youtube.com/video/-8fuUe4yCPg/edit", category: "general", isStarred: false },
+      { title: "AI generated super short story of lady in a train", studioUrl: "https://studio.youtube.com/video/rc1SHwsrGDY/edit", category: "ai", isStarred: false },
+      { title: "3 friends", studioUrl: "https://studio.youtube.com/video/BoM-mdqjIy4/edit", category: "general", isStarred: false },
+      { title: "ai african woman", studioUrl: "https://studio.youtube.com/video/gYj5dEYBKgM/edit", category: "ai", isStarred: false },
+      { title: "thin denim woman flexing", studioUrl: "", category: "general", isStarred: false },
+      { title: "Purple Owl", studioUrl: "https://studio.youtube.com/video/HPe-IA7gpqU/edit", category: "general", isStarred: false },
+      { title: "res", studioUrl: "https://studio.youtube.com/video/DDK30ZcoG6I/edit", category: "general", isStarred: false },
+      { title: "kdf0z", studioUrl: "https://studio.youtube.com/video/Sx-XYKrWsao/edit", category: "general", isStarred: false },
+      { title: "Honour", studioUrl: "https://studio.youtube.com/video/pKKiyC0BJnY/edit", category: "general", isStarred: false },
+      { title: "KDE Plasma Colourful Colour Scheme", studioUrl: "https://studio.youtube.com/video/bh3ZjMxdNX0/edit", category: "ai", isStarred: false }
+    ];
+
+    let storedVideos = localStorage.getItem('bradford_portfolio_videos');
+    let videosData = [];
+    
+    if (storedVideos) {
+      try {
+        videosData = JSON.parse(storedVideos);
+      } catch(e) {
+        videosData = [];
+      }
+    }
+
+    if (!videosData || !videosData.length) {
+      videosData = rawVideos.map((v, index) => {
+        let videoId = null;
+        if (v.studioUrl) {
+          const match = v.studioUrl.match(/(?:video\/|v=|v\/)([a-zA-Z0-9_-]{11})/);
+          if (match && match[1]) {
+            videoId = match[1];
+          }
+        }
+
+        const publicUrl = videoId ? `https://www.youtube.com/watch?v=${videoId}` : (v.publicUrl || (v.studioUrl && v.studioUrl.startsWith('http') ? v.studioUrl : '#'));
+
+        return {
+          id: index + 1,
+          videoId: videoId,
+          title: v.title || "Untitled Video",
+          publicUrl: publicUrl,
+          category: v.category || "general",
+          isStarred: v.isStarred || false
+        };
+      });
+    }
+
+    // Bio Text State
+    let bioText = localStorage.getItem('bradford_portfolio_bio') || defaultBioText;
+
+    // App State
+    let currentCategory = 'all';
+    let currentViewMode = 'list';
+    let isEditMode = false;
+    let exportFormat = 'plain';
+
+    function renderBio() {
+      const bioElem = document.getElementById('bio-text-display');
+      if (bioElem) {
+        bioElem.textContent = bioText;
+      }
+    }
+
+    function openBioEditorModal() {
+      if (!isEditMode) return;
+      const modal = document.getElementById('bio-editor-modal');
+      const textarea = document.getElementById('edit-bio-textarea');
+      if (textarea) textarea.value = bioText;
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeBioEditorModal() {
+      const modal = document.getElementById('bio-editor-modal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function saveBioText() {
+      const textarea = document.getElementById('edit-bio-textarea');
+      if (textarea && textarea.value.trim()) {
+        bioText = textarea.value.trim();
+        localStorage.setItem('bradford_portfolio_bio', bioText);
+        renderBio();
+        closeBioEditorModal();
+        showToast('Bio updated successfully!');
+      }
+    }
+
+    function renderVideos() {
+      const container = document.getElementById('video-container');
+      const emptyState = document.getElementById('empty-state');
+      const badge = document.getElementById('video-count-badge');
+      const counterText = document.getElementById('category-counter-text');
+      const searchVal = document.getElementById('search-input').value.toLowerCase().trim();
+
+      let filtered = videosData.filter(v => {
+        let matchesCat = false;
+        if (currentCategory === 'all') matchesCat = true;
+        else if (currentCategory === 'starred') matchesCat = v.isStarred;
+        else matchesCat = (v.category === currentCategory);
+
+        const matchesSearch = !searchVal || v.title.toLowerCase().includes(searchVal);
+        return matchesCat && matchesSearch;
+      });
+
+      if (badge) badge.textContent = `${videosData.length} Total Videos`;
+      if (counterText) {
+        if (currentCategory === 'all') counterText.textContent = `Showing all ${filtered.length} videos`;
+        else if (currentCategory === 'starred') counterText.textContent = `Showing ${filtered.length} best starred videos`;
+        else counterText.textContent = `Showing ${filtered.length} videos in ${currentCategory}`;
+      }
+
+      if (filtered.length === 0) {
+        container.innerHTML = '';
+        emptyState.classList.remove('hidden');
+        return;
+      }
+
+      emptyState.classList.add('hidden');
+
+      if (currentViewMode === 'grid') {
+        container.className = 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3';
+        container.innerHTML = filtered.map(v => renderVideoCard(v)).join('');
+      } else {
+        container.className = 'space-y-2';
+        container.innerHTML = filtered.map(v => renderVideoListRow(v)).join('');
+      }
+    }
+
+    function renderVideoListRow(v) {
+      const isStarred = v.isStarred || false;
+      const starIconClass = isStarred ? 'fa-solid text-amber-400' : 'fa-regular text-slate-400';
+
+      return `
+        <div class="gtk-pill p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 border border-[var(--gtk-border)] hover:border-blue-500/50 transition-all group">
+          <div class="flex items-center space-x-3 min-w-0 flex-1">
+            
+            ${isEditMode ? `
+              <button onclick="toggleStarVideo(${v.id})" class="text-sm p-1 hover:scale-110 transition-transform" title="${isStarred ? 'Unstar Best Video' : 'Mark as Best Video'}">
+                <i class="fa-star ${starIconClass}"></i>
+              </button>
+            ` : (isStarred ? `<i class="fa-solid fa-star text-amber-400 text-xs shrink-0" title="Best Video"></i>` : `<i class="fa-solid fa-film text-[var(--gtk-text-muted)] text-xs shrink-0"></i>`)}
+
+            <a href="${v.publicUrl}" target="_blank" rel="noopener noreferrer" class="font-semibold text-xs sm:text-sm text-[var(--gtk-text)] hover:text-blue-500 truncate tracking-tight transition-colors">
+              ${escapeHtml(v.title)}
+            </a>
+          </div>
+
+          <div class="flex items-center space-x-2 shrink-0 self-end sm:self-auto">
+            <span class="text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full bg-[var(--gtk-bg)] text-[var(--gtk-text-muted)] border border-[var(--gtk-border)]">
+              ${v.category}
+            </span>
+
+            <a href="${v.publicUrl}" target="_blank" rel="noopener noreferrer" class="gtk-pill px-3 py-1.5 text-xs font-bold bg-blue-500/10 text-blue-500 hover:bg-blue-500 hover:text-white transition-all flex items-center space-x-1">
+              <span>Watch</span>
+              <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+            </a>
+
+            ${isEditMode ? `
+              <button onclick="openVideoEditorModal(${v.id})" class="p-1.5 text-xs text-amber-500 hover:bg-amber-500/10 rounded" title="Edit Item">
+                <i class="fa-solid fa-pen"></i>
+              </button>
+              <button onclick="deleteVideoItem(${v.id})" class="p-1.5 text-xs text-red-500 hover:bg-red-500/10 rounded" title="Delete Item">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            ` : ''}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderVideoCard(v) {
+      const isStarred = v.isStarred || false;
+      const starIconClass = isStarred ? 'fa-solid text-amber-400' : 'fa-regular text-slate-400';
+
+      return `
+        <div class="gtk-window p-4 flex flex-col justify-between space-y-3 border border-[var(--gtk-border)] hover:border-blue-500/50 transition-all">
+          <div class="space-y-2">
+            <div class="flex items-center justify-between text-[10px] text-[var(--gtk-text-muted)]">
+              <span class="font-semibold uppercase px-2 py-0.5 rounded-full bg-[var(--gtk-pill-bg)] border border-[var(--gtk-border)]">${v.category}</span>
+              ${isEditMode ? `
+                <button onclick="toggleStarVideo(${v.id})" class="text-xs p-1 hover:scale-110 transition-transform">
+                  <i class="fa-star ${starIconClass}"></i>
+                </button>
+              ` : (isStarred ? `<i class="fa-solid fa-star text-amber-400 text-xs" title="Best Video"></i>` : `<i class="fa-solid fa-film"></i>`)}
+            </div>
+
+            <a href="${v.publicUrl}" target="_blank" rel="noopener noreferrer" class="font-bold text-xs sm:text-sm text-[var(--gtk-text)] hover:text-blue-500 line-clamp-2 leading-snug transition-colors">
+              ${escapeHtml(v.title)}
+            </a>
+          </div>
+
+          <div class="pt-2 border-t border-[var(--gtk-border)] flex items-center justify-between">
+            <a href="${v.publicUrl}" target="_blank" rel="noopener noreferrer" class="gtk-pill px-3 py-1.5 text-xs font-bold bg-blue-500/10 text-blue-500 hover:bg-blue-500 hover:text-white transition-all flex items-center space-x-1.5 w-full justify-center">
+              <span>Watch Video</span>
+              <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+            </a>
+
+            ${isEditMode ? `
+              <div class="flex items-center space-x-1 ml-2">
+                <button onclick="openVideoEditorModal(${v.id})" class="p-1.5 text-xs text-amber-500 hover:bg-amber-500/10 rounded" title="Edit Item">
+                  <i class="fa-solid fa-pen"></i>
+                </button>
+                <button onclick="deleteVideoItem(${v.id})" class="p-1.5 text-xs text-red-500 hover:bg-red-500/10 rounded" title="Delete Item">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              </div>
+            ` : ''}
+          </div>
+        </div>
+      `;
+    }
+
+    function filterCategory(cat) {
+      currentCategory = cat;
+      document.querySelectorAll('.cat-btn').forEach(btn => btn.classList.remove('gtk-pill-active'));
+      const activeBtn = document.getElementById(`cat-${cat}`);
+      if (activeBtn) activeBtn.classList.add('gtk-pill-active');
+      renderVideos();
+    }
+
+    function setViewMode(mode) {
+      currentViewMode = mode;
+      const listBtn = document.getElementById('view-list');
+      const gridBtn = document.getElementById('view-grid');
+      
+      if (mode === 'grid') {
+        gridBtn.classList.add('gtk-pill-active');
+        listBtn.classList.remove('gtk-pill-active');
+      } else {
+        listBtn.classList.add('gtk-pill-active');
+        gridBtn.classList.remove('gtk-pill-active');
+      }
+      renderVideos();
+    }
+
+    function handleSearch() {
+      const input = document.getElementById('search-input');
+      const clearBtn = document.getElementById('clear-search');
+      if (input.value.trim()) {
+        clearBtn.classList.remove('hidden');
+      } else {
+        clearBtn.classList.add('hidden');
+      }
+      renderVideos();
+    }
+
+    function clearSearch() {
+      const input = document.getElementById('search-input');
+      input.value = '';
+      document.getElementById('clear-search').classList.add('hidden');
+      renderVideos();
+    }
+
+    function toggleStarVideo(id) {
+      if (!isEditMode) return;
+      const index = videosData.findIndex(v => v.id === id);
+      if (index !== -1) {
+        videosData[index].isStarred = !videosData[index].isStarred;
+        saveVideosState();
+        renderVideos();
+        showToast(videosData[index].isStarred ? 'Marked as Best Video ⭐' : 'Unstarred video');
+      }
+    }
+
+    function toggleEditMode() {
+      isEditMode = !isEditMode;
+      const banner = document.getElementById('edit-mode-banner');
+      const btnEditBio = document.getElementById('btn-edit-bio');
+
+      if (banner) {
+        if (isEditMode) {
+          banner.classList.remove('hidden');
+          if (btnEditBio) btnEditBio.classList.remove('hidden');
+          showToast('Edit Mode Activated!');
+        } else {
+          banner.classList.add('hidden');
+          if (btnEditBio) btnEditBio.classList.add('hidden');
+          showToast('Edit Mode Deactivated');
+        }
+      }
+      renderVideos();
+    }
+
+    function openVideoEditorModal(id = null) {
+      if (!isEditMode) return;
+      const modal = document.getElementById('video-editor-modal');
+      const titleElem = document.getElementById('modal-editor-title');
+      const inputId = document.getElementById('edit-video-id');
+      const inputTitle = document.getElementById('edit-video-title');
+      const inputUrl = document.getElementById('edit-video-url');
+      const selectCat = document.getElementById('edit-video-category');
+      const checkStarred = document.getElementById('edit-video-starred');
+
+      if (id) {
+        const item = videosData.find(v => v.id === id);
+        if (item) {
+          titleElem.querySelector('span').textContent = 'Edit Video Item';
+          inputId.value = item.id;
+          inputTitle.value = item.title;
+          inputUrl.value = item.publicUrl;
+          selectCat.value = item.category;
+          checkStarred.checked = !!item.isStarred;
+        }
+      } else {
+        titleElem.querySelector('span').textContent = 'Add New Video';
+        inputId.value = '';
+        inputTitle.value = '';
+        inputUrl.value = '';
+        selectCat.value = 'trance';
+        checkStarred.checked = false;
+      }
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeVideoEditorModal() {
+      document.getElementById('video-editor-modal').classList.add('hidden');
+    }
+
+    function saveVideoItem() {
+      const id = document.getElementById('edit-video-id').value;
+      const title = document.getElementById('edit-video-title').value.trim();
+      const url = document.getElementById('edit-video-url').value.trim();
+      const category = document.getElementById('edit-video-category').value;
+      const isStarred = document.getElementById('edit-video-starred').checked;
+
+      if (!title || !url) {
+        showToast('Please fill in both Title and URL');
+        return;
+      }
+
+      let videoId = null;
+      const match = url.match(/(?:video\/|v=|v\/)([a-zA-Z0-9_-]{11})/);
+      if (match && match[1]) {
+        videoId = match[1];
+      }
+
+      const publicUrl = videoId ? `https://www.youtube.com/watch?v=${videoId}` : url;
+
+      if (id) {
+        const index = videosData.findIndex(v => v.id == id);
+        if (index !== -1) {
+          videosData[index] = {
+            ...videosData[index],
+            title,
+            publicUrl,
+            category,
+            isStarred,
+            videoId
+          };
+        }
+      } else {
+        const newId = Date.now();
+        videosData.unshift({
+          id: newId,
+          title,
+          publicUrl,
+          category,
+          isStarred,
+          videoId
+        });
+      }
+
+      saveVideosState();
+      renderVideos();
+      closeVideoEditorModal();
+      showToast(id ? 'Video updated!' : 'New video added!');
+    }
+
+    function deleteVideoItem(id) {
+      if (!confirm('Are you sure you want to delete this video item?')) return;
+      videosData = videosData.filter(v => v.id !== id);
+      saveVideosState();
+      renderVideos();
+      showToast('Video item removed');
+    }
+
+    function saveVideosState() {
+      localStorage.setItem('bradford_portfolio_videos', JSON.stringify(videosData));
+    }
+
+    function downloadUpdatedHTML() {
+      const cleanExport = videosData.map(v => ({
+        title: v.title,
+        studioUrl: v.publicUrl || "",
+        category: v.category,
+        isStarred: v.isStarred || false
+      }));
+
+      let pageHtml = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+
+      const bioRegex = /const defaultBioText = `[\s\S]*?`;/;
+      const safeBio = bioText.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\${/g, '\\${');
+      pageHtml = pageHtml.replace(bioRegex, `const defaultBioText = \`${safeBio}\`;`);
+
+      const rawVideosRegex = /const rawVideos = \[[\s\S]*?\];/;
+      const formattedJson = `const rawVideos = ${JSON.stringify(cleanExport, null, 2)};`;
+      pageHtml = pageHtml.replace(rawVideosRegex, formattedJson);
+
+      const blob = new Blob([pageHtml], { type: 'text/html' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'index.html';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+
+      showToast('Downloaded index.html for GitHub!');
+    }
+
+    function openExportModal() {
+      document.getElementById('export-modal').classList.remove('hidden');
+      generateExportText();
+    }
+
+    function closeExportModal() {
+      document.getElementById('export-modal').classList.add('hidden');
+    }
+
+    function setExportFormat(fmt) {
+      exportFormat = fmt;
+      document.querySelectorAll('.fmt-btn').forEach(btn => btn.classList.remove('gtk-pill-active'));
+      const activeBtn = document.getElementById(`fmt-${fmt}`);
+      if (activeBtn) activeBtn.classList.add('gtk-pill-active');
+      generateExportText();
+    }
+
+    function generateExportText() {
+      const textarea = document.getElementById('export-textarea');
+      const countText = document.getElementById('export-count-text');
+
+      let output = '';
+      if (exportFormat === 'plain') {
+        output = videosData.map(v => `${v.title} -> ${v.publicUrl}`).join('\n');
+      } else if (exportFormat === 'html') {
+        const lis = videosData.map(v => `  <li><a href="${v.publicUrl}" target="_blank">${v.title}</a></li>`).join('\n');
+        output = `<ul>\n${lis}\n</ul>`;
+      } else if (exportFormat === 'markdown') {
+        output = videosData.map(v => `- [${v.title}](${v.publicUrl})`).join('\n');
+      } else if (exportFormat === 'json') {
+        output = JSON.stringify(videosData.map(v => ({ title: v.title, url: v.publicUrl, category: v.category, isStarred: v.isStarred })), null, 2);
+      }
+
+      textarea.value = output;
+      countText.textContent = `${videosData.length} items formatted as ${exportFormat.toUpperCase()}`;
+    }
+
+    function copyExportText() {
+      const textarea = document.getElementById('export-textarea');
+      textarea.select();
+      document.execCommand('copy');
+      showToast('Copied export list to clipboard!');
+    }
+
+    function copyContactInfo() {
+      const text = `Bradford R.\nEmail: trancedemon@gmail.com\nPhone: +91 9821320459`;
+      const tempInput = document.createElement('textarea');
+      tempInput.value = text;
+      document.body.appendChild(tempInput);
+      tempInput.select();
+      document.execCommand('copy');
+      document.body.removeChild(tempInput);
+      showToast('Contact info copied to clipboard!');
+    }
+
+    function setTheme(mode) {
+      const root = document.documentElement;
+      const btnLight = document.getElementById('theme-light');
+      const btnDark = document.getElementById('theme-dark');
+      const btnAuto = document.getElementById('theme-auto');
+
+      [btnLight, btnDark, btnAuto].forEach(b => b.classList.remove('gtk-pill-active'));
+
+      if (mode === 'light') {
+        root.classList.remove('dark');
+        btnLight.classList.add('gtk-pill-active');
+      } else if (mode === 'dark') {
+        root.classList.add('dark');
+        btnDark.classList.add('gtk-pill-active');
+      } else {
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (prefersDark) root.classList.add('dark');
+        else root.classList.remove('dark');
+        btnAuto.classList.add('gtk-pill-active');
+      }
+
+      localStorage.setItem('bradford_theme', mode);
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toast-msg');
+      if (toast && toastMsg) {
+        toastMsg.textContent = msg;
+        toast.classList.remove('opacity-0', 'pointer-events-none');
+        setTimeout(() => {
+          toast.classList.add('opacity-0', 'pointer-events-none');
+        }, 2800);
+      }
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+    }
+
+    window.onload = function() {
+      const savedTheme = localStorage.getItem('bradford_theme') || 'dark';
+      setTheme(savedTheme);
+
+      renderBio();
+      renderVideos();
+
+      document.addEventListener('keydown', (e) => {
+        if (e.ctrlKey && e.altKey && e.shiftKey && (e.code === 'Space' || e.key === ' ')) {
+          e.preventDefault();
+          toggleEditMode();
+        }
+
+        if (e.key === 'Escape') {
+          closeVideoEditorModal();
+          closeBioEditorModal();
+          closeExportModal();
+        }
+      });
+    };
+  </script>
+</body>
+</html>
