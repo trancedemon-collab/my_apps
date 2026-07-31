@@ -155,6 +155,71 @@
         </div>
       </section>
 
+      <!-- Featured Spotlight Showcase Frame -->
+      <section class="border-b border-gtk-light-border dark:border-gtk-dark-border bg-gradient-to-b from-gray-50/80 to-white dark:from-[#212121] dark:to-[#232323] p-3.5 sm:p-4">
+        <div class="space-y-2">
+          <!-- Header Tag & Link -->
+          <div class="flex items-center justify-between flex-wrap gap-2">
+            <div class="flex items-center gap-2">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold bg-amber-500/10 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-500/30">
+                <i class="fa-solid fa-star text-[10px] mr-1.5 animate-pulse text-amber-500"></i> Featured Spotlight
+              </span>
+              <span id="spotlightHeaderTitle" class="text-xs font-semibold text-gray-800 dark:text-gray-200 hidden sm:inline">The Challenge</span>
+            </div>
+
+            <!-- Sequence Player Controls & Watch Link -->
+            <div class="flex items-center gap-2">
+              <div class="flex items-center space-x-1 bg-gray-200/80 dark:bg-gtk-dark-hover rounded-lg p-0.5 text-xs border border-gray-300/50 dark:border-gtk-dark-border">
+                <button id="spotlightPrevBtn" class="px-2 py-0.5 hover:bg-white dark:hover:bg-gray-700 rounded text-gray-700 dark:text-gray-200 transition-colors" title="Previous GIF">
+                  <i class="fa-solid fa-chevron-left text-[10px]"></i>
+                </button>
+                <span id="spotlightCounter" class="px-1 text-[10px] font-mono font-medium text-gray-600 dark:text-gray-300">1/1</span>
+                <button id="spotlightNextBtn" class="px-2 py-0.5 hover:bg-white dark:hover:bg-gray-700 rounded text-gray-700 dark:text-gray-200 transition-colors" title="Next GIF">
+                  <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                </button>
+                <button id="spotlightPlayPauseBtn" class="px-1.5 py-0.5 hover:bg-white dark:hover:bg-gray-700 rounded text-gray-700 dark:text-gray-200 transition-colors border-l border-gray-300 dark:border-gray-600 pl-1.5 ml-0.5" title="Pause / Resume Auto-Play">
+                  <i id="spotlightPlayPauseIcon" class="fa-solid fa-pause text-[10px]"></i>
+                </button>
+              </div>
+
+              <a id="spotlightLinkTop" href="https://www.youtube.com/watch?v=cwlm7Pg9awQ" target="_blank" class="text-[11px] sm:text-xs text-gtk-blue hover:underline font-medium flex items-center gap-1">
+                <span>Watch Video</span>
+                <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+              </a>
+            </div>
+          </div>
+
+          <!-- GTK Styled Framed GIF Container -->
+          <div class="relative group rounded-xl overflow-hidden border border-gray-300/80 dark:border-gtk-dark-border bg-gray-900 shadow-sm transition-all duration-300 hover:shadow-lg">
+            <a id="spotlightAnchor" href="https://www.youtube.com/watch?v=cwlm7Pg9awQ" target="_blank" class="block relative aspect-video sm:aspect-[21/9] w-full overflow-hidden bg-black">
+              <img 
+                id="spotlightImg"
+                src="https://trancedemon-collab.github.io/my_apps/gif/the_challenge.gif" 
+                alt="Animated Short Preview" 
+                class="w-full h-full object-cover group-hover:scale-105 transition-all duration-500 opacity-95 group-hover:opacity-100"
+                loading="eager"
+              >
+              <!-- Gradient Overlay with Title -->
+              <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent flex flex-col justify-end p-3 sm:p-4 text-white">
+                <div class="flex items-end justify-between gap-3">
+                  <div class="space-y-0.5 min-w-0">
+                    <span id="spotlightTag" class="text-[9px] sm:text-[10px] font-mono uppercase tracking-wider text-amber-300/90 font-semibold">Featured Spotlight</span>
+                    <h3 id="spotlightTitle" class="text-sm sm:text-lg font-bold tracking-tight text-white group-hover:text-blue-200 transition-colors truncate">The Challenge</h3>
+                    <p id="spotlightSubtitle" class="text-[10px] sm:text-xs text-gray-300 line-clamp-1 font-mono">Cinematic Animation • Gemini Storyboarded & Google Flow Rendered</p>
+                  </div>
+                  <div class="shrink-0">
+                    <span class="px-3 py-1.5 rounded-lg bg-gtk-blue hover:bg-gtk-blue-hover text-white text-xs font-medium flex items-center gap-1.5 shadow-md transition-transform active:scale-95">
+                      <i class="fa-solid fa-play text-[10px]"></i>
+                      <span class="hidden sm:inline">Play Video</span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </a>
+          </div>
+        </div>
+      </section>
+
       <!-- Production Methodology Overview for Clients -->
       <section class="border-b border-gtk-light-border dark:border-gtk-dark-border bg-white dark:bg-[#232323] p-3.5 sm:p-4 text-xs sm:text-sm leading-relaxed">
         <div class="space-y-2.5 sm:space-y-3">
@@ -258,6 +323,31 @@
   </div>
 
   <script>
+    // Featured GIF Sequence List (easily append your new GIFs here!)
+    const featuredList = [
+      {
+        title: "The Challenge",
+        subtitle: "Cinematic Animation • Gemini Storyboarded & Google Flow Rendered",
+        tag: "Featured Spotlight",
+        gifUrl: "https://trancedemon-collab.github.io/my_apps/gif/the_challenge.gif",
+        youtubeUrl: "https://www.youtube.com/watch?v=cwlm7Pg9awQ"
+      }
+      /*
+      // To add another GIF, simply un-comment and add entries like this:
+      ,{
+        title: "He-Man and THE EGG",
+        subtitle: "Animation Short • Google Flow Rendered & Custom Audio Mix",
+        tag: "Animated Short",
+        gifUrl: "https://trancedemon-collab.github.io/my_apps/gif/he_man_egg.gif",
+        youtubeUrl: "https://www.youtube.com/watch?v=CM35r4XySC8"
+      }
+      */
+    ];
+
+    let currentSpotlightIdx = 0;
+    let spotlightInterval = null;
+    let isSpotlightPlaying = true;
+
     // Raw Dataset of Music and Videos
     const musicData = [
       { id: "6nCkFvBSd7k", title: "Pixel Pursuit", tag: "Chiptune / Electronic" },
@@ -350,6 +440,73 @@
     const themeSelect = document.getElementById('themeSelect');
     const toastEl = document.getElementById('toast');
     const toastMessage = document.getElementById('toastMessage');
+
+    // Spotlight Carousel Elements
+    const spotlightImg = document.getElementById('spotlightImg');
+    const spotlightTitle = document.getElementById('spotlightTitle');
+    const spotlightSubtitle = document.getElementById('spotlightSubtitle');
+    const spotlightTag = document.getElementById('spotlightTag');
+    const spotlightHeaderTitle = document.getElementById('spotlightHeaderTitle');
+    const spotlightCounter = document.getElementById('spotlightCounter');
+    const spotlightAnchor = document.getElementById('spotlightAnchor');
+    const spotlightLinkTop = document.getElementById('spotlightLinkTop');
+    const spotlightPrevBtn = document.getElementById('spotlightPrevBtn');
+    const spotlightNextBtn = document.getElementById('spotlightNextBtn');
+    const spotlightPlayPauseBtn = document.getElementById('spotlightPlayPauseBtn');
+    const spotlightPlayPauseIcon = document.getElementById('spotlightPlayPauseIcon');
+
+    function updateSpotlightUI(index) {
+      if (!featuredList || featuredList.length === 0) return;
+      currentSpotlightIdx = (index + featuredList.length) % featuredList.length;
+      const item = featuredList[currentSpotlightIdx];
+
+      // Smooth opacity transition
+      spotlightImg.style.opacity = '0.3';
+      setTimeout(() => {
+        spotlightImg.src = item.gifUrl;
+        spotlightTitle.textContent = item.title;
+        spotlightSubtitle.textContent = item.subtitle;
+        spotlightTag.textContent = item.tag || 'Featured Spotlight';
+        spotlightHeaderTitle.textContent = item.title;
+        spotlightAnchor.href = item.youtubeUrl;
+        spotlightLinkTop.href = item.youtubeUrl;
+        spotlightCounter.textContent = `${currentSpotlightIdx + 1}/${featuredList.length}`;
+        spotlightImg.style.opacity = '1';
+      }, 150);
+    }
+
+    function startSpotlightTimer() {
+      if (spotlightInterval) clearInterval(spotlightInterval);
+      if (featuredList.length > 1 && isSpotlightPlaying) {
+        spotlightInterval = setInterval(() => {
+          updateSpotlightUI(currentSpotlightIdx + 1);
+        }, 6000); // Cycles every 6 seconds
+      }
+    }
+
+    spotlightNextBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      updateSpotlightUI(currentSpotlightIdx + 1);
+      startSpotlightTimer();
+    });
+
+    spotlightPrevBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      updateSpotlightUI(currentSpotlightIdx - 1);
+      startSpotlightTimer();
+    });
+
+    spotlightPlayPauseBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      isSpotlightPlaying = !isSpotlightPlaying;
+      if (isSpotlightPlaying) {
+        spotlightPlayPauseIcon.className = "fa-solid fa-pause text-[10px]";
+        startSpotlightTimer();
+      } else {
+        spotlightPlayPauseIcon.className = "fa-solid fa-play text-[10px]";
+        if (spotlightInterval) clearInterval(spotlightInterval);
+      }
+    });
 
     // Update Category Counters
     countAllEl.textContent = catalog.length;
@@ -536,6 +693,8 @@
       const savedTheme = localStorage.getItem('gtk-portfolio-theme') || 'auto';
       themeSelect.value = savedTheme;
       applyTheme(savedTheme);
+      updateSpotlightUI(0);
+      startSpotlightTimer();
       renderList();
     };
   </script>
