@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Creative Portfolio - Music & Short Movies</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Inter & JetBrains Mono Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            gtk: {
+              blue: '#3584e4',
+              'blue-hover': '#1c71d8',
+              'dark-bg': '#1e1e1e',
+              'dark-card': '#2d2d2d',
+              'dark-hover': '#383838',
+              'dark-border': '#3e3e3e',
+              'light-bg': '#f6f6f7',
+              'light-card': '#ffffff',
+              'light-hover': '#f0f0f2',
+              'light-border': '#e1e1e6',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom scrollbar matching GTK style */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(125, 125, 125, 0.3);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(125, 125, 125, 0.5);
+    }
+
+    /* GTK-style transition polish */
+    .gtk-row {
+      transition: background-color 0.15s ease, transform 0.1s ease;
+    }
+    .gtk-row:active {
+      transform: scale(0.998);
+    }
+    
+    /* GTK Window Frame Effect */
+    .gtk-window {
+      box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1);
+    }
+
+    /* Hide horizontal scrollbar for filter chips on small screens */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="bg-gtk-light-bg dark:bg-gtk-dark-bg text-gray-800 dark:text-gray-100 font-sans min-h-screen flex flex-col transition-colors duration-200 selection:bg-gtk-blue selection:text-white overflow-x-hidden">
+
+  <div class="max-w-5xl mx-auto w-full my-0 sm:my-6 flex-1 flex flex-col px-0 sm:px-4">
+    
+    <!-- Main GTK Window Card -->
+    <div class="gtk-window bg-gtk-light-card dark:bg-gtk-dark-card border-0 sm:border border-gtk-light-border dark:border-gtk-dark-border sm:rounded-2xl flex-1 flex flex-col overflow-hidden">
+      
+      <!-- GTK HeaderBar Header -->
+      <header class="bg-gray-100 dark:bg-[#252525] border-b border-gtk-light-border dark:border-gtk-dark-border px-3 sm:px-4 py-2.5 sm:py-3 flex flex-row items-center justify-between gap-2 select-none">
+        <!-- Left: Window Controls & Title -->
+        <div class="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1">
+          <!-- Window Control Buttons (GTK Style) -->
+          <div class="hidden sm:flex items-center space-x-2 mr-1 flex-shrink-0">
+            <div class="w-3.5 h-3.5 rounded-full bg-red-500/80 hover:bg-red-500 transition-colors cursor-pointer" title="Close"></div>
+            <div class="w-3.5 h-3.5 rounded-full bg-yellow-500/80 hover:bg-yellow-500 transition-colors cursor-pointer" title="Minimize"></div>
+            <div class="w-3.5 h-3.5 rounded-full bg-green-500/80 hover:bg-green-500 transition-colors cursor-pointer" title="Maximize"></div>
+          </div>
+          <div class="flex items-center space-x-2.5 min-w-0 flex-1">
+            <i class="fa-solid fa-compact-disc text-gtk-blue text-base sm:text-lg flex-shrink-0"></i>
+            <div class="min-w-0 flex-1">
+              <h1 class="font-bold text-xs sm:text-base leading-tight text-gray-900 dark:text-gray-100 truncate">Bradford R. — Portfolio</h1>
+              <p class="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 font-mono truncate">Multimedia Producer • GTK Adwaita Theme</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Theme Switcher Dropdown -->
+        <div class="flex items-center space-x-2 flex-shrink-0">
+          <div class="relative">
+            <select id="themeSelect" class="appearance-none bg-gray-200/70 dark:bg-gtk-dark-hover hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 text-xs font-medium py-1.5 pl-2.5 pr-6 rounded-lg cursor-pointer focus:outline-none focus:ring-2 focus:ring-gtk-blue transition-colors">
+              <option value="auto">🌗 Auto</option>
+              <option value="dark">🌙 Dark</option>
+              <option value="light">☀️ Light</option>
+            </select>
+            <i class="fa-solid fa-chevron-down absolute right-2 top-1/2 -translate-y-1/2 text-[10px] pointer-events-none text-gray-500"></i>
+          </div>
+        </div>
+      </header>
+
+      <!-- Profile & Contact Bar for Clients -->
+      <section class="bg-gradient-to-r from-blue-50/80 via-indigo-50/40 to-purple-50/50 dark:from-[#1d2736] dark:via-[#222332] dark:to-[#281f33] border-b border-gtk-light-border dark:border-gtk-dark-border p-3.5 sm:p-5">
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-3.5 sm:gap-4">
+          <div class="space-y-1 sm:space-y-1.5 max-w-2xl w-full">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="text-[10px] sm:text-xs font-semibold uppercase tracking-wider px-2 py-0.5 rounded bg-gtk-blue/10 dark:bg-gtk-blue/20 text-gtk-blue">Available for Hire & Projects</span>
+              <span class="text-[10px] sm:text-xs text-emerald-600 dark:text-emerald-400 font-mono flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Direct Inquiry</span>
+            </div>
+            <h2 class="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Bradford R.</h2>
+            <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-300 leading-normal sm:leading-relaxed">
+              Specializing in custom audio production, digital music composition, sound design, and AI-assisted short film creation. Dedicated to delivering tailored, high-impact creative media for commercial and artistic endeavors.
+            </p>
+          </div>
+
+          <!-- Contact Buttons & WhatsApp -->
+          <div class="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 w-full md:w-auto">
+            <a href="https://wa.me/919821320459" target="_blank" class="flex items-center justify-center gap-1.5 px-3 py-2.5 sm:py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs transition-all shadow-md shadow-emerald-600/20 active:scale-95">
+              <i class="fa-brands fa-whatsapp text-sm"></i>
+              <span class="truncate">WhatsApp</span>
+            </a>
+            <a href="mailto:trancedemon@gmail.com" class="flex items-center justify-center gap-1.5 px-3 py-2.5 sm:py-2 rounded-xl bg-gtk-blue hover:bg-gtk-blue-hover text-white font-medium text-xs transition-all shadow-md shadow-blue-500/20 active:scale-95">
+              <i class="fa-regular fa-envelope text-sm"></i>
+              <span class="truncate">Email Me</span>
+            </a>
+            <a href="tel:9821320459" class="col-span-2 sm:col-span-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-gray-200/80 dark:bg-gtk-dark-hover hover:bg-gray-300 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 text-xs font-medium transition-all" title="Call 9821320459">
+              <i class="fa-solid fa-phone text-xs"></i>
+              <span>+91 9821320459</span>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Production Methodology Overview for Clients -->
+      <section class="border-b border-gtk-light-border dark:border-gtk-dark-border bg-white dark:bg-[#232323] p-3.5 sm:p-4 text-xs sm:text-sm leading-relaxed">
+        <div class="space-y-2.5 sm:space-y-3">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+            <h3 class="font-semibold text-gray-900 dark:text-gray-100 text-[11px] sm:text-xs uppercase tracking-wider flex items-center gap-2">
+              <i class="fa-solid fa-sliders text-gtk-blue"></i> Production Methodology & Technical Expertise
+            </h3>
+            <span class="text-[10px] sm:text-[11px] text-gray-500 dark:text-gray-400 font-mono">End-to-End Creative Pipeline</span>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5 sm:gap-3 text-gray-600 dark:text-gray-300">
+            <!-- Music Methodology -->
+            <div class="bg-gray-50 dark:bg-[#1c1c1c] p-3 sm:p-3.5 rounded-xl border border-gray-200/80 dark:border-gtk-dark-border space-y-1">
+              <div class="flex items-center gap-2 font-semibold text-gray-900 dark:text-gray-100 text-xs sm:text-sm">
+                <i class="fa-solid fa-music text-gtk-blue"></i>
+                <span>Music Crafting Workflow</span>
+              </div>
+              <p class="text-[11px] sm:text-xs text-gray-600 dark:text-gray-300 leading-normal">
+                Utilizing Digital Audio Workstations (FL Studio, BandLab, and custom-developed DAWs) in synergy with generative audio tools like Suno AI. Every track is built on hands-on creation of rhythm, original motifs, and core melodies—ensuring unique structural complexity rather than simple automated prompts. Artwork and visuals are designed with Gemini, Canva, and Shotcut.
+              </p>
+            </div>
+
+            <!-- Video Methodology -->
+            <div class="bg-gray-50 dark:bg-[#1c1c1c] p-3 sm:p-3.5 rounded-xl border border-gray-200/80 dark:border-gtk-dark-border space-y-1">
+              <div class="flex items-center gap-2 font-semibold text-gray-900 dark:text-gray-100 text-xs sm:text-sm">
+                <i class="fa-solid fa-film text-purple-500"></i>
+                <span>Short Movies & Video Workflow</span>
+              </div>
+              <p class="text-[11px] sm:text-xs text-gray-600 dark:text-gray-300 leading-normal">
+                Short films and videos are generated using Gemini Chat and Google Flow / Vids. The process begins with detailed storyboarding and narrative decomposition into individual rendered clip segments. These elements are then multi-track stitched, sound-engineered, and polished with video editors using custom mixes, audio overlays, and precision cut edits.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="p-3 sm:p-4 bg-gray-50/50 dark:bg-[#212121] border-b border-gtk-light-border dark:border-gtk-dark-border space-y-2.5 sm:space-y-3">
+        
+        <!-- Search Input Bar -->
+        <div class="relative">
+          <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs sm:text-sm"></i>
+          <input 
+            type="text" 
+            id="searchInput" 
+            placeholder="Search titles, variants, or keywords..."
+            class="w-full bg-white dark:bg-gtk-dark-card text-gray-900 dark:text-gray-100 pl-9 pr-9 py-2 sm:py-2.5 rounded-xl border border-gray-300 dark:border-gtk-dark-border focus:outline-none focus:ring-2 focus:ring-gtk-blue text-xs sm:text-sm transition-all shadow-sm placeholder-gray-400"
+          >
+          <button id="clearSearchBtn" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-1">
+            <i class="fa-solid fa-circle-xmark"></i>
+          </button>
+        </div>
+
+        <!-- Filter Category Tabs & Counter Stats -->
+        <div class="flex flex-row items-center justify-between gap-2 overflow-x-auto no-scrollbar py-0.5">
+          <div class="flex items-center gap-1.5 flex-nowrap shrink-0" id="categoryFilterContainer">
+            <button data-cat="all" class="cat-btn active px-2.5 py-1.5 sm:px-3 sm:py-1.5 rounded-lg text-xs font-medium transition-all bg-gtk-blue text-white shadow-sm shrink-0">
+              All (<span id="countAll">0</span>)
+            </button>
+            <button data-cat="music" class="cat-btn px-2.5 py-1.5 sm:px-3 sm:py-1.5 rounded-lg text-xs font-medium transition-all bg-gray-200/80 dark:bg-gtk-dark-hover text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700 shrink-0">
+              <i class="fa-solid fa-music mr-1 text-gtk-blue"></i>Music (<span id="countMusic">0</span>)
+            </button>
+            <button data-cat="videos" class="cat-btn px-2.5 py-1.5 sm:px-3 sm:py-1.5 rounded-lg text-xs font-medium transition-all bg-gray-200/80 dark:bg-gtk-dark-hover text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700 shrink-0">
+              <i class="fa-solid fa-video mr-1 text-purple-500"></i>Videos (<span id="countVideos">0</span>)
+            </button>
+          </div>
+
+          <div class="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 font-mono shrink-0">
+            Showing <span id="visibleCount" class="font-semibold text-gray-800 dark:text-gray-200">0</span> items
+          </div>
+        </div>
+      </div>
+
+      <main class="flex-1 overflow-y-auto p-3 sm:p-4">
+        <!-- GTK Group Box Container -->
+        <div id="catalogList" class="divide-y divide-gray-200/60 dark:divide-gtk-dark-border bg-white dark:bg-[#252525] rounded-xl border border-gray-200 dark:border-gtk-dark-border overflow-hidden shadow-sm">
+          <!-- List items rendered dynamically via JavaScript -->
+        </div>
+
+        <!-- Empty State Message -->
+        <div id="emptyState" class="hidden py-16 text-center space-y-3">
+          <i class="fa-solid fa-folder-open text-4xl text-gray-300 dark:text-gray-600"></i>
+          <p class="text-sm text-gray-500 dark:text-gray-400">No tracks or videos match your search.</p>
+          <button id="resetSearchBtn" class="text-xs text-gtk-blue hover:underline font-medium">Clear search filter</button>
+        </div>
+      </main>
+
+      <footer class="bg-gray-100 dark:bg-[#212121] border-t border-gtk-light-border dark:border-gtk-dark-border px-3 sm:px-4 py-2.5 flex flex-wrap items-center justify-between gap-2 text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 font-mono">
+        <div class="flex items-center space-x-2 truncate">
+          <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
+          <span class="truncate">Bradford R. • trancedemon@gmail.com • +91 9821320459</span>
+        </div>
+      </footer>
+
+    </div>
+  </div>
+
+  <!-- Toast Notification Box -->
+  <div id="toast" class="fixed bottom-5 right-5 transform translate-y-16 opacity-0 transition-all duration-300 bg-gray-900 dark:bg-black text-white text-xs px-4 py-2.5 rounded-xl shadow-lg border border-gray-700 flex items-center gap-2 pointer-events-none z-50">
+    <i class="fa-solid fa-check text-emerald-400"></i>
+    <span id="toastMessage">Link copied to clipboard</span>
+  </div>
+
+  <script>
+    // Raw Dataset of Music and Videos
+    const musicData = [
+      { id: "6nCkFvBSd7k", title: "Pixel Pursuit", tag: "Chiptune / Electronic" },
+      { id: "vyMI2nOLFFU", title: "Nexus Circuitry", tag: "Synthwave / Cyber" },
+      { id: "q5JYhDYFosw", title: "Stellar Surge", tag: "Trance / Main" },
+      { id: "oyVJ1jNHvg4", title: "Stellar Surge (Techno Varient)", tag: "Techno" },
+      { id: "NRLCFqcH1xg", title: "Stellar Surge (Chillout Varient)", tag: "Chillout" },
+      { id: "afYSAlAx524", title: "Stardown", tag: "Ambient / Space" },
+      { id: "YnvU4vSxumM", title: "Still Waters", tag: "Melodic / Downtempo" },
+      { id: "YNseoZjoh3w", title: "Broken Factory (Extended Varient)", tag: "Industrial / Extended" },
+      { id: "V-m2RLHv0RA", title: "Quantum Dream", tag: "Electronic" },
+      { id: "rJWdDmblLJs", title: "Quantum Dream (Melodic Extravaganza)", tag: "Melodic / Extended" },
+      { id: "h2YUW-QZSp0", title: "Broken Factory", tag: "Industrial" },
+      { id: "snw_l_Yb2RU", title: "Nebula Haze (Extended Trance Varient)", tag: "Trance / Extended" },
+      { id: "NdwBKmGvBEY", title: "Nebula Haze", tag: "Trance" },
+      { id: "62xUdeS2bzQ", title: "Molten Passage (Varient 2 - Melodic Extravaganza)", tag: "Melodic / Synth" },
+      { id: "OTtV6C8NRCw", title: "Molten Passage (Varient 1)", tag: "Synthwave" },
+      { id: "JrXm3OeiGGs", title: "Ropes and Knots (Ibiza Trance Varient)", tag: "Ibiza Trance" },
+      { id: "ovmer_k71YM", title: "Salty Stone", tag: "Electronic" },
+      { id: "gtdrEZQZPO8", title: "c0smic (EDM Varient)", tag: "EDM" },
+      { id: "tq90GXmXDt0", title: "c0smic (Progressive Trance Varient)", tag: "Progressive Trance" },
+      { id: "E1a9ymIAENY", title: "C0smic", tag: "Electronic" },
+      { id: "6ZOwuOlP2zQ", title: "Twisted Orbit", tag: "Sci-Fi Beat" },
+      { id: "HZbxYKYqcYg", title: "Menace", tag: "Dark Synth" },
+      { id: "RTPswkXl0Gs", title: "Skipix (Clean Varient 1)", tag: "Electronic Clean" },
+      { id: "XZO6TLaZKwo", title: "SkipiX", tag: "Electronic" },
+      { id: "1DgQd3X1tJI", title: "Lemonoid", tag: "Electro Pop" },
+      { id: "6UB9Rq7Kph8", title: "Drunken Topedo", tag: "Experimental Groove" },
+      { id: "_4um9iXQ0tk", title: "Glamour Glide (Yamaha DS-XG MIDI Style)", tag: "Retro MIDI Style" },
+      { id: "96o4xqOqRO0", title: "Viking Vinegar", tag: "Folk Techno" },
+      { id: "9TQMAOHwFKA", title: "Recall (Extended Emotive Trance Varient)", tag: "Emotive Trance" },
+      { id: "wseVxReO88Q", title: "Recall", tag: "Trance" },
+      { id: "llnnGPW-Zaw", title: "Worthy (Trance Varient)", tag: "Trance" },
+      { id: "0YY7inH0eco", title: "Worthy", tag: "Electronic" },
+      { id: "3wjkWO9Y-CY", title: "Curse of Time", tag: "Cinematic Electro" },
+      { id: "_xL1fcfsMcQ", title: "Tulsi", tag: "Atmospheric" },
+      { id: "MFzJe-IC-jQ", title: "Dark Lotus", tag: "Dark EDM" },
+      { id: "66_aFaqJLOs", title: "Unfound (Vocal Trance Varient)", tag: "Vocal Trance" },
+      { id: "kHMBq1dwVaQ", title: "Unfound (Emotive Trance Instrumental Varient 1)", tag: "Trance Instrumental" },
+      { id: "ke6YPE7aHS8", title: "Unfound", tag: "Electronic" },
+      { id: "J_uoRdrxx5E", title: "Twilight Glory", tag: "Melodic" },
+      { id: "LXwOYVDH2HA", title: "Jungle Walk", tag: "Drum & Bass / Rhythm" },
+      { id: "RhJNFoJjlDY", title: "Mesh Rider", tag: "Cyber Synth" },
+      { id: "-8fuUe4yCPg", title: "Siren Of Salema", tag: "Deep Electronic" },
+      { id: "HPe-IA7gpqU", title: "Purple Owl", tag: "Chill Beat" },
+      { id: "Sx-XYKrWsao", title: "kdf0z", tag: "IDM / Experimental" },
+      { id: "pKKiyC0BJnY", title: "Honour", tag: "Cinematic / Epic" }
+    ];
+
+    const videoData = [
+      { id: "CM35r4XySC8", title: "He-Man and THE EGG", tag: "Short Movie / Animation" },
+      { id: "2o4oTMxRTuc", title: "selo vs mikoz (with technicals)", tag: "Technical / Animation" },
+      { id: "89p-77m7dqU", title: "Kiku vs Rancor (Anime Fight)", tag: "Anime Fight Action" },
+      { id: "2h0zp8EPpGo", title: "Unchained", tag: "Short Film" },
+      { id: "cwlm7Pg9awQ", title: "The Challenge", tag: "Short Film" },
+      { id: "KFuvxwfM7eE", title: "NES - Double Dragon 3 - Rosetta Stone - Mission 1 Part 1", tag: "Retro Gaming Short" },
+      { id: "Q9h9PiwKsTg", title: "Tyrannosaurus Rex Documentary", tag: "AI Documentary" },
+      { id: "aWXVBylEUwU", title: "Constant Chase", tag: "Action Sequence" },
+      { id: "VRlOz1UQKQQ", title: "Occurances", tag: "Cinematic Short" },
+      { id: "NpURs7xHu3o", title: "Battle Arena Anime", tag: "Anime Battle" },
+      { id: "FQjfgQadOYM", title: "Fight male vampire attacked by squad (anime) (widescreen)", tag: "Widescreen Anime" },
+      { id: "Qqa0Xn8UFl4", title: "Unchained (Variant)", tag: "Cinematic Short" },
+      { id: "yZtfWSjewsE", title: "gtk lite infinite sticky notes", tag: "Tech Showcase / UI" },
+      { id: "N_Jwxtt4WFo", title: "Checkpoint (landscape)", tag: "Landscape Video" },
+      { id: "ceeG1ta_pFc", title: "ceraphina and goro", tag: "Story Short" },
+      { id: "81AN1DvYFH0", title: "cats and dinos", tag: "Fun / AI Video" },
+      { id: "hQBhprfsE6g", title: "Cat bully gets bullied", tag: "Short Story" },
+      { id: "hNPFrEkaLdw", title: "Desert Cravings", tag: "Atmospheric Short" }
+    ];
+
+    // Combine data with type properties
+    const catalog = [
+      ...musicData.map(m => ({ ...m, type: 'music' })),
+      ...videoData.map(v => ({ ...v, type: 'videos' }))
+    ];
+
+    let activeCategory = 'all';
+    let searchQuery = '';
+
+    // DOM Elements
+    const catalogListEl = document.getElementById('catalogList');
+    const searchInput = document.getElementById('searchInput');
+    const clearSearchBtn = document.getElementById('clearSearchBtn');
+    const resetSearchBtn = document.getElementById('resetSearchBtn');
+    const emptyStateEl = document.getElementById('emptyState');
+    const visibleCountEl = document.getElementById('visibleCount');
+    const countAllEl = document.getElementById('countAll');
+    const countMusicEl = document.getElementById('countMusic');
+    const countVideosEl = document.getElementById('countVideos');
+    const themeSelect = document.getElementById('themeSelect');
+    const toastEl = document.getElementById('toast');
+    const toastMessage = document.getElementById('toastMessage');
+
+    // Update Category Counters
+    countAllEl.textContent = catalog.length;
+    countMusicEl.textContent = musicData.length;
+    countVideosEl.textContent = videoData.length;
+
+    // Helper: Build YouTube Link
+    function getUrl(item) {
+      return `https://www.youtube.com/watch?v=${item.id}`;
+    }
+
+    function renderList() {
+      catalogListEl.innerHTML = '';
+      
+      const filtered = catalog.filter(item => {
+        const matchesCategory = (activeCategory === 'all') || (item.type === activeCategory);
+        const matchesSearch = searchQuery === '' || 
+          item.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+          item.tag.toLowerCase().includes(searchQuery.toLowerCase());
+        return matchesCategory && matchesSearch;
+      });
+
+      visibleCountEl.textContent = filtered.length;
+
+      if (filtered.length === 0) {
+        catalogListEl.classList.add('hidden');
+        emptyStateEl.classList.remove('hidden');
+        return;
+      }
+
+      catalogListEl.classList.remove('hidden');
+      emptyStateEl.classList.add('hidden');
+
+      filtered.forEach((item, idx) => {
+        const row = document.createElement('div');
+        row.className = 'gtk-row group p-2.5 sm:px-4 sm:py-3.5 flex items-center justify-between gap-2 sm:gap-3 hover:bg-gtk-light-hover dark:hover:bg-gtk-dark-hover transition-colors cursor-pointer';
+        
+        const isMusic = item.type === 'music';
+        const iconClass = isMusic ? 'fa-music text-gtk-blue' : 'fa-film text-purple-500';
+        const targetUrl = getUrl(item);
+
+        row.innerHTML = `
+          <div class="flex items-center space-x-2.5 sm:space-x-3 min-w-0 flex-1" onclick="window.open('${targetUrl}', '_blank')">
+            <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-gray-100 dark:bg-[#1a1a1a] flex items-center justify-center shrink-0 group-hover:bg-blue-50 dark:group-hover:bg-gray-700 transition-colors">
+              <i class="fa-solid ${iconClass} text-xs sm:text-sm"></i>
+            </div>
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-1.5">
+                <a href="${targetUrl}" target="_blank" class="font-medium text-xs sm:text-sm text-gray-900 dark:text-gray-100 group-hover:text-gtk-blue dark:group-hover:text-gtk-blue transition-colors truncate">
+                  ${item.title}
+                </a>
+                <i class="fa-solid fa-arrow-up-right-from-square text-[9px] sm:text-[10px] opacity-0 group-hover:opacity-100 text-gtk-blue transition-opacity shrink-0"></i>
+              </div>
+              <div class="flex items-center gap-2 mt-0.5">
+                <span class="text-[10px] sm:text-[11px] font-mono text-gray-500 dark:text-gray-400 truncate">${item.tag}</span>
+              </div>
+            </div>
+          </div>
+          <div class="flex items-center space-x-1.5 sm:space-x-2 shrink-0">
+            <button class="copy-btn px-2 py-1.5 rounded-lg text-xs font-mono text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white hover:bg-gray-200/60 dark:hover:bg-gray-700 transition-colors flex items-center gap-1" title="Copy Link" onclick="event.stopPropagation(); copyLink('${targetUrl}')">
+              <i class="fa-regular fa-copy text-xs"></i>
+              <span class="hidden sm:inline">Copy</span>
+            </button>
+            <a href="${targetUrl}" target="_blank" onclick="event.stopPropagation();" class="px-2.5 sm:px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gtk-dark-hover hover:bg-gtk-blue hover:text-white dark:hover:bg-gtk-blue text-xs font-medium text-gray-700 dark:text-gray-200 transition-all flex items-center gap-1">
+              <span>Open</span>
+              <i class="fa-solid fa-chevron-right text-[10px]"></i>
+            </a>
+          </div>
+        `;
+
+        catalogListEl.appendChild(row);
+      });
+    }
+
+    function showToast(msg) {
+      toastMessage.textContent = msg;
+      toastEl.classList.remove('translate-y-16', 'opacity-0');
+      toastEl.classList.add('translate-y-0', 'opacity-100');
+      setTimeout(() => {
+        toastEl.classList.remove('translate-y-0', 'opacity-100');
+        toastEl.classList.add('translate-y-16', 'opacity-0');
+      }, 2500);
+    }
+
+    function copyLink(url) {
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(url).then(() => {
+          showToast('Link copied to clipboard!');
+        });
+      } else {
+        // Fallback for iFrame or non-HTTPS environment
+        const textArea = document.createElement("textarea");
+        textArea.value = url;
+        document.body.appendChild(textArea);
+        textArea.select();
+        try {
+          document.execCommand('copy');
+          showToast('Link copied to clipboard!');
+        } catch (err) {
+          showToast('Failed to copy link.');
+        }
+        document.body.removeChild(textArea);
+      }
+    }
+
+    // Search listeners
+    searchInput.addEventListener('input', (e) => {
+      searchQuery = e.target.value;
+      if (searchQuery.length > 0) {
+        clearSearchBtn.classList.remove('hidden');
+      } else {
+        clearSearchBtn.classList.add('hidden');
+      }
+      renderList();
+    });
+
+    clearSearchBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      searchQuery = '';
+      clearSearchBtn.classList.add('hidden');
+      renderList();
+    });
+
+    resetSearchBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      searchQuery = '';
+      activeCategory = 'all';
+      clearSearchBtn.classList.add('hidden');
+      
+      document.querySelectorAll('.cat-btn').forEach(btn => {
+        if (btn.dataset.cat === 'all') {
+          btn.className = 'cat-btn active px-3 py-1.5 rounded-lg text-xs font-medium transition-all bg-gtk-blue text-white shadow-sm';
+        } else {
+          btn.className = 'cat-btn px-3 py-1.5 rounded-lg text-xs font-medium transition-all bg-gray-200/80 dark:bg-gtk-dark-hover text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700';
+        }
+      });
+      renderList();
+    });
+
+    // Category Tabs Listener
+    document.getElementById('categoryFilterContainer').addEventListener('click', (e) => {
+      const btn = e.target.closest('.cat-btn');
+      if (!btn) return;
+      
+      document.querySelectorAll('.cat-btn').forEach(b => {
+        b.className = 'cat-btn px-3 py-1.5 rounded-lg text-xs font-medium transition-all bg-gray-200/80 dark:bg-gtk-dark-hover text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700';
+      });
+
+      btn.className = 'cat-btn active px-3 py-1.5 rounded-lg text-xs font-medium transition-all bg-gtk-blue text-white shadow-sm';
+      activeCategory = btn.dataset.cat;
+      renderList();
+    });
+
+    function applyTheme(theme) {
+      if (theme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else if (theme === 'light') {
+        document.documentElement.classList.remove('dark');
+      } else {
+        // Auto System
+        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+      }
+    }
+
+    themeSelect.addEventListener('change', (e) => {
+      const selected = e.target.value;
+      localStorage.setItem('gtk-portfolio-theme', selected);
+      applyTheme(selected);
+    });
+
+    // Listen to OS theme preference changes if set to auto
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+      if (themeSelect.value === 'auto') {
+        applyTheme('auto');
+      }
+    });
+
+    // On Load Initializers
+    window.onload = function() {
+      const savedTheme = localStorage.getItem('gtk-portfolio-theme') || 'auto';
+      themeSelect.value = savedTheme;
+      applyTheme(savedTheme);
+      renderList();
+    };
+  </script>
+</body>
+</html>
