@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Resume - Bradford Risbert</title>
   
   <!-- Tailwind CSS & FontAwesome -->
@@ -43,6 +43,9 @@
       background-color: var(--gtk-bg);
       color: var(--gtk-text);
       transition: background-color 0.2s ease, color 0.2s ease;
+      overflow-x: hidden;
+      width: 100%;
+      -webkit-tap-highlight-color: transparent;
     }
 
     /* GTK Window Card Styling */
@@ -51,6 +54,7 @@
       border: 1px solid var(--gtk-border);
       border-radius: 12px;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      max-width: 100%;
     }
 
     /* GTK Header Bar */
@@ -80,8 +84,8 @@
 
     /* Custom Scrollbar */
     ::-webkit-scrollbar {
-      width: 8px;
-      height: 8px;
+      width: 6px;
+      height: 6px;
     }
     ::-webkit-scrollbar-track {
       background: var(--gtk-bg);
@@ -104,45 +108,97 @@
       outline: 2px solid var(--gtk-accent);
       border-color: transparent;
     }
+
+    /* Print Media Queries & Printer-Friendly Modes */
+    @media print {
+      body {
+        background-color: #ffffff !important;
+        color: #000000 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        width: 100% !important;
+      }
+      .no-print,
+      .gtk-headerbar button,
+      #toast,
+      #export-modal,
+      #print-modal,
+      footer {
+        display: none !important;
+      }
+      .gtk-window {
+        box-shadow: none !important;
+        border: 1px solid #d0d0d0 !important;
+        page-break-inside: avoid;
+        margin-bottom: 12px !important;
+      }
+      /* Simplified Ink-Saver Printing Styles */
+      body.print-simplified * {
+        background: transparent !important;
+        color: #000000 !important;
+        border-color: #cccccc !important;
+        box-shadow: none !important;
+        text-shadow: none !important;
+      }
+      body.print-simplified .gtk-headerbar {
+        border-bottom: 2px solid #000000 !important;
+      }
+      body.print-simplified .gtk-pill {
+        border: 1px solid #dddddd !important;
+      }
+      body.print-simplified i {
+        display: none !important; /* Hide icons in simplified mode for maximum ink savings */
+      }
+    }
   </style>
 </head>
 <body class="min-h-screen p-2 sm:p-4 md:p-6 flex flex-col items-center">
 
-  <div class="w-full max-w-5xl space-y-4">
+  <div class="w-full max-w-5xl space-y-3 sm:space-y-4">
     
     <!-- GTK Window Header & Contact Card -->
     <header class="gtk-window overflow-hidden">
-      <div class="gtk-headerbar px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+      <div class="gtk-headerbar px-3 sm:px-4 py-2.5 sm:py-3 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3">
         
         <!-- Window Controls & Title -->
-        <div class="flex items-center space-x-3">
-          <div class="flex items-center space-x-1.5">
-            <span class="w-3 h-3 rounded-full bg-red-500/80 inline-block"></span>
-            <span class="w-3 h-3 rounded-full bg-amber-500/80 inline-block"></span>
-            <span class="w-3 h-3 rounded-full bg-emerald-500/80 inline-block"></span>
+        <div class="flex items-center justify-between sm:justify-start space-x-3 w-full sm:w-auto">
+          <div class="flex items-center space-x-2">
+            <div class="flex items-center space-x-1.5">
+              <span class="w-3 h-3 rounded-full bg-red-500/80 inline-block"></span>
+              <span class="w-3 h-3 rounded-full bg-amber-500/80 inline-block"></span>
+              <span class="w-3 h-3 rounded-full bg-emerald-500/80 inline-block"></span>
+            </div>
+            <h1 class="font-bold text-sm sm:text-lg tracking-tight flex items-center gap-1.5 ml-1">
+              <i class="fa-solid fa-id-card text-blue-500 text-xs sm:text-base"></i>
+              <span>Resume [GTK]</span>
+            </h1>
           </div>
-          <h1 class="font-bold text-base sm:text-lg tracking-tight flex items-center gap-2">
-            <i class="fa-solid fa-id-card text-blue-500"></i>
-            <span>Resume [GTK]</span>
-          </h1>
+
+          <!-- Mobile Only Quick Theme Indicator -->
+          <span class="sm:hidden text-[10px] uppercase tracking-wider font-semibold text-[var(--gtk-text-muted)]">Libadwaita</span>
         </div>
 
-        <!-- Right Controls: Export & Theme Selector -->
-        <div class="flex items-center space-x-2">
-          <button onclick="openExportModal()" class="gtk-pill px-3 py-1 text-xs font-semibold flex items-center space-x-1.5 border border-[var(--gtk-border)] hover:border-blue-500">
+        <!-- Right Controls: Print, Export & Theme Selector -->
+        <div class="flex flex-wrap items-center justify-between sm:justify-end gap-2 w-full sm:w-auto pt-1 sm:pt-0 border-t sm:border-t-0 border-[var(--gtk-border)]/50 no-print">
+          <button onclick="openPrintModal()" class="gtk-pill px-2.5 sm:px-3 py-1 text-xs font-semibold flex items-center space-x-1.5 border border-[var(--gtk-border)] hover:border-emerald-500 min-h-[32px]" title="Print or Save as PDF">
+            <i class="fa-solid fa-print text-emerald-500"></i>
+            <span>Print</span>
+          </button>
+
+          <button onclick="openExportModal()" class="gtk-pill px-2.5 sm:px-3 py-1 text-xs font-semibold flex items-center space-x-1.5 border border-[var(--gtk-border)] hover:border-blue-500 min-h-[32px]">
             <i class="fa-solid fa-file-export text-blue-500"></i>
             <span>Export Resume</span>
           </button>
 
-          <div class="gtk-pill p-1 flex items-center text-xs space-x-1 border border-[var(--gtk-border)]">
-            <button id="theme-light" onclick="setTheme('light')" class="px-2.5 py-1 rounded-full text-[11px] font-medium transition-all" title="Light Theme">
-              <i class="fa-solid fa-sun mr-1"></i> Light
+          <div class="gtk-pill p-0.5 sm:p-1 flex items-center text-xs space-x-0.5 sm:space-x-1 border border-[var(--gtk-border)]">
+            <button id="theme-light" onclick="setTheme('light')" class="px-2 sm:px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-medium transition-all" title="Light Theme">
+              <i class="fa-solid fa-sun mr-0.5 sm:mr-1"></i> Light
             </button>
-            <button id="theme-dark" onclick="setTheme('dark')" class="px-2.5 py-1 rounded-full text-[11px] font-medium transition-all" title="Dark Theme">
-              <i class="fa-solid fa-moon mr-1"></i> Dark
+            <button id="theme-dark" onclick="setTheme('dark')" class="px-2 sm:px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-medium transition-all" title="Dark Theme">
+              <i class="fa-solid fa-moon mr-0.5 sm:mr-1"></i> Dark
             </button>
-            <button id="theme-auto" onclick="setTheme('auto')" class="px-2.5 py-1 rounded-full text-[11px] font-medium transition-all" title="System Auto Theme">
-              <i class="fa-solid fa-desktop mr-1"></i> Auto
+            <button id="theme-auto" onclick="setTheme('auto')" class="px-2 sm:px-2.5 py-1 rounded-full text-[10px] sm:text-[11px] font-medium transition-all" title="System Auto Theme">
+              <i class="fa-solid fa-desktop mr-0.5 sm:mr-1"></i> Auto
             </button>
           </div>
         </div>
@@ -150,52 +206,70 @@
       </div>
 
       <!-- Profile Header Section -->
-      <div class="p-4 sm:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[var(--gtk-card-bg)]">
-        <div class="space-y-1 max-w-2xl">
-          <div class="flex items-center space-x-2">
-            <span class="text-xs uppercase tracking-wider font-semibold text-blue-500">Professional Profile</span>
-            <span class="text-slate-400">•</span>
-            <span class="text-xs text-[var(--gtk-text-muted)]">12+ Years Experience</span>
+      <div class="p-3.5 sm:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[var(--gtk-card-bg)]">
+        <div class="flex items-center space-x-3.5 sm:space-x-5 max-w-2xl">
+          
+          <!-- Profile Photo Frame with GTK Styling -->
+          <div class="relative flex-shrink-0 group">
+            <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full p-0.5 bg-gradient-to-tr from-blue-500 via-indigo-500 to-purple-500 shadow-md transition-all duration-300 group-hover:scale-105">
+              <img 
+                id="res-photo"
+                src="profile.jpg" 
+                alt="Bradford Risbert" 
+                class="w-full h-full rounded-full object-cover bg-[var(--gtk-header-bg)]"
+                onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=Bradford+Risbert&background=3584e4&color=ffffff&size=128&bold=true';"
+              />
+            </div>
+            <!-- Active / Available Indicator -->
+            <span class="absolute bottom-0.5 right-0.5 w-3.5 h-3.5 sm:w-4 sm:h-4 bg-emerald-500 border-2 border-[var(--gtk-card-bg)] rounded-full shadow-sm" title="Active & Available"></span>
           </div>
-          <h2 id="res-name" class="text-2xl sm:text-3xl font-bold tracking-tight">Bradford Risbert</h2>
-          <p id="res-title" class="text-xs sm:text-sm font-medium text-[var(--gtk-text-muted)] leading-relaxed">
-            AI-Powered Content Creator, Creative &amp; Technical Professional
-          </p>
+
+          <div class="space-y-1">
+            <div class="flex items-center space-x-2">
+              <span class="text-[11px] sm:text-xs uppercase tracking-wider font-semibold text-blue-500">Professional Profile</span>
+              <span class="text-slate-400">•</span>
+              <span class="text-[11px] sm:text-xs text-[var(--gtk-text-muted)]">12+ Years Experience</span>
+            </div>
+            <h2 id="res-name" class="text-xl sm:text-3xl font-bold tracking-tight">Bradford Risbert</h2>
+            <p id="res-title" class="text-xs sm:text-sm font-medium text-[var(--gtk-text-muted)] leading-relaxed">
+              AI-Powered Content Creator, Creative &amp; Technical Professional
+            </p>
+          </div>
         </div>
 
         <!-- Contact Pill Buttons -->
-        <div id="res-contact-container" class="flex flex-wrap items-center gap-2 w-full md:w-auto">
+        <div id="res-contact-container" class="flex flex-wrap items-center gap-1.5 sm:gap-2 w-full md:w-auto pt-1 md:pt-0">
           <!-- Dynamically Rendered Contact Details -->
         </div>
       </div>
     </header>
 
     <!-- Executive Summary Section -->
-    <section class="gtk-window p-4 sm:p-6 space-y-3 relative">
-      <div class="flex items-center justify-between border-b border-[var(--gtk-border)] pb-2.5">
+    <section class="gtk-window p-3.5 sm:p-6 space-y-2.5 sm:space-y-3 relative">
+      <div class="flex items-center justify-between border-b border-[var(--gtk-border)] pb-2 sm:pb-2.5">
         <div class="flex items-center space-x-2">
-          <i class="fa-solid fa-user-tie text-blue-500 text-sm"></i>
-          <h2 class="font-bold text-sm sm:text-base tracking-tight">Executive Summary</h2>
+          <i class="fa-solid fa-user-tie text-blue-500 text-xs sm:text-sm"></i>
+          <h2 class="font-bold text-xs sm:text-base tracking-tight">Executive Summary</h2>
         </div>
       </div>
-      <p id="res-summary" class="text-xs sm:text-sm leading-relaxed text-[var(--gtk-text)]">
+      <p id="res-summary" class="text-xs sm:text-sm leading-relaxed text-[var(--gtk-text)] break-words">
         <!-- Rendered Summary -->
       </p>
     </section>
 
     <!-- Skills Matrix Section -->
-    <section class="gtk-window p-4 sm:p-6 space-y-4">
-      <div class="flex items-center justify-between border-b border-[var(--gtk-border)] pb-2.5">
+    <section class="gtk-window p-3.5 sm:p-6 space-y-3 sm:space-y-4">
+      <div class="flex items-center justify-between border-b border-[var(--gtk-border)] pb-2 sm:pb-2.5">
         <div class="flex items-center space-x-2">
-          <i class="fa-solid fa-microchip text-blue-500 text-sm"></i>
-          <h2 class="font-bold text-sm sm:text-base tracking-tight">Core Competencies &amp; Skills</h2>
+          <i class="fa-solid fa-microchip text-blue-500 text-xs sm:text-sm"></i>
+          <h2 class="font-bold text-xs sm:text-base tracking-tight">Core Competencies &amp; Skills</h2>
         </div>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
         <!-- Technical & AI Tools -->
         <div class="space-y-2">
-          <h3 class="text-xs font-bold uppercase tracking-wider text-[var(--gtk-text-muted)] flex items-center gap-1.5">
+          <h3 class="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-[var(--gtk-text-muted)] flex items-center gap-1.5">
             <i class="fa-solid fa-terminal text-blue-500"></i> Technical &amp; AI Stack
           </h3>
           <div id="res-skills-technical" class="flex flex-wrap gap-1.5">
@@ -205,7 +279,7 @@
 
         <!-- Creative Production -->
         <div class="space-y-2">
-          <h3 class="text-xs font-bold uppercase tracking-wider text-[var(--gtk-text-muted)] flex items-center gap-1.5">
+          <h3 class="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-[var(--gtk-text-muted)] flex items-center gap-1.5">
             <i class="fa-solid fa-wand-magic-sparkles text-emerald-500"></i> Creative &amp; Production Stack
           </h3>
           <div id="res-skills-creative" class="flex flex-wrap gap-1.5">
@@ -216,41 +290,41 @@
     </section>
 
     <!-- Professional Work Experience Section -->
-    <section class="gtk-window p-4 sm:p-6 space-y-4">
-      <div class="flex items-center justify-between border-b border-[var(--gtk-border)] pb-2.5">
+    <section class="gtk-window p-3.5 sm:p-6 space-y-3 sm:space-y-4">
+      <div class="flex items-center justify-between border-b border-[var(--gtk-border)] pb-2 sm:pb-2.5">
         <div class="flex items-center space-x-2">
-          <i class="fa-solid fa-briefcase text-blue-500 text-sm"></i>
-          <h2 class="font-bold text-sm sm:text-base tracking-tight">Work Experience</h2>
+          <i class="fa-solid fa-briefcase text-blue-500 text-xs sm:text-sm"></i>
+          <h2 class="font-bold text-xs sm:text-base tracking-tight">Work Experience (BPO / Customer Service / Technical Support)</h2>
         </div>
       </div>
 
-      <div id="res-experience-container" class="space-y-4">
+      <div id="res-experience-container" class="space-y-3 sm:space-y-4">
         <!-- Rendered Experience Cards -->
       </div>
     </section>
 
     <!-- Education & Certifications Section -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
       
       <!-- Education -->
-      <section class="gtk-window p-4 sm:p-6 space-y-3">
-        <div class="flex items-center justify-between border-b border-[var(--gtk-border)] pb-2.5">
+      <section class="gtk-window p-3.5 sm:p-6 space-y-2.5 sm:space-y-3">
+        <div class="flex items-center justify-between border-b border-[var(--gtk-border)] pb-2 sm:pb-2.5">
           <div class="flex items-center space-x-2">
-            <i class="fa-solid fa-graduation-cap text-blue-500 text-sm"></i>
-            <h2 class="font-bold text-sm sm:text-base tracking-tight">Education</h2>
+            <i class="fa-solid fa-graduation-cap text-blue-500 text-xs sm:text-sm"></i>
+            <h2 class="font-bold text-xs sm:text-base tracking-tight">Education</h2>
           </div>
         </div>
-        <div id="res-education-container" class="space-y-3">
+        <div id="res-education-container" class="space-y-2.5 sm:space-y-3">
           <!-- Rendered Education Items -->
         </div>
       </section>
 
       <!-- Certifications -->
-      <section class="gtk-window p-4 sm:p-6 space-y-3">
-        <div class="flex items-center justify-between border-b border-[var(--gtk-border)] pb-2.5">
+      <section class="gtk-window p-3.5 sm:p-6 space-y-2.5 sm:space-y-3">
+        <div class="flex items-center justify-between border-b border-[var(--gtk-border)] pb-2 sm:pb-2.5">
           <div class="flex items-center space-x-2">
-            <i class="fa-solid fa-award text-amber-500 text-sm"></i>
-            <h2 class="font-bold text-sm sm:text-base tracking-tight">Certifications</h2>
+            <i class="fa-solid fa-award text-amber-500 text-xs sm:text-sm"></i>
+            <h2 class="font-bold text-xs sm:text-base tracking-tight">Certifications</h2>
           </div>
         </div>
         <div id="res-certifications-container" class="space-y-2">
@@ -261,7 +335,7 @@
     </div>
 
     <!-- Footer -->
-    <footer class="text-center py-4 text-xs text-[var(--gtk-text-muted)] space-y-1">
+    <footer class="text-center py-3 sm:py-4 text-[11px] sm:text-xs text-[var(--gtk-text-muted)] space-y-1">
       <p>&copy; Bradford Risbert • Interactive GTK Resume Portfolio</p>
       <p class="text-[10px]">Hosted on GitHub Pages • Generated with Libadwaita Design Language</p>
     </footer>
@@ -269,34 +343,34 @@
   </div>
 
   <!-- Export Modal -->
-  <div id="export-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-6 hidden">
-    <div class="gtk-window w-full max-w-2xl bg-[var(--gtk-card-bg)] p-5 space-y-4 shadow-2xl">
-      <div class="flex items-center justify-between border-b border-[var(--gtk-border)] pb-3">
-        <h3 class="font-bold text-base flex items-center space-x-2">
+  <div id="export-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-2.5 sm:p-6 hidden">
+    <div class="gtk-window w-full max-w-2xl bg-[var(--gtk-card-bg)] p-4 sm:p-5 space-y-3 sm:space-y-4 shadow-2xl max-h-[92vh] flex flex-col justify-between overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-[var(--gtk-border)] pb-2.5 sm:pb-3">
+        <h3 class="font-bold text-sm sm:text-base flex items-center space-x-2">
           <i class="fa-solid fa-file-export text-blue-500"></i>
           <span>Export Resume</span>
         </h3>
-        <button onclick="closeExportModal()" class="text-base text-[var(--gtk-text-muted)] hover:text-[var(--gtk-text)]">
+        <button onclick="closeExportModal()" class="text-base text-[var(--gtk-text-muted)] hover:text-[var(--gtk-text)] p-1">
           <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
 
-      <div class="space-y-3">
-        <div class="flex items-center space-x-2 text-xs">
-          <span class="font-semibold text-[var(--gtk-text-muted)]">Format:</span>
-          <button onclick="setExportFormat('plain')" id="fmt-plain" class="fmt-btn gtk-pill gtk-pill-active px-3 py-1 text-xs">Plain Text</button>
-          <button onclick="setExportFormat('markdown')" id="fmt-markdown" class="fmt-btn gtk-pill px-3 py-1 text-xs">Markdown</button>
-          <button onclick="setExportFormat('json')" id="fmt-json" class="fmt-btn gtk-pill px-3 py-1 text-xs">JSON</button>
+      <div class="space-y-2.5 sm:space-y-3">
+        <div class="flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs">
+          <span class="font-semibold text-[var(--gtk-text-muted)] mr-1 text-xs">Format:</span>
+          <button onclick="setExportFormat('plain')" id="fmt-plain" class="fmt-btn gtk-pill gtk-pill-active px-2.5 sm:px-3 py-1 text-xs">Plain Text</button>
+          <button onclick="setExportFormat('markdown')" id="fmt-markdown" class="fmt-btn gtk-pill px-2.5 sm:px-3 py-1 text-xs">Markdown</button>
+          <button onclick="setExportFormat('json')" id="fmt-json" class="fmt-btn gtk-pill px-2.5 sm:px-3 py-1 text-xs">JSON</button>
         </div>
 
-        <textarea id="export-textarea" readonly class="gtk-input w-full h-64 p-3 font-mono text-xs leading-relaxed select-all" placeholder="Export output will appear here..."></textarea>
+        <textarea id="export-textarea" readonly class="gtk-input w-full h-48 sm:h-64 p-2.5 sm:p-3 font-mono text-xs leading-relaxed select-all" placeholder="Export output will appear here..."></textarea>
       </div>
 
-      <div class="flex items-center justify-between pt-2">
-        <span class="text-[11px] text-[var(--gtk-text-muted)]" id="export-info-text">Formatted Output</span>
-        <div class="flex items-center space-x-2">
-          <button onclick="closeExportModal()" class="gtk-pill px-4 py-1.5 text-xs font-semibold">Close</button>
-          <button onclick="copyExportText()" class="gtk-pill px-4 py-1.5 text-xs font-bold bg-blue-500 text-white hover:bg-blue-600 flex items-center space-x-1.5">
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 pt-2 border-t border-[var(--gtk-border)]">
+        <span class="text-[10px] sm:text-[11px] text-[var(--gtk-text-muted)] text-center sm:text-left" id="export-info-text">Formatted Output</span>
+        <div class="flex items-center justify-end space-x-2">
+          <button onclick="closeExportModal()" class="gtk-pill px-3.5 sm:px-4 py-1.5 text-xs font-semibold">Close</button>
+          <button onclick="copyExportText()" class="gtk-pill px-3.5 sm:px-4 py-1.5 text-xs font-bold bg-blue-500 text-white hover:bg-blue-600 flex items-center space-x-1.5">
             <i class="fa-regular fa-copy"></i>
             <span>Copy Text</span>
           </button>
@@ -305,14 +379,67 @@
     </div>
   </div>
 
+  <!-- Print Options Modal -->
+  <div id="print-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-2.5 sm:p-6 hidden no-print">
+    <div class="gtk-window w-full max-w-md bg-[var(--gtk-card-bg)] p-4 sm:p-5 space-y-3.5 sm:space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-[var(--gtk-border)] pb-2.5 sm:pb-3">
+        <h3 class="font-bold text-sm sm:text-base flex items-center space-x-2">
+          <i class="fa-solid fa-print text-emerald-500"></i>
+          <span>Print / Save as PDF</span>
+        </h3>
+        <button onclick="closePrintModal()" class="text-base text-[var(--gtk-text-muted)] hover:text-[var(--gtk-text)] p-1">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <p class="text-xs text-[var(--gtk-text-muted)] leading-relaxed">Select your preferred layout format for printing or saving as a PDF document:</p>
+
+      <div class="space-y-2.5">
+        <button onclick="triggerPrint('full')" class="w-full gtk-pill p-3 border border-[var(--gtk-border)] hover:border-blue-500 flex items-center space-x-3 text-left transition-all group">
+          <div class="w-9 h-9 rounded-full bg-blue-500/10 text-blue-500 flex items-center justify-center group-hover:bg-blue-500 group-hover:text-white transition-all flex-shrink-0">
+            <i class="fa-solid fa-palette text-sm"></i>
+          </div>
+          <div>
+            <div class="font-bold text-xs sm:text-sm text-[var(--gtk-text)]">Full GTK Theme Style</div>
+            <div class="text-[10px] sm:text-[11px] text-[var(--gtk-text-muted)]">Prints complete document with full colors, badges, and GTK window styling</div>
+          </div>
+        </button>
+
+        <button onclick="triggerPrint('simplified')" class="w-full gtk-pill p-3 border border-[var(--gtk-border)] hover:border-emerald-500 flex items-center space-x-3 text-left transition-all group">
+          <div class="w-9 h-9 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center group-hover:bg-emerald-500 group-hover:text-white transition-all flex-shrink-0">
+            <i class="fa-solid fa-file-lines text-sm"></i>
+          </div>
+          <div>
+            <div class="font-bold text-xs sm:text-sm text-[var(--gtk-text)]">Printer-Friendly (Ink Saver)</div>
+            <div class="text-[10px] sm:text-[11px] text-[var(--gtk-text-muted)]">Monochrome high-contrast layout, clean text, ideal for fast paper printing</div>
+          </div>
+        </button>
+
+        <button onclick="openPrintableNewWindow('simplified')" class="w-full gtk-pill p-3 border border-[var(--gtk-border)] hover:border-purple-500 flex items-center space-x-3 text-left transition-all group">
+          <div class="w-9 h-9 rounded-full bg-purple-500/10 text-purple-500 flex items-center justify-center group-hover:bg-purple-500 group-hover:text-white transition-all flex-shrink-0">
+            <i class="fa-solid fa-arrow-up-right-from-square text-sm"></i>
+          </div>
+          <div>
+            <div class="font-bold text-xs sm:text-sm text-[var(--gtk-text)]">Open in New Tab & Print</div>
+            <div class="text-[10px] sm:text-[11px] text-[var(--gtk-text-muted)]">Opens a standalone clean view in a new browser tab for easy printing/saving as PDF</div>
+          </div>
+        </button>
+      </div>
+
+      <div class="flex justify-end pt-2 border-t border-[var(--gtk-border)]">
+        <button onclick="closePrintModal()" class="gtk-pill px-4 py-1.5 text-xs font-semibold">Cancel</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Message -->
-  <div id="toast" class="fixed bottom-6 right-6 bg-slate-900 text-white text-xs px-4 py-3 rounded-lg shadow-xl flex items-center space-x-2 opacity-0 pointer-events-none transition-all duration-300 z-50 border border-slate-700">
-    <i class="fa-solid fa-circle-check text-emerald-400"></i>
-    <span id="toast-msg">Action complete</span>
+  <div id="toast" class="fixed bottom-4 sm:bottom-6 right-4 sm:right-6 max-w-[calc(100vw-2rem)] bg-slate-900 text-white text-xs px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-lg shadow-xl flex items-center space-x-2 opacity-0 pointer-events-none transition-all duration-300 z-50 border border-slate-700">
+    <i class="fa-solid fa-circle-check text-emerald-400 text-sm"></i>
+    <span id="toast-msg" class="truncate">Action complete</span>
   </div>
 
   <script>
-    /* Updated Resume JSON Data */
+    /* Resume JSON Data */
     const defaultResumeData = {
       "personal_info": {
         "name": "Bradford Risbert",
@@ -320,29 +447,33 @@
         "contact": {
           "phone": "9821320459",
           "email": "trancedemon@gmail.com",
-          "linkedin": "https://www.linkedin.com/in/bradford-risbert-68202348/"
+          "linkedin": "https://www.linkedin.com/in/bradford-risbert-68202348/",
+          "portfolio": "https://trancedemon-collab.github.io/my_apps/portfolio.html",
+          "address": "Virar, Palghar district, Maharashtra, India",
+          "dob": "20th November 1982"
         }
       },
-      "summary": "A highly creative and technically proficient professional with a strong interest in AI-powered content creation, problem-solving, and utilizing AI tools for high-quality video, music, and graphic content. Over 12 years of proven success in customer support across technical and non-technical domains. Apart from the BPO & call center roles listed here, I have also done freelancing work designing graphics, web development, and video production.",
+      "summary": "A highly creative and technically proficient professional with a strong passion for AI-powered content creation, video editing, music generation, and problem-solving. Equipped with hands-on expertise across top AI tools (Google Gemini, Google Flow, Suno, ChatGPT, Claude, Grok, Meta AI) and post-production software (Shotcut, Canva, Blender, Photoshop). Over 12 years of proven success in technical customer support, coupled with freelancing experience in graphic design, web development, and video production. Adaptable, eager to master new technologies, and open to overseas employment opportunities across various fields (Valid Passport Holder).",
       "skills": {
         "technical_tools": [
+          "Google Gemini & Google Flow",
+          "ChatGPT, Claude, Grok & Meta AI",
           "AI Prompting (Vibe Coding)",
           "Generative Prompt Engineering",
-          "Python",
-          "HTML",
-          "Salesforce",
-          "Jira",
-          "Slack",
+          "Python & HTML",
+          "Salesforce & Jira",
+          "Slack & Collaboration",
           "OS Installation (Linux/Windows)"
         ],
         "creative_production": [
+          "Suno AI Music Generation",
+          "Video Editing (Shotcut, Canva)",
           "Advanced Generative Imaging (Nano Banana)",
           "3D Modeling (Blender, Maya)",
-          "Video/Music Editing (Soundforge, FL Studio)",
+          "Audio Editing (Soundforge, FL Studio)",
           "Graphic Design (Photoshop, Illustrator)",
-          "Script Writing",
-          "Content Planning & Management",
-          "Social Media Content"
+          "Script Writing & Content Planning",
+          "Social Media Content Production"
         ]
       },
       "work_experience": [
@@ -378,21 +509,21 @@
           "role": "Sr. CMR Rel. Assoc.",
           "company": "Epicenter Technologies Pvt. Ltd.",
           "dates": "Nov 2011 - Jun 2012",
-          "location": "",
+          "location": "Bhayandar West, Mumbai",
           "description": "Upselling of satellite and digital TV service packages for client Telus."
         },
         {
           "role": "Support Professional Voice Service",
           "company": "Stream International Services Pvt. Ltd.",
           "dates": "Sep 2008 - Jul 2011",
-          "location": "",
+          "location": "Bhayandar West, Mumbai",
           "description": "Technical support for HP desktop computers. Helping customers troubleshoot and fix computer issues over the phone."
         },
         {
           "role": "Customer Service Executive",
           "company": "IBM Daksh",
           "dates": "Mar 2007 - Apr 2008",
-          "location": "",
+          "location": "Malad West, Mumbai",
           "description": "Tech support for Orange Broadband internet services."
         }
       ],
@@ -436,32 +567,54 @@
       const c = p.contact || {};
 
       contactContainer.innerHTML = `
+        ${c.address ? `
+          <div class="gtk-pill px-2.5 sm:px-3.5 py-1.5 sm:py-2 text-[11px] sm:text-xs font-semibold flex items-center space-x-1.5 sm:space-x-2 border border-[var(--gtk-border)] max-w-full min-w-0" title="Location">
+            <i class="fa-solid fa-location-dot text-rose-500 flex-shrink-0"></i>
+            <span class="truncate">${c.address}</span>
+          </div>
+        ` : ''}
+
+        ${c.dob ? `
+          <div class="gtk-pill px-2.5 sm:px-3.5 py-1.5 sm:py-2 text-[11px] sm:text-xs font-semibold flex items-center space-x-1.5 sm:space-x-2 border border-[var(--gtk-border)] whitespace-nowrap" title="Date of Birth">
+            <i class="fa-solid fa-cake-candles text-amber-500 flex-shrink-0"></i>
+            <span>DOB: ${c.dob}</span>
+          </div>
+        ` : ''}
+
         ${c.email ? `
-          <a href="mailto:${c.email}" class="gtk-pill px-3.5 py-2 text-xs font-semibold flex items-center space-x-2 border border-[var(--gtk-border)] hover:border-blue-500">
-            <i class="fa-regular fa-envelope text-blue-500"></i>
-            <span>${c.email}</span>
+          <a href="mailto:${c.email}" class="gtk-pill px-2.5 sm:px-3.5 py-1.5 sm:py-2 text-[11px] sm:text-xs font-semibold flex items-center space-x-1.5 sm:space-x-2 border border-[var(--gtk-border)] hover:border-blue-500 max-w-full min-w-0">
+            <i class="fa-regular fa-envelope text-blue-500 flex-shrink-0"></i>
+            <span class="truncate">${c.email}</span>
           </a>
         ` : ''}
 
         ${c.phone ? `
-          <a href="tel:${c.phone}" class="gtk-pill px-3.5 py-2 text-xs font-semibold flex items-center space-x-2 border border-[var(--gtk-border)] hover:border-emerald-500">
-            <i class="fa-solid fa-phone text-emerald-500"></i>
+          <a href="tel:${c.phone}" class="gtk-pill px-2.5 sm:px-3.5 py-1.5 sm:py-2 text-[11px] sm:text-xs font-semibold flex items-center space-x-1.5 sm:space-x-2 border border-[var(--gtk-border)] hover:border-emerald-500">
+            <i class="fa-solid fa-phone text-emerald-500 flex-shrink-0"></i>
             <span>+91 ${c.phone}</span>
           </a>
-          <a href="https://wa.me/91${c.phone}" target="_blank" rel="noopener noreferrer" class="gtk-pill px-3.5 py-2 text-xs font-semibold flex items-center space-x-2 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/20">
-            <i class="fa-brands fa-whatsapp text-emerald-500 text-sm"></i>
+          <a href="https://wa.me/91${c.phone}" target="_blank" rel="noopener noreferrer" class="gtk-pill px-2.5 sm:px-3.5 py-1.5 sm:py-2 text-[11px] sm:text-xs font-semibold flex items-center space-x-1.5 sm:space-x-2 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/20">
+            <i class="fa-brands fa-whatsapp text-emerald-500 text-xs sm:text-sm flex-shrink-0"></i>
             <span>WhatsApp</span>
           </a>
         ` : ''}
 
         ${c.linkedin ? `
-          <a href="${c.linkedin}" target="_blank" rel="noopener noreferrer" class="gtk-pill px-3.5 py-2 text-xs font-semibold flex items-center space-x-2 border border-[var(--gtk-border)] hover:border-blue-500">
-            <i class="fa-brands fa-linkedin text-blue-500 text-sm"></i>
+          <a href="${c.linkedin}" target="_blank" rel="noopener noreferrer" class="gtk-pill px-2.5 sm:px-3.5 py-1.5 sm:py-2 text-[11px] sm:text-xs font-semibold flex items-center space-x-1.5 sm:space-x-2 border border-[var(--gtk-border)] hover:border-blue-500">
+            <i class="fa-brands fa-linkedin text-blue-500 text-xs sm:text-sm flex-shrink-0"></i>
             <span>LinkedIn</span>
           </a>
         ` : ''}
 
-        <button onclick="copyContactInfo()" class="gtk-pill px-3 py-2 text-xs font-semibold hover:text-blue-500 border border-[var(--gtk-border)]" title="Copy Contact Info">
+        ${c.portfolio ? `
+          <a href="${c.portfolio}" target="_blank" rel="noopener noreferrer" class="gtk-pill px-2.5 sm:px-3.5 py-1.5 sm:py-2 text-[11px] sm:text-xs font-bold flex items-center space-x-1.5 sm:space-x-2 bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/30 hover:bg-purple-500/20 shadow-sm transition-all" title="View Video Portfolio">
+            <i class="fa-solid fa-clapperboard text-purple-500 text-xs sm:text-sm flex-shrink-0"></i>
+            <span class="truncate">Video Portfolio</span>
+            <i class="fa-solid fa-arrow-up-right-from-square text-[9px] sm:text-[10px] text-purple-400 ml-0.5 flex-shrink-0"></i>
+          </a>
+        ` : ''}
+
+        <button onclick="copyContactInfo()" class="gtk-pill p-2 sm:px-3 sm:py-2 text-[11px] sm:text-xs font-semibold hover:text-blue-500 border border-[var(--gtk-border)] flex items-center justify-center min-w-[32px]" title="Copy Contact Info">
           <i class="fa-regular fa-copy"></i>
         </button>
       `;
@@ -471,20 +624,43 @@
       document.getElementById('res-summary').textContent = resumeData.summary || '';
     }
 
+    function getSkillIcon(skillName) {
+      const s = skillName.toLowerCase();
+      if (s.includes('gemini') || s.includes('flow')) return '<i class="fa-solid fa-sparkles text-blue-500 mr-1.5"></i>';
+      if (s.includes('chatgpt') || s.includes('claude') || s.includes('grok') || s.includes('meta')) return '<i class="fa-solid fa-brain text-purple-500 mr-1.5"></i>';
+      if (s.includes('suno')) return '<i class="fa-solid fa-music text-amber-500 mr-1.5"></i>';
+      if (s.includes('shotcut') || s.includes('canva')) return '<i class="fa-solid fa-film text-rose-500 mr-1.5"></i>';
+      if (s.includes('prompting') || s.includes('vibe')) return '<i class="fa-solid fa-code text-cyan-500 mr-1.5"></i>';
+      if (s.includes('engineering')) return '<i class="fa-solid fa-wand-magic-sparkles text-emerald-500 mr-1.5"></i>';
+      if (s.includes('python')) return '<i class="fa-brands fa-python text-amber-500 mr-1.5"></i>';
+      if (s.includes('html')) return '<i class="fa-brands fa-html5 text-orange-500 mr-1.5"></i>';
+      if (s.includes('salesforce') || s.includes('jira')) return '<i class="fa-solid fa-cloud text-sky-500 mr-1.5"></i>';
+      if (s.includes('slack')) return '<i class="fa-brands fa-slack text-emerald-500 mr-1.5"></i>';
+      if (s.includes('linux') || s.includes('windows')) return '<i class="fa-brands fa-linux text-slate-500 mr-1.5"></i>';
+      if (s.includes('generative imaging') || s.includes('banana')) return '<i class="fa-solid fa-image text-pink-500 mr-1.5"></i>';
+      if (s.includes('blender') || s.includes('maya') || s.includes('3d')) return '<i class="fa-solid fa-cube text-amber-600 mr-1.5"></i>';
+      if (s.includes('soundforge') || s.includes('fl studio') || s.includes('audio')) return '<i class="fa-solid fa-sliders text-indigo-500 mr-1.5"></i>';
+      if (s.includes('photoshop') || s.includes('illustrator') || s.includes('graphic')) return '<i class="fa-solid fa-pen-nib text-blue-500 mr-1.5"></i>';
+      if (s.includes('script')) return '<i class="fa-solid fa-pen-fancy text-teal-500 mr-1.5"></i>';
+      return '<i class="fa-solid fa-check text-blue-500 mr-1.5"></i>';
+    }
+
     function renderSkills() {
       const skills = resumeData.skills || {};
       const techElem = document.getElementById('res-skills-technical');
       const creativeElem = document.getElementById('res-skills-creative');
 
       techElem.innerHTML = (skills.technical_tools || []).map(s => `
-        <span class="gtk-pill px-3 py-1 text-xs font-medium border border-[var(--gtk-border)] bg-[var(--gtk-pill-bg)]">
-          ${escapeHtml(s)}
+        <span class="gtk-pill px-2.5 sm:px-3 py-1 text-[11px] sm:text-xs font-medium border border-[var(--gtk-border)] bg-[var(--gtk-pill-bg)] inline-flex items-center">
+          ${getSkillIcon(s)}
+          <span>${escapeHtml(s)}</span>
         </span>
       `).join('');
 
       creativeElem.innerHTML = (skills.creative_production || []).map(s => `
-        <span class="gtk-pill px-3 py-1 text-xs font-semibold text-blue-600 dark:text-blue-400 bg-blue-500/10 border border-blue-500/20">
-          ${escapeHtml(s)}
+        <span class="gtk-pill px-2.5 sm:px-3 py-1 text-[11px] sm:text-xs font-semibold text-blue-600 dark:text-blue-400 bg-blue-500/10 border border-blue-500/20 inline-flex items-center">
+          ${getSkillIcon(s)}
+          <span>${escapeHtml(s)}</span>
         </span>
       `).join('');
     }
@@ -494,21 +670,21 @@
       const expList = resumeData.work_experience || [];
 
       container.innerHTML = expList.map((exp, idx) => `
-        <div class="gtk-pill p-4 flex flex-col space-y-2 border border-[var(--gtk-border)] hover:border-blue-500/40 transition-all">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+        <div class="gtk-pill p-3 sm:p-4 flex flex-col space-y-2 border border-[var(--gtk-border)] hover:border-blue-500/40 transition-all">
+          <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-1 sm:gap-2">
             <div>
-              <h3 class="font-bold text-sm sm:text-base text-[var(--gtk-text)] flex items-center gap-2">
+              <h3 class="font-bold text-xs sm:text-base text-[var(--gtk-text)] flex flex-wrap items-center gap-1.5 sm:gap-2">
                 <span>${escapeHtml(exp.role)}</span>
                 <span class="text-xs font-semibold text-blue-500">@ ${escapeHtml(exp.company)}</span>
               </h3>
             </div>
-            <div class="flex items-center space-x-2 text-xs text-[var(--gtk-text-muted)] font-medium">
-              ${exp.location ? `<span><i class="fa-solid fa-location-dot mr-1"></i>${escapeHtml(exp.location)}</span> • ` : ''}
-              <span class="bg-[var(--gtk-bg)] px-2 py-0.5 rounded border border-[var(--gtk-border)]">${escapeHtml(exp.dates)}</span>
+            <div class="flex flex-wrap items-center gap-1.5 text-[11px] sm:text-xs text-[var(--gtk-text-muted)] font-medium">
+              ${exp.location ? `<span class="whitespace-nowrap"><i class="fa-solid fa-location-dot mr-1"></i>${escapeHtml(exp.location)}</span> • ` : ''}
+              <span class="bg-[var(--gtk-bg)] px-2 py-0.5 rounded border border-[var(--gtk-border)] whitespace-nowrap">${escapeHtml(exp.dates)}</span>
             </div>
           </div>
           ${exp.description ? `
-            <p class="text-xs text-[var(--gtk-text)] leading-relaxed pt-1 border-t border-[var(--gtk-border)]/50">
+            <p class="text-[11px] sm:text-xs text-[var(--gtk-text)] leading-relaxed pt-1.5 border-t border-[var(--gtk-border)]/50 break-words">
               ${formatHighlights(exp.description)}
             </p>
           ` : ''}
@@ -521,12 +697,12 @@
       const eduList = resumeData.education || [];
 
       container.innerHTML = eduList.map(edu => `
-        <div class="gtk-pill p-3 border border-[var(--gtk-border)] flex items-center justify-between">
-          <div>
-            <h4 class="font-bold text-xs sm:text-sm text-[var(--gtk-text)]">${escapeHtml(edu.degree)}</h4>
-            <p class="text-xs text-[var(--gtk-text-muted)]">${escapeHtml(edu.institution)}</p>
+        <div class="gtk-pill p-2.5 sm:p-3 border border-[var(--gtk-border)] flex items-center justify-between gap-2">
+          <div class="min-w-0">
+            <h4 class="font-bold text-xs sm:text-sm text-[var(--gtk-text)] truncate">${escapeHtml(edu.degree)}</h4>
+            <p class="text-[11px] sm:text-xs text-[var(--gtk-text-muted)] truncate">${escapeHtml(edu.institution)}</p>
           </div>
-          <span class="text-xs font-bold text-blue-500 bg-blue-500/10 px-2.5 py-1 rounded-full border border-blue-500/20">${edu.year}</span>
+          <span class="text-[11px] sm:text-xs font-bold text-blue-500 bg-blue-500/10 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full border border-blue-500/20 flex-shrink-0">${edu.year}</span>
         </div>
       `).join('');
     }
@@ -536,9 +712,9 @@
       const certs = resumeData.certifications || [];
 
       container.innerHTML = certs.map(c => `
-        <div class="gtk-pill p-3 border border-[var(--gtk-border)] flex items-center space-x-2.5">
-          <i class="fa-solid fa-circle-check text-emerald-500 text-xs"></i>
-          <span class="text-xs font-medium text-[var(--gtk-text)]">${escapeHtml(c)}</span>
+        <div class="gtk-pill p-2.5 sm:p-3 border border-[var(--gtk-border)] flex items-start space-x-2">
+          <i class="fa-solid fa-circle-check text-emerald-500 text-xs mt-0.5 flex-shrink-0"></i>
+          <span class="text-[11px] sm:text-xs font-medium text-[var(--gtk-text)] leading-snug">${escapeHtml(c)}</span>
         </div>
       `).join('');
     }
@@ -550,6 +726,90 @@
 
     function closeExportModal() {
       document.getElementById('export-modal').classList.add('hidden');
+    }
+
+    function openPrintModal() {
+      document.getElementById('print-modal').classList.remove('hidden');
+    }
+
+    function closePrintModal() {
+      document.getElementById('print-modal').classList.add('hidden');
+    }
+
+    function triggerPrint(mode) {
+      closePrintModal();
+      if (mode === 'simplified') {
+        document.body.classList.add('print-simplified');
+      } else {
+        document.body.classList.remove('print-simplified');
+      }
+
+      // Synchronous execution to preserve browser user gesture activation token
+      try {
+        window.addEventListener('afterprint', function cleanup() {
+          document.body.classList.remove('print-simplified');
+          window.removeEventListener('afterprint', cleanup);
+        });
+
+        window.print();
+
+        // Fallback cleanup timer in case afterprint does not fire
+        setTimeout(() => {
+          document.body.classList.remove('print-simplified');
+        }, 1000);
+      } catch (err) {
+        console.warn('Direct print blocked by environment, opening printable tab fallback:', err);
+        openPrintableNewWindow(mode);
+      }
+    }
+
+    function openPrintableNewWindow(mode) {
+      closePrintModal();
+      try {
+        const printWin = window.open('', '_blank');
+        if (!printWin) {
+          showToast('Popup blocked! Please allow popups or press Ctrl+P.');
+          return;
+        }
+
+        const isSimplified = mode === 'simplified';
+        const pageTitle = document.title || 'Resume - Bradford Risbert';
+        const isDark = document.documentElement.classList.contains('dark');
+
+        const htmlContent = `
+          <!DOCTYPE html>
+          <html class="${isDark && !isSimplified ? 'dark' : ''}">
+          <head>
+            <meta charset="UTF-8">
+            <title>${pageTitle}</title>
+            <script src="https://cdn.tailwindcss.com"><\/script>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+            <style>
+              ${document.querySelector('style') ? document.querySelector('style').innerHTML : ''}
+            </style>
+          </head>
+          <body class="${document.body.className} ${isSimplified ? 'print-simplified' : ''} bg-white dark:bg-slate-900 p-4">
+            <div class="max-w-5xl mx-auto flex flex-col items-center">
+              ${document.querySelector('.max-w-5xl').outerHTML}
+            </div>
+            <script>
+              window.onload = function() {
+                setTimeout(function() {
+                  window.print();
+                }, 300);
+              };
+            <\/script>
+          </body>
+          </html>
+        `;
+
+        printWin.document.open();
+        printWin.document.write(htmlContent);
+        printWin.document.close();
+      } catch (e) {
+        console.error(e);
+        showToast('Use Ctrl+P (or Cmd+P on Mac) to print this page.');
+      }
     }
 
     function setExportFormat(fmt) {
@@ -568,10 +828,10 @@
       const p = resumeData.personal_info || {};
 
       if (exportFormat === 'plain') {
-        output = `${p.name}\n${p.title}\nContact: ${p.contact?.phone} | ${p.contact?.email}\n\nSUMMARY:\n${resumeData.summary}\n\nTECHNICAL SKILLS:\n${(resumeData.skills?.technical_tools || []).join(', ')}\n\nCREATIVE SKILLS:\n${(resumeData.skills?.creative_production || []).join(', ')}\n\nEXPERIENCE:\n` +
+        output = `${p.name}\n${p.title}\nLocation: ${p.contact?.address || ''}\nDOB: ${p.contact?.dob || ''}\nContact: ${p.contact?.phone} | ${p.contact?.email}\nPortfolio: ${p.contact?.portfolio}\n\nSUMMARY:\n${resumeData.summary}\n\nTECHNICAL SKILLS:\n${(resumeData.skills?.technical_tools || []).join(', ')}\n\nCREATIVE SKILLS:\n${(resumeData.skills?.creative_production || []).join(', ')}\n\nEXPERIENCE:\n` +
           (resumeData.work_experience || []).map(e => `${e.role} at ${e.company} (${e.dates})\n${e.description ? e.description + '\n' : ''}`).join('\n');
       } else if (exportFormat === 'markdown') {
-        output = `# ${p.name}\n**${p.title}**\n\n- Phone: ${p.contact?.phone}\n- Email: ${p.contact?.email}\n- LinkedIn: ${p.contact?.linkedin}\n\n## Summary\n${resumeData.summary}\n\n## Technical Skills\n` +
+        output = `# ${p.name}\n**${p.title}**\n\n- Location: ${p.contact?.address}\n- Date of Birth: ${p.contact?.dob}\n- Phone: ${p.contact?.phone}\n- Email: ${p.contact?.email}\n- LinkedIn: ${p.contact?.linkedin}\n- Portfolio: ${p.contact?.portfolio}\n\n## Summary\n${resumeData.summary}\n\n## Technical Skills\n` +
           (resumeData.skills?.technical_tools || []).map(s => `- ${s}`).join('\n') + `\n\n## Work Experience\n` +
           (resumeData.work_experience || []).map(e => `### ${e.role} - ${e.company}\n*${e.dates} | ${e.location}*\n\n${e.description}\n`).join('\n');
       } else if (exportFormat === 'json') {
@@ -592,7 +852,7 @@
     function copyContactInfo() {
       const p = resumeData.personal_info || {};
       const c = p.contact || {};
-      const text = `${p.name}\nEmail: ${c.email}\nPhone: +91 ${c.phone}\nLinkedIn: ${c.linkedin}`;
+      const text = `${p.name}\nLocation: ${c.address}\nDOB: ${c.dob}\nEmail: ${c.email}\nPhone: +91 ${c.phone}\nLinkedIn: ${c.linkedin}\nPortfolio: ${c.portfolio}`;
       const tempInput = document.createElement('textarea');
       tempInput.value = text;
       document.body.appendChild(tempInput);
@@ -650,7 +910,7 @@
     }
 
     window.onload = function() {
-      const savedTheme = localStorage.getItem('bradford_resume_theme') || 'dark';
+      const savedTheme = localStorage.getItem('bradford_resume_theme') || 'light';
       setTheme(savedTheme);
 
       renderAll();
@@ -658,6 +918,7 @@
       document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
           closeExportModal();
+          closePrintModal();
         }
       });
     };
