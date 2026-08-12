@@ -32,45 +32,41 @@
             overflow: hidden;
         }
 
-        /* --- DESKTOP HUD --- */
         #hud {
             position: absolute;
-            top: calc(12px + env(safe-area-inset-top, 0px));
-            left: 12px;
+            top: calc(10px + env(safe-area-inset-top, 0px));
+            left: 10px;
             background: rgba(255, 255, 255, 0.95);
-            padding: 10px 14px;
+            padding: 10px 12px;
             border-radius: 12px;
             border: 1px solid rgba(0, 0, 0, 0.15);
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
-            min-width: 280px;
-            max-width: 320px;
+            min-width: 270px;
+            max-width: 310px;
             z-index: 1000;
             box-sizing: border-box;
         }
 
-        /* Only scroll inner content, keeping toggle button pinned */
         #hud-content {
-            max-height: 70vh;
+            max-height: 65vh;
             overflow-y: auto;
             margin-top: 6px;
         }
 
-        /* --- COMPACT MOBILE / PORTRAIT HUD --- */
         @media (orientation: portrait), (max-width: 600px) {
             #hud {
-                top: calc(10px + env(safe-area-inset-top, 0px));
-                left: 10px;
-                right: 10px;
+                top: calc(8px + env(safe-area-inset-top, 0px));
+                left: 8px;
+                right: 8px;
                 min-width: auto;
                 max-width: none;
-                padding: 8px 10px;
+                padding: 6px 8px;
             }
             #hud-content {
-                max-height: 38vh;
+                max-height: 35vh;
             }
-            .scale-group { display: none; }
-            h2 { font-size: 11px; margin-bottom: 4px; }
-            .info-row { font-size: 10px; margin-bottom: 2px; }
+            h2 { font-size: 11px; margin-bottom: 2px; }
+            .info-row { font-size: 9.5px; margin-bottom: 2px; }
         }
 
         #hud-content.collapsed {
@@ -97,8 +93,15 @@
         .control-group {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 6px;
-            margin-top: 8px;
+            gap: 4px;
+            margin-top: 6px;
+        }
+
+        .fps-group {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 4px;
+            margin-top: 6px;
         }
 
         .cam-btn-group {
@@ -111,11 +114,11 @@
             background: #f3f4f6;
             color: #1f2937;
             border: 1px solid #d1d5db;
-            padding: 6px 4px;
-            border-radius: 6px;
+            padding: 5px 3px;
+            border-radius: 5px;
             cursor: pointer;
             text-align: center;
-            font-size: 10px;
+            font-size: 9.5px;
             font-weight: bold;
             transition: all 0.2s ease;
         }
@@ -132,8 +135,9 @@
             color: #fff;
             border: none;
             width: 100%;
-            padding: 8px 10px;
+            padding: 6px 10px;
             font-size: 11px;
+            border-radius: 6px;
         }
 
         #banner {
@@ -180,6 +184,13 @@
                     <button class="btn btn-pause" id="btn-pause">⏸️ Pause</button>
                     <button class="btn btn-reset" id="btn-reset">🔄 Reset Game</button>
                     <button class="btn btn-orient" id="toggle-orient">📱 Portrait / Landscape</button>
+                </div>
+
+                <!-- FPS CAP SELECTOR -->
+                <div class="fps-group">
+                    <button class="btn active" id="fps-30">⚡ 30 FPS</button>
+                    <button class="btn" id="fps-60">🚀 60 FPS</button>
+                    <button class="btn" id="fps-max">🔥 Max</button>
                 </div>
 
                 <div class="cam-btn-group">
@@ -243,7 +254,7 @@
         scene.background = new THREE.Color(0x0b0f19);
         scene.fog = new THREE.FogExp2(0x0b0f19, 0.018);
 
-        const camera = new THREE.PerspectiveCamera(50, container.clientWidth / container.clientHeight, 0.1, 120);
+        const camera = new THREE.PerspectiveCamera(50, container.clientWidth / container.clientHeight, 0.05, 120);
         const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
         renderer.setSize(container.clientWidth, container.clientHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -254,12 +265,14 @@
         const controls = new OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
 
-        // --- LIGHTING ---
+        // --- LIGHTING & SCONCES ---
         scene.add(new THREE.AmbientLight(0xffffff, 1.8));
         const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
         dirLight.position.set(10, 20, 15);
         dirLight.castShadow = true;
         scene.add(dirLight);
+
+        const sconceLights = [];
 
         // --- ENVIRONMENT ---
         function createWallTexture() {
@@ -283,6 +296,8 @@
         const wallTexture = createWallTexture();
         const wallGeom = new THREE.BoxGeometry(CELL_SIZE, WALL_HEIGHT, CELL_SIZE);
         const wallMat = new THREE.MeshStandardMaterial({ map: wallTexture, roughness: 0.4, metalness: 0.1 });
+        const archGeom = new THREE.BoxGeometry(CELL_SIZE * 0.9, 0.3, 0.4);
+        const archMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.8, roughness: 0.2 });
 
         const wallColliders = [];
         let startGrid = { c: 1, r: 1 };
@@ -303,11 +318,21 @@
                     if (MAZE[r][c] === 2) startPos.set(c * CELL_SIZE, 0, r * CELL_SIZE);
                     if (MAZE[r][c] === 3) endPos.set(c * CELL_SIZE, 0, r * CELL_SIZE);
 
-                    if (Math.random() < 0.25) {
+                    // Corridor Support Arches
+                    if (r % 2 === 0 && c % 2 === 0) {
+                        const arch = new THREE.Mesh(archGeom, archMat);
+                        arch.position.set(c * CELL_SIZE, WALL_HEIGHT - 0.2, r * CELL_SIZE);
+                        scene.add(arch);
+                    }
+
+                    // Sconce Lights
+                    if (Math.random() < 0.3) {
                         const lightColor = Math.random() > 0.5 ? 0x00e5ff : 0xd97706;
                         const pLight = new THREE.PointLight(lightColor, 2.2, 9);
                         pLight.position.set(c * CELL_SIZE, WALL_HEIGHT - 0.6, r * CELL_SIZE);
+                        pLight.userData = { originalColor: lightColor };
                         scene.add(pLight);
+                        sconceLights.push(pLight);
                     }
                 }
             }
@@ -337,9 +362,12 @@
         const attackerScale = 1.8;
         const attackerMaxSpeed = 4.5;
 
-        // --- GAME CONTROLS STATE ---
+        // --- GAME CONTROLS & FPS CAP STATE ---
         let isPaused = false;
         let isGameOver = false;
+        let targetFPS = 30; // Default 30 FPS for mobile smoothness/cool devices
+        let fpsInterval = 1000 / targetFPS;
+        let lastFrameTime = performance.now();
 
         // --- RUNNER STATE ---
         let runnerModel, runnerMixer;
@@ -404,6 +432,20 @@
         }
 
         initModels();
+
+        // --- FPS BUTTON LISTENERS ---
+        function setFPSCap(fps) {
+            targetFPS = fps;
+            fpsInterval = fps > 0 ? (1000 / fps) : 0;
+            document.querySelectorAll('.fps-group .btn').forEach(b => b.classList.remove('active'));
+            if (fps === 30) document.getElementById('fps-30').classList.add('active');
+            if (fps === 60) document.getElementById('fps-60').classList.add('active');
+            if (fps === 0) document.getElementById('fps-max').classList.add('active');
+        }
+
+        document.getElementById('fps-30').addEventListener('click', () => setFPSCap(30));
+        document.getElementById('fps-60').addEventListener('click', () => setFPSCap(60));
+        document.getElementById('fps-max').addEventListener('click', () => setFPSCap(0));
 
         // --- PAUSE AND RESET HANDLERS ---
         document.getElementById('btn-pause').addEventListener('click', () => {
@@ -562,6 +604,7 @@
             return null;
         }
 
+        // --- CARMILLA PROACTIVE EVASION (EARLY LOS TRIGGER) ---
         function selectNextRunnerWaypoint() {
             if (!runnerModel || isGameOver) return;
 
@@ -579,9 +622,10 @@
                 losElement.className = 'highlight-green';
             }
 
-            if (!isEvadingMode && distToAttacker < 10.0 && hasLineOfSight) {
+            // PROACTIVE EVASION: Trigger evasion earlier at 14m on LoS so she never walks toward the Demon
+            if (!isEvadingMode && distToAttacker < 14.0 && hasLineOfSight) {
                 isEvadingMode = true;
-            } else if (isEvadingMode && (distToAttacker > 15.0 || (!hasLineOfSight && distToAttacker > 8.0))) {
+            } else if (isEvadingMode && (distToAttacker > 16.0 || (!hasLineOfSight && distToAttacker > 8.0))) {
                 isEvadingMode = false;
             }
 
@@ -601,6 +645,7 @@
                 const pathFromAttacker = findPathBFS(attackerGrid, runnerGrid);
                 const currentDistFromAttacker = pathFromAttacker ? pathFromAttacker.length : 0;
 
+                // Candidate paths that strictly INCREASE distance from Attacker
                 let safeCandidates = openPaths.filter(cell => {
                     const p = findPathBFS(attackerGrid, cell);
                     const d = p ? p.length : 0;
@@ -701,11 +746,16 @@
                 speedElement.innerText = `${currentAttackerSpeed.toFixed(1)}m/s (CHASING)`;
                 speedElement.className = 'highlight-red';
                 fadeAttackerState('RunFast');
+
+                // RED ALERT AMBIANCE STROBE
+                sconceLights.forEach(l => l.color.setHex(0xdc2626));
             } else {
                 currentAttackerSpeed = 1.8;
                 speedElement.innerText = `${currentAttackerSpeed.toFixed(1)}m/s (PATROL)`;
                 speedElement.className = 'highlight-blue';
                 fadeAttackerState('Walking');
+
+                sconceLights.forEach(l => l.color.setHex(l.userData.originalColor));
             }
 
             POOL.v2.subVectors(attackerTargetPos, attackerPos).setY(0);
@@ -739,6 +789,20 @@
                 showBanner('CAUGHT BY DEMON!', 'game-over');
                 fadeRunnerState('IDLE');
                 fadeAttackerState('IDLE');
+            }
+        }
+
+        // --- CAMERA WALL COLLISION / OCCLUSION PREVENTER ---
+        function preventCameraWallCollision(camPos, lookAtPos) {
+            POOL.v3.copy(lookAtPos);
+            POOL.dir.subVectors(camPos, POOL.v3);
+            const dist = POOL.dir.length();
+            POOL.dir.normalize();
+
+            POOL.raycaster.set(POOL.v3, POOL.dir);
+            const hits = POOL.raycaster.intersectObjects(wallColliders);
+            if (hits.length > 0 && hits[0].distance < dist) {
+                camPos.copy(POOL.v3).addScaledVector(POOL.dir, Math.max(0.4, hits[0].distance - 0.35));
             }
         }
 
@@ -802,45 +866,51 @@
             } else if (activeView === 'CHASE') {
                 POOL.dir.set(0, 2.8, -5.5).applyAxisAngle(new THREE.Vector3(0, 1, 0), runnerModel.rotation.y);
                 POOL.camTarget.copy(runnerPos).add(POOL.dir);
+                preventCameraWallCollision(POOL.camTarget, POOL.lookTarget);
                 camera.position.lerp(POOL.camTarget, 0.08);
                 controls.target.lerp(POOL.lookTarget, 0.08);
 
             } else if (activeView === 'FRONT') {
                 POOL.dir.set(0, 1.8, 4.5).applyAxisAngle(new THREE.Vector3(0, 1, 0), runnerModel.rotation.y);
                 POOL.camTarget.copy(runnerPos).add(POOL.dir);
+                preventCameraWallCollision(POOL.camTarget, POOL.lookTarget);
                 camera.position.lerp(POOL.camTarget, 0.08);
                 controls.target.lerp(POOL.lookTarget, 0.08);
 
             } else if (activeView === 'WORM_FRONT') {
-                POOL.dir.set(0, 0.35, 3.2).applyAxisAngle(new THREE.Vector3(0, 1, 0), runnerModel.rotation.y);
+                POOL.dir.set(0, 0.45, 3.0).applyAxisAngle(new THREE.Vector3(0, 1, 0), runnerModel.rotation.y);
                 POOL.camTarget.copy(runnerPos).add(POOL.dir);
+                preventCameraWallCollision(POOL.camTarget, POOL.lookTarget);
                 camera.position.lerp(POOL.camTarget, 0.08);
                 controls.target.lerp(POOL.lookTarget, 0.08);
 
             } else if (activeView === 'WORM_BACK') {
-                POOL.dir.set(0, 0.35, -3.2).applyAxisAngle(new THREE.Vector3(0, 1, 0), runnerModel.rotation.y);
+                POOL.dir.set(0, 0.45, -3.0).applyAxisAngle(new THREE.Vector3(0, 1, 0), runnerModel.rotation.y);
                 POOL.camTarget.copy(runnerPos).add(POOL.dir);
+                preventCameraWallCollision(POOL.camTarget, POOL.lookTarget);
                 camera.position.lerp(POOL.camTarget, 0.08);
                 controls.target.lerp(POOL.lookTarget, 0.08);
 
             } else if (activeView === 'PIVOT_RUNNER') {
-                const radius = 4.5;
+                const radius = 4.2;
                 POOL.camTarget.set(
                     runnerPos.x + Math.sin(pivotAngle) * radius,
                     runnerPos.y + 1.8,
                     runnerPos.z + Math.cos(pivotAngle) * radius
                 );
+                preventCameraWallCollision(POOL.camTarget, POOL.lookTarget);
                 camera.position.lerp(POOL.camTarget, 0.08);
                 controls.target.lerp(POOL.lookTarget, 0.08);
 
             } else if (activeView === 'PIVOT_ATTACKER') {
-                const radius = 5.5;
+                const radius = 5.0;
                 POOL.v3.copy(attackerPos).setY(1.2 * attackerScale);
                 POOL.camTarget.set(
                     attackerPos.x + Math.sin(pivotAngle) * radius,
                     attackerPos.y + 2.0,
                     attackerPos.z + Math.cos(pivotAngle) * radius
                 );
+                preventCameraWallCollision(POOL.camTarget, POOL.v3);
                 camera.position.lerp(POOL.camTarget, 0.08);
                 controls.target.lerp(POOL.v3, 0.08);
             }
@@ -853,8 +923,15 @@
             banner.style.display = 'block';
         }
 
-        function animate() {
+        // --- RENDER LOOP WITH FPS LIMITER ---
+        function animate(now) {
             requestAnimationFrame(animate);
+
+            if (targetFPS > 0) {
+                const elapsed = now - lastFrameTime;
+                if (elapsed < fpsInterval) return;
+                lastFrameTime = now - (elapsed % fpsInterval);
+            }
 
             const delta = clock.getDelta();
 
@@ -871,7 +948,7 @@
             renderer.render(scene, camera);
         }
 
-        animate();
+        animate(performance.now());
     </script>
 </body>
 </html>
