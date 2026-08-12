@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Carmilla: Dual-Character Cinematic Escape</title>
+    <title>Carmilla: The Demon Escape</title>
     <style>
         body {
             margin: 0;
@@ -32,32 +32,40 @@
             overflow: hidden;
         }
 
+        /* --- DESKTOP HUD --- */
         #hud {
             position: absolute;
             top: 15px;
             left: 15px;
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(255, 255, 255, 0.94);
             padding: 12px 16px;
             border-radius: 10px;
             border: 1px solid rgba(0, 0, 0, 0.15);
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-            min-width: 300px;
+            min-width: 280px;
             max-height: 88vh;
             overflow-y: auto;
             z-index: 10;
         }
 
+        /* --- COMPACT MOBILE / PORTRAIT HUD --- */
         @media (orientation: portrait), (max-width: 600px) {
             #hud {
-                top: auto;
-                bottom: 10px;
+                top: 10px;
                 left: 10px;
                 right: 10px;
                 min-width: auto;
-                max-height: 42vh;
-                padding: 10px;
+                max-height: 35vh;
+                padding: 8px 12px;
+                font-size: 10px;
             }
             .scale-group { display: none; }
+            h2 { font-size: 11px; margin-bottom: 4px; }
+            .info-row { font-size: 10px; margin-bottom: 2px; }
+        }
+
+        #hud-content.collapsed {
+            display: none;
         }
 
         h2 {
@@ -77,40 +85,13 @@
         .highlight-blue { color: #0284c7; }
         .highlight-purple { color: #9333ea; }
         
-        .scale-group {
-            margin-top: 6px;
-            font-size: 10px;
-            font-weight: bold;
-        }
-        .scale-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 3px;
-        }
-        .scale-row input { width: 100px; }
-
-        .url-input-group {
-            margin-top: 8px;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-        .url-input-group input {
-            font-size: 10px;
-            padding: 4px 6px;
-            border: 1px solid #cbd5e1;
-            border-radius: 4px;
-            width: 100%;
-            box-sizing: border-box;
-        }
-
-        .upload-group {
+        .control-group {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 6px;
-            margin-top: 6px;
+            margin-top: 8px;
         }
+
         .cam-btn-group {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -134,34 +115,10 @@
             color: #fff;
             border-color: #0284c7;
         }
-        .btn-orient {
-            background: #9333ea;
-            color: #fff;
-            border: none;
-            width: 100%;
-            margin-top: 6px;
-        }
-        .btn-lock-url {
-            background: #16a34a;
-            color: #fff;
-            border: none;
-            width: 100%;
-            margin-top: 4px;
-            padding: 6px;
-        }
-        .upload-btn {
-            background: #0284c7;
-            color: #fff;
-            border: none;
-            padding: 6px;
-        }
-        .upload-btn-attacker {
-            background: #dc2626;
-            color: #fff;
-            border: none;
-            padding: 6px;
-        }
-        input[type="file"] { display: none; }
+        .btn-pause { background: #d97706; color: #fff; border: none; }
+        .btn-reset { background: #dc2626; color: #fff; border: none; }
+        .btn-orient { background: #9333ea; color: #fff; border: none; grid-column: span 2; }
+        .btn-collapse { background: #64748b; color: #fff; border: none; margin-bottom: 6px; width: 100%; }
 
         #banner {
             position: absolute;
@@ -194,58 +151,31 @@
 
     <div id="canvas-container">
         <div id="hud">
-            <h2>Dual-Character Optimized AI</h2>
-            <div class="info-row">Objective: <span id="objective" class="highlight-blue">Reach END Goal</span></div>
-            <div class="info-row">Line of Sight: <span id="los-state" class="highlight-green">BLOCKED (Hidden)</span></div>
-            <div class="info-row">Runner State: <span id="ai-state" class="highlight-green">WALKING</span></div>
-            <div class="info-row">Attacker Mode: <span id="attacker-speed" class="highlight-blue">1.8m/s (PATROL)</span></div>
-            <div class="info-row">Camera View: <span id="cam-mode-text" class="highlight-purple">DYNAMIC MOVIE</span></div>
+            <button class="btn btn-collapse" id="hud-toggle">⚙️ Toggle HUD Menu</button>
+            <div id="hud-content">
+                <h2>Carmilla vs Demon Escape</h2>
+                <div class="info-row">Objective: <span id="objective" class="highlight-blue">Reach END Goal</span></div>
+                <div class="info-row">Line of Sight: <span id="los-state" class="highlight-green">BLOCKED (Hidden)</span></div>
+                <div class="info-row">Runner State: <span id="ai-state" class="highlight-green">WALKING</span></div>
+                <div class="info-row">Demon Mode: <span id="attacker-speed" class="highlight-blue">1.8m/s (PATROL)</span></div>
+                <div class="info-row">Camera View: <span id="cam-mode-text" class="highlight-purple">DYNAMIC MOVIE</span></div>
 
-            <button class="btn btn-orient" id="toggle-orient">📱 Switch Portrait / Landscape</button>
-
-            <!-- GITHUB / REMOTE URL INPUTS -->
-            <div class="url-input-group">
-                <input type="text" id="runner-url" placeholder="GitHub Raw Runner GLB URL...">
-                <input type="text" id="attacker-url" placeholder="GitHub Raw Attacker GLB URL...">
-                <button class="btn btn-lock-url" id="load-urls-btn">🔒 Lock & Load Remote Models</button>
-            </div>
-
-            <!-- SCALING & SPEED CONTROL SLIDERS -->
-            <div class="scale-group">
-                <div class="scale-row">
-                    <label for="runner-scale">Runner Scale:</label>
-                    <input type="range" id="runner-scale" min="0.5" max="3.0" step="0.1" value="1.0">
+                <div class="control-group">
+                    <button class="btn btn-pause" id="btn-pause">⏸️ Pause</button>
+                    <button class="btn btn-reset" id="btn-reset">🔄 Reset Game</button>
+                    <button class="btn btn-orient" id="toggle-orient">📱 Portrait / Landscape</button>
                 </div>
-                <div class="scale-row">
-                    <label for="attacker-scale">Demon Scale:</label>
-                    <input type="range" id="attacker-scale" min="0.5" max="3.5" step="0.1" value="1.8">
-                </div>
-                <div class="scale-row">
-                    <label for="attacker-speed-max">Demon Max Speed:</label>
-                    <input type="range" id="attacker-speed-max" min="2.0" max="4.7" step="0.1" value="4.5">
-                </div>
-            </div>
 
-            <div class="cam-btn-group">
-                <button class="btn active" id="cam-auto">🎬 Auto</button>
-                <button class="btn" id="cam-god">👁️ God</button>
-                <button class="btn" id="cam-chase">🏎️ Chase</button>
-                <button class="btn" id="cam-front">🎥 Front</button>
-                <button class="btn" id="cam-worm-f">🐛 W-Front</button>
-                <button class="btn" id="cam-worm-b">🐛 W-Back</button>
-                <button class="btn" id="cam-pivot-r">🔄 Piv-Run</button>
-                <button class="btn" id="cam-pivot-a">🔄 Piv-Atk</button>
-            </div>
-
-            <div class="upload-group">
-                <label class="btn upload-btn">
-                    🏃 Local Runner
-                    <input type="file" id="glb-runner-input" accept=".glb,.gltf">
-                </label>
-                <label class="btn upload-btn-attacker">
-                    ⚔️ Local Attacker
-                    <input type="file" id="glb-attacker-input" accept=".glb,.gltf">
-                </label>
+                <div class="cam-btn-group">
+                    <button class="btn active" id="cam-auto">🎬 Auto</button>
+                    <button class="btn" id="cam-god">👁️ God</button>
+                    <button class="btn" id="cam-chase">🏎️ Chase</button>
+                    <button class="btn" id="cam-front">🎥 Front</button>
+                    <button class="btn" id="cam-worm-f">🐛 W-Front</button>
+                    <button class="btn" id="cam-worm-b">🐛 W-Back</button>
+                    <button class="btn" id="cam-pivot-r">🔄 Piv-Run</button>
+                    <button class="btn" id="cam-pivot-a">🔄 Piv-Atk</button>
+                </div>
             </div>
         </div>
 
@@ -256,6 +186,10 @@
         import * as THREE from 'three';
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
         import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+        // --- HARDCODED FIXED ASSETS ---
+        const RUNNER_URL = 'https://trancedemon-collab.github.io/my_apps/glb/carmilla.glb';
+        const ATTACKER_URL = 'https://trancedemon-collab.github.io/my_apps/glb/demon.glb';
 
         // --- MAZE MATRIX ---
         const CELL_SIZE = 4;
@@ -383,9 +317,13 @@
         scene.add(gridHelper);
 
         // --- CHARACTER CONFIGURATIONS ---
-        let runnerScale = 1.0;
-        let attackerScale = 1.8;
-        let attackerMaxSpeed = 4.5; // Slightly slower than Carmilla's 4.8m/s
+        const runnerScale = 1.0;
+        const attackerScale = 1.8;
+        const attackerMaxSpeed = 4.5;
+
+        // --- GAME CONTROLS STATE ---
+        let isPaused = false;
+        let isGameOver = false;
 
         // --- RUNNER STATE ---
         let runnerModel, runnerMixer;
@@ -403,7 +341,6 @@
         let runnerSpeed = 0;
         let isEvadingMode = false;
         let hasLineOfSight = false;
-        let isGameOver = false;
 
         // --- ATTACKER STATE ---
         let attackerModel, attackerMixer;
@@ -420,103 +357,83 @@
         const clock = new THREE.Clock();
         const gltfLoader = new GLTFLoader();
 
-        function createPlaceholderAttacker() {
-            const group = new THREE.Group();
-            const mesh = new THREE.Mesh(
-                new THREE.CapsuleGeometry(0.6, 1.2, 8, 16),
-                new THREE.MeshStandardMaterial({ color: 0xdc2626, emissive: 0x7f1d1d, roughness: 0.3 })
-            );
-            mesh.position.y = 1.2;
-            mesh.castShadow = true;
-            group.add(mesh);
-            return group;
-        }
-
-        attackerModel = createPlaceholderAttacker();
-        attackerModel.position.copy(endPos);
-        attackerModel.scale.setScalar(attackerScale);
-        scene.add(attackerModel);
-
-        function loadRunnerSource(source) {
-            const url = (typeof source === 'string') ? source : URL.createObjectURL(source);
-            if (runnerModel) scene.remove(runnerModel);
-
-            gltfLoader.load(url, (gltf) => {
+        // --- AUTO-LOAD GLB MODELS AT STARTUP ---
+        function initModels() {
+            gltfLoader.load(RUNNER_URL, (gltf) => {
                 runnerModel = gltf.scene;
                 runnerModel.position.copy(startPos);
                 runnerModel.scale.setScalar(runnerScale);
-
-                runnerModel.traverse((node) => {
-                    if (node.isMesh) node.castShadow = true;
-                });
+                runnerModel.traverse((node) => { if (node.isMesh) node.castShadow = true; });
 
                 scene.add(runnerModel);
                 runnerMixer = new THREE.AnimationMixer(runnerModel);
-                gltf.animations.forEach((clip) => {
-                    runnerAnimMap.set(clip.name, runnerMixer.clipAction(clip));
-                });
-
-                runnerPrevGrid = { c: 1, r: 1 };
-                runnerGrid = { c: 1, r: 1 };
-                runnerNextGrid = { c: 1, r: 1 };
-                runnerTargetPos.copy(startPos);
+                gltf.animations.forEach((clip) => { runnerAnimMap.set(clip.name, runnerMixer.clipAction(clip)); });
 
                 fadeRunnerState('Walking');
                 selectNextRunnerWaypoint();
-            }, undefined, (err) => console.error("Could not load Runner GLB:", err));
-        }
+            }, undefined, (err) => console.error("Could not load Carmilla GLB:", err));
 
-        function loadAttackerSource(source) {
-            const url = (typeof source === 'string') ? source : URL.createObjectURL(source);
-            if (attackerModel) scene.remove(attackerModel);
-
-            gltfLoader.load(url, (gltf) => {
+            gltfLoader.load(ATTACKER_URL, (gltf) => {
                 attackerModel = gltf.scene;
-                attackerModel.position.copy(attackerTargetPos);
+                attackerModel.position.copy(endPos);
                 attackerModel.scale.setScalar(attackerScale);
-
-                attackerModel.traverse((node) => {
-                    if (node.isMesh) node.castShadow = true;
-                });
+                attackerModel.traverse((node) => { if (node.isMesh) node.castShadow = true; });
 
                 scene.add(attackerModel);
                 attackerMixer = new THREE.AnimationMixer(attackerModel);
-                gltf.animations.forEach((clip) => {
-                    attackerAnimMap.set(clip.name, attackerMixer.clipAction(clip));
-                });
+                gltf.animations.forEach((clip) => { attackerAnimMap.set(clip.name, attackerMixer.clipAction(clip)); });
 
                 fadeAttackerState('Walking');
-            }, undefined, (err) => console.error("Could not load Attacker GLB:", err));
+            }, undefined, (err) => console.error("Could not load Demon GLB:", err));
         }
 
-        // --- URL PARAMETER & GITHUB REMOTE LOADING ---
-        const urlParams = new URLSearchParams(window.location.search);
-        const paramRunner = urlParams.get('runner');
-        const paramAttacker = urlParams.get('attacker');
+        initModels();
 
-        if (paramRunner) {
-            document.getElementById('runner-url').value = paramRunner;
-            loadRunnerSource(paramRunner);
-        } else {
-            gltfLoader.load('3d carmilla.glb', () => loadRunnerSource('3d carmilla.glb'));
+        // --- PAUSE AND RESET HANDLERS ---
+        document.getElementById('btn-pause').addEventListener('click', () => {
+            isPaused = !isPaused;
+            const pBtn = document.getElementById('btn-pause');
+            pBtn.innerText = isPaused ? '▶️ Resume' : '⏸️ Pause';
+            pBtn.style.background = isPaused ? '#16a34a' : '#d97706';
+        });
+
+        document.getElementById('btn-reset').addEventListener('click', resetGame);
+
+        function resetGame() {
+            isGameOver = false;
+            isPaused = false;
+            isEvadingMode = false;
+            currentGoal = 'END';
+
+            document.getElementById('btn-pause').innerText = '⏸️ Pause';
+            document.getElementById('btn-pause').style.background = '#d97706';
+            document.getElementById('banner').style.display = 'none';
+            document.getElementById('objective').innerText = 'Reach END Goal';
+            document.getElementById('objective').className = 'highlight-blue';
+
+            // Reset Positions
+            if (runnerModel) {
+                runnerModel.position.copy(startPos);
+                runnerGrid = { ...startGrid };
+                runnerNextGrid = { ...startGrid };
+                runnerPrevGrid = { ...startGrid };
+                runnerTargetPos.copy(startPos);
+                fadeRunnerState('Walking');
+                selectNextRunnerWaypoint();
+            }
+
+            if (attackerModel) {
+                attackerModel.position.copy(endPos);
+                attackerGrid = { ...endGrid };
+                attackerNextGrid = { ...endGrid };
+                attackerTargetPos.copy(endPos);
+                fadeAttackerState('Walking');
+            }
         }
 
-        if (paramAttacker) {
-            document.getElementById('attacker-url').value = paramAttacker;
-            loadAttackerSource(paramAttacker);
-        }
-
-        document.getElementById('load-urls-btn').addEventListener('click', () => {
-            const rUrl = document.getElementById('runner-url').value.trim();
-            const aUrl = document.getElementById('attacker-url').value.trim();
-
-            if (rUrl) loadRunnerSource(rUrl);
-            if (aUrl) loadAttackerSource(aUrl);
-
-            const newUrl = new URL(window.location.href);
-            if (rUrl) newUrl.searchParams.set('runner', rUrl);
-            if (aUrl) newUrl.searchParams.set('attacker', aUrl);
-            window.history.pushState({}, '', newUrl);
+        // HUD Toggle & Orientation Switch
+        document.getElementById('hud-toggle').addEventListener('click', () => {
+            document.getElementById('hud-content').classList.toggle('collapsed');
         });
 
         function updateViewportSize() {
@@ -531,20 +448,6 @@
         });
 
         window.addEventListener('resize', updateViewportSize);
-
-        document.getElementById('runner-scale').addEventListener('input', (e) => {
-            runnerScale = parseFloat(e.target.value);
-            if (runnerModel) runnerModel.scale.setScalar(runnerScale);
-        });
-
-        document.getElementById('attacker-scale').addEventListener('input', (e) => {
-            attackerScale = parseFloat(e.target.value);
-            if (attackerModel) attackerModel.scale.setScalar(attackerScale);
-        });
-
-        document.getElementById('attacker-speed-max').addEventListener('input', (e) => {
-            attackerMaxSpeed = parseFloat(e.target.value);
-        });
 
         // --- ANIMATION CONTROLLER ---
         function fadeRunnerState(name, duration = 0.2) {
@@ -736,7 +639,7 @@
         }
 
         function updateRunnerAI(delta) {
-            if (!runnerModel || isGameOver) return;
+            if (!runnerModel || isGameOver || isPaused) return;
 
             const runnerPos = runnerModel.position;
             POOL.v1.subVectors(runnerTargetPos, runnerPos).setY(0);
@@ -771,7 +674,7 @@
         }
 
         function updateAttackerAI(delta) {
-            if (!runnerModel || isGameOver) return;
+            if (!runnerModel || isGameOver || isPaused) return;
 
             const attackerPos = attackerModel.position;
             const distToRunner = attackerPos.distanceTo(runnerModel.position);
@@ -780,7 +683,6 @@
 
             if (hasLineOfSight && distToRunner < 11.0) {
                 const proximityFactor = Math.max(0, 1 - (distToRunner / 11.0));
-                // Scales up to slider max speed (4.5 m/s vs Carmilla's 4.8 m/s)
                 currentAttackerSpeed = THREE.MathUtils.lerp(1.8, attackerMaxSpeed, Math.pow(proximityFactor, 1.3));
                 speedElement.innerText = `${currentAttackerSpeed.toFixed(1)}m/s (CHASING)`;
                 speedElement.className = 'highlight-red';
@@ -820,7 +722,7 @@
 
             if (distToRunner < (1.4 * Math.max(1, attackerScale * 0.7)) && hasLineOfSight) {
                 isGameOver = true;
-                showBanner('CAUGHT BY ATTACKER!', 'game-over');
+                showBanner('CAUGHT BY DEMON!', 'game-over');
                 fadeRunnerState('IDLE');
                 fadeAttackerState('IDLE');
             }
@@ -937,25 +839,20 @@
             banner.style.display = 'block';
         }
 
-        document.getElementById('glb-runner-input').addEventListener('change', (e) => {
-            if (e.target.files[0]) loadRunnerGLB(e.target.files[0]);
-        });
-        document.getElementById('glb-attacker-input').addEventListener('change', (e) => {
-            if (e.target.files[0]) loadAttackerGLB(e.target.files[0]);
-        });
-
         function animate() {
             requestAnimationFrame(animate);
 
             const delta = clock.getDelta();
 
-            if (runnerMixer) runnerMixer.update(delta);
-            if (attackerMixer) attackerMixer.update(delta);
+            if (!isPaused) {
+                if (runnerMixer) runnerMixer.update(delta);
+                if (attackerMixer) attackerMixer.update(delta);
 
-            updateRunnerAI(delta);
-            updateAttackerAI(delta);
+                updateRunnerAI(delta);
+                updateAttackerAI(delta);
+            }
+
             updateCamera(delta);
-
             controls.update();
             renderer.render(scene, camera);
         }
