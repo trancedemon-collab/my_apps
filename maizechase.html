@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carmilla: Dual-Character Cinematic Escape</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #0b0f19;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #111827;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        #canvas-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        #canvas-container.portrait-mode {
+            width: 390px;
+            height: 844px;
+            max-height: 90vh;
+            border: 4px solid #0284c7;
+            border-radius: 20px;
+            box-shadow: 0 0 40px rgba(2, 132, 199, 0.4);
+            overflow: hidden;
+        }
+
+        #hud {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 12px 16px;
+            border-radius: 10px;
+            border: 1px solid rgba(0, 0, 0, 0.15);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            min-width: 300px;
+            max-height: 88vh;
+            overflow-y: auto;
+            z-index: 10;
+        }
+
+        @media (orientation: portrait), (max-width: 600px) {
+            #hud {
+                top: auto;
+                bottom: 10px;
+                left: 10px;
+                right: 10px;
+                min-width: auto;
+                max-height: 42vh;
+                padding: 10px;
+            }
+            .scale-group { display: none; }
+        }
+
+        h2 {
+            margin: 0 0 6px 0;
+            font-size: 13px;
+            color: #0284c7;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .info-row {
+            font-size: 11px;
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+        .highlight-green { color: #16a34a; }
+        .highlight-red { color: #dc2626; }
+        .highlight-blue { color: #0284c7; }
+        .highlight-purple { color: #9333ea; }
+        
+        .scale-group {
+            margin-top: 6px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+        .scale-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 3px;
+        }
+        .scale-row input { width: 100px; }
+
+        .url-input-group {
+            margin-top: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .url-input-group input {
+            font-size: 10px;
+            padding: 4px 6px;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .upload-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            margin-top: 6px;
+        }
+        .cam-btn-group {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 4px;
+            margin-top: 6px;
+        }
+        .btn {
+            background: #f3f4f6;
+            color: #1f2937;
+            border: 1px solid #d1d5db;
+            padding: 5px 3px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: center;
+            font-size: 9.5px;
+            font-weight: bold;
+            transition: all 0.2s ease;
+        }
+        .btn:hover, .btn.active {
+            background: #0284c7;
+            color: #fff;
+            border-color: #0284c7;
+        }
+        .btn-orient {
+            background: #9333ea;
+            color: #fff;
+            border: none;
+            width: 100%;
+            margin-top: 6px;
+        }
+        .btn-lock-url {
+            background: #16a34a;
+            color: #fff;
+            border: none;
+            width: 100%;
+            margin-top: 4px;
+            padding: 6px;
+        }
+        .upload-btn {
+            background: #0284c7;
+            color: #fff;
+            border: none;
+            padding: 6px;
+        }
+        .upload-btn-attacker {
+            background: #dc2626;
+            color: #fff;
+            border: none;
+            padding: 6px;
+        }
+        input[type="file"] { display: none; }
+
+        #banner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 26px;
+            font-weight: bold;
+            text-align: center;
+            padding: 16px 32px;
+            border-radius: 12px;
+            display: none;
+            z-index: 100;
+            letter-spacing: 1.5px;
+        }
+        .game-over { background: rgba(220, 38, 38, 0.95); color: #fff; box-shadow: 0 10px 30px rgba(220, 38, 38, 0.5); }
+        .game-win { background: rgba(22, 163, 74, 0.95); color: #fff; box-shadow: 0 10px 30px rgba(22, 163, 74, 0.5); }
+    </style>
+
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        }
+    }
+    </script>
+</head>
+<body>
+
+    <div id="canvas-container">
+        <div id="hud">
+            <h2>Dual-Character Optimized AI</h2>
+            <div class="info-row">Objective: <span id="objective" class="highlight-blue">Reach END Goal</span></div>
+            <div class="info-row">Line of Sight: <span id="los-state" class="highlight-green">BLOCKED (Hidden)</span></div>
+            <div class="info-row">Runner State: <span id="ai-state" class="highlight-green">WALKING</span></div>
+            <div class="info-row">Attacker Mode: <span id="attacker-speed" class="highlight-blue">1.8m/s (PATROL)</span></div>
+            <div class="info-row">Camera View: <span id="cam-mode-text" class="highlight-purple">DYNAMIC MOVIE</span></div>
+
+            <button class="btn btn-orient" id="toggle-orient">📱 Switch Portrait / Landscape</button>
+
+            <!-- GITHUB / REMOTE URL INPUTS -->
+            <div class="url-input-group">
+                <input type="text" id="runner-url" placeholder="GitHub Raw Runner GLB URL...">
+                <input type="text" id="attacker-url" placeholder="GitHub Raw Attacker GLB URL...">
+                <button class="btn btn-lock-url" id="load-urls-btn">🔒 Lock & Load Remote Models</button>
+            </div>
+
+            <!-- SCALING & SPEED CONTROL SLIDERS -->
+            <div class="scale-group">
+                <div class="scale-row">
+                    <label for="runner-scale">Runner Scale:</label>
+                    <input type="range" id="runner-scale" min="0.5" max="3.0" step="0.1" value="1.0">
+                </div>
+                <div class="scale-row">
+                    <label for="attacker-scale">Demon Scale:</label>
+                    <input type="range" id="attacker-scale" min="0.5" max="3.5" step="0.1" value="1.8">
+                </div>
+                <div class="scale-row">
+                    <label for="attacker-speed-max">Demon Max Speed:</label>
+                    <input type="range" id="attacker-speed-max" min="2.0" max="4.7" step="0.1" value="4.5">
+                </div>
+            </div>
+
+            <div class="cam-btn-group">
+                <button class="btn active" id="cam-auto">🎬 Auto</button>
+                <button class="btn" id="cam-god">👁️ God</button>
+                <button class="btn" id="cam-chase">🏎️ Chase</button>
+                <button class="btn" id="cam-front">🎥 Front</button>
+                <button class="btn" id="cam-worm-f">🐛 W-Front</button>
+                <button class="btn" id="cam-worm-b">🐛 W-Back</button>
+                <button class="btn" id="cam-pivot-r">🔄 Piv-Run</button>
+                <button class="btn" id="cam-pivot-a">🔄 Piv-Atk</button>
+            </div>
+
+            <div class="upload-group">
+                <label class="btn upload-btn">
+                    🏃 Local Runner
+                    <input type="file" id="glb-runner-input" accept=".glb,.gltf">
+                </label>
+                <label class="btn upload-btn-attacker">
+                    ⚔️ Local Attacker
+                    <input type="file" id="glb-attacker-input" accept=".glb,.gltf">
+                </label>
+            </div>
+        </div>
+
+        <div id="banner"></div>
+    </div>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+        // --- MAZE MATRIX ---
+        const CELL_SIZE = 4;
+        const WALL_HEIGHT = 3.5;
+        const MAZE = [
+            [1,1,1,1,1,1,1,1,1,1,1,1,1],
+            [1,2,0,0,1,0,0,0,0,0,0,0,1],
+            [1,1,1,0,1,0,1,1,1,1,1,0,1],
+            [1,0,0,0,0,0,0,0,0,0,1,0,1],
+            [1,0,1,1,1,1,1,1,1,0,1,0,1],
+            [1,0,1,0,0,0,0,0,1,0,0,0,1],
+            [1,0,1,0,1,1,1,0,1,1,1,0,1],
+            [1,0,0,0,1,0,0,0,0,0,1,0,1],
+            [1,1,1,0,1,0,1,1,1,0,1,0,1],
+            [1,0,0,0,1,0,1,0,0,0,1,0,1],
+            [1,0,1,1,1,0,1,0,1,1,1,0,1],
+            [1,0,0,0,0,0,1,0,0,0,0,3,1],
+            [1,1,1,1,1,1,1,1,1,1,1,1,1]
+        ];
+
+        // --- MEMORY POOLING ---
+        const POOL = {
+            v1: new THREE.Vector3(),
+            v2: new THREE.Vector3(),
+            v3: new THREE.Vector3(),
+            dir: new THREE.Vector3(),
+            camTarget: new THREE.Vector3(),
+            lookTarget: new THREE.Vector3(),
+            raycaster: new THREE.Raycaster()
+        };
+
+        // --- SCENE SETUP ---
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x0b0f19);
+        scene.fog = new THREE.FogExp2(0x0b0f19, 0.018);
+
+        const camera = new THREE.PerspectiveCamera(50, container.clientWidth / container.clientHeight, 0.1, 120);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        container.appendChild(renderer.domElement);
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+
+        // --- LIGHTING ---
+        scene.add(new THREE.AmbientLight(0xffffff, 1.8));
+        const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
+        dirLight.position.set(10, 20, 15);
+        dirLight.castShadow = true;
+        scene.add(dirLight);
+
+        // --- ENVIRONMENT ---
+        function createWallTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 256; canvas.height = 256;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#f1f5f9';
+            ctx.fillRect(0, 0, 256, 256);
+            ctx.strokeStyle = '#0284c7'; ctx.lineWidth = 6;
+            ctx.strokeRect(6, 6, 244, 244);
+            ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(128, 0); ctx.lineTo(128, 256);
+            ctx.moveTo(0, 128); ctx.lineTo(256, 128);
+            ctx.stroke();
+            const tex = new THREE.CanvasTexture(canvas);
+            tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping;
+            return tex;
+        }
+
+        const wallTexture = createWallTexture();
+        const wallGeom = new THREE.BoxGeometry(CELL_SIZE, WALL_HEIGHT, CELL_SIZE);
+        const wallMat = new THREE.MeshStandardMaterial({ map: wallTexture, roughness: 0.4, metalness: 0.1 });
+
+        const wallColliders = [];
+        let startGrid = { c: 1, r: 1 };
+        let endGrid = { c: 11, r: 11 };
+        let startPos = new THREE.Vector3(startGrid.c * CELL_SIZE, 0, startGrid.r * CELL_SIZE);
+        let endPos = new THREE.Vector3(endGrid.c * CELL_SIZE, 0, endGrid.r * CELL_SIZE);
+
+        for (let r = 0; r < MAZE.length; r++) {
+            for (let c = 0; c < MAZE[r].length; c++) {
+                if (MAZE[r][c] === 1) {
+                    const wall = new THREE.Mesh(wallGeom, wallMat);
+                    wall.position.set(c * CELL_SIZE, WALL_HEIGHT / 2, r * CELL_SIZE);
+                    wall.castShadow = true;
+                    wall.receiveShadow = true;
+                    scene.add(wall);
+                    wallColliders.push(wall);
+                } else {
+                    if (MAZE[r][c] === 2) startPos.set(c * CELL_SIZE, 0, r * CELL_SIZE);
+                    if (MAZE[r][c] === 3) endPos.set(c * CELL_SIZE, 0, r * CELL_SIZE);
+
+                    if (Math.random() < 0.25) {
+                        const lightColor = Math.random() > 0.5 ? 0x00e5ff : 0xd97706;
+                        const pLight = new THREE.PointLight(lightColor, 2.2, 9);
+                        pLight.position.set(c * CELL_SIZE, WALL_HEIGHT - 0.6, r * CELL_SIZE);
+                        scene.add(pLight);
+                    }
+                }
+            }
+        }
+
+        const mapWidth = MAZE[0].length * CELL_SIZE;
+        const mapHeight = MAZE.length * CELL_SIZE;
+        const floorMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.3 });
+        const floor = new THREE.Mesh(new THREE.PlaneGeometry(mapWidth, mapHeight), floorMat);
+        floor.rotation.x = -Math.PI / 2;
+        floor.position.set(mapWidth / 2 - CELL_SIZE/2, 0, mapHeight / 2 - CELL_SIZE/2);
+        floor.receiveShadow = true;
+        scene.add(floor);
+
+        const ceilingMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.6 });
+        const ceiling = new THREE.Mesh(new THREE.PlaneGeometry(mapWidth, mapHeight), ceilingMat);
+        ceiling.rotation.x = Math.PI / 2;
+        ceiling.position.set(mapWidth / 2 - CELL_SIZE/2, WALL_HEIGHT, mapHeight / 2 - CELL_SIZE/2);
+        scene.add(ceiling);
+
+        const gridHelper = new THREE.GridHelper(Math.max(mapWidth, mapHeight), MAZE.length, 0x0284c7, 0x94a3b8);
+        gridHelper.position.set(mapWidth / 2 - CELL_SIZE/2, 0.01, mapHeight / 2 - CELL_SIZE/2);
+        scene.add(gridHelper);
+
+        // --- CHARACTER CONFIGURATIONS ---
+        let runnerScale = 1.0;
+        let attackerScale = 1.8;
+        let attackerMaxSpeed = 4.5; // Slightly slower than Carmilla's 4.8m/s
+
+        // --- RUNNER STATE ---
+        let runnerModel, runnerMixer;
+        let runnerAnimMap = new Map();
+        let activeRunnerAction = null;
+        let activeRunnerState = 'IDLE';
+
+        let runnerPrevGrid = { c: 1, r: 1 };
+        let runnerGrid = { c: 1, r: 1 };
+        let runnerNextGrid = { c: 1, r: 1 };
+        let runnerTargetPos = new THREE.Vector3().copy(startPos);
+
+        let currentGoal = 'END';
+        let runnerRotation = 0;
+        let runnerSpeed = 0;
+        let isEvadingMode = false;
+        let hasLineOfSight = false;
+        let isGameOver = false;
+
+        // --- ATTACKER STATE ---
+        let attackerModel, attackerMixer;
+        let attackerAnimMap = new Map();
+        let activeAttackerAction = null;
+        let activeAttackerState = 'IDLE';
+
+        let attackerGrid = { c: endGrid.c, r: endGrid.r };
+        let attackerNextGrid = { c: endGrid.c, r: endGrid.r };
+        let attackerTargetPos = new THREE.Vector3().copy(endPos);
+        let attackerRotation = 0;
+        let currentAttackerSpeed = 1.8;
+
+        const clock = new THREE.Clock();
+        const gltfLoader = new GLTFLoader();
+
+        function createPlaceholderAttacker() {
+            const group = new THREE.Group();
+            const mesh = new THREE.Mesh(
+                new THREE.CapsuleGeometry(0.6, 1.2, 8, 16),
+                new THREE.MeshStandardMaterial({ color: 0xdc2626, emissive: 0x7f1d1d, roughness: 0.3 })
+            );
+            mesh.position.y = 1.2;
+            mesh.castShadow = true;
+            group.add(mesh);
+            return group;
+        }
+
+        attackerModel = createPlaceholderAttacker();
+        attackerModel.position.copy(endPos);
+        attackerModel.scale.setScalar(attackerScale);
+        scene.add(attackerModel);
+
+        function loadRunnerSource(source) {
+            const url = (typeof source === 'string') ? source : URL.createObjectURL(source);
+            if (runnerModel) scene.remove(runnerModel);
+
+            gltfLoader.load(url, (gltf) => {
+                runnerModel = gltf.scene;
+                runnerModel.position.copy(startPos);
+                runnerModel.scale.setScalar(runnerScale);
+
+                runnerModel.traverse((node) => {
+                    if (node.isMesh) node.castShadow = true;
+                });
+
+                scene.add(runnerModel);
+                runnerMixer = new THREE.AnimationMixer(runnerModel);
+                gltf.animations.forEach((clip) => {
+                    runnerAnimMap.set(clip.name, runnerMixer.clipAction(clip));
+                });
+
+                runnerPrevGrid = { c: 1, r: 1 };
+                runnerGrid = { c: 1, r: 1 };
+                runnerNextGrid = { c: 1, r: 1 };
+                runnerTargetPos.copy(startPos);
+
+                fadeRunnerState('Walking');
+                selectNextRunnerWaypoint();
+            }, undefined, (err) => console.error("Could not load Runner GLB:", err));
+        }
+
+        function loadAttackerSource(source) {
+            const url = (typeof source === 'string') ? source : URL.createObjectURL(source);
+            if (attackerModel) scene.remove(attackerModel);
+
+            gltfLoader.load(url, (gltf) => {
+                attackerModel = gltf.scene;
+                attackerModel.position.copy(attackerTargetPos);
+                attackerModel.scale.setScalar(attackerScale);
+
+                attackerModel.traverse((node) => {
+                    if (node.isMesh) node.castShadow = true;
+                });
+
+                scene.add(attackerModel);
+                attackerMixer = new THREE.AnimationMixer(attackerModel);
+                gltf.animations.forEach((clip) => {
+                    attackerAnimMap.set(clip.name, attackerMixer.clipAction(clip));
+                });
+
+                fadeAttackerState('Walking');
+            }, undefined, (err) => console.error("Could not load Attacker GLB:", err));
+        }
+
+        // --- URL PARAMETER & GITHUB REMOTE LOADING ---
+        const urlParams = new URLSearchParams(window.location.search);
+        const paramRunner = urlParams.get('runner');
+        const paramAttacker = urlParams.get('attacker');
+
+        if (paramRunner) {
+            document.getElementById('runner-url').value = paramRunner;
+            loadRunnerSource(paramRunner);
+        } else {
+            gltfLoader.load('3d carmilla.glb', () => loadRunnerSource('3d carmilla.glb'));
+        }
+
+        if (paramAttacker) {
+            document.getElementById('attacker-url').value = paramAttacker;
+            loadAttackerSource(paramAttacker);
+        }
+
+        document.getElementById('load-urls-btn').addEventListener('click', () => {
+            const rUrl = document.getElementById('runner-url').value.trim();
+            const aUrl = document.getElementById('attacker-url').value.trim();
+
+            if (rUrl) loadRunnerSource(rUrl);
+            if (aUrl) loadAttackerSource(aUrl);
+
+            const newUrl = new URL(window.location.href);
+            if (rUrl) newUrl.searchParams.set('runner', rUrl);
+            if (aUrl) newUrl.searchParams.set('attacker', aUrl);
+            window.history.pushState({}, '', newUrl);
+        });
+
+        function updateViewportSize() {
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        }
+
+        document.getElementById('toggle-orient').addEventListener('click', () => {
+            container.classList.toggle('portrait-mode');
+            updateViewportSize();
+        });
+
+        window.addEventListener('resize', updateViewportSize);
+
+        document.getElementById('runner-scale').addEventListener('input', (e) => {
+            runnerScale = parseFloat(e.target.value);
+            if (runnerModel) runnerModel.scale.setScalar(runnerScale);
+        });
+
+        document.getElementById('attacker-scale').addEventListener('input', (e) => {
+            attackerScale = parseFloat(e.target.value);
+            if (attackerModel) attackerModel.scale.setScalar(attackerScale);
+        });
+
+        document.getElementById('attacker-speed-max').addEventListener('input', (e) => {
+            attackerMaxSpeed = parseFloat(e.target.value);
+        });
+
+        // --- ANIMATION CONTROLLER ---
+        function fadeRunnerState(name, duration = 0.2) {
+            if (activeRunnerState === name || !runnerMixer) return;
+
+            if (name === 'IDLE') {
+                const walkAction = runnerAnimMap.get('Walking') || runnerAnimMap.get('Casual_Walk');
+                if (activeRunnerAction && activeRunnerAction !== walkAction) activeRunnerAction.fadeOut(duration);
+
+                if (walkAction) {
+                    walkAction.reset();
+                    walkAction.time = 0;
+                    walkAction.paused = true;
+                    walkAction.fadeIn(duration).play();
+                    activeRunnerAction = walkAction;
+                }
+                activeRunnerState = 'IDLE';
+                runnerSpeed = 0.0;
+                document.getElementById('ai-state').innerText = 'IDLE';
+                return;
+            }
+
+            const newAction = runnerAnimMap.get(name);
+            if (activeRunnerAction) {
+                if (activeRunnerAction.paused) activeRunnerAction.paused = false;
+                activeRunnerAction.fadeOut(duration);
+            }
+
+            if (newAction) {
+                newAction.reset();
+                newAction.paused = false;
+                newAction.fadeIn(duration).play();
+                activeRunnerAction = newAction;
+            }
+
+            activeRunnerState = name;
+            runnerSpeed = (name === 'RunFast') ? 4.8 : (name === 'Walking' ? 2.4 : 0.0);
+            document.getElementById('ai-state').innerText = name.toUpperCase();
+        }
+
+        function fadeAttackerState(name, duration = 0.2) {
+            if (activeAttackerState === name || !attackerMixer) return;
+
+            const newAction = attackerAnimMap.get(name) || attackerAnimMap.get('RunFast') || attackerAnimMap.get('Walking');
+            if (activeAttackerAction && newAction) activeAttackerAction.fadeOut(duration);
+
+            if (newAction) {
+                newAction.reset().fadeIn(duration).play();
+                activeAttackerAction = newAction;
+            }
+
+            activeAttackerState = name;
+        }
+
+        function checkLineOfSight(posA, posB) {
+            POOL.v1.copy(posA).setY(1.2);
+            POOL.v2.copy(posB).setY(1.2);
+            POOL.dir.subVectors(POOL.v2, POOL.v1);
+            const dist = POOL.dir.length();
+            POOL.dir.normalize();
+
+            POOL.raycaster.set(POOL.v1, POOL.dir);
+            const hits = POOL.raycaster.intersectObjects(wallColliders);
+            return !(hits.length > 0 && hits[0].distance < dist);
+        }
+
+        function getOpenNeighbors(c, r) {
+            const neighbors = [
+                { c: c, r: r - 1 }, { c: c + 1, r: r },
+                { c: c, r: r + 1 }, { c: c - 1, r: r }
+            ];
+            return neighbors.filter(n => MAZE[n.r] && MAZE[n.r][n.c] !== 1);
+        }
+
+        function findPathBFS(startCell, targetCell, dangerCells = []) {
+            const queue = [[startCell]];
+            const visited = new Set();
+            visited.add(`${startCell.c},${startCell.r}`);
+            dangerCells.forEach(d => visited.add(`${d.c},${d.r}`));
+
+            while (queue.length > 0) {
+                const path = queue.shift();
+                const curr = path[path.length - 1];
+
+                if (curr.c === targetCell.c && curr.r === targetCell.r) {
+                    return path;
+                }
+
+                const neighbors = getOpenNeighbors(curr.c, curr.r);
+                for (const n of neighbors) {
+                    const key = `${n.c},${n.r}`;
+                    if (!visited.has(key)) {
+                        visited.add(key);
+                        queue.push([...path, n]);
+                    }
+                }
+            }
+            return null;
+        }
+
+        function selectNextRunnerWaypoint() {
+            if (!runnerModel || isGameOver) return;
+
+            const openPaths = getOpenNeighbors(runnerGrid.c, runnerGrid.r);
+            const distToAttacker = runnerModel.position.distanceTo(attackerModel.position);
+            
+            hasLineOfSight = checkLineOfSight(runnerModel.position, attackerModel.position);
+
+            const losElement = document.getElementById('los-state');
+            if (hasLineOfSight) {
+                losElement.innerText = 'CLEAR SIGHT (Spotted!)';
+                losElement.className = 'highlight-red';
+            } else {
+                losElement.innerText = 'BLOCKED (Hidden)';
+                losElement.className = 'highlight-green';
+            }
+
+            if (!isEvadingMode && distToAttacker < 10.0 && hasLineOfSight) {
+                isEvadingMode = true;
+            } else if (isEvadingMode && (distToAttacker > 15.0 || (!hasLineOfSight && distToAttacker > 8.0))) {
+                isEvadingMode = false;
+            }
+
+            if (openPaths.length === 1 && distToAttacker < 8.5 && hasLineOfSight) {
+                fadeRunnerState('IDLE');
+                runnerRotation = Math.atan2(attackerModel.position.x - runnerModel.position.x, attackerModel.position.z - runnerModel.position.z);
+                isGameOver = true;
+                showBanner('CORNERED & TRAPPED!', 'game-over');
+                document.getElementById('ai-state').innerText = 'TRAPPED';
+                document.getElementById('ai-state').className = 'highlight-red';
+                return;
+            }
+
+            if (isEvadingMode) {
+                fadeRunnerState('RunFast');
+
+                const pathFromAttacker = findPathBFS(attackerGrid, runnerGrid);
+                const currentDistFromAttacker = pathFromAttacker ? pathFromAttacker.length : 0;
+
+                let safeCandidates = openPaths.filter(cell => {
+                    const p = findPathBFS(attackerGrid, cell);
+                    const d = p ? p.length : 0;
+                    return d > currentDistFromAttacker;
+                });
+
+                if (safeCandidates.length === 0) {
+                    safeCandidates = openPaths.filter(cell => !(cell.c === attackerGrid.c && cell.r === attackerGrid.r));
+                }
+
+                const targetGoalGrid = (currentGoal === 'END') ? endGrid : startGrid;
+                const dangerZone = [attackerGrid, attackerNextGrid];
+                
+                let bestCell = safeCandidates[0] || openPaths[0];
+                let maxDist = -1;
+
+                safeCandidates.forEach(cell => {
+                    const safePathToGoal = findPathBFS(cell, targetGoalGrid, dangerZone);
+                    const pFromAttacker = findPathBFS(attackerGrid, cell);
+                    const dFromAttacker = pFromAttacker ? pFromAttacker.length : 0;
+
+                    if (safePathToGoal) {
+                        bestCell = cell;
+                    } else if (dFromAttacker > maxDist) {
+                        maxDist = dFromAttacker;
+                        bestCell = cell;
+                    }
+                });
+
+                runnerPrevGrid = { ...runnerGrid };
+                runnerNextGrid = bestCell;
+
+            } else {
+                fadeRunnerState('Walking');
+                const targetGoalGrid = (currentGoal === 'END') ? endGrid : startGrid;
+                const path = findPathBFS(runnerGrid, targetGoalGrid);
+                
+                let forwardPaths = openPaths.filter(p => !(p.c === runnerPrevGrid.c && p.r === runnerPrevGrid.r));
+                if (forwardPaths.length === 0) forwardPaths = openPaths;
+
+                if (path && path.length > 1) {
+                    runnerNextGrid = path[1];
+                } else {
+                    runnerNextGrid = forwardPaths[0];
+                }
+                runnerPrevGrid = { ...runnerGrid };
+            }
+
+            runnerTargetPos.set(runnerNextGrid.c * CELL_SIZE, 0, runnerNextGrid.r * CELL_SIZE);
+        }
+
+        function updateRunnerAI(delta) {
+            if (!runnerModel || isGameOver) return;
+
+            const runnerPos = runnerModel.position;
+            POOL.v1.subVectors(runnerTargetPos, runnerPos).setY(0);
+            const distToWaypoint = POOL.v1.length();
+            const moveStep = runnerSpeed * delta;
+
+            if (distToWaypoint <= moveStep) {
+                runnerPos.x = runnerTargetPos.x;
+                runnerPos.z = runnerTargetPos.z;
+                runnerGrid = { ...runnerNextGrid };
+
+                if (runnerGrid.c === endGrid.c && runnerGrid.r === endGrid.r && currentGoal === 'END') {
+                    currentGoal = 'START';
+                    document.getElementById('objective').innerText = 'Return to START';
+                    document.getElementById('objective').className = 'highlight-green';
+                } else if (runnerGrid.c === startGrid.c && runnerGrid.r === startGrid.r && currentGoal === 'START') {
+                    currentGoal = 'END';
+                    document.getElementById('objective').innerText = 'Escape to END Goal';
+                    document.getElementById('objective').className = 'highlight-blue';
+                }
+
+                selectNextRunnerWaypoint();
+            } else {
+                POOL.v1.normalize();
+                runnerPos.addScaledVector(POOL.v1, moveStep);
+
+                runnerRotation = Math.atan2(POOL.v1.x, POOL.v1.z);
+                let angleDiff = runnerRotation - runnerModel.rotation.y;
+                angleDiff = Math.atan2(Math.sin(angleDiff), Math.cos(angleDiff));
+                runnerModel.rotation.y += angleDiff * Math.min(1, delta * 12);
+            }
+        }
+
+        function updateAttackerAI(delta) {
+            if (!runnerModel || isGameOver) return;
+
+            const attackerPos = attackerModel.position;
+            const distToRunner = attackerPos.distanceTo(runnerModel.position);
+
+            const speedElement = document.getElementById('attacker-speed');
+
+            if (hasLineOfSight && distToRunner < 11.0) {
+                const proximityFactor = Math.max(0, 1 - (distToRunner / 11.0));
+                // Scales up to slider max speed (4.5 m/s vs Carmilla's 4.8 m/s)
+                currentAttackerSpeed = THREE.MathUtils.lerp(1.8, attackerMaxSpeed, Math.pow(proximityFactor, 1.3));
+                speedElement.innerText = `${currentAttackerSpeed.toFixed(1)}m/s (CHASING)`;
+                speedElement.className = 'highlight-red';
+                fadeAttackerState('RunFast');
+            } else {
+                currentAttackerSpeed = 1.8;
+                speedElement.innerText = `${currentAttackerSpeed.toFixed(1)}m/s (PATROL)`;
+                speedElement.className = 'highlight-blue';
+                fadeAttackerState('Walking');
+            }
+
+            POOL.v2.subVectors(attackerTargetPos, attackerPos).setY(0);
+            const distToWaypoint = POOL.v2.length();
+            const moveStep = currentAttackerSpeed * delta;
+
+            if (distToWaypoint <= moveStep) {
+                attackerPos.x = attackerTargetPos.x;
+                attackerPos.z = attackerTargetPos.z;
+                attackerGrid = { ...attackerNextGrid };
+
+                const pathToRunner = findPathBFS(attackerGrid, runnerGrid);
+                if (pathToRunner && pathToRunner.length > 1) {
+                    attackerNextGrid = pathToRunner[1];
+                } else {
+                    attackerNextGrid = runnerGrid;
+                }
+                attackerTargetPos.set(attackerNextGrid.c * CELL_SIZE, 0, attackerNextGrid.r * CELL_SIZE);
+            } else {
+                POOL.v2.normalize();
+                attackerPos.addScaledVector(POOL.v2, moveStep);
+
+                attackerRotation = Math.atan2(POOL.v2.x, POOL.v2.z);
+                let angleDiff = attackerRotation - attackerModel.rotation.y;
+                angleDiff = Math.atan2(Math.sin(angleDiff), Math.cos(angleDiff));
+                attackerModel.rotation.y += angleDiff * Math.min(1, delta * 12);
+            }
+
+            if (distToRunner < (1.4 * Math.max(1, attackerScale * 0.7)) && hasLineOfSight) {
+                isGameOver = true;
+                showBanner('CAUGHT BY ATTACKER!', 'game-over');
+                fadeRunnerState('IDLE');
+                fadeAttackerState('IDLE');
+            }
+        }
+
+        // --- CINEMATIC CAMERA ---
+        let cameraMode = 'AUTO';
+        let autoCamTimer = 0;
+        let autoCamIndex = 0;
+        let pivotAngle = 0;
+        const autoCamModes = ['CHASE', 'FRONT', 'WORM_FRONT', 'PIVOT_RUNNER', 'PIVOT_ATTACKER', 'GOD'];
+
+        function setCameraMode(mode) {
+            cameraMode = mode;
+            document.querySelectorAll('.cam-btn-group .btn').forEach(btn => btn.classList.remove('active'));
+            const btnIdMap = {
+                'AUTO': 'cam-auto', 'GOD': 'cam-god', 'CHASE': 'cam-chase',
+                'FRONT': 'cam-front', 'WORM_FRONT': 'cam-worm-f', 'WORM_BACK': 'cam-worm-b',
+                'PIVOT_RUNNER': 'cam-pivot-r', 'PIVOT_ATTACKER': 'cam-pivot-a'
+            };
+            if (btnIdMap[mode]) document.getElementById(btnIdMap[mode]).classList.add('active');
+
+            document.getElementById('cam-mode-text').innerText = (mode === 'AUTO') ? 'DYNAMIC MOVIE' : `${mode} VIEW`;
+        }
+
+        ['cam-auto', 'cam-god', 'cam-chase', 'cam-front', 'cam-worm-f', 'cam-worm-b', 'cam-pivot-r', 'cam-pivot-a'].forEach(id => {
+            document.getElementById(id).addEventListener('click', () => {
+                const modeMap = {
+                    'cam-auto': 'AUTO', 'cam-god': 'GOD', 'cam-chase': 'CHASE',
+                    'cam-front': 'FRONT', 'cam-worm-f': 'WORM_FRONT', 'cam-worm-b': 'WORM_BACK',
+                    'cam-pivot-r': 'PIVOT_RUNNER', 'cam-pivot-a': 'PIVOT_ATTACKER'
+                };
+                setCameraMode(modeMap[id]);
+            });
+        });
+
+        function updateCamera(delta) {
+            if (!runnerModel) return;
+
+            let activeView = cameraMode;
+            if (cameraMode === 'AUTO') {
+                autoCamTimer += delta;
+                if (autoCamTimer > 5.0) {
+                    autoCamTimer = 0;
+                    autoCamIndex = (autoCamIndex + 1) % autoCamModes.length;
+                }
+                activeView = autoCamModes[autoCamIndex];
+            }
+
+            ceiling.visible = (activeView !== 'GOD');
+
+            const runnerPos = runnerModel.position;
+            const attackerPos = attackerModel.position;
+            
+            POOL.lookTarget.copy(runnerPos).setY(1.2 * runnerScale);
+            pivotAngle += delta * 0.8;
+
+            if (activeView === 'GOD') {
+                POOL.camTarget.set(mapWidth / 2, 28, mapHeight / 2);
+                camera.position.lerp(POOL.camTarget, 0.05);
+                controls.target.lerp(POOL.v3.set(mapWidth/2, 0, mapHeight/2), 0.05);
+
+            } else if (activeView === 'CHASE') {
+                POOL.dir.set(0, 2.8, -5.5).applyAxisAngle(new THREE.Vector3(0, 1, 0), runnerModel.rotation.y);
+                POOL.camTarget.copy(runnerPos).add(POOL.dir);
+                camera.position.lerp(POOL.camTarget, 0.08);
+                controls.target.lerp(POOL.lookTarget, 0.08);
+
+            } else if (activeView === 'FRONT') {
+                POOL.dir.set(0, 1.8, 4.5).applyAxisAngle(new THREE.Vector3(0, 1, 0), runnerModel.rotation.y);
+                POOL.camTarget.copy(runnerPos).add(POOL.dir);
+                camera.position.lerp(POOL.camTarget, 0.08);
+                controls.target.lerp(POOL.lookTarget, 0.08);
+
+            } else if (activeView === 'WORM_FRONT') {
+                POOL.dir.set(0, 0.35, 3.2).applyAxisAngle(new THREE.Vector3(0, 1, 0), runnerModel.rotation.y);
+                POOL.camTarget.copy(runnerPos).add(POOL.dir);
+                camera.position.lerp(POOL.camTarget, 0.08);
+                controls.target.lerp(POOL.lookTarget, 0.08);
+
+            } else if (activeView === 'WORM_BACK') {
+                POOL.dir.set(0, 0.35, -3.2).applyAxisAngle(new THREE.Vector3(0, 1, 0), runnerModel.rotation.y);
+                POOL.camTarget.copy(runnerPos).add(POOL.dir);
+                camera.position.lerp(POOL.camTarget, 0.08);
+                controls.target.lerp(POOL.lookTarget, 0.08);
+
+            } else if (activeView === 'PIVOT_RUNNER') {
+                const radius = 4.5;
+                POOL.camTarget.set(
+                    runnerPos.x + Math.sin(pivotAngle) * radius,
+                    runnerPos.y + 1.8,
+                    runnerPos.z + Math.cos(pivotAngle) * radius
+                );
+                camera.position.lerp(POOL.camTarget, 0.08);
+                controls.target.lerp(POOL.lookTarget, 0.08);
+
+            } else if (activeView === 'PIVOT_ATTACKER') {
+                const radius = 5.5;
+                POOL.v3.copy(attackerPos).setY(1.2 * attackerScale);
+                POOL.camTarget.set(
+                    attackerPos.x + Math.sin(pivotAngle) * radius,
+                    attackerPos.y + 2.0,
+                    attackerPos.z + Math.cos(pivotAngle) * radius
+                );
+                camera.position.lerp(POOL.camTarget, 0.08);
+                controls.target.lerp(POOL.v3, 0.08);
+            }
+        }
+
+        function showBanner(text, cssClass) {
+            const banner = document.getElementById('banner');
+            banner.innerText = text;
+            banner.className = cssClass;
+            banner.style.display = 'block';
+        }
+
+        document.getElementById('glb-runner-input').addEventListener('change', (e) => {
+            if (e.target.files[0]) loadRunnerGLB(e.target.files[0]);
+        });
+        document.getElementById('glb-attacker-input').addEventListener('change', (e) => {
+            if (e.target.files[0]) loadAttackerGLB(e.target.files[0]);
+        });
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const delta = clock.getDelta();
+
+            if (runnerMixer) runnerMixer.update(delta);
+            if (attackerMixer) attackerMixer.update(delta);
+
+            updateRunnerAI(delta);
+            updateAttackerAI(delta);
+            updateCamera(delta);
+
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        animate();
+    </script>
+</body>
+</html>
