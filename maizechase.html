@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Carmilla: The Demon Escape</title>
+    <title>Carmilla: Ancient Tag Escape</title>
     <style>
         body {
             margin: 0;
             overflow: hidden;
-            background-color: #0b0f19;
+            background-color: #0c0a09;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: #111827;
+            color: #f3f4f6;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -26,9 +26,9 @@
             width: 390px;
             height: 844px;
             max-height: 90vh;
-            border: 4px solid #0284c7;
+            border: 4px solid #d97706;
             border-radius: 20px;
-            box-shadow: 0 0 40px rgba(2, 132, 199, 0.4);
+            box-shadow: 0 0 40px rgba(217, 119, 6, 0.4);
             overflow: hidden;
         }
 
@@ -37,15 +37,17 @@
             position: absolute;
             top: calc(10px + env(safe-area-inset-top, 0px));
             left: 10px;
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(28, 25, 23, 0.92);
             padding: 10px 12px;
             border-radius: 12px;
-            border: 1px solid rgba(0, 0, 0, 0.15);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(217, 119, 6, 0.35);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
             min-width: 270px;
-            max-width: 310px;
+            max-width: 320px;
             z-index: 1000;
             box-sizing: border-box;
+            color: #e7e5e4;
+            backdrop-filter: blur(8px);
         }
 
         #hud-content {
@@ -75,27 +77,37 @@
         }
 
         h2 {
-            margin: 0 0 6px 0;
-            font-size: 13px;
-            color: #0284c7;
+            margin: 6px 0 4px 0;
+            font-size: 12px;
+            color: #f59e0b;
             text-transform: uppercase;
             letter-spacing: 1px;
+            border-bottom: 1px solid rgba(245, 158, 11, 0.2);
+            padding-bottom: 2px;
         }
         .info-row {
             font-size: 11px;
             margin-bottom: 4px;
             font-weight: 600;
         }
-        .highlight-green { color: #16a34a; }
-        .highlight-red { color: #dc2626; }
-        .highlight-blue { color: #0284c7; }
-        .highlight-purple { color: #9333ea; }
+        .highlight-green { color: #22c55e; }
+        .highlight-red { color: #ef4444; }
+        .highlight-blue { color: #38bdf8; }
+        .highlight-purple { color: #c084fc; }
+        .highlight-gold { color: #fbbf24; }
         
         .control-group {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 4px;
             margin-top: 6px;
+        }
+
+        .fx-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4px;
+            margin-top: 4px;
         }
 
         .fps-group {
@@ -112,9 +124,9 @@
             margin-top: 6px;
         }
         .btn {
-            background: #f3f4f6;
-            color: #1f2937;
-            border: 1px solid #d1d5db;
+            background: #292524;
+            color: #e7e5e4;
+            border: 1px solid #44403c;
             padding: 5px 3px;
             border-radius: 5px;
             cursor: pointer;
@@ -124,39 +136,43 @@
             transition: all 0.2s ease;
         }
         .btn:hover, .btn.active {
-            background: #0284c7;
+            background: #d97706;
             color: #fff;
-            border-color: #0284c7;
+            border-color: #f59e0b;
         }
-        .btn-pause { background: #d97706; color: #fff; border: none; }
-        .btn-reset { background: #dc2626; color: #fff; border: none; }
-        .btn-orient { background: #9333ea; color: #fff; border: none; grid-column: span 2; }
+        .btn-pause { background: #b45309; color: #fff; border: none; }
+        .btn-reset { background: #991b1b; color: #fff; border: none; }
+        .btn-audio { background: #0284c7; color: #fff; border: none; }
+        .btn-orient { background: #7e22ce; color: #fff; border: none; }
         .btn-collapse {
-            background: #0284c7;
+            background: #d97706;
             color: #fff;
             border: none;
             width: 100%;
             padding: 6px 10px;
             font-size: 11px;
             border-radius: 6px;
+            font-weight: bold;
         }
 
         #banner {
             position: absolute;
-            top: 50%;
+            top: 40%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 26px;
+            font-size: 22px;
             font-weight: bold;
             text-align: center;
-            padding: 16px 32px;
-            border-radius: 12px;
+            padding: 16px 28px;
+            border-radius: 14px;
             display: none;
             z-index: 100;
-            letter-spacing: 1.5px;
+            letter-spacing: 1.2px;
+            pointer-events: none;
+            line-height: 1.4;
         }
-        .game-over { background: rgba(220, 38, 38, 0.95); color: #fff; box-shadow: 0 10px 30px rgba(220, 38, 38, 0.5); }
-        .game-win { background: rgba(22, 163, 74, 0.95); color: #fff; box-shadow: 0 10px 30px rgba(22, 163, 74, 0.5); }
+        .tag-banner { background: rgba(217, 119, 6, 0.95); color: #fff; box-shadow: 0 10px 30px rgba(217, 119, 6, 0.6); }
+        .headstart-banner { background: rgba(2, 132, 199, 0.95); color: #fff; box-shadow: 0 10px 30px rgba(2, 132, 199, 0.6); }
     </style>
 
     <script type="importmap">
@@ -174,17 +190,26 @@
         <div id="hud">
             <button class="btn btn-collapse" id="hud-toggle">⚙️ Toggle HUD Menu</button>
             <div id="hud-content">
-                <h2>Carmilla vs Demon Escape</h2>
-                <div class="info-row">Objective: <span id="objective" class="highlight-blue">Reach END Goal</span></div>
-                <div class="info-row">Line of Sight: <span id="los-state" class="highlight-green">BLOCKED (Hidden)</span></div>
-                <div class="info-row">Runner State: <span id="ai-state" class="highlight-green">WALKING</span></div>
-                <div class="info-row">Demon Mode: <span id="attacker-speed" class="highlight-blue">1.8m/s (PATROL)</span></div>
+                <h2>Carmilla Ancient Tag</h2>
+                <div class="info-row">Active Hunter: <span id="current-hunter" class="highlight-red">DEMON</span></div>
+                <div class="info-row">Hunter Speed: <span id="hunter-speed-text" class="highlight-blue">3.2 m/s (OMNISCIENT)</span></div>
+                <div class="info-row">Evader Speed: <span id="evader-speed-text" class="highlight-green">4.6 m/s (FAST SPRINT)</span></div>
+                <div class="info-row">Tag Scores: <span id="score-text" class="highlight-gold">Carmilla: 0 | Demon: 0</span></div>
                 <div class="info-row">Camera View: <span id="cam-mode-text" class="highlight-purple">DYNAMIC MOVIE</span></div>
 
                 <div class="control-group">
                     <button class="btn btn-pause" id="btn-pause">⏸️ Pause</button>
                     <button class="btn btn-reset" id="btn-reset">🔄 Reset Game</button>
-                    <button class="btn btn-orient" id="toggle-orient">📱 Portrait / Landscape</button>
+                    <button class="btn btn-audio" id="btn-audio">🔊 Audio: ON</button>
+                    <button class="btn btn-orient" id="toggle-orient">💻 View: Desktop</button>
+                </div>
+
+                <h2>Graphics & FX Options</h2>
+                <div class="fx-group">
+                    <button class="btn active" id="fx-lights">💡 Point Lights: ON</button>
+                    <button class="btn active" id="fx-fog">🌫️ Fog: ON</button>
+                    <button class="btn active" id="fx-flames">🔥 Flames: ON</button>
+                    <button class="btn active" id="fx-props">📦 Props FX: ON</button>
                 </div>
 
                 <div class="fps-group">
@@ -214,11 +239,11 @@
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
         import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-        // --- HARDCODED FIXED ASSETS ---
+        // --- HARDCODED ASSET URLS ---
         const RUNNER_URL = 'https://trancedemon-collab.github.io/my_apps/glb/carmilla.glb';
         const ATTACKER_URL = 'https://trancedemon-collab.github.io/my_apps/glb/demon.glb';
 
-        // --- MAZE MATRIX ---
+        // --- MAZE GRID DEFINITION ---
         const CELL_SIZE = 4;
         const WALL_HEIGHT = 3.5;
         const MAZE = [
@@ -237,6 +262,41 @@
             [1,1,1,1,1,1,1,1,1,1,1,1,1]
         ];
 
+        let startGrid = { c: 1, r: 1 };
+        let endGrid = { c: 11, r: 11 };
+        let startPos = new THREE.Vector3(startGrid.c * CELL_SIZE, 0, startGrid.r * CELL_SIZE);
+        let endPos = new THREE.Vector3(endGrid.c * CELL_SIZE, 0, endGrid.r * CELL_SIZE);
+
+        // --- GAMEPLAY STATE ---
+        let currentHunter = 'DEMON'; // 'DEMON' or 'CARMILLA'
+        let headStartTimer = 0.0;
+        let carmillaTags = 0;
+        let demonTags = 0;
+        let isPaused = false;
+        let targetFPS = 60;
+        let fpsInterval = 1000 / targetFPS;
+        let lastFrameTime = performance.now();
+        const clock = new THREE.Clock();
+
+        const SPEED_TIERS = {
+            WALK: 2.1,
+            JOG: 3.4,
+            SPRINT: 4.8
+        };
+
+        // --- GLOBAL ARRAYS & LIGHTS ---
+        const torchFlames = []; // <--- FIXED: Global array for torch flicker management
+        const props = [];
+        const wallColliders = [];
+        let mainLight;
+
+        const fxState = {
+            lights: true,
+            fog: true,
+            flames: true,
+            props: true
+        };
+
         // --- MEMORY POOLING ---
         const POOL = {
             v1: new THREE.Vector3(),
@@ -248,84 +308,269 @@
             raycaster: new THREE.Raycaster()
         };
 
-        // --- SCENE SETUP (ULTRA-LIGHTWEIGHT OPTIMIZATIONS) ---
+        class AudioEngine {
+            constructor() {
+                this.ctx = null;
+                this.enabled = true;
+                this.initialized = false;
+                this.lastCarmillaStep = 0;
+                this.lastDemonStep = 0;
+            }
+
+            init() {
+                if (this.initialized) return;
+                try {
+                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                    if (!AudioCtx) return;
+                    this.ctx = new AudioCtx();
+                    this.initialized = true;
+                } catch (e) {
+                    console.warn("Audio init skipped:", e);
+                }
+            }
+
+            resume() {
+                if (this.ctx && this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+            }
+
+            playFootstep(isDemon = false, volume = 0.3) {
+                if (!this.ctx || !this.enabled || this.ctx.state !== 'running') return;
+                const now = this.ctx.currentTime;
+
+                if (isDemon) {
+                    const osc = this.ctx.createOscillator();
+                    const oscGain = this.ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(130, now);
+                    osc.frequency.exponentialRampToValueAtTime(25, now + 0.14);
+
+                    oscGain.gain.setValueAtTime(Math.min(0.65, volume * 1.8), now);
+                    oscGain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+
+                    osc.connect(oscGain);
+                    oscGain.connect(this.ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.14);
+
+                    const bufferSize = this.ctx.sampleRate * 0.08;
+                    const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+                    const data = buffer.getChannelData(0);
+                    for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+
+                    const noise = this.ctx.createBufferSource();
+                    noise.buffer = buffer;
+                    const filter = this.ctx.createBiquadFilter();
+                    filter.type = 'lowpass';
+                    filter.frequency.setValueAtTime(350, now);
+
+                    const noiseGain = this.ctx.createGain();
+                    noiseGain.gain.setValueAtTime(volume * 1.1, now);
+                    noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+
+                    noise.connect(filter);
+                    filter.connect(noiseGain);
+                    noiseGain.connect(this.ctx.destination);
+                    noise.start(now);
+
+                } else {
+                    const osc = this.ctx.createOscillator();
+                    const oscGain = this.ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(540, now);
+                    osc.frequency.exponentialRampToValueAtTime(160, now + 0.05);
+
+                    oscGain.gain.setValueAtTime(0.35, now);
+                    oscGain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+
+                    osc.connect(oscGain);
+                    oscGain.connect(this.ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.05);
+
+                    const bufferSize = this.ctx.sampleRate * 0.04;
+                    const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+                    const data = buffer.getChannelData(0);
+                    for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+
+                    const noise = this.ctx.createBufferSource();
+                    noise.buffer = buffer;
+                    const filter = this.ctx.createBiquadFilter();
+                    filter.type = 'bandpass';
+                    filter.frequency.setValueAtTime(1300, now);
+                    filter.Q.setValueAtTime(3.0, now);
+
+                    const noiseGain = this.ctx.createGain();
+                    noiseGain.gain.setValueAtTime(0.25, now);
+                    noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+
+                    noise.connect(filter);
+                    filter.connect(noiseGain);
+                    noiseGain.connect(this.ctx.destination);
+                    noise.start(now);
+                }
+            }
+
+            playTagSound() {
+                if (!this.ctx || !this.enabled || this.ctx.state !== 'running') return;
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(220, now);
+                osc.frequency.exponentialRampToValueAtTime(880, now + 0.25);
+                gain.gain.setValueAtTime(0.4, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.25);
+            }
+
+            toggleAudio() {
+                this.enabled = !this.enabled;
+                return this.enabled;
+            }
+        }
+
+        const audio = new AudioEngine();
+        const initAudio = () => { audio.init(); audio.resume(); };
+        window.addEventListener('click', initAudio);
+        window.addEventListener('keydown', initAudio);
+        window.addEventListener('touchstart', initAudio);
+
         const container = document.getElementById('canvas-container');
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x0b0f19);
+        scene.background = new THREE.Color(0x0c0a09);
+        scene.fog = new THREE.FogExp2(0x0c0a09, 0.022);
 
         const camera = new THREE.PerspectiveCamera(50, container.clientWidth / container.clientHeight, 0.05, 120);
-        
-        // Disable antialiasing & shadow maps to keep 3rd-Gen Intel i3/i5 GPUs cool
-        const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: "high-performance" });
+        camera.position.set(startPos.x, 2.8, startPos.z + 5);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
         renderer.setSize(container.clientWidth, container.clientHeight);
-        renderer.setPixelRatio(1); // Force 1:1 pixel mapping (no 2x/3x supersampling)
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         renderer.shadowMap.enabled = false;
         container.appendChild(renderer.domElement);
 
         const controls = new OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
+        controls.target.copy(startPos);
 
-        // --- LIGHTING (EFFICIENT AMBIENT & SINGLE DIRECTIONAL) ---
-        const mainLight = new THREE.AmbientLight(0xffffff, 2.0);
+        mainLight = new THREE.AmbientLight(0xffffff, 0.6);
         scene.add(mainLight);
-        
-        const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-        dirLight.position.set(10, 20, 15);
-        scene.add(dirLight);
 
-        // --- PROCEDURAL DECAL TEXTURES ---
-        function createDecalTexture(text, accentColor) {
+        function createAncientWallTexture() {
             const canvas = document.createElement('canvas');
-            canvas.width = 256; canvas.height = 128;
+            canvas.width = 512; canvas.height = 512;
             const ctx = canvas.getContext('2d');
-            ctx.fillStyle = '#0f172a'; ctx.fillRect(0, 0, 256, 128);
-            ctx.strokeStyle = accentColor; ctx.lineWidth = 6;
-            ctx.strokeRect(6, 6, 244, 116);
-            ctx.fillStyle = accentColor; ctx.font = 'bold 24px sans-serif';
-            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-            ctx.fillText(text, 128, 64);
-            return new THREE.CanvasTexture(canvas);
-        }
 
-        // --- ENVIRONMENT & PROPS GENERATOR ---
-        function createWallTexture() {
-            const canvas = document.createElement('canvas');
-            canvas.width = 256; canvas.height = 256;
-            const ctx = canvas.getContext('2d');
-            ctx.fillStyle = '#f1f5f9'; ctx.fillRect(0, 0, 256, 256);
-            ctx.strokeStyle = '#0284c7'; ctx.lineWidth = 6;
-            ctx.strokeRect(6, 6, 244, 244);
-            ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.moveTo(128, 0); ctx.lineTo(128, 256);
-            ctx.moveTo(0, 128); ctx.lineTo(256, 128);
-            ctx.stroke();
+            ctx.fillStyle = '#262522'; ctx.fillRect(0, 0, 512, 512);
+
+            const rows = 8, cols = 4;
+            const rowH = 512 / rows, colW = 512 / cols;
+
+            ctx.strokeStyle = '#121110'; ctx.lineWidth = 6;
+
+            for (let r = 0; r < rows; r++) {
+                const offsetX = (r % 2 === 0) ? 0 : colW / 2;
+                for (let c = -1; c <= cols; c++) {
+                    const x = c * colW + offsetX;
+                    const y = r * rowH;
+                    const stoneShade = Math.floor(Math.random() * 35);
+                    ctx.fillStyle = `rgb(${38 + stoneShade}, ${37 + stoneShade}, ${34 + stoneShade})`;
+                    ctx.fillRect(x + 3, y + 3, colW - 6, rowH - 6);
+                    ctx.strokeRect(x, y, colW, rowH);
+
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
+                    for (let i = 0; i < 5; i++) {
+                        ctx.fillRect(x + Math.random() * colW, y + Math.random() * (rowH - 6), Math.random() * 6 + 2, Math.random() * 6 + 2);
+                    }
+                }
+            }
+
+            const mossGrad = ctx.createLinearGradient(0, 512, 0, 320);
+            mossGrad.addColorStop(0, 'rgba(34, 60, 30, 0.65)');
+            mossGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            ctx.fillStyle = mossGrad; ctx.fillRect(0, 0, 512, 512);
+
             const tex = new THREE.CanvasTexture(canvas);
             tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping;
             return tex;
         }
 
-        const wallTexture = createWallTexture();
+        function createAncientFloorTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 512; canvas.height = 512;
+            const ctx = canvas.getContext('2d');
+
+            ctx.fillStyle = '#141210'; ctx.fillRect(0, 0, 512, 512);
+            const size = 64;
+            ctx.strokeStyle = '#090807'; ctx.lineWidth = 4;
+
+            for (let x = 0; x < 512; x += size) {
+                for (let y = 0; y < 512; y += size) {
+                    const v = Math.floor(Math.random() * 22);
+                    ctx.fillStyle = `rgb(${34 + v}, ${30 + v}, ${26 + v})`;
+                    ctx.fillRect(x + 2, y + 2, size - 4, size - 4);
+                    ctx.strokeRect(x, y, size, size);
+                }
+            }
+
+            const tex = new THREE.CanvasTexture(canvas);
+            tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping;
+            tex.repeat.set(MAZE[0].length, MAZE.length);
+            return tex;
+        }
+
+        function createFlameTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 64; canvas.height = 128;
+            const ctx = canvas.getContext('2d');
+            
+            const grad = ctx.createRadialGradient(32, 96, 4, 32, 80, 28);
+            grad.addColorStop(0, 'rgba(255, 250, 210, 1)');
+            grad.addColorStop(0.25, 'rgba(255, 170, 30, 0.95)');
+            grad.addColorStop(0.6, 'rgba(220, 60, 10, 0.6)');
+            grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.ellipse(32, 70, 24, 48, 0, 0, Math.PI * 2);
+            ctx.fill();
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        function createGlowTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 128; canvas.height = 128;
+            const ctx = canvas.getContext('2d');
+            const grad = ctx.createRadialGradient(64, 64, 2, 64, 64, 60);
+            grad.addColorStop(0, 'rgba(255, 160, 40, 0.85)');
+            grad.addColorStop(0.5, 'rgba(240, 100, 15, 0.3)');
+            grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            ctx.fillStyle = grad; ctx.fillRect(0, 0, 128, 128);
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        const wallTexture = createAncientWallTexture();
         const wallGeom = new THREE.BoxGeometry(CELL_SIZE, WALL_HEIGHT, CELL_SIZE);
-        const wallMat = new THREE.MeshBasicMaterial({ map: wallTexture }); // Fast Basic Material
-        
-        const archGeom = new THREE.BoxGeometry(CELL_SIZE * 0.9, 0.3, 0.4);
-        const archMat = new THREE.MeshBasicMaterial({ color: 0x1e293b });
+        const wallMat = new THREE.MeshLambertMaterial({ map: wallTexture });
+
+        const capGeom = new THREE.BoxGeometry(CELL_SIZE * 1.08, 0.25, CELL_SIZE * 1.08);
+        const capMat = new THREE.MeshLambertMaterial({ color: 0x1c1917 });
+
+        const flameTexture = createFlameTexture();
+        const glowTexture = createGlowTexture();
+        const flameMat = new THREE.SpriteMaterial({ map: flameTexture, transparent: true, blending: THREE.AdditiveBlending });
+        const glowMat = new THREE.SpriteMaterial({ map: glowTexture, transparent: true, blending: THREE.AdditiveBlending });
+        const torchBracketMat = new THREE.MeshLambertMaterial({ color: 0x1c1917 });
 
         const crateGeom = new THREE.BoxGeometry(0.7, 0.7, 0.7);
-        const crateMat = new THREE.MeshBasicMaterial({ color: 0x334155 });
+        const crateMat = new THREE.MeshLambertMaterial({ color: 0x44403c });
         const barrelGeom = new THREE.CylinderGeometry(0.35, 0.35, 0.9, 10);
-        const barrelMat = new THREE.MeshBasicMaterial({ color: 0x475569 });
-        const puddleGeom = new THREE.CircleGeometry(1.1, 12);
-        const puddleMat = new THREE.MeshBasicMaterial({ color: 0x0284c7, transparent: true, opacity: 0.35 });
-        const pipeGeom = new THREE.CylinderGeometry(0.06, 0.06, CELL_SIZE, 6);
-        const pipeMat = new THREE.MeshBasicMaterial({ color: 0x64748b });
-
-        const wallColliders = [];
-        let startGrid = { c: 1, r: 1 };
-        let endGrid = { c: 11, r: 11 };
-        let startPos = new THREE.Vector3(startGrid.c * CELL_SIZE, 0, startGrid.r * CELL_SIZE);
-        let endPos = new THREE.Vector3(endGrid.c * CELL_SIZE, 0, endGrid.r * CELL_SIZE);
+        const barrelMat = new THREE.MeshLambertMaterial({ color: 0x292524 });
 
         for (let r = 0; r < MAZE.length; r++) {
             for (let c = 0; c < MAZE[r].length; c++) {
@@ -337,53 +582,76 @@
                     wall.position.set(x, WALL_HEIGHT / 2, z);
                     scene.add(wall);
                     wallColliders.push(wall);
+
+                    const cap = new THREE.Mesh(capGeom, capMat);
+                    cap.position.set(x, WALL_HEIGHT + 0.12, z);
+                    scene.add(cap);
+
                 } else {
                     if (MAZE[r][c] === 2) startPos.set(x, 0, z);
                     if (MAZE[r][c] === 3) endPos.set(x, 0, z);
 
-                    let sectorHex = '#00e5ff';
-                    if (r > 6 && c <= 6) sectorHex = '#d97706';
-                    if (r <= 6 && c > 6) sectorHex = '#16a34a';
-                    if (r > 6 && c > 6) sectorHex = '#ef4444';
+                    if ((r + c) % 3 === 0) {
+                        const wallNeighbors = [
+                            { dr: -1, dc: 0, ox: 0, oz: -CELL_SIZE/2 + 0.1, rotY: 0 },
+                            { dr: 1, dc: 0, ox: 0, oz: CELL_SIZE/2 - 0.1, rotY: Math.PI },
+                            { dr: 0, dc: -1, ox: -CELL_SIZE/2 + 0.1, oz: 0, rotY: Math.PI / 2 },
+                            { dr: 0, dc: 1, ox: CELL_SIZE/2 - 0.1, oz: 0, rotY: -Math.PI / 2 }
+                        ];
 
-                    if (r % 2 === 0 && c % 2 === 0) {
-                        const arch = new THREE.Mesh(archGeom, archMat);
-                        arch.position.set(x, WALL_HEIGHT - 0.2, z);
-                        scene.add(arch);
+                        for (const wn of wallNeighbors) {
+                            const nr = r + wn.dr, nc = c + wn.dc;
+                            if (MAZE[nr] && MAZE[nr][nc] === 1) {
+                                const torchGroup = new THREE.Group();
+                                const mount = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.25, 0.2), torchBracketMat);
+                                const sconce = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.04, 0.4, 6), torchBracketMat);
+                                sconce.position.set(0, 0.1, 0.12);
+                                sconce.rotation.x = Math.PI / 6;
+
+                                const flame = new THREE.Sprite(flameMat.clone());
+                                flame.position.set(0, 0.35, 0.22);
+                                flame.scale.set(0.6, 0.9, 1);
+
+                                const glow = new THREE.Sprite(glowMat.clone());
+                                glow.position.set(0, 0.35, 0.22);
+                                glow.scale.set(2.8, 2.8, 1);
+
+                                const torchLight = new THREE.PointLight(0xf59e0b, 1.8, 11);
+                                torchLight.position.set(0, 0.35, 0.3);
+
+                                torchGroup.add(mount, sconce, flame, glow, torchLight);
+                                torchGroup.position.set(x + wn.ox, 2.0, z + wn.oz);
+                                torchGroup.rotation.y = wn.rotY;
+
+                                scene.add(torchGroup);
+
+                                torchFlames.push({
+                                    flame: flame,
+                                    glow: glow,
+                                    light: torchLight,
+                                    baseScaleY: 0.9,
+                                    baseGlowScale: 2.8,
+                                    baseIntensity: 1.8,
+                                    phase: Math.random() * 100
+                                });
+                                break;
+                            }
+                        }
                     }
 
-                    if (r % 3 === 0) {
-                        const pipe = new THREE.Mesh(pipeGeom, pipeMat);
-                        pipe.rotation.z = Math.PI / 2;
-                        pipe.position.set(x, WALL_HEIGHT - 0.3, z);
-                        scene.add(pipe);
-                    }
-
-                    if (Math.random() < 0.2) {
+                    if (Math.random() < 0.22) {
                         const isCrate = Math.random() > 0.5;
-                        const prop = new THREE.Mesh(isCrate ? crateGeom : barrelGeom, isCrate ? crateMat : barrelMat);
-                        prop.position.set(x + (Math.random() * 1.2 - 0.6), isCrate ? 0.35 : 0.45, z + (Math.random() * 1.2 - 0.6));
-                        scene.add(prop);
-                    }
+                        const mesh = new THREE.Mesh(isCrate ? crateGeom : barrelGeom, isCrate ? crateMat : barrelMat);
+                        mesh.position.set(x + (Math.random() * 1.4 - 0.7), isCrate ? 0.35 : 0.45, z + (Math.random() * 1.4 - 0.7));
+                        scene.add(mesh);
 
-                    if (Math.random() < 0.18) {
-                        const puddle = new THREE.Mesh(puddleGeom, puddleMat);
-                        puddle.rotation.x = -Math.PI / 2;
-                        puddle.position.set(x + (Math.random() * 0.8 - 0.4), 0.015, z + (Math.random() * 0.8 - 0.4));
-                        scene.add(puddle);
-                    }
-
-                    if (Math.random() < 0.12) {
-                        const decalTexts = ['SECTOR 01', 'SECTOR 02', 'DANGER ⚡', 'EXIT →', 'RESTRICTED'];
-                        const text = decalTexts[Math.floor(Math.random() * decalTexts.length)];
-                        const decalMat = new THREE.MeshBasicMaterial({
-                            map: createDecalTexture(text, sectorHex),
-                            transparent: true,
-                            opacity: 0.85
+                        props.push({
+                            mesh: mesh,
+                            vel: new THREE.Vector3(),
+                            rotVel: new THREE.Vector3(),
+                            radius: isCrate ? 0.45 : 0.4,
+                            baseY: isCrate ? 0.35 : 0.45
                         });
-                        const decal = new THREE.Mesh(new THREE.PlaneGeometry(1.8, 0.9), decalMat);
-                        decal.position.set(x, 1.8, z - 1.95);
-                        scene.add(decal);
                     }
                 }
             }
@@ -391,78 +659,57 @@
 
         const mapWidth = MAZE[0].length * CELL_SIZE;
         const mapHeight = MAZE.length * CELL_SIZE;
-        const floorMat = new THREE.MeshBasicMaterial({ color: 0xc8d1e0 });
-        const floor = new THREE.Mesh(new THREE.PlaneGeometry(mapWidth, mapHeight), floorMat);
+
+        const floor = new THREE.Mesh(new THREE.PlaneGeometry(mapWidth, mapHeight), new THREE.MeshLambertMaterial({ map: createAncientFloorTexture() }));
         floor.rotation.x = -Math.PI / 2;
         floor.position.set(mapWidth / 2 - CELL_SIZE/2, 0, mapHeight / 2 - CELL_SIZE/2);
         scene.add(floor);
 
-        const ceilingMat = new THREE.MeshBasicMaterial({ color: 0x334155 });
-        const ceiling = new THREE.Mesh(new THREE.PlaneGeometry(mapWidth, mapHeight), ceilingMat);
-        ceiling.rotation.x = Math.PI / 2;
-        ceiling.position.set(mapWidth / 2 - CELL_SIZE/2, WALL_HEIGHT, mapHeight / 2 - CELL_SIZE/2);
-        scene.add(ceiling);
-
-        const gridHelper = new THREE.GridHelper(Math.max(mapWidth, mapHeight), MAZE.length, 0x0284c7, 0x94a3b8);
-        gridHelper.position.set(mapWidth / 2 - CELL_SIZE/2, 0.01, mapHeight / 2 - CELL_SIZE/2);
-        scene.add(gridHelper);
-
-        // --- CHARACTER CONFIGURATIONS ---
         const runnerScale = 1.0;
-        const attackerScale = 1.8;
-        const attackerMaxSpeed = 4.5;
+        const attackerScale = 1.25;
 
-        // --- GAME CONTROLS & FPS CAP STATE ---
-        let isPaused = false;
-        let isGameOver = false;
-        let targetFPS = 60;
-        let fpsInterval = 1000 / targetFPS;
-        let lastFrameTime = performance.now();
-
-        // --- RUNNER STATE ---
-        let runnerModel, runnerMixer;
+        let runnerModel, runnerMixer, activeRunnerAction, activeRunnerState = 'IDLE';
         let runnerAnimMap = new Map();
-        let activeRunnerAction = null;
-        let activeRunnerState = 'IDLE';
-
-        let runnerPrevGrid = { c: 1, r: 1 };
-        let runnerGrid = { c: 1, r: 1 };
-        let runnerNextGrid = { c: 1, r: 1 };
+        let runnerGrid = { c: 1, r: 1 }, runnerNextGrid = { c: 1, r: 1 }, runnerPrevGrid = { c: 1, r: 1 };
         let runnerTargetPos = new THREE.Vector3().copy(startPos);
+        let runnerSpeed = SPEED_TIERS.WALK;
+        let runnerRecentCells = [];
 
-        let currentGoal = 'END';
-        let runnerRotation = 0;
-        let runnerSpeed = 0;
-        let isEvadingMode = false;
-        let hasLineOfSight = false;
-
-        // --- ATTACKER STATE ---
-        let attackerGroup = new THREE.Group();
-        let attackerInnerMesh = null;
-        let attackerMixer;
+        let attackerGroup = new THREE.Group(), attackerInnerMesh, attackerMixer, activeAttackerAction, activeAttackerState = 'IDLE';
         let attackerAnimMap = new Map();
-        let activeAttackerAction = null;
-        let activeAttackerState = 'IDLE';
-
-        let attackerGrid = { c: endGrid.c, r: endGrid.r };
-        let attackerNextGrid = { c: endGrid.c, r: endGrid.r };
+        let attackerGrid = { c: endGrid.c, r: endGrid.r }, attackerNextGrid = { c: endGrid.c, r: endGrid.r }, attackerPrevGrid = { c: endGrid.c, r: endGrid.r };
         let attackerTargetPos = new THREE.Vector3().copy(endPos);
-        let attackerRotation = 0;
-        let currentAttackerSpeed = 1.8;
-
-        const clock = new THREE.Clock();
-        const gltfLoader = new GLTFLoader();
+        let attackerSpeed = SPEED_TIERS.WALK;
+        let attackerRecentCells = [];
 
         scene.add(attackerGroup);
         attackerGroup.position.copy(endPos);
 
-        // --- AUTO-LOAD GLB MODELS AT STARTUP ---
+        const gltfLoader = new GLTFLoader();
+
+        function applyCharacterTuning(model, isCarmilla = false) {
+            if (!model) return;
+            model.traverse((child) => {
+                if (child.isMesh && child.material) {
+                    if (child.material.roughness !== undefined) child.material.roughness = 0.95;
+                    if (child.material.metalness !== undefined) child.material.metalness = 0.0;
+                    if (isCarmilla) {
+                        if (child.material.color) child.material.color.setHex(0xffffff);
+                        if (child.material.emissive) {
+                            child.material.emissive.setHex(0xf5e6e6);
+                            child.material.emissiveIntensity = 0.7;
+                        }
+                    }
+                }
+            });
+        }
+
         function initModels() {
-            // 1. CARMILLA (RUNNER)
             gltfLoader.load(RUNNER_URL, (gltf) => {
                 runnerModel = gltf.scene;
                 runnerModel.position.copy(startPos);
                 runnerModel.scale.setScalar(runnerScale);
+                applyCharacterTuning(runnerModel, true);
 
                 scene.add(runnerModel);
                 runnerMixer = new THREE.AnimationMixer(runnerModel);
@@ -470,187 +717,64 @@
 
                 fadeRunnerState('Walking');
                 selectNextRunnerWaypoint();
-            }, undefined, (err) => console.error("Could not load Carmilla GLB:", err));
+                if (attackerInnerMesh) selectNextAttackerWaypoint();
+            });
 
-            // 2. DEMON WARRIOR (ATTACKER - WITH ORIENTATION OFFSET CORRECTION)
             gltfLoader.load(ATTACKER_URL, (gltf) => {
                 attackerInnerMesh = gltf.scene;
-                
-                // --- BONE ORIENTATION CORRECTION FOR DEMON.GLB ---
                 attackerInnerMesh.rotation.set(0, 0, 0); 
                 attackerInnerMesh.scale.setScalar(attackerScale);
+                applyCharacterTuning(attackerInnerMesh, false);
 
                 attackerGroup.add(attackerInnerMesh);
                 attackerMixer = new THREE.AnimationMixer(attackerInnerMesh);
-                
-                gltf.animations.forEach((clip) => { 
-                    attackerAnimMap.set(clip.name, attackerMixer.clipAction(clip)); 
-                });
+                gltf.animations.forEach((clip) => { attackerAnimMap.set(clip.name, attackerMixer.clipAction(clip)); });
 
                 fadeAttackerState('Walking');
-            }, undefined, (err) => console.error("Could not load Demon GLB:", err));
+                if (runnerModel) selectNextAttackerWaypoint();
+            });
         }
 
         initModels();
 
-        // --- FPS BUTTON LISTENERS ---
-        function setFPSCap(fps) {
-            targetFPS = fps;
-            fpsInterval = fps > 0 ? (1000 / fps) : 0;
-            document.querySelectorAll('.fps-group .btn').forEach(b => b.classList.remove('active'));
-            if (fps === 30) document.getElementById('fps-30').classList.add('active');
-            if (fps === 60) document.getElementById('fps-60').classList.add('active');
-            if (fps === 0) document.getElementById('fps-max').classList.add('active');
-        }
+        document.getElementById('fx-lights').addEventListener('click', () => {
+            fxState.lights = !fxState.lights;
+            const btn = document.getElementById('fx-lights');
+            btn.innerText = fxState.lights ? '💡 Point Lights: ON' : '💡 Point Lights: OFF';
+            btn.classList.toggle('active', fxState.lights);
 
-        document.getElementById('fps-30').addEventListener('click', () => setFPSCap(30));
-        document.getElementById('fps-60').addEventListener('click', () => setFPSCap(60));
-        document.getElementById('fps-max').addEventListener('click', () => setFPSCap(0));
-
-        // --- PAUSE AND RESET HANDLERS ---
-        document.getElementById('btn-pause').addEventListener('click', () => {
-            isPaused = !isPaused;
-            const pBtn = document.getElementById('btn-pause');
-            pBtn.innerText = isPaused ? '▶️ Resume' : '⏸️ Pause';
-            pBtn.style.background = isPaused ? '#16a34a' : '#d97706';
+            torchFlames.forEach(tf => { if (tf.light) tf.light.visible = fxState.lights; });
+            mainLight.intensity = fxState.lights ? 0.6 : 1.8;
         });
 
-        document.getElementById('btn-reset').addEventListener('click', resetGame);
+        document.getElementById('fx-fog').addEventListener('click', () => {
+            fxState.fog = !fxState.fog;
+            const btn = document.getElementById('fx-fog');
+            btn.innerText = fxState.fog ? '🌫️ Fog: ON' : '🌫️ Fog: OFF';
+            btn.classList.toggle('active', fxState.fog);
 
-        function resetGame() {
-            isGameOver = false;
-            isPaused = false;
-            isEvadingMode = false;
-            currentGoal = 'END';
-
-            document.getElementById('btn-pause').innerText = '⏸️ Pause';
-            document.getElementById('btn-pause').style.background = '#d97706';
-            document.getElementById('banner').style.display = 'none';
-            document.getElementById('objective').innerText = 'Reach END Goal';
-            document.getElementById('objective').className = 'highlight-blue';
-
-            if (runnerModel) {
-                runnerModel.position.copy(startPos);
-                runnerGrid = { ...startGrid };
-                runnerNextGrid = { ...startGrid };
-                runnerPrevGrid = { ...startGrid };
-                runnerTargetPos.copy(startPos);
-                fadeRunnerState('Walking');
-                selectNextRunnerWaypoint();
-            }
-
-            if (attackerGroup) {
-                attackerGroup.position.copy(endPos);
-                attackerGrid = { ...endGrid };
-                attackerNextGrid = { ...endGrid };
-                attackerTargetPos.copy(endPos);
-                fadeAttackerState('Walking');
-            }
-        }
-
-        document.getElementById('hud-toggle').addEventListener('click', () => {
-            document.getElementById('hud-content').classList.toggle('collapsed');
+            scene.fog = fxState.fog ? new THREE.FogExp2(0x0c0a09, 0.022) : null;
         });
 
-        function updateViewportSize() {
-            camera.aspect = container.clientWidth / container.clientHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(container.clientWidth, container.clientHeight);
-        }
+        document.getElementById('fx-flames').addEventListener('click', () => {
+            fxState.flames = !fxState.flames;
+            const btn = document.getElementById('fx-flames');
+            btn.innerText = fxState.flames ? '🔥 Flames: ON' : '🔥 Flames: OFF';
+            btn.classList.toggle('active', fxState.flames);
 
-        document.getElementById('toggle-orient').addEventListener('click', () => {
-            container.classList.toggle('portrait-mode');
-            updateViewportSize();
+            torchFlames.forEach(tf => {
+                if (tf.flame) tf.flame.visible = fxState.flames;
+                if (tf.glow) tf.glow.visible = fxState.flames;
+            });
         });
 
-        window.addEventListener('resize', updateViewportSize);
-
-        // --- ANIMATION CONTROLLER ---
-        function fadeRunnerState(name, duration = 0.2) {
-            if (activeRunnerState === name || !runnerMixer) return;
-
-            if (name === 'IDLE') {
-                const walkAction = runnerAnimMap.get('Walking') || runnerAnimMap.get('Casual_Walk');
-                if (activeRunnerAction && activeRunnerAction !== walkAction) activeRunnerAction.fadeOut(duration);
-
-                if (walkAction) {
-                    walkAction.reset();
-                    walkAction.time = 0;
-                    walkAction.paused = true;
-                    walkAction.fadeIn(duration).play();
-                    activeRunnerAction = walkAction;
-                }
-                activeRunnerState = 'IDLE';
-                runnerSpeed = 0.0;
-                document.getElementById('ai-state').innerText = 'IDLE';
-                return;
-            }
-
-            const newAction = runnerAnimMap.get(name);
-            if (activeRunnerAction) {
-                if (activeRunnerAction.paused) activeRunnerAction.paused = false;
-                activeRunnerAction.fadeOut(duration);
-            }
-
-            if (newAction) {
-                newAction.reset();
-                newAction.paused = false;
-                newAction.fadeIn(duration).play();
-                activeRunnerAction = newAction;
-            }
-
-            activeRunnerState = name;
-            runnerSpeed = (name === 'RunFast') ? 4.8 : (name === 'Walking' ? 2.4 : 0.0);
-            document.getElementById('ai-state').innerText = name.toUpperCase();
-        }
-
-        function fadeAttackerState(name, duration = 0.2) {
-            if (activeAttackerState === name || !attackerMixer) return;
-
-            if (name === 'IDLE') {
-                let idleAction = attackerAnimMap.get('Idle') || attackerAnimMap.get('Alert') || attackerAnimMap.get('Walking');
-                if (activeAttackerAction && activeAttackerAction !== idleAction) activeAttackerAction.fadeOut(duration);
-
-                if (idleAction) {
-                    idleAction.reset();
-                    if (idleAction === attackerAnimMap.get('Walking')) {
-                        idleAction.time = 0;
-                        idleAction.paused = true;
-                    }
-                    idleAction.fadeIn(duration).play();
-                    activeAttackerAction = idleAction;
-                }
-                activeAttackerState = 'IDLE';
-                return;
-            }
-
-            const newAction = attackerAnimMap.get(name) || attackerAnimMap.get('RunFast') || attackerAnimMap.get('Walking');
-            if (activeAttackerAction && newAction) {
-                if (activeAttackerAction.paused) activeAttackerAction.paused = false;
-                activeAttackerAction.fadeOut(duration);
-            }
-
-            if (newAction) {
-                newAction.reset();
-                newAction.paused = false;
-                newAction.fadeIn(duration).play();
-                activeAttackerAction = newAction;
-            }
-
-            activeAttackerState = name;
-        }
-
-        function checkLineOfSight(posA, posB) {
-            POOL.v1.copy(posA).setY(1.2);
-            POOL.v2.copy(posB).setY(1.2);
-            POOL.dir.subVectors(POOL.v2, POOL.v1);
-            const dist = POOL.dir.length();
-            POOL.dir.normalize();
-
-            POOL.raycaster.set(POOL.v1, POOL.dir);
-            const hits = POOL.raycaster.intersectObjects(wallColliders);
-            return !(hits.length > 0 && hits[0].distance < dist);
-        }
+        document.getElementById('fx-props').addEventListener('click', () => {
+            fxState.props = !fxState.props;
+            const btn = document.getElementById('fx-props');
+            btn.innerText = fxState.props ? '📦 Props FX: ON' : '📦 Props FX: OFF';
+            btn.classList.toggle('active', fxState.props);
+            props.forEach(p => p.mesh.visible = fxState.props);
+        });
 
         function getOpenNeighbors(c, r) {
             const neighbors = [
@@ -660,19 +784,16 @@
             return neighbors.filter(n => MAZE[n.r] && MAZE[n.r][n.c] !== 1);
         }
 
-        function findPathBFS(startCell, targetCell, dangerCells = []) {
+        function findPathBFS(startCell, targetCell) {
             const queue = [[startCell]];
             const visited = new Set();
             visited.add(`${startCell.c},${startCell.r}`);
-            dangerCells.forEach(d => visited.add(`${d.c},${d.r}`));
 
             while (queue.length > 0) {
                 const path = queue.shift();
                 const curr = path[path.length - 1];
 
-                if (curr.c === targetCell.c && curr.r === targetCell.r) {
-                    return path;
-                }
+                if (curr.c === targetCell.c && curr.r === targetCell.r) return path;
 
                 const neighbors = getOpenNeighbors(curr.c, curr.r);
                 for (const n of neighbors) {
@@ -686,316 +807,345 @@
             return null;
         }
 
-        // --- CARMILLA PROACTIVE EVASION ---
-        function selectNextRunnerWaypoint() {
-            if (!runnerModel || isGameOver) return;
+        function fadeRunnerState(name, duration = 0.2) {
+            if (activeRunnerState === name || !runnerMixer) return;
+            const newAction = runnerAnimMap.get(name) || runnerAnimMap.get('Walking');
+            if (activeRunnerAction && newAction) activeRunnerAction.fadeOut(duration);
+            if (newAction) {
+                newAction.reset().fadeIn(duration).play();
+                activeRunnerAction = newAction;
+            }
+            activeRunnerState = name;
+        }
 
+        function fadeAttackerState(name, duration = 0.2) {
+            if (activeAttackerState === name || !attackerMixer) return;
+            const newAction = attackerAnimMap.get(name) || attackerAnimMap.get('Walking');
+            if (activeAttackerAction && newAction) activeAttackerAction.fadeOut(duration);
+            if (newAction) {
+                newAction.reset().fadeIn(duration).play();
+                activeAttackerAction = newAction;
+            }
+            activeAttackerState = name;
+        }
+
+        function selectNextRunnerWaypoint() {
+            if (!runnerModel || !attackerGroup) return;
             const openPaths = getOpenNeighbors(runnerGrid.c, runnerGrid.r);
             const distToAttacker = runnerModel.position.distanceTo(attackerGroup.position);
-            
-            hasLineOfSight = checkLineOfSight(runnerModel.position, attackerGroup.position);
 
-            const losElement = document.getElementById('los-state');
-            if (hasLineOfSight) {
-                losElement.innerText = 'CLEAR SIGHT (Spotted!)';
-                losElement.className = 'highlight-red';
+            if (currentHunter === 'CARMILLA') {
+                if (distToAttacker > 12.0) {
+                    fadeRunnerState('Walking');
+                    runnerSpeed = SPEED_TIERS.WALK;
+                } else {
+                    fadeRunnerState('RunFast');
+                    runnerSpeed = SPEED_TIERS.JOG + 0.3;
+                }
+                
+                const pathToDemon = findPathBFS(runnerGrid, attackerGrid);
+                runnerNextGrid = (pathToDemon && pathToDemon.length > 1) ? pathToDemon[1] : openPaths[0];
+
             } else {
-                losElement.innerText = 'BLOCKED (Hidden)';
-                losElement.className = 'highlight-green';
-            }
+                const pathFromHunter = findPathBFS(attackerGrid, runnerGrid);
+                const distInSteps = pathFromHunter ? pathFromHunter.length : 10;
 
-            if (!isEvadingMode && distToAttacker < 14.0 && hasLineOfSight) {
-                isEvadingMode = true;
-            } else if (isEvadingMode && (distToAttacker > 16.0 || (!hasLineOfSight && distToAttacker > 8.0))) {
-                isEvadingMode = false;
-            }
-
-            if (openPaths.length === 1 && distToAttacker < 8.5 && hasLineOfSight) {
-                fadeRunnerState('IDLE');
-                runnerRotation = Math.atan2(attackerGroup.position.x - runnerModel.position.x, attackerGroup.position.z - runnerModel.position.z);
-                isGameOver = true;
-                showBanner('CORNERED & TRAPPED!', 'game-over');
-                document.getElementById('ai-state').innerText = 'TRAPPED';
-                document.getElementById('ai-state').className = 'highlight-red';
-                return;
-            }
-
-            if (isEvadingMode) {
-                fadeRunnerState('RunFast');
-
-                const pathFromAttacker = findPathBFS(attackerGrid, runnerGrid);
-                const currentDistFromAttacker = pathFromAttacker ? pathFromAttacker.length : 0;
-
-                let safeCandidates = openPaths.filter(cell => {
-                    const p = findPathBFS(attackerGrid, cell);
-                    const d = p ? p.length : 0;
-                    return d > currentDistFromAttacker;
-                });
-
-                if (safeCandidates.length === 0) {
-                    safeCandidates = openPaths.filter(cell => !(cell.c === attackerGrid.c && cell.r === attackerGrid.r));
+                if (distInSteps < 4) {
+                    fadeRunnerState('RunFast');
+                    runnerSpeed = SPEED_TIERS.SPRINT;
+                } else if (distInSteps < 9) {
+                    fadeRunnerState('RunFast');
+                    runnerSpeed = SPEED_TIERS.JOG;
+                } else {
+                    fadeRunnerState('Walking');
+                    runnerSpeed = SPEED_TIERS.WALK;
                 }
 
-                const targetGoalGrid = (currentGoal === 'END') ? endGrid : startGrid;
-                const dangerZone = [attackerGrid, attackerNextGrid];
-                
-                let bestCell = safeCandidates[0] || openPaths[0];
-                let maxDist = -1;
+                const currentKey = `${runnerGrid.c},${runnerGrid.r}`;
+                if (!runnerRecentCells.includes(currentKey)) {
+                    runnerRecentCells.push(currentKey);
+                    if (runnerRecentCells.length > 6) runnerRecentCells.shift();
+                }
 
-                safeCandidates.forEach(cell => {
-                    const safePathToGoal = findPathBFS(cell, targetGoalGrid, dangerZone);
-                    const pFromAttacker = findPathBFS(attackerGrid, cell);
-                    const dFromAttacker = pFromAttacker ? pFromAttacker.length : 0;
+                let bestCell = openPaths[0];
+                let maxScore = -999999;
 
-                    if (safePathToGoal) {
-                        bestCell = cell;
-                    } else if (dFromAttacker > maxDist) {
-                        maxDist = dFromAttacker;
+                openPaths.forEach(cell => {
+                    const cellKey = `${cell.c},${cell.r}`;
+                    const pathFromH = findPathBFS(attackerGrid, cell);
+                    const distFromH = pathFromH ? pathFromH.length : 0;
+                    const cellNeighbors = getOpenNeighbors(cell.c, cell.r);
+
+                    let deadEndPenalty = (cellNeighbors.length <= 1) ? -10 : 0;
+                    let backtrackPenalty = (cell.c === runnerPrevGrid.c && cell.r === runnerPrevGrid.r) ? -6 : 0;
+                    let recentIndex = runnerRecentCells.indexOf(cellKey);
+                    let recentPenalty = recentIndex >= 0 ? -(runnerRecentCells.length - recentIndex) * 3.5 : 0;
+
+                    let score = (distFromH * 5.0) + (cellNeighbors.length * 2.5) + deadEndPenalty + backtrackPenalty + recentPenalty;
+
+                    if (score > maxScore) {
+                        maxScore = score;
                         bestCell = cell;
                     }
                 });
 
                 runnerPrevGrid = { ...runnerGrid };
                 runnerNextGrid = bestCell;
-
-            } else {
-                fadeRunnerState('Walking');
-                const targetGoalGrid = (currentGoal === 'END') ? endGrid : startGrid;
-                const path = findPathBFS(runnerGrid, targetGoalGrid);
-                
-                let forwardPaths = openPaths.filter(p => !(p.c === runnerPrevGrid.c && p.r === runnerPrevGrid.r));
-                if (forwardPaths.length === 0) forwardPaths = openPaths;
-
-                if (path && path.length > 1) {
-                    runnerNextGrid = path[1];
-                } else {
-                    runnerNextGrid = forwardPaths[0];
-                }
-                runnerPrevGrid = { ...runnerGrid };
             }
 
             runnerTargetPos.set(runnerNextGrid.c * CELL_SIZE, 0, runnerNextGrid.r * CELL_SIZE);
         }
 
-        function updateRunnerAI(delta) {
-            if (!runnerModel || isGameOver || isPaused) return;
+        function selectNextAttackerWaypoint() {
+            if (!attackerGroup || !runnerModel) return;
+            const openPaths = getOpenNeighbors(attackerGrid.c, attackerGrid.r);
+            const distToCarmilla = attackerGroup.position.distanceTo(runnerModel.position);
 
-            const runnerPos = runnerModel.position;
-            POOL.v1.subVectors(runnerTargetPos, runnerPos).setY(0);
-            const distToWaypoint = POOL.v1.length();
-            const moveStep = runnerSpeed * delta;
+            if (currentHunter === 'DEMON') {
+                const pathToCarmilla = findPathBFS(attackerGrid, runnerGrid);
+                const stepsToCarmilla = pathToCarmilla ? pathToCarmilla.length : 10;
 
-            if (distToWaypoint <= moveStep) {
-                runnerPos.x = runnerTargetPos.x;
-                runnerPos.z = runnerTargetPos.z;
-                runnerGrid = { ...runnerNextGrid };
-
-                if (runnerGrid.c === endGrid.c && runnerGrid.r === endGrid.r && currentGoal === 'END') {
-                    currentGoal = 'START';
-                    document.getElementById('objective').innerText = 'Return to START';
-                    document.getElementById('objective').className = 'highlight-green';
-                } else if (runnerGrid.c === startGrid.c && runnerGrid.r === startGrid.r && currentGoal === 'START') {
-                    currentGoal = 'END';
-                    document.getElementById('objective').innerText = 'Escape to END Goal';
-                    document.getElementById('objective').className = 'highlight-blue';
+                if (stepsToCarmilla < 5) {
+                    fadeAttackerState('RunFast');
+                    attackerSpeed = SPEED_TIERS.SPRINT - 0.5;
+                } else if (stepsToCarmilla < 10) {
+                    fadeAttackerState('RunFast');
+                    attackerSpeed = SPEED_TIERS.JOG - 0.2;
+                } else {
+                    fadeAttackerState('Walking');
+                    attackerSpeed = SPEED_TIERS.WALK - 0.2;
                 }
 
+                attackerNextGrid = (pathToCarmilla && pathToCarmilla.length > 1) ? pathToCarmilla[1] : openPaths[0];
+
+            } else {
+                if (distToCarmilla < 6.0) {
+                    fadeAttackerState('RunFast');
+                    attackerSpeed = SPEED_TIERS.SPRINT - 0.3;
+                } else {
+                    fadeAttackerState('Walking');
+                    attackerSpeed = SPEED_TIERS.WALK;
+                }
+
+                const currentKey = `${attackerGrid.c},${attackerGrid.r}`;
+                if (!attackerRecentCells.includes(currentKey)) {
+                    attackerRecentCells.push(currentKey);
+                    if (attackerRecentCells.length > 6) attackerRecentCells.shift();
+                }
+
+                let bestCell = openPaths[0];
+                let maxScore = -999999;
+
+                openPaths.forEach(cell => {
+                    const cellKey = `${cell.c},${cell.r}`;
+                    const pathFromH = findPathBFS(runnerGrid, cell);
+                    const distFromH = pathFromH ? pathFromH.length : 0;
+                    const cellNeighbors = getOpenNeighbors(cell.c, cell.r);
+
+                    let deadEndPenalty = (cellNeighbors.length <= 1) ? -10 : 0;
+                    let backtrackPenalty = (cell.c === attackerPrevGrid.c && cell.r === attackerPrevGrid.r) ? -6 : 0;
+                    let recentIndex = attackerRecentCells.indexOf(cellKey);
+                    let recentPenalty = recentIndex >= 0 ? -(attackerRecentCells.length - recentIndex) * 3.5 : 0;
+
+                    let score = (distFromH * 5.0) + (cellNeighbors.length * 2.5) + deadEndPenalty + backtrackPenalty + recentPenalty;
+
+                    if (score > maxScore) {
+                        maxScore = score;
+                        bestCell = cell;
+                    }
+                });
+
+                attackerPrevGrid = { ...attackerGrid };
+                attackerNextGrid = bestCell;
+            }
+
+            attackerTargetPos.set(attackerNextGrid.c * CELL_SIZE, 0, attackerNextGrid.r * CELL_SIZE);
+        }
+
+        function updateRunnerMovement(delta, now) {
+            if (!runnerModel) return;
+            POOL.v1.subVectors(runnerTargetPos, runnerModel.position).setY(0);
+            const dist = POOL.v1.length();
+            const step = (headStartTimer > 0 && currentHunter === 'DEMON' ? SPEED_TIERS.SPRINT : runnerSpeed) * delta;
+
+            if (runnerSpeed > 0) {
+                const interval = (runnerSpeed > 3.5) ? 220 : 380;
+                if (now - audio.lastCarmillaStep > interval) {
+                    audio.playFootstep(false, 0.2);
+                    audio.lastCarmillaStep = now;
+                }
+            }
+
+            if (dist <= step) {
+                runnerModel.position.x = runnerTargetPos.x;
+                runnerModel.position.z = runnerTargetPos.z;
+                runnerGrid = { ...runnerNextGrid };
                 selectNextRunnerWaypoint();
             } else {
                 POOL.v1.normalize();
-                runnerPos.addScaledVector(POOL.v1, moveStep);
-
-                runnerRotation = Math.atan2(POOL.v1.x, POOL.v1.z);
-                let angleDiff = runnerRotation - runnerModel.rotation.y;
-                angleDiff = Math.atan2(Math.sin(angleDiff), Math.cos(angleDiff));
-                runnerModel.rotation.y += angleDiff * Math.min(1, delta * 12);
+                runnerModel.position.addScaledVector(POOL.v1, step);
+                let targetRot = Math.atan2(POOL.v1.x, POOL.v1.z);
+                let diff = Math.atan2(Math.sin(targetRot - runnerModel.rotation.y), Math.cos(targetRot - runnerModel.rotation.y));
+                runnerModel.rotation.y += diff * Math.min(1, delta * 12);
             }
         }
 
-        function updateAttackerAI(delta) {
-            if (!runnerModel || isGameOver || isPaused) return;
+        function updateAttackerMovement(delta, now) {
+            if (!attackerGroup || !runnerModel || (headStartTimer > 0 && currentHunter === 'DEMON')) return;
 
-            const attackerPos = attackerGroup.position;
-            const distToRunner = attackerPos.distanceTo(runnerModel.position);
+            POOL.v2.subVectors(attackerTargetPos, attackerGroup.position).setY(0);
+            const dist = POOL.v2.length();
+            const step = (headStartTimer > 0 && currentHunter === 'CARMILLA' ? SPEED_TIERS.SPRINT : attackerSpeed) * delta;
 
-            const speedElement = document.getElementById('attacker-speed');
-
-            if (hasLineOfSight && distToRunner < 11.0) {
-                const proximityFactor = Math.max(0, 1 - (distToRunner / 11.0));
-                currentAttackerSpeed = THREE.MathUtils.lerp(1.8, attackerMaxSpeed, Math.pow(proximityFactor, 1.3));
-                speedElement.innerText = `${currentAttackerSpeed.toFixed(1)}m/s (CHASING)`;
-                speedElement.className = 'highlight-red';
-                fadeAttackerState('RunFast');
-            } else {
-                currentAttackerSpeed = 1.8;
-                speedElement.innerText = `${currentAttackerSpeed.toFixed(1)}m/s (PATROL)`;
-                speedElement.className = 'highlight-blue';
-                fadeAttackerState('Walking');
+            if (attackerSpeed > 0 && runnerModel) {
+                const distToCamera = camera.position.distanceTo(attackerGroup.position);
+                const vol = Math.max(0.05, (1 - distToCamera / 30.0) * 0.4);
+                const interval = (attackerSpeed > 3.5) ? 280 : 460;
+                if (now - audio.lastDemonStep > interval) {
+                    audio.playFootstep(true, vol);
+                    audio.lastDemonStep = now;
+                }
             }
 
-            POOL.v2.subVectors(attackerTargetPos, attackerPos).setY(0);
-            const distToWaypoint = POOL.v2.length();
-            const moveStep = currentAttackerSpeed * delta;
-
-            if (distToWaypoint <= moveStep) {
-                attackerPos.x = attackerTargetPos.x;
-                attackerPos.z = attackerTargetPos.z;
+            if (dist <= step) {
+                attackerGroup.position.x = attackerTargetPos.x;
+                attackerGroup.position.z = attackerTargetPos.z;
                 attackerGrid = { ...attackerNextGrid };
-
-                const pathToRunner = findPathBFS(attackerGrid, runnerGrid);
-                if (pathToRunner && pathToRunner.length > 1) {
-                    attackerNextGrid = pathToRunner[1];
-                } else {
-                    attackerNextGrid = runnerGrid;
-                }
-                attackerTargetPos.set(attackerNextGrid.c * CELL_SIZE, 0, attackerNextGrid.r * CELL_SIZE);
+                selectNextAttackerWaypoint();
             } else {
                 POOL.v2.normalize();
-                attackerPos.addScaledVector(POOL.v2, moveStep);
-
-                attackerRotation = Math.atan2(POOL.v2.x, POOL.v2.z);
-                let angleDiff = attackerRotation - attackerGroup.rotation.y;
-                angleDiff = Math.atan2(Math.sin(angleDiff), Math.cos(angleDiff));
-                attackerGroup.rotation.y += angleDiff * Math.min(1, delta * 12);
-            }
-
-            if (distToRunner < (1.4 * Math.max(1, attackerScale * 0.7)) && hasLineOfSight) {
-                isGameOver = true;
-                showBanner('CAUGHT BY DEMON!', 'game-over');
-                fadeRunnerState('IDLE');
-                fadeAttackerState('IDLE');
+                attackerGroup.position.addScaledVector(POOL.v2, step);
+                let targetRot = Math.atan2(POOL.v2.x, POOL.v2.z);
+                let diff = Math.atan2(Math.sin(targetRot - attackerGroup.rotation.y), Math.cos(targetRot - attackerGroup.rotation.y));
+                attackerGroup.rotation.y += diff * Math.min(1, delta * 12);
             }
         }
 
-        // --- CAMERA WALL COLLISION PREVENTER ---
-        function preventCameraWallCollision(camPos, lookAtPos) {
-            POOL.v3.copy(lookAtPos);
-            POOL.dir.subVectors(camPos, POOL.v3);
-            const dist = POOL.dir.length();
-            POOL.dir.normalize();
+        function checkTagCollision() {
+            if (!runnerModel || !attackerGroup || headStartTimer > 0) return;
+            const dist = runnerModel.position.distanceTo(attackerGroup.position);
+            
+            if (dist < 1.35) {
+                audio.playTagSound();
+                if (currentHunter === 'DEMON') {
+                    demonTags++;
+                    currentHunter = 'CARMILLA';
+                } else {
+                    carmillaTags++;
+                    currentHunter = 'DEMON';
+                }
 
-            POOL.raycaster.set(POOL.v3, POOL.dir);
-            const hits = POOL.raycaster.intersectObjects(wallColliders);
-            if (hits.length > 0 && hits[0].distance < dist) {
-                camPos.copy(POOL.v3).addScaledVector(POOL.dir, Math.max(0.4, hits[0].distance - 0.35));
+                headStartTimer = 3.0;
+                document.getElementById('current-hunter').innerText = currentHunter;
+                document.getElementById('current-hunter').className = (currentHunter === 'DEMON') ? 'highlight-red' : 'highlight-purple';
+                document.getElementById('score-text').innerText = `Carmilla: ${carmillaTags} | Demon: ${demonTags}`;
+
+                document.getElementById('hunter-speed-text').innerText = (currentHunter === 'DEMON') ? '3.2 m/s (OMNISCIENT)' : '3.6 m/s (OMNISCIENT)';
+                document.getElementById('evader-speed-text').innerText = (currentHunter === 'DEMON') ? '4.6 m/s (FAST SPRINT)' : '4.8 m/s (EVASIVE SPRINT)';
+
+                selectNextRunnerWaypoint();
+                selectNextAttackerWaypoint();
             }
         }
 
-        // --- CINEMATIC CAMERA ---
-        let cameraMode = 'AUTO';
-        let autoCamTimer = 0;
-        let autoCamIndex = 0;
-        let pivotAngle = 0;
+        document.getElementById('hud-toggle').addEventListener('click', () => {
+            document.getElementById('hud-content').classList.toggle('collapsed');
+        });
+
+        document.getElementById('btn-pause').addEventListener('click', () => {
+            isPaused = !isPaused;
+            const btn = document.getElementById('btn-pause');
+            btn.innerText = isPaused ? '▶️ Resume' : '⏸️ Pause';
+            btn.style.background = isPaused ? '#16a34a' : '#b45309';
+        });
+
+        document.getElementById('btn-reset').addEventListener('click', () => {
+            carmillaTags = 0; demonTags = 0;
+            currentHunter = 'DEMON';
+            headStartTimer = 0.0;
+            isPaused = false;
+            document.getElementById('score-text').innerText = 'Carmilla: 0 | Demon: 0';
+            document.getElementById('current-hunter').innerText = 'DEMON';
+            document.getElementById('current-hunter').className = 'highlight-red';
+
+            if (runnerModel) {
+                runnerModel.position.copy(startPos);
+                runnerGrid = { ...startGrid }; runnerNextGrid = { ...startGrid };
+                selectNextRunnerWaypoint();
+            }
+            if (attackerGroup) {
+                attackerGroup.position.copy(endPos);
+                attackerGrid = { ...endGrid }; attackerNextGrid = { ...endGrid };
+                selectNextAttackerWaypoint();
+            }
+        });
+
+        document.getElementById('btn-audio').addEventListener('click', () => {
+            const enabled = audio.toggleAudio();
+            const btn = document.getElementById('btn-audio');
+            btn.innerText = enabled ? '🔊 Audio: ON' : '🔇 Audio: OFF';
+            btn.style.background = enabled ? '#0284c7' : '#475569';
+        });
+
+        document.getElementById('toggle-orient').addEventListener('click', () => {
+            const isPortrait = container.classList.toggle('portrait-mode');
+            document.getElementById('toggle-orient').innerText = isPortrait ? '📱 View: Mobile' : '💻 View: Desktop';
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        });
+
+        let cameraMode = 'AUTO', autoCamTimer = 0, autoCamIndex = 0, pivotAngle = 0;
         const autoCamModes = ['CHASE', 'FRONT', 'WORM_FRONT', 'PIVOT_RUNNER', 'PIVOT_ATTACKER', 'GOD'];
 
         function setCameraMode(mode) {
             cameraMode = mode;
             document.querySelectorAll('.cam-btn-group .btn').forEach(btn => btn.classList.remove('active'));
-            const btnIdMap = {
-                'AUTO': 'cam-auto', 'GOD': 'cam-god', 'CHASE': 'cam-chase',
-                'FRONT': 'cam-front', 'WORM_FRONT': 'cam-worm-f', 'WORM_BACK': 'cam-worm-b',
-                'PIVOT_RUNNER': 'cam-pivot-r', 'PIVOT_ATTACKER': 'cam-pivot-a'
-            };
-            if (btnIdMap[mode]) document.getElementById(btnIdMap[mode]).classList.add('active');
-
+            const map = { 'AUTO':'cam-auto', 'GOD':'cam-god', 'CHASE':'cam-chase', 'FRONT':'cam-front', 'WORM_FRONT':'cam-worm-f', 'WORM_BACK':'cam-worm-b', 'PIVOT_RUNNER':'cam-pivot-r', 'PIVOT_ATTACKER':'cam-pivot-a' };
+            if (map[mode]) document.getElementById(map[mode]).classList.add('active');
             document.getElementById('cam-mode-text').innerText = (mode === 'AUTO') ? 'DYNAMIC MOVIE' : `${mode} VIEW`;
         }
 
         ['cam-auto', 'cam-god', 'cam-chase', 'cam-front', 'cam-worm-f', 'cam-worm-b', 'cam-pivot-r', 'cam-pivot-a'].forEach(id => {
             document.getElementById(id).addEventListener('click', () => {
-                const modeMap = {
-                    'cam-auto': 'AUTO', 'cam-god': 'GOD', 'cam-chase': 'CHASE',
-                    'cam-front': 'FRONT', 'cam-worm-f': 'WORM_FRONT', 'cam-worm-b': 'WORM_BACK',
-                    'cam-pivot-r': 'PIVOT_RUNNER', 'cam-pivot-a': 'PIVOT_ATTACKER'
-                };
-                setCameraMode(modeMap[id]);
+                const map = { 'cam-auto':'AUTO', 'cam-god':'GOD', 'cam-chase':'CHASE', 'cam-front':'FRONT', 'cam-worm-f':'WORM_FRONT', 'cam-worm-b':'WORM_BACK', 'cam-pivot-r':'PIVOT_RUNNER', 'cam-pivot-a':'PIVOT_ATTACKER' };
+                setCameraMode(map[id]);
             });
         });
 
         function updateCamera(delta) {
             if (!runnerModel) return;
-
             let activeView = cameraMode;
             if (cameraMode === 'AUTO') {
                 autoCamTimer += delta;
-                if (autoCamTimer > 5.0) {
-                    autoCamTimer = 0;
-                    autoCamIndex = (autoCamIndex + 1) % autoCamModes.length;
-                }
+                if (autoCamTimer > 5.0) { autoCamTimer = 0; autoCamIndex = (autoCamIndex + 1) % autoCamModes.length; }
                 activeView = autoCamModes[autoCamIndex];
             }
 
-            ceiling.visible = (activeView !== 'GOD');
-
-            const runnerPos = runnerModel.position;
-            const attackerPos = attackerGroup.position;
-            
-            POOL.lookTarget.copy(runnerPos).setY(1.2 * runnerScale);
+            const rPos = runnerModel.position;
+            const aPos = attackerGroup.position;
+            POOL.lookTarget.copy(rPos).setY(1.2);
             pivotAngle += delta * 0.8;
 
             if (activeView === 'GOD') {
-                POOL.camTarget.set(mapWidth / 2, 28, mapHeight / 2);
-                camera.position.lerp(POOL.camTarget, 0.05);
-                controls.target.lerp(POOL.v3.set(mapWidth/2, 0, mapHeight/2), 0.05);
-
+                camera.position.lerp(POOL.camTarget.set(mapWidth / 2, 28, mapHeight / 2), 0.05);
+                controls.target.lerp(POOL.v3.set(mapWidth / 2, 0, mapHeight / 2), 0.05);
             } else if (activeView === 'CHASE') {
                 POOL.dir.set(0, 2.8, -5.5).applyAxisAngle(new THREE.Vector3(0, 1, 0), runnerModel.rotation.y);
-                POOL.camTarget.copy(runnerPos).add(POOL.dir);
-                preventCameraWallCollision(POOL.camTarget, POOL.lookTarget);
-                camera.position.lerp(POOL.camTarget, 0.08);
+                camera.position.lerp(POOL.camTarget.copy(rPos).add(POOL.dir), 0.08);
                 controls.target.lerp(POOL.lookTarget, 0.08);
-
             } else if (activeView === 'FRONT') {
                 POOL.dir.set(0, 1.8, 4.5).applyAxisAngle(new THREE.Vector3(0, 1, 0), runnerModel.rotation.y);
-                POOL.camTarget.copy(runnerPos).add(POOL.dir);
-                preventCameraWallCollision(POOL.camTarget, POOL.lookTarget);
-                camera.position.lerp(POOL.camTarget, 0.08);
+                camera.position.lerp(POOL.camTarget.copy(rPos).add(POOL.dir), 0.08);
                 controls.target.lerp(POOL.lookTarget, 0.08);
-
-            } else if (activeView === 'WORM_FRONT') {
-                POOL.dir.set(0, 0.45, 3.0).applyAxisAngle(new THREE.Vector3(0, 1, 0), runnerModel.rotation.y);
-                POOL.camTarget.copy(runnerPos).add(POOL.dir);
-                preventCameraWallCollision(POOL.camTarget, POOL.lookTarget);
-                camera.position.lerp(POOL.camTarget, 0.08);
-                controls.target.lerp(POOL.lookTarget, 0.08);
-
-            } else if (activeView === 'WORM_BACK') {
-                POOL.dir.set(0, 0.45, -3.0).applyAxisAngle(new THREE.Vector3(0, 1, 0), runnerModel.rotation.y);
-                POOL.camTarget.copy(runnerPos).add(POOL.dir);
-                preventCameraWallCollision(POOL.camTarget, POOL.lookTarget);
-                camera.position.lerp(POOL.camTarget, 0.08);
-                controls.target.lerp(POOL.lookTarget, 0.08);
-
             } else if (activeView === 'PIVOT_RUNNER') {
-                const radius = 4.5;
-                POOL.camTarget.set(
-                    runnerPos.x + Math.sin(pivotAngle) * radius,
-                    runnerPos.y + 1.8,
-                    runnerPos.z + Math.cos(pivotAngle) * radius
-                );
-                preventCameraWallCollision(POOL.camTarget, POOL.lookTarget);
-                camera.position.lerp(POOL.camTarget, 0.08);
+                camera.position.lerp(POOL.camTarget.set(rPos.x + Math.sin(pivotAngle) * 4.5, rPos.y + 1.8, rPos.z + Math.cos(pivotAngle) * 4.5), 0.08);
                 controls.target.lerp(POOL.lookTarget, 0.08);
-
             } else if (activeView === 'PIVOT_ATTACKER') {
-                const radius = 5.0;
-                POOL.v3.copy(attackerPos).setY(1.2 * attackerScale);
-                POOL.camTarget.set(
-                    attackerPos.x + Math.sin(pivotAngle) * radius,
-                    attackerPos.y + 2.0,
-                    attackerPos.z + Math.cos(pivotAngle) * radius
-                );
-                preventCameraWallCollision(POOL.camTarget, POOL.v3);
-                camera.position.lerp(POOL.camTarget, 0.08);
+                POOL.v3.copy(aPos).setY(2.0);
+                camera.position.lerp(POOL.camTarget.set(aPos.x + Math.sin(pivotAngle) * 5.0, aPos.y + 2.0, aPos.z + Math.cos(pivotAngle) * 5.0), 0.08);
                 controls.target.lerp(POOL.v3, 0.08);
             }
-        }
-
-        function showBanner(text, cssClass) {
-            const banner = document.getElementById('banner');
-            banner.innerText = text;
-            banner.className = cssClass;
-            banner.style.display = 'block';
         }
 
         function animate(now) {
@@ -1009,12 +1159,41 @@
 
             const delta = clock.getDelta();
 
+            // Dynamic torch flame & point light flickering
+            if (fxState.flames || fxState.lights) {
+                const timeScale = now * 0.008;
+                torchFlames.forEach((tf) => { // <--- FIXED: Safely iterates globally declared torchFlames
+                    const flicker = Math.sin(timeScale * 6 + tf.phase) * 0.15 + Math.cos(timeScale * 12 + tf.phase) * 0.08;
+                    if (fxState.flames) {
+                        if (tf.flame) tf.flame.scale.set(0.55 + flicker * 0.1, tf.baseScaleY + flicker * 0.25, 1);
+                        if (tf.glow) tf.glow.scale.set(tf.baseGlowScale + flicker * 0.5, tf.baseGlowScale + flicker * 0.5, 1);
+                    }
+                    if (fxState.lights && tf.light) {
+                        tf.light.intensity = Math.max(0.2, tf.baseIntensity + flicker * 0.8);
+                    }
+                });
+            }
+
             if (!isPaused) {
+                if (headStartTimer > 0) {
+                    headStartTimer -= delta;
+                    const banner = document.getElementById('banner');
+                    if (headStartTimer > 0) {
+                        const evaderName = (currentHunter === 'DEMON') ? 'CARMILLA' : 'DEMON';
+                        banner.innerText = `HEAD START! ${evaderName} SPRINTING!\n${headStartTimer.toFixed(1)}s`;
+                        banner.className = 'headstart-banner';
+                        banner.style.display = 'block';
+                    } else {
+                        banner.style.display = 'none';
+                    }
+                }
+
                 if (runnerMixer) runnerMixer.update(delta);
                 if (attackerMixer) attackerMixer.update(delta);
 
-                updateRunnerAI(delta);
-                updateAttackerAI(delta);
+                updateRunnerMovement(delta, now);
+                updateAttackerMovement(delta, now);
+                checkTagCollision();
             }
 
             updateCamera(delta);
