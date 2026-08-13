@@ -188,8 +188,8 @@
                 </div>
 
                 <div class="fps-group">
-                    <button class="btn active" id="fps-30">⚡ 30 FPS</button>
-                    <button class="btn" id="fps-60">🚀 60 FPS</button>
+                    <button class="btn" id="fps-30">⚡ 30 FPS</button>
+                    <button class="btn active" id="fps-60">🚀 60 FPS</button>
                     <button class="btn" id="fps-max">🔥 Max</button>
                 </div>
 
@@ -248,31 +248,30 @@
             raycaster: new THREE.Raycaster()
         };
 
-        // --- SCENE SETUP ---
+        // --- SCENE SETUP (ULTRA-LIGHTWEIGHT OPTIMIZATIONS) ---
         const container = document.getElementById('canvas-container');
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0x0b0f19);
-        scene.fog = new THREE.FogExp2(0x0b0f19, 0.018);
 
         const camera = new THREE.PerspectiveCamera(50, container.clientWidth / container.clientHeight, 0.05, 120);
-        const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+        
+        // Disable antialiasing & shadow maps to keep 3rd-Gen Intel i3/i5 GPUs cool
+        const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: "high-performance" });
         renderer.setSize(container.clientWidth, container.clientHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        renderer.shadowMap.enabled = true;
-        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.setPixelRatio(1); // Force 1:1 pixel mapping (no 2x/3x supersampling)
+        renderer.shadowMap.enabled = false;
         container.appendChild(renderer.domElement);
 
         const controls = new OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
 
-        // --- LIGHTING & SCONCES ---
-        scene.add(new THREE.AmbientLight(0xffffff, 1.6));
-        const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
+        // --- LIGHTING (EFFICIENT AMBIENT & SINGLE DIRECTIONAL) ---
+        const mainLight = new THREE.AmbientLight(0xffffff, 2.0);
+        scene.add(mainLight);
+        
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
         dirLight.position.set(10, 20, 15);
-        dirLight.castShadow = true;
         scene.add(dirLight);
-
-        const sconceLights = [];
 
         // --- PROCEDURAL DECAL TEXTURES ---
         function createDecalTexture(text, accentColor) {
@@ -308,19 +307,19 @@
 
         const wallTexture = createWallTexture();
         const wallGeom = new THREE.BoxGeometry(CELL_SIZE, WALL_HEIGHT, CELL_SIZE);
-        const wallMat = new THREE.MeshStandardMaterial({ map: wallTexture, roughness: 0.4, metalness: 0.1 });
+        const wallMat = new THREE.MeshBasicMaterial({ map: wallTexture }); // Fast Basic Material
         
         const archGeom = new THREE.BoxGeometry(CELL_SIZE * 0.9, 0.3, 0.4);
-        const archMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.8, roughness: 0.2 });
+        const archMat = new THREE.MeshBasicMaterial({ color: 0x1e293b });
 
         const crateGeom = new THREE.BoxGeometry(0.7, 0.7, 0.7);
-        const crateMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.6 });
-        const barrelGeom = new THREE.CylinderGeometry(0.35, 0.35, 0.9, 12);
-        const barrelMat = new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.6, roughness: 0.3 });
-        const puddleGeom = new THREE.CircleGeometry(1.1, 16);
-        const puddleMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.05, metalness: 0.9, transparent: true, opacity: 0.45 });
-        const pipeGeom = new THREE.CylinderGeometry(0.06, 0.06, CELL_SIZE, 8);
-        const pipeMat = new THREE.MeshStandardMaterial({ color: 0x64748b, metalness: 0.9, roughness: 0.2 });
+        const crateMat = new THREE.MeshBasicMaterial({ color: 0x334155 });
+        const barrelGeom = new THREE.CylinderGeometry(0.35, 0.35, 0.9, 10);
+        const barrelMat = new THREE.MeshBasicMaterial({ color: 0x475569 });
+        const puddleGeom = new THREE.CircleGeometry(1.1, 12);
+        const puddleMat = new THREE.MeshBasicMaterial({ color: 0x0284c7, transparent: true, opacity: 0.35 });
+        const pipeGeom = new THREE.CylinderGeometry(0.06, 0.06, CELL_SIZE, 6);
+        const pipeMat = new THREE.MeshBasicMaterial({ color: 0x64748b });
 
         const wallColliders = [];
         let startGrid = { c: 1, r: 1 };
@@ -336,26 +335,16 @@
                 if (MAZE[r][c] === 1) {
                     const wall = new THREE.Mesh(wallGeom, wallMat);
                     wall.position.set(x, WALL_HEIGHT / 2, z);
-                    wall.castShadow = true;
-                    wall.receiveShadow = true;
                     scene.add(wall);
                     wallColliders.push(wall);
                 } else {
                     if (MAZE[r][c] === 2) startPos.set(x, 0, z);
                     if (MAZE[r][c] === 3) endPos.set(x, 0, z);
 
-                    let sectorColor = 0x00e5ff;
-                    if (r > 6 && c <= 6) sectorColor = 0xd97706;
-                    if (r <= 6 && c > 6) sectorColor = 0x16a34a;
-                    if (r > 6 && c > 6) sectorColor = 0xef4444;
-
-                    if (Math.random() < 0.35) {
-                        const pLight = new THREE.PointLight(sectorColor, 2.4, 9);
-                        pLight.position.set(x, WALL_HEIGHT - 0.6, z);
-                        scene.add(pLight);
-                        pLight.userData = { originalColor: sectorColor };
-                        sconceLights.push(pLight);
-                    }
+                    let sectorHex = '#00e5ff';
+                    if (r > 6 && c <= 6) sectorHex = '#d97706';
+                    if (r <= 6 && c > 6) sectorHex = '#16a34a';
+                    if (r > 6 && c > 6) sectorHex = '#ef4444';
 
                     if (r % 2 === 0 && c % 2 === 0) {
                         const arch = new THREE.Mesh(archGeom, archMat);
@@ -374,7 +363,6 @@
                         const isCrate = Math.random() > 0.5;
                         const prop = new THREE.Mesh(isCrate ? crateGeom : barrelGeom, isCrate ? crateMat : barrelMat);
                         prop.position.set(x + (Math.random() * 1.2 - 0.6), isCrate ? 0.35 : 0.45, z + (Math.random() * 1.2 - 0.6));
-                        prop.castShadow = true;
                         scene.add(prop);
                     }
 
@@ -388,8 +376,8 @@
                     if (Math.random() < 0.12) {
                         const decalTexts = ['SECTOR 01', 'SECTOR 02', 'DANGER ⚡', 'EXIT →', 'RESTRICTED'];
                         const text = decalTexts[Math.floor(Math.random() * decalTexts.length)];
-                        const decalMat = new THREE.MeshStandardMaterial({
-                            map: createDecalTexture(text, '#' + sectorColor.toString(16)),
+                        const decalMat = new THREE.MeshBasicMaterial({
+                            map: createDecalTexture(text, sectorHex),
                             transparent: true,
                             opacity: 0.85
                         });
@@ -403,14 +391,13 @@
 
         const mapWidth = MAZE[0].length * CELL_SIZE;
         const mapHeight = MAZE.length * CELL_SIZE;
-        const floorMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.3 });
+        const floorMat = new THREE.MeshBasicMaterial({ color: 0xc8d1e0 });
         const floor = new THREE.Mesh(new THREE.PlaneGeometry(mapWidth, mapHeight), floorMat);
         floor.rotation.x = -Math.PI / 2;
         floor.position.set(mapWidth / 2 - CELL_SIZE/2, 0, mapHeight / 2 - CELL_SIZE/2);
-        floor.receiveShadow = true;
         scene.add(floor);
 
-        const ceilingMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.6 });
+        const ceilingMat = new THREE.MeshBasicMaterial({ color: 0x334155 });
         const ceiling = new THREE.Mesh(new THREE.PlaneGeometry(mapWidth, mapHeight), ceilingMat);
         ceiling.rotation.x = Math.PI / 2;
         ceiling.position.set(mapWidth / 2 - CELL_SIZE/2, WALL_HEIGHT, mapHeight / 2 - CELL_SIZE/2);
@@ -428,7 +415,7 @@
         // --- GAME CONTROLS & FPS CAP STATE ---
         let isPaused = false;
         let isGameOver = false;
-        let targetFPS = 30;
+        let targetFPS = 60;
         let fpsInterval = 1000 / targetFPS;
         let lastFrameTime = performance.now();
 
@@ -450,8 +437,8 @@
         let hasLineOfSight = false;
 
         // --- ATTACKER STATE ---
-        let attackerGroup = new THREE.Group(); // Parent container for grid movement
-        let attackerInnerMesh = null;           // Inner mesh for rotational correction
+        let attackerGroup = new THREE.Group();
+        let attackerInnerMesh = null;
         let attackerMixer;
         let attackerAnimMap = new Map();
         let activeAttackerAction = null;
@@ -476,7 +463,6 @@
                 runnerModel = gltf.scene;
                 runnerModel.position.copy(startPos);
                 runnerModel.scale.setScalar(runnerScale);
-                runnerModel.traverse((node) => { if (node.isMesh) node.castShadow = true; });
 
                 scene.add(runnerModel);
                 runnerMixer = new THREE.AnimationMixer(runnerModel);
@@ -491,10 +477,8 @@
                 attackerInnerMesh = gltf.scene;
                 
                 // --- BONE ORIENTATION CORRECTION FOR DEMON.GLB ---
-                attackerInnerMesh.rotation.set(0, 0, 0); // Stand upright without floor sliding
+                attackerInnerMesh.rotation.set(0, 0, 0); 
                 attackerInnerMesh.scale.setScalar(attackerScale);
-
-                attackerInnerMesh.traverse((node) => { if (node.isMesh) node.castShadow = true; });
 
                 attackerGroup.add(attackerInnerMesh);
                 attackerMixer = new THREE.AnimationMixer(attackerInnerMesh);
@@ -623,7 +607,6 @@
         function fadeAttackerState(name, duration = 0.2) {
             if (activeAttackerState === name || !attackerMixer) return;
 
-            // IDLE ANIMATION SUPPORT FOR DEMON
             if (name === 'IDLE') {
                 let idleAction = attackerAnimMap.get('Idle') || attackerAnimMap.get('Alert') || attackerAnimMap.get('Walking');
                 if (activeAttackerAction && activeAttackerAction !== idleAction) activeAttackerAction.fadeOut(duration);
@@ -843,15 +826,11 @@
                 speedElement.innerText = `${currentAttackerSpeed.toFixed(1)}m/s (CHASING)`;
                 speedElement.className = 'highlight-red';
                 fadeAttackerState('RunFast');
-
-                sconceLights.forEach(l => l.color.setHex(0xdc2626));
             } else {
                 currentAttackerSpeed = 1.8;
                 speedElement.innerText = `${currentAttackerSpeed.toFixed(1)}m/s (PATROL)`;
                 speedElement.className = 'highlight-blue';
                 fadeAttackerState('Walking');
-
-                sconceLights.forEach(l => l.color.setHex(l.userData.originalColor));
             }
 
             POOL.v2.subVectors(attackerTargetPos, attackerPos).setY(0);
