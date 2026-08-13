@@ -313,7 +313,6 @@
         const archGeom = new THREE.BoxGeometry(CELL_SIZE * 0.9, 0.3, 0.4);
         const archMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.8, roughness: 0.2 });
 
-        // Props Geometries & Materials
         const crateGeom = new THREE.BoxGeometry(0.7, 0.7, 0.7);
         const crateMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.6 });
         const barrelGeom = new THREE.CylinderGeometry(0.35, 0.35, 0.9, 12);
@@ -345,11 +344,10 @@
                     if (MAZE[r][c] === 2) startPos.set(x, 0, z);
                     if (MAZE[r][c] === 3) endPos.set(x, 0, z);
 
-                    // 1. ZONED SECTOR COLOR LIGHTING
-                    let sectorColor = 0x00e5ff; // Cyan (Sector 1)
-                    if (r > 6 && c <= 6) sectorColor = 0xd97706; // Amber (Sector 2)
-                    if (r <= 6 && c > 6) sectorColor = 0x16a34a; // Green (Sector 3)
-                    if (r > 6 && c > 6) sectorColor = 0xef4444;  // Red (Sector 4)
+                    let sectorColor = 0x00e5ff;
+                    if (r > 6 && c <= 6) sectorColor = 0xd97706;
+                    if (r <= 6 && c > 6) sectorColor = 0x16a34a;
+                    if (r > 6 && c > 6) sectorColor = 0xef4444;
 
                     if (Math.random() < 0.35) {
                         const pLight = new THREE.PointLight(sectorColor, 2.4, 9);
@@ -359,14 +357,12 @@
                         sconceLights.push(pLight);
                     }
 
-                    // 2. CORRIDOR SUPPORT ARCHES
                     if (r % 2 === 0 && c % 2 === 0) {
                         const arch = new THREE.Mesh(archGeom, archMat);
                         arch.position.set(x, WALL_HEIGHT - 0.2, z);
                         scene.add(arch);
                     }
 
-                    // 3. PIPES ALONG CEILINGS
                     if (r % 3 === 0) {
                         const pipe = new THREE.Mesh(pipeGeom, pipeMat);
                         pipe.rotation.z = Math.PI / 2;
@@ -374,7 +370,6 @@
                         scene.add(pipe);
                     }
 
-                    // 4. CLUTTER PROPS (BARRELS / CRATES AT CORNERS)
                     if (Math.random() < 0.2) {
                         const isCrate = Math.random() > 0.5;
                         const prop = new THREE.Mesh(isCrate ? crateGeom : barrelGeom, isCrate ? crateMat : barrelMat);
@@ -383,7 +378,6 @@
                         scene.add(prop);
                     }
 
-                    // 5. WET FLOOR REFLECTION PUDDLES
                     if (Math.random() < 0.18) {
                         const puddle = new THREE.Mesh(puddleGeom, puddleMat);
                         puddle.rotation.x = -Math.PI / 2;
@@ -391,7 +385,6 @@
                         scene.add(puddle);
                     }
 
-                    // 6. WALL DECALS & ZONE SIGNAGE
                     if (Math.random() < 0.12) {
                         const decalTexts = ['SECTOR 01', 'SECTOR 02', 'DANGER ⚡', 'EXIT →', 'RESTRICTED'];
                         const text = decalTexts[Math.floor(Math.random() * decalTexts.length)];
@@ -457,7 +450,9 @@
         let hasLineOfSight = false;
 
         // --- ATTACKER STATE ---
-        let attackerModel, attackerMixer;
+        let attackerGroup = new THREE.Group(); // Parent container for grid movement
+        let attackerInnerMesh = null;           // Inner mesh for rotational correction
+        let attackerMixer;
         let attackerAnimMap = new Map();
         let activeAttackerAction = null;
         let activeAttackerState = 'IDLE';
@@ -471,8 +466,12 @@
         const clock = new THREE.Clock();
         const gltfLoader = new GLTFLoader();
 
+        scene.add(attackerGroup);
+        attackerGroup.position.copy(endPos);
+
         // --- AUTO-LOAD GLB MODELS AT STARTUP ---
         function initModels() {
+            // 1. CARMILLA (RUNNER)
             gltfLoader.load(RUNNER_URL, (gltf) => {
                 runnerModel = gltf.scene;
                 runnerModel.position.copy(startPos);
@@ -487,15 +486,22 @@
                 selectNextRunnerWaypoint();
             }, undefined, (err) => console.error("Could not load Carmilla GLB:", err));
 
+            // 2. DEMON WARRIOR (ATTACKER - WITH ORIENTATION OFFSET CORRECTION)
             gltfLoader.load(ATTACKER_URL, (gltf) => {
-                attackerModel = gltf.scene;
-                attackerModel.position.copy(endPos);
-                attackerModel.scale.setScalar(attackerScale);
-                attackerModel.traverse((node) => { if (node.isMesh) node.castShadow = true; });
+                attackerInnerMesh = gltf.scene;
+                
+                // --- BONE ORIENTATION CORRECTION FOR DEMON.GLB ---
+                attackerInnerMesh.rotation.set(0, 0, 0); // Stand upright without floor sliding
+                attackerInnerMesh.scale.setScalar(attackerScale);
 
-                scene.add(attackerModel);
-                attackerMixer = new THREE.AnimationMixer(attackerModel);
-                gltf.animations.forEach((clip) => { attackerAnimMap.set(clip.name, attackerMixer.clipAction(clip)); });
+                attackerInnerMesh.traverse((node) => { if (node.isMesh) node.castShadow = true; });
+
+                attackerGroup.add(attackerInnerMesh);
+                attackerMixer = new THREE.AnimationMixer(attackerInnerMesh);
+                
+                gltf.animations.forEach((clip) => { 
+                    attackerAnimMap.set(clip.name, attackerMixer.clipAction(clip)); 
+                });
 
                 fadeAttackerState('Walking');
             }, undefined, (err) => console.error("Could not load Demon GLB:", err));
@@ -549,8 +555,8 @@
                 selectNextRunnerWaypoint();
             }
 
-            if (attackerModel) {
-                attackerModel.position.copy(endPos);
+            if (attackerGroup) {
+                attackerGroup.position.copy(endPos);
                 attackerGrid = { ...endGrid };
                 attackerNextGrid = { ...endGrid };
                 attackerTargetPos.copy(endPos);
@@ -617,11 +623,34 @@
         function fadeAttackerState(name, duration = 0.2) {
             if (activeAttackerState === name || !attackerMixer) return;
 
+            // IDLE ANIMATION SUPPORT FOR DEMON
+            if (name === 'IDLE') {
+                let idleAction = attackerAnimMap.get('Idle') || attackerAnimMap.get('Alert') || attackerAnimMap.get('Walking');
+                if (activeAttackerAction && activeAttackerAction !== idleAction) activeAttackerAction.fadeOut(duration);
+
+                if (idleAction) {
+                    idleAction.reset();
+                    if (idleAction === attackerAnimMap.get('Walking')) {
+                        idleAction.time = 0;
+                        idleAction.paused = true;
+                    }
+                    idleAction.fadeIn(duration).play();
+                    activeAttackerAction = idleAction;
+                }
+                activeAttackerState = 'IDLE';
+                return;
+            }
+
             const newAction = attackerAnimMap.get(name) || attackerAnimMap.get('RunFast') || attackerAnimMap.get('Walking');
-            if (activeAttackerAction && newAction) activeAttackerAction.fadeOut(duration);
+            if (activeAttackerAction && newAction) {
+                if (activeAttackerAction.paused) activeAttackerAction.paused = false;
+                activeAttackerAction.fadeOut(duration);
+            }
 
             if (newAction) {
-                newAction.reset().fadeIn(duration).play();
+                newAction.reset();
+                newAction.paused = false;
+                newAction.fadeIn(duration).play();
                 activeAttackerAction = newAction;
             }
 
@@ -679,9 +708,9 @@
             if (!runnerModel || isGameOver) return;
 
             const openPaths = getOpenNeighbors(runnerGrid.c, runnerGrid.r);
-            const distToAttacker = runnerModel.position.distanceTo(attackerModel.position);
+            const distToAttacker = runnerModel.position.distanceTo(attackerGroup.position);
             
-            hasLineOfSight = checkLineOfSight(runnerModel.position, attackerModel.position);
+            hasLineOfSight = checkLineOfSight(runnerModel.position, attackerGroup.position);
 
             const losElement = document.getElementById('los-state');
             if (hasLineOfSight) {
@@ -700,7 +729,7 @@
 
             if (openPaths.length === 1 && distToAttacker < 8.5 && hasLineOfSight) {
                 fadeRunnerState('IDLE');
-                runnerRotation = Math.atan2(attackerModel.position.x - runnerModel.position.x, attackerModel.position.z - runnerModel.position.z);
+                runnerRotation = Math.atan2(attackerGroup.position.x - runnerModel.position.x, attackerGroup.position.z - runnerModel.position.z);
                 isGameOver = true;
                 showBanner('CORNERED & TRAPPED!', 'game-over');
                 document.getElementById('ai-state').innerText = 'TRAPPED';
@@ -803,7 +832,7 @@
         function updateAttackerAI(delta) {
             if (!runnerModel || isGameOver || isPaused) return;
 
-            const attackerPos = attackerModel.position;
+            const attackerPos = attackerGroup.position;
             const distToRunner = attackerPos.distanceTo(runnerModel.position);
 
             const speedElement = document.getElementById('attacker-speed');
@@ -846,9 +875,9 @@
                 attackerPos.addScaledVector(POOL.v2, moveStep);
 
                 attackerRotation = Math.atan2(POOL.v2.x, POOL.v2.z);
-                let angleDiff = attackerRotation - attackerModel.rotation.y;
+                let angleDiff = attackerRotation - attackerGroup.rotation.y;
                 angleDiff = Math.atan2(Math.sin(angleDiff), Math.cos(angleDiff));
-                attackerModel.rotation.y += angleDiff * Math.min(1, delta * 12);
+                attackerGroup.rotation.y += angleDiff * Math.min(1, delta * 12);
             }
 
             if (distToRunner < (1.4 * Math.max(1, attackerScale * 0.7)) && hasLineOfSight) {
@@ -920,7 +949,7 @@
             ceiling.visible = (activeView !== 'GOD');
 
             const runnerPos = runnerModel.position;
-            const attackerPos = attackerModel.position;
+            const attackerPos = attackerGroup.position;
             
             POOL.lookTarget.copy(runnerPos).setY(1.2 * runnerScale);
             pivotAngle += delta * 0.8;
