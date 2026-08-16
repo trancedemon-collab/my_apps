@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Creative Portfolio - Music & Short Movies</title>
+  <title>Creative Portfolio - Bradford R.</title>
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -48,56 +48,28 @@
 
   <style>
     /* Custom scrollbar matching GTK style */
-    ::-webkit-scrollbar {
-      width: 8px;
-      height: 8px;
-    }
-    ::-webkit-scrollbar-track {
-      background: transparent;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: rgba(125, 125, 125, 0.3);
-      border-radius: 9999px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: rgba(125, 125, 125, 0.5);
-    }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(125, 125, 125, 0.3); border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(125, 125, 125, 0.5); }
 
-    /* GTK-style transition polish */
-    .gtk-row {
-      transition: background-color 0.15s ease, transform 0.1s ease;
-    }
-    .gtk-row:active {
-      transform: scale(0.998);
-    }
-    
-    /* GTK Window Frame Effect */
-    .gtk-window {
-      box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1);
-    }
+    .gtk-row { transition: background-color 0.15s ease, transform 0.1s ease; }
+    .gtk-row:active { transform: scale(0.998); }
+    .gtk-window { box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1); }
 
-    /* Hide horizontal scrollbar for filter chips on small screens */
-    .no-scrollbar::-webkit-scrollbar {
-      display: none;
-    }
-    .no-scrollbar {
-      -ms-overflow-style: none;
-      scrollbar-width: none;
-    }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
 <body class="bg-gtk-light-bg dark:bg-gtk-dark-bg text-gray-800 dark:text-gray-100 font-sans min-h-screen flex flex-col transition-colors duration-200 selection:bg-gtk-blue selection:text-white overflow-x-hidden">
 
   <div class="max-w-5xl mx-auto w-full my-0 sm:my-6 flex-1 flex flex-col px-0 sm:px-4">
     
-    <!-- Main GTK Window Card -->
     <div class="gtk-window bg-gtk-light-card dark:bg-gtk-dark-card border-0 sm:border border-gtk-light-border dark:border-gtk-dark-border sm:rounded-2xl flex-1 flex flex-col overflow-hidden">
       
-      <!-- GTK HeaderBar Header -->
+      <!-- Header -->
       <header class="bg-gray-100 dark:bg-[#252525] border-b border-gtk-light-border dark:border-gtk-dark-border px-3 sm:px-4 py-2.5 sm:py-3 flex flex-row items-center justify-between gap-2 select-none">
-        <!-- Left: Window Controls & Title -->
         <div class="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1">
-          <!-- Window Control Buttons (GTK Style) -->
           <div class="hidden sm:flex items-center space-x-2 mr-1 flex-shrink-0">
             <div class="w-3.5 h-3.5 rounded-full bg-red-500/80 hover:bg-red-500 transition-colors cursor-pointer" title="Close"></div>
             <div class="w-3.5 h-3.5 rounded-full bg-yellow-500/80 hover:bg-yellow-500 transition-colors cursor-pointer" title="Minimize"></div>
@@ -111,8 +83,6 @@
             </div>
           </div>
         </div>
-
-        <!-- Right: Theme Switcher Dropdown -->
         <div class="flex items-center space-x-2 flex-shrink-0">
           <div class="relative">
             <select id="themeSelect" class="appearance-none bg-gray-200/70 dark:bg-gtk-dark-hover hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 text-xs font-medium py-1.5 pl-2.5 pr-6 rounded-lg cursor-pointer focus:outline-none focus:ring-2 focus:ring-gtk-blue transition-colors">
@@ -125,7 +95,7 @@
         </div>
       </header>
 
-      <!-- Profile & Contact Bar for Clients -->
+      <!-- Contact Bar -->
       <section class="bg-gradient-to-r from-blue-50/80 via-indigo-50/40 to-purple-50/50 dark:from-[#1d2736] dark:via-[#222332] dark:to-[#281f33] border-b border-gtk-light-border dark:border-gtk-dark-border p-3.5 sm:p-5">
         <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-3.5 sm:gap-4">
           <div class="space-y-1 sm:space-y-1.5 max-w-2xl w-full">
@@ -139,7 +109,7 @@
             </p>
           </div>
 
-          <!-- Contact Buttons & WhatsApp -->
+          <!-- Contact Buttons -->
           <div class="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 w-full md:w-auto">
             <a href="https://trancedemon-collab.github.io/my_apps/resume_gtk.html" target="_blank" class="flex items-center justify-center gap-1.5 px-3 py-2.5 sm:py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-medium text-xs transition-all shadow-md shadow-purple-600/20 active:scale-95">
               <i class="fa-solid fa-id-card text-sm"></i>
@@ -161,10 +131,9 @@
         </div>
       </section>
 
-      <!-- Featured Spotlight Showcase Frame -->
+      <!-- Carousel -->
       <section class="border-b border-gtk-light-border dark:border-gtk-dark-border bg-gradient-to-b from-gray-50/80 to-white dark:from-[#212121] dark:to-[#232323] p-3.5 sm:p-4">
         <div class="space-y-2">
-          <!-- Header Tag & Link -->
           <div class="flex items-center justify-between flex-wrap gap-2">
             <div class="flex items-center gap-2">
               <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold bg-amber-500/10 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-500/30">
@@ -172,40 +141,21 @@
               </span>
               <span id="spotlightHeaderTitle" class="text-xs font-semibold text-gray-800 dark:text-gray-200 hidden sm:inline">The Challenge</span>
             </div>
-
-            <!-- Sequence Player Controls & Watch Link -->
             <div class="flex items-center gap-2">
               <div class="flex items-center space-x-1 bg-gray-200/80 dark:bg-gtk-dark-hover rounded-lg p-0.5 text-xs border border-gray-300/50 dark:border-gtk-dark-border">
-                <button id="spotlightPrevBtn" class="px-2 py-0.5 hover:bg-white dark:hover:bg-gray-700 rounded text-gray-700 dark:text-gray-200 transition-colors" title="Previous GIF">
-                  <i class="fa-solid fa-chevron-left text-[10px]"></i>
-                </button>
+                <button id="spotlightPrevBtn" class="px-2 py-0.5 hover:bg-white dark:hover:bg-gray-700 rounded text-gray-700 dark:text-gray-200 transition-colors" title="Previous GIF"><i class="fa-solid fa-chevron-left text-[10px]"></i></button>
                 <span id="spotlightCounter" class="px-1 text-[10px] font-mono font-medium text-gray-600 dark:text-gray-300">1/1</span>
-                <button id="spotlightNextBtn" class="px-2 py-0.5 hover:bg-white dark:hover:bg-gray-700 rounded text-gray-700 dark:text-gray-200 transition-colors" title="Next GIF">
-                  <i class="fa-solid fa-chevron-right text-[10px]"></i>
-                </button>
-                <button id="spotlightPlayPauseBtn" class="px-1.5 py-0.5 hover:bg-white dark:hover:bg-gray-700 rounded text-gray-700 dark:text-gray-200 transition-colors border-l border-gray-300 dark:border-gray-600 pl-1.5 ml-0.5" title="Pause / Resume Auto-Play">
-                  <i id="spotlightPlayPauseIcon" class="fa-solid fa-pause text-[10px]"></i>
-                </button>
+                <button id="spotlightNextBtn" class="px-2 py-0.5 hover:bg-white dark:hover:bg-gray-700 rounded text-gray-700 dark:text-gray-200 transition-colors" title="Next GIF"><i class="fa-solid fa-chevron-right text-[10px]"></i></button>
+                <button id="spotlightPlayPauseBtn" class="px-1.5 py-0.5 hover:bg-white dark:hover:bg-gray-700 rounded text-gray-700 dark:text-gray-200 transition-colors border-l border-gray-300 dark:border-gray-600 pl-1.5 ml-0.5" title="Pause / Resume"><i id="spotlightPlayPauseIcon" class="fa-solid fa-pause text-[10px]"></i></button>
               </div>
-
               <a id="spotlightLinkTop" href="https://www.youtube.com/watch?v=cwlm7Pg9awQ" target="_blank" class="text-[11px] sm:text-xs text-gtk-blue hover:underline font-medium flex items-center gap-1">
-                <span>Watch Video</span>
-                <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                <span>Watch Video</span><i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
               </a>
             </div>
           </div>
-
-          <!-- GTK Styled Framed GIF Container -->
           <div class="relative group rounded-xl overflow-hidden border border-gray-300/80 dark:border-gtk-dark-border bg-gray-900 shadow-sm transition-all duration-300 hover:shadow-lg">
             <a id="spotlightAnchor" href="https://www.youtube.com/watch?v=cwlm7Pg9awQ" target="_blank" class="block relative aspect-video sm:aspect-[21/9] w-full overflow-hidden bg-black">
-              <img 
-                id="spotlightImg"
-                src="https://trancedemon-collab.github.io/my_apps/gif/the_challenge.gif" 
-                alt="Animated Short Preview" 
-                class="w-full h-full object-cover group-hover:scale-105 transition-all duration-500 opacity-95 group-hover:opacity-100"
-                loading="eager"
-              >
-              <!-- Gradient Overlay with Title -->
+              <img id="spotlightImg" src="https://trancedemon-collab.github.io/my_apps/gif/the_challenge.gif" alt="Preview" class="w-full h-full object-cover group-hover:scale-105 transition-all duration-500 opacity-95 group-hover:opacity-100" loading="eager">
               <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent flex flex-col justify-end p-3 sm:p-4 text-white">
                 <div class="flex items-end justify-between gap-3">
                   <div class="space-y-0.5 min-w-0">
@@ -215,8 +165,7 @@
                   </div>
                   <div class="shrink-0">
                     <span class="px-3 py-1.5 rounded-lg bg-gtk-blue hover:bg-gtk-blue-hover text-white text-xs font-medium flex items-center gap-1.5 shadow-md transition-transform active:scale-95">
-                      <i class="fa-solid fa-play text-[10px]"></i>
-                      <span class="hidden sm:inline">Play Video</span>
+                      <i class="fa-solid fa-play text-[10px]"></i><span class="hidden sm:inline">Play Video</span>
                     </span>
                   </div>
                 </div>
@@ -226,7 +175,7 @@
         </div>
       </section>
 
-      <!-- Production Methodology Overview for Clients -->
+      <!-- Methodology -->
       <section class="border-b border-gtk-light-border dark:border-gtk-dark-border bg-white dark:bg-[#232323] p-3.5 sm:p-4 text-xs sm:text-sm leading-relaxed">
         <div class="space-y-2.5 sm:space-y-3">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
@@ -237,22 +186,17 @@
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5 sm:gap-3 text-gray-600 dark:text-gray-300">
-            <!-- Music Methodology -->
             <div class="bg-gray-50 dark:bg-[#1c1c1c] p-3 sm:p-3.5 rounded-xl border border-gray-200/80 dark:border-gtk-dark-border space-y-1">
               <div class="flex items-center gap-2 font-semibold text-gray-900 dark:text-gray-100 text-xs sm:text-sm">
-                <i class="fa-solid fa-music text-gtk-blue"></i>
-                <span>Music Crafting Workflow</span>
+                <i class="fa-solid fa-music text-gtk-blue"></i><span>Music Crafting Workflow</span>
               </div>
               <p class="text-[11px] sm:text-xs text-gray-600 dark:text-gray-300 leading-normal">
                 Utilizing Digital Audio Workstations (FL Studio, BandLab, and custom-developed DAWs) in synergy with generative audio tools like Suno AI. Every track is built on hands-on creation of rhythm, original motifs, and core melodies—ensuring unique structural complexity rather than simple automated prompts. Artwork and visuals are designed with Gemini, Canva, and Shotcut.
               </p>
             </div>
-
-            <!-- Video Methodology -->
             <div class="bg-gray-50 dark:bg-[#1c1c1c] p-3 sm:p-3.5 rounded-xl border border-gray-200/80 dark:border-gtk-dark-border space-y-1">
               <div class="flex items-center gap-2 font-semibold text-gray-900 dark:text-gray-100 text-xs sm:text-sm">
-                <i class="fa-solid fa-film text-purple-500"></i>
-                <span>Short Movies & Video Workflow</span>
+                <i class="fa-solid fa-film text-purple-500"></i><span>Short Movies & Video Workflow</span>
               </div>
               <p class="text-[11px] sm:text-xs text-gray-600 dark:text-gray-300 leading-normal">
                 Short films and videos are generated using Gemini Chat and Google Flow / Vids. The process begins with detailed storyboarding and narrative decomposition into individual rendered clip segments. These elements are then multi-track stitched, sound-engineered, and polished with video editors using custom mixes, audio overlays, and precision cut edits.
@@ -262,232 +206,119 @@
         </div>
       </section>
 
-      <!-- Software & Tools Ecosystem Showcase -->
+      <!-- Tools Ecosystem -->
       <section class="border-b border-gtk-light-border dark:border-gtk-dark-border bg-gray-50/60 dark:bg-[#202020] p-3.5 sm:p-4 text-xs">
         <div class="space-y-3">
           <div class="flex items-center justify-between flex-wrap gap-2">
             <h3 class="font-semibold text-gray-900 dark:text-gray-100 text-[11px] sm:text-xs uppercase tracking-wider flex items-center gap-2">
               <i class="fa-solid fa-layer-group text-gtk-blue"></i> Technical Stack & Software Ecosystem
             </h3>
-            <span class="text-[10px] sm:text-[11px] text-gray-500 dark:text-gray-400 font-mono">Tools, DAWs, OS & Platforms</span>
           </div>
-
-          <!-- Grid Categories -->
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            
-            <!-- Category 1: AI, Vibe Coding & Code -->
             <div class="bg-white dark:bg-[#252525] p-3 rounded-xl border border-gray-200/90 dark:border-gtk-dark-border space-y-2">
               <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-700/60 pb-1.5">
-                <span class="font-semibold text-gray-800 dark:text-gray-200 text-xs flex items-center gap-1.5">
-                  <i class="fa-solid fa-wand-magic-sparkles text-amber-500"></i> AI & Vibe Coding
-                </span>
-                <span class="text-[9px] font-mono text-gray-400">Development</span>
+                <span class="font-semibold text-gray-800 dark:text-gray-200 text-xs flex items-center gap-1.5"><i class="fa-solid fa-wand-magic-sparkles text-amber-500"></i> AI & Vibe Coding</span>
               </div>
               <div class="flex flex-wrap gap-1.5">
-                <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-100 dark:bg-gtk-dark-hover text-gray-800 dark:text-gray-200 text-[11px]">
-                  <svg class="w-3.5 h-3.5 text-blue-500 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C12 6.627 6.627 12 0 12C6.627 12 12 17.373 12 24C12 17.373 17.373 12 24 12C17.373 12 12 6.627 12 0Z"/></svg>
-                  Gemini
-                </span>
-                <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-100 dark:bg-gtk-dark-hover text-gray-800 dark:text-gray-200 text-[11px]">
-                  <i class="fa-solid fa-robot text-emerald-500 text-xs"></i> ChatGPT
-                </span>
-                <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-100 dark:bg-gtk-dark-hover text-gray-800 dark:text-gray-200 text-[11px]">
-                  <i class="fa-solid fa-brain text-amber-500 text-xs"></i> Claude
-                </span>
-                <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-100 dark:bg-gtk-dark-hover text-gray-800 dark:text-gray-200 text-[11px]">
-                  <i class="fa-solid fa-bolt text-sky-400 text-xs"></i> Grok
-                </span>
-                <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-100 dark:bg-gtk-dark-hover text-gray-800 dark:text-gray-200 text-[11px]">
-                  <i class="fa-solid fa-fish-fins text-cyan-500 text-xs"></i> DeepSeek
-                </span>
-                <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-100 dark:bg-gtk-dark-hover text-gray-800 dark:text-gray-200 text-[11px]">
-                  <i class="fa-brands fa-meta text-blue-600 text-xs"></i> Meta
-                </span>
-                <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-100 dark:bg-gtk-dark-hover text-gray-800 dark:text-gray-200 text-[11px]">
-                  <i class="fa-solid fa-code text-emerald-500 text-xs"></i> Google AI Studio
-                </span>
-                <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-100 dark:bg-gtk-dark-hover text-gray-800 dark:text-gray-200 text-[11px]">
-                  <i class="devicon-python-plain colored text-xs"></i> Python (Vibe Coding)
-                </span>
-                <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-100 dark:bg-gtk-dark-hover text-gray-800 dark:text-gray-200 text-[11px]">
-                  <i class="fa-solid fa-diagram-project text-purple-500 text-xs"></i> Google Flow
-                </span>
-                <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-100 dark:bg-gtk-dark-hover text-gray-800 dark:text-gray-200 text-[11px]">
-                  <i class="fa-solid fa-sliders text-amber-500 text-xs"></i> Suno AI
-                </span>
+                <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-100 dark:bg-gtk-dark-hover text-[11px]"><svg class="w-3.5 h-3.5 text-blue-500 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C12 6.627 6.627 12 0 12C6.627 12 12 17.373 12 24C12 17.373 17.373 12 24 12C17.373 12 12 6.627 12 0Z"/></svg>Gemini</span>
+                <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-100 dark:bg-gtk-dark-hover text-[11px]"><i class="fa-solid fa-robot text-emerald-500"></i> ChatGPT</span>
+                <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-100 dark:bg-gtk-dark-hover text-[11px]"><i class="fa-solid fa-brain text-amber-500"></i> Claude</span>
+                <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-100 dark:bg-gtk-dark-hover text-[11px]"><i class="fa-solid fa-bolt text-sky-400"></i> Grok</span>
+                <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-100 dark:bg-gtk-dark-hover text-[11px]"><i class="fa-solid fa-fish-fins text-cyan-500"></i> DeepSeek</span>
+                <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-100 dark:bg-gtk-dark-hover text-[11px]"><i class="devicon-python-plain colored"></i> Python</span>
               </div>
             </div>
 
-            <!-- Category 2: Music & Audio DAWs -->
             <div class="bg-white dark:bg-[#252525] p-3 rounded-xl border border-gray-200/90 dark:border-gtk-dark-border space-y-2">
               <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-700/60 pb-1.5">
-                <span class="font-semibold text-gray-800 dark:text-gray-200 text-xs flex items-center gap-1.5">
-                  <i class="fa-solid fa-headphones text-gtk-blue"></i> Audio & Music Workstations
-                </span>
-                <span class="text-[9px] font-mono text-gray-400">DAWs & Production</span>
+                <span class="font-semibold text-gray-800 dark:text-gray-200 text-xs flex items-center gap-1.5"><i class="fa-solid fa-headphones text-gtk-blue"></i> Audio & DAWs</span>
               </div>
               <div class="flex flex-wrap gap-1.5">
-                <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-100 dark:bg-gtk-dark-hover text-gray-800 dark:text-gray-200 text-[11px]">
-                  <i class="fa-solid fa-compact-disc text-orange-500 text-xs"></i> FL Studio
-                </span>
-                <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-100 dark:bg-gtk-dark-hover text-gray-800 dark:text-gray-200 text-[11px]">
-                  <i class="fa-solid fa-lines-leaning text-red-500 text-xs"></i> BandLab
-                </span>
-                <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-100 dark:bg-gtk-dark-hover text-gray-800 dark:text-gray-200 text-[11px]">
-                  <i class="fa-solid fa-wave-square text-cyan-500 text-xs"></i> Sound Forge
-                </span>
-                <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-100 dark:bg-gtk-dark-hover text-gray-800 dark:text-gray-200 text-[11px]">
-                  <i class="fa-solid fa-laptop-code text-blue-500 text-xs"></i> Custom DAWs
-                </span>
+                <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-100 dark:bg-gtk-dark-hover text-[11px]"><i class="fa-solid fa-record-vinyl text-orange-500"></i> FL Studio</span>
+                <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-100 dark:bg-gtk-dark-hover text-[11px]"><i class="fa-solid fa-sliders text-red-500"></i> BandLab</span>
+                <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-100 dark:bg-gtk-dark-hover text-[11px]"><i class="fa-solid fa-wave-square text-blue-500"></i> Sound Forge</span>
+                <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-100 dark:bg-gtk-dark-hover text-[11px]"><i class="fa-solid fa-music text-purple-500"></i> Suno AI</span>
               </div>
             </div>
 
-            <!-- Category 3: 3D, Video & Design -->
             <div class="bg-white dark:bg-[#252525] p-3 rounded-xl border border-gray-200/90 dark:border-gtk-dark-border space-y-2">
               <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-700/60 pb-1.5">
-                <span class="font-semibold text-gray-800 dark:text-gray-200 text-xs flex items-center gap-1.5">
-                  <i class="fa-solid fa-cubes text-purple-500"></i> 3D, Video & Graphics
-                </span>
-                <span class="text-[9px] font-mono text-gray-400">Design</span>
+                <span class="font-semibold text-gray-800 dark:text-gray-200 text-xs flex items-center gap-1.5"><i class="fa-solid fa-cubes text-purple-500"></i> 3D, Video & Graphic Design</span>
               </div>
               <div class="flex flex-wrap gap-1.5">
-                <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-100 dark:bg-gtk-dark-hover text-gray-800 dark:text-gray-200 text-[11px]">
-                  <i class="devicon-blender-original colored text-xs"></i> Blender
-                </span>
-                <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-100 dark:bg-gtk-dark-hover text-gray-800 dark:text-gray-200 text-[11px]">
-                  <i class="fa-solid fa-cube text-teal-500 text-xs"></i> Autodesk Maya
-                </span>
-                <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-100 dark:bg-gtk-dark-hover text-gray-800 dark:text-gray-200 text-[11px]">
-                  <i class="devicon-photoshop-plain colored text-xs"></i> Photoshop
-                </span>
-                <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-100 dark:bg-gtk-dark-hover text-gray-800 dark:text-gray-200 text-[11px]">
-                  <i class="devicon-illustrator-plain colored text-xs"></i> Illustrator
-                </span>
-                <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-100 dark:bg-gtk-dark-hover text-gray-800 dark:text-gray-200 text-[11px]">
-                  <i class="devicon-inkscape-plain colored text-xs"></i> Inkscape
-                </span>
-                <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-100 dark:bg-gtk-dark-hover text-gray-800 dark:text-gray-200 text-[11px]">
-                  <i class="fa-solid fa-scissors text-rose-500 text-xs"></i> Shotcut
-                </span>
-                <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-100 dark:bg-gtk-dark-hover text-gray-800 dark:text-gray-200 text-[11px]">
-                  <i class="fa-solid fa-palette text-cyan-500 text-xs"></i> Canva
-                </span>
-                <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-100 dark:bg-gtk-dark-hover text-gray-800 dark:text-gray-200 text-[11px]">
-                  <i class="fa-solid fa-pen-nib text-green-500 text-xs"></i> CorelDRAW
-                </span>
+                <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-100 dark:bg-gtk-dark-hover text-[11px]"><i class="devicon-blender-original colored"></i> Blender</span>
+                <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-100 dark:bg-gtk-dark-hover text-[11px]"><i class="fa-solid fa-cube text-teal-500"></i> Maya</span>
+                <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-100 dark:bg-gtk-dark-hover text-[11px]"><i class="devicon-photoshop-plain colored"></i> Photoshop</span>
+                <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-100 dark:bg-gtk-dark-hover text-[11px]"><i class="devicon-illustrator-plain colored"></i> Illustrator</span>
+                <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-100 dark:bg-gtk-dark-hover text-[11px]"><i class="devicon-inkscape-plain colored"></i> Inkscape</span>
+                <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-100 dark:bg-gtk-dark-hover text-[11px]"><i class="fa-solid fa-scissors text-indigo-500"></i> Shotcut</span>
+                <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-100 dark:bg-gtk-dark-hover text-[11px]"><i class="fa-solid fa-paintbrush text-cyan-500"></i> Canva</span>
+                <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-100 dark:bg-gtk-dark-hover text-[11px]"><i class="fa-solid fa-vector-square text-emerald-500"></i> CorelDRAW</span>
               </div>
             </div>
 
-            <!-- Category 4: Operating Systems -->
             <div class="bg-white dark:bg-[#252525] p-3 rounded-xl border border-gray-200/90 dark:border-gtk-dark-border space-y-2">
               <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-700/60 pb-1.5">
-                <span class="font-semibold text-gray-800 dark:text-gray-200 text-xs flex items-center gap-1.5">
-                  <i class="fa-solid fa-desktop text-indigo-500"></i> Operating Systems
-                </span>
-                <span class="text-[9px] font-mono text-gray-400">Environment</span>
+                <span class="font-semibold text-gray-800 dark:text-gray-200 text-xs flex items-center gap-1.5"><i class="fa-solid fa-desktop text-sky-500"></i> Operating Systems</span>
               </div>
               <div class="flex flex-wrap gap-1.5">
-                <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-100 dark:bg-gtk-dark-hover text-gray-800 dark:text-gray-200 text-[11px]">
-                  <i class="devicon-linux-plain colored text-xs"></i> Linux
-                </span>
-                <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-100 dark:bg-gtk-dark-hover text-gray-800 dark:text-gray-200 text-[11px]">
-                  <i class="devicon-windows8-original colored text-xs"></i> Windows
-                </span>
+                <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-100 dark:bg-gtk-dark-hover text-[11px]"><i class="devicon-linux-plain colored"></i> Linux</span>
+                <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-100 dark:bg-gtk-dark-hover text-[11px]"><i class="devicon-windows8-original colored"></i> Windows</span>
               </div>
             </div>
 
-            <!-- Category 5: Cloud & Workspace -->
             <div class="bg-white dark:bg-[#252525] p-3 rounded-xl border border-gray-200/90 dark:border-gtk-dark-border space-y-2">
               <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-700/60 pb-1.5">
-                <span class="font-semibold text-gray-800 dark:text-gray-200 text-xs flex items-center gap-1.5">
-                  <i class="fa-solid fa-cloud text-sky-500"></i> Cloud & Workspace
-                </span>
-                <span class="text-[9px] font-mono text-gray-400">Services</span>
+                <span class="font-semibold text-gray-800 dark:text-gray-200 text-xs flex items-center gap-1.5"><i class="fa-solid fa-cloud text-blue-500"></i> Cloud & Workspace</span>
               </div>
               <div class="flex flex-wrap gap-1.5">
-                <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-100 dark:bg-gtk-dark-hover text-gray-800 dark:text-gray-200 text-[11px]">
-                  <i class="devicon-googlecloud-plain colored text-xs"></i> Google Cloud
-                </span>
-                <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-100 dark:bg-gtk-dark-hover text-gray-800 dark:text-gray-200 text-[11px]">
-                  <i class="fa-brands fa-google-drive text-amber-500 text-xs"></i> Google Drive
-                </span>
-                <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-100 dark:bg-gtk-dark-hover text-gray-800 dark:text-gray-200 text-[11px]">
-                  <i class="fa-solid fa-envelope text-red-500 text-xs"></i> Gmail
-                </span>
-                <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-100 dark:bg-gtk-dark-hover text-gray-800 dark:text-gray-200 text-[11px]">
-                  <i class="fa-brands fa-microsoft text-blue-500 text-xs"></i> MS Office
-                </span>
+                <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-100 dark:bg-gtk-dark-hover text-[11px]"><i class="devicon-googlecloud-plain colored"></i> Google Cloud</span>
+                <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-100 dark:bg-gtk-dark-hover text-[11px]"><i class="fa-brands fa-google-drive text-amber-500"></i> Google Drive</span>
+                <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-100 dark:bg-gtk-dark-hover text-[11px]"><i class="fa-solid fa-envelope text-red-500"></i> Gmail</span>
+                <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-100 dark:bg-gtk-dark-hover text-[11px]"><i class="fa-solid fa-file-word text-blue-600"></i> MS Office</span>
               </div>
             </div>
 
-            <!-- Category 6: Enterprise, CRM & Collaboration -->
             <div class="bg-white dark:bg-[#252525] p-3 rounded-xl border border-gray-200/90 dark:border-gtk-dark-border space-y-2">
               <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-700/60 pb-1.5">
-                <span class="font-semibold text-gray-800 dark:text-gray-200 text-xs flex items-center gap-1.5">
-                  <i class="fa-solid fa-users-gear text-emerald-500"></i> Productivity & CRM
-                </span>
-                <span class="text-[9px] font-mono text-gray-400">Collaboration</span>
+                <span class="font-semibold text-gray-800 dark:text-gray-200 text-xs flex items-center gap-1.5"><i class="fa-solid fa-briefcase text-emerald-500"></i> Productivity & Enterprise</span>
               </div>
               <div class="flex flex-wrap gap-1.5">
-                <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-100 dark:bg-gtk-dark-hover text-gray-800 dark:text-gray-200 text-[11px]">
-                  <i class="devicon-jira-plain colored text-xs"></i> Jira
-                </span>
-                <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-100 dark:bg-gtk-dark-hover text-gray-800 dark:text-gray-200 text-[11px]">
-                  <i class="devicon-salesforce-plain colored text-xs"></i> Salesforce
-                </span>
-                <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-100 dark:bg-gtk-dark-hover text-gray-800 dark:text-gray-200 text-[11px]">
-                  <i class="devicon-slack-plain colored text-xs"></i> Slack
-                </span>
+                <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-100 dark:bg-gtk-dark-hover text-[11px]"><i class="devicon-jira-plain colored"></i> Jira</span>
+                <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-100 dark:bg-gtk-dark-hover text-[11px]"><i class="devicon-salesforce-plain colored"></i> Salesforce</span>
+                <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-100 dark:bg-gtk-dark-hover text-[11px]"><i class="devicon-slack-plain colored"></i> Slack</span>
               </div>
             </div>
-
           </div>
         </div>
       </section>
 
-      <div class="p-3 sm:p-4 bg-gray-50/50 dark:bg-[#212121] border-b border-gtk-light-border dark:border-gtk-dark-border space-y-2.5 sm:space-y-3">
-        
-        <!-- Search Input Bar -->
+      <!-- Data List Actions -->
+      <div class="p-3 sm:p-4 bg-gray-50/50 dark:bg-[#212121] border-b border-gtk-light-border dark:border-gtk-dark-border space-y-2.5 sm:space-y-3 flex-shrink-0">
         <div class="relative">
           <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs sm:text-sm"></i>
-          <input 
-            type="text" 
-            id="searchInput" 
-            placeholder="Search titles, variants, or keywords..."
-            class="w-full bg-white dark:bg-gtk-dark-card text-gray-900 dark:text-gray-100 pl-9 pr-9 py-2 sm:py-2.5 rounded-xl border border-gray-300 dark:border-gtk-dark-border focus:outline-none focus:ring-2 focus:ring-gtk-blue text-xs sm:text-sm transition-all shadow-sm placeholder-gray-400"
-          >
-          <button id="clearSearchBtn" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-1">
-            <i class="fa-solid fa-circle-xmark"></i>
-          </button>
+          <input type="text" id="searchInput" placeholder="Search from your CSV Data..." class="w-full bg-white dark:bg-gtk-dark-card text-gray-900 dark:text-gray-100 pl-9 pr-9 py-2 sm:py-2.5 rounded-xl border border-gray-300 dark:border-gtk-dark-border focus:outline-none focus:ring-2 focus:ring-gtk-blue text-xs sm:text-sm transition-all shadow-sm">
+          <button id="clearSearchBtn" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1"><i class="fa-solid fa-circle-xmark"></i></button>
         </div>
-
-        <!-- Filter Category Tabs & Counter Stats -->
         <div class="flex flex-row items-center justify-between gap-2 overflow-x-auto no-scrollbar py-0.5">
           <div class="flex items-center gap-1.5 flex-nowrap shrink-0" id="categoryFilterContainer">
-            <button data-cat="all" class="cat-btn active px-2.5 py-1.5 sm:px-3 sm:py-1.5 rounded-lg text-xs font-medium transition-all bg-gtk-blue text-white shadow-sm shrink-0">
-              All (<span id="countAll">0</span>)
-            </button>
-            <button data-cat="music" class="cat-btn px-2.5 py-1.5 sm:px-3 sm:py-1.5 rounded-lg text-xs font-medium transition-all bg-gray-200/80 dark:bg-gtk-dark-hover text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700 shrink-0">
-              <i class="fa-solid fa-music mr-1 text-gtk-blue"></i>Music (<span id="countMusic">0</span>)
-            </button>
-            <button data-cat="videos" class="cat-btn px-2.5 py-1.5 sm:px-3 sm:py-1.5 rounded-lg text-xs font-medium transition-all bg-gray-200/80 dark:bg-gtk-dark-hover text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700 shrink-0">
-              <i class="fa-solid fa-video mr-1 text-purple-500"></i>Videos (<span id="countVideos">0</span>)
-            </button>
+            <button data-cat="all" class="cat-btn active px-2.5 py-1.5 sm:px-3 rounded-lg text-xs font-medium transition-all bg-gtk-blue text-white shadow-sm">All (<span id="countAll">0</span>)</button>
+            <button data-cat="music" class="cat-btn px-2.5 py-1.5 sm:px-3 rounded-lg text-xs font-medium transition-all bg-gray-200/80 dark:bg-gtk-dark-hover text-gray-700 dark:text-gray-300 hover:bg-gray-300"><i class="fa-solid fa-music mr-1 text-gtk-blue"></i>Music (<span id="countMusic">0</span>)</button>
+            <button data-cat="videos" class="cat-btn px-2.5 py-1.5 sm:px-3 rounded-lg text-xs font-medium transition-all bg-gray-200/80 dark:bg-gtk-dark-hover text-gray-700 dark:text-gray-300 hover:bg-gray-300"><i class="fa-solid fa-video mr-1 text-purple-500"></i>Videos (<span id="countVideos">0</span>)</button>
           </div>
-
-          <div class="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 font-mono shrink-0">
-            Showing <span id="visibleCount" class="font-semibold text-gray-800 dark:text-gray-200">0</span> items
-          </div>
+          <div class="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 font-mono shrink-0">Showing <span id="visibleCount" class="font-semibold">0</span> items</div>
         </div>
       </div>
 
-      <main class="flex-1 overflow-y-auto p-3 sm:p-4">
-        <!-- GTK Group Box Container -->
+      <!-- Main Dynamic Content List -->
+      <main class="flex-1 overflow-y-auto p-3 sm:p-4 min-h-[300px]">
         <div id="catalogList" class="divide-y divide-gray-200/60 dark:divide-gtk-dark-border bg-white dark:bg-[#252525] rounded-xl border border-gray-200 dark:border-gtk-dark-border overflow-hidden shadow-sm">
-          <!-- List items rendered dynamically via JavaScript -->
+          <!-- Dynamically populates from Google Sheet CSV -->
         </div>
-
-        <!-- Empty State Message -->
+        <div id="loadingState" class="py-16 text-center space-y-3">
+          <i class="fa-solid fa-circle-notch fa-spin text-3xl text-gtk-blue"></i>
+          <p class="text-sm text-gray-500 font-mono">Fetching Google Sheets CSV data...</p>
+        </div>
         <div id="emptyState" class="hidden py-16 text-center space-y-3">
           <i class="fa-solid fa-folder-open text-4xl text-gray-300 dark:text-gray-600"></i>
           <p class="text-sm text-gray-500 dark:text-gray-400">No tracks or videos match your search.</p>
@@ -498,255 +329,199 @@
       <footer class="bg-gray-100 dark:bg-[#212121] border-t border-gtk-light-border dark:border-gtk-dark-border px-3 sm:px-4 py-2.5 flex flex-wrap items-center justify-between gap-2 text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 font-mono">
         <div class="flex items-center space-x-2 truncate">
           <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
-          <span class="truncate">Bradford R. • trancedemon@gmail.com • +91 9821320459</span>
+          <span class="truncate">Bradford R. • trancedemon@gmail.com</span>
         </div>
         <a href="https://trancedemon-collab.github.io/my_apps/resume_gtk.html" target="_blank" class="hover:text-gtk-blue transition-colors flex items-center gap-1.5 font-sans text-xs">
-          <i class="fa-solid fa-file-invoice text-xs"></i>
-          <span>View CV / Resume</span>
-          <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
+          <i class="fa-solid fa-file-invoice text-xs"></i><span>View CV</span>
         </a>
       </footer>
 
     </div>
   </div>
 
-  <!-- Toast Notification Box -->
   <div id="toast" class="fixed bottom-5 right-5 transform translate-y-16 opacity-0 transition-all duration-300 bg-gray-900 dark:bg-black text-white text-xs px-4 py-2.5 rounded-xl shadow-lg border border-gray-700 flex items-center gap-2 pointer-events-none z-50">
-    <i class="fa-solid fa-check text-emerald-400"></i>
-    <span id="toastMessage">Link copied to clipboard</span>
+    <i class="fa-solid fa-check text-emerald-400"></i><span id="toastMessage">Link copied</span>
   </div>
 
   <script>
-    // Featured GIF Sequence List (easily append your new GIFs here!)
-    const featuredList = [
-      {
-        title: "The Challenge",
-        subtitle: "Cinematic Animation • Gemini Storyboarded & Google Flow Rendered",
-        tag: "Featured Spotlight",
-        gifUrl: "https://trancedemon-collab.github.io/my_apps/gif/the_challenge.gif",
-        youtubeUrl: "https://www.youtube.com/watch?v=cwlm7Pg9awQ"
-      }
-      /*
-      // To add another GIF, simply un-comment and add entries like this:
-      ,{
-        title: "He-Man and THE EGG",
-        subtitle: "Animation Short • Google Flow Rendered & Custom Audio Mix",
-        tag: "Animated Short",
-        gifUrl: "https://trancedemon-collab.github.io/my_apps/gif/he_man_egg.gif",
-        youtubeUrl: "https://www.youtube.com/watch?v=CM35r4XySC8"
-      }
-      */
-    ];
+    // ==========================================
+    // YOUR PUBLISHED GOOGLE SHEET CSV EXPORT LINK
+    // ==========================================
+    const GOOGLE_SHEETS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRz46axEPpRGWO-LneYixbvGo7ThCEVSVOXluyIYgqlvuHqnlIalIBQG1cs3mygC3czsYuSlh9-xuKh/pub?output=csv"; 
 
-    let currentSpotlightIdx = 0;
-    let spotlightInterval = null;
-    let isSpotlightPlaying = true;
+    // FALLBACK DATA (In case of offline network)
+    const FALLBACK_CSV = `Type,ID,Title,Tag,Description
+music,6nCkFvBSd7k,Pixel Pursuit,Chiptune / Electronic,
+music,vyMI2nOLFFU,Nexus Circuitry,Synthwave / Cyber,
+music,q5JYhDYFosw,Stellar Surge,Trance / Main,
+music,oyVJ1jNHvg4,Stellar Surge (Techno Varient),Techno,
+music,NRLCFqcH1xg,Stellar Surge (Chillout Varient),Chillout,
+music,afYSAlAx524,Stardown,Ambient / Space,
+music,YnvU4vSxumM,Still Waters,Melodic / Downtempo,
+music,YNseoZjoh3w,Broken Factory (Extended Varient),Industrial / Extended,
+music,V-m2RLHv0RA,Quantum Dream,Electronic,
+music,rJWdDmblLJs,Quantum Dream (Melodic Extravaganza),Melodic / Extended,
+music,h2YUW-QZSp0,Broken Factory,Industrial,
+music,snw_l_Yb2RU,Nebula Haze (Extended Trance Varient),Trance / Extended,
+music,NdwBKmGvBEY,Nebula Haze,Trance,
+music,62xUdeS2bzQ,Molten Passage (Varient 2 - Melodic Extravaganza),Melodic / Synth,
+music,OTtV6C8NRCw,Molten Passage (Varient 1),Synthwave,
+music,JrXm3OeiGGs,Ropes and Knots (Ibiza Trance Varient),Ibiza Trance,
+music,ovmer_k71YM,Salty Stone,Electronic,
+music,gtdrEZQZPO8,c0smic (EDM Varient),EDM,
+music,tq90GXmXDt0,c0smic (Progressive Trance Varient),Progressive Trance,
+music,E1a9ymIAENY,C0smic,Electronic,
+music,6ZOwuOlP2zQ,Twisted Orbit,Sci-Fi Beat,
+music,HZbxYKYqcYg,Menace,Dark Synth,
+music,RTPswkXl0Gs,Skipix (Clean Varient 1),Electronic Clean,
+music,XZO6TLaZKwo,SkipiX,Electronic,
+music,1DgQd3X1tJI,Lemonoid,Electro Pop,
+music,6UB9Rq7Kph8,Drunken Topedo,Experimental Groove,
+music,_4um9iXQ0tk,Glamour Glide (Yamaha DS-XG MIDI Style),Retro MIDI Style,
+music,96o4xqOqRO0,Viking Vinegar,Folk Techno,
+music,9TQMAOHwFKA,Recall (Extended Emotive Trance Varient),Emotive Trance,
+music,wseVxReO88Q,Recall,Trance,
+music,llnnGPW-Zaw,Worthy (Trance Varient),Trance,
+music,0YY7inH0eco,Worthy,Electronic,
+music,3wjkWO9Y-CY,Curse of Time,Cinematic Electro,
+music,_xL1fcfsMcQ,Tulsi,Atmospheric,
+music,MFzJe-IC-jQ,Dark Lotus,Dark EDM,
+music,66_aFaqJLOs,Unfound (Vocal Trance Varient),Vocal Trance,
+music,kHMBq1dwVaQ,Unfound (Emotive Trance Instrumental Varient 1),Trance Instrumental,
+music,ke6YPE7aHS8,Unfound,Electronic,
+music,J_uoRdrxx5E,Twilight Glory,Melodic,
+music,LXwOYVDH2HA,Jungle Walk,Drum & Bass / Rhythm,
+music,RhJNFoJjlDY,Mesh Rider,Cyber Synth,
+music,-8fuUe4yCPg,Siren Of Salema,Deep Electronic,
+music,HPe-IA7gpqU,Purple Owl,Chill Beat,
+music,Sx-XYKrWsao,kdf0z,IDM / Experimental,
+music,pKKiyC0BJnY,Honour,Cinematic / Epic,
+videos,CM35r4XySC8,He-Man and THE EGG,Short Movie / Animation,"Fan-made short animation featuring He-Man, Evil-Lyn, Teela, and Man-At-Arms in an original dramatic story blending fun character interactions and lighthearted comedy."
+videos,2o4oTMxRTuc,selo vs mikoz (with technicals),Technical / Animation,"Gemini-assisted action fight sequence between two characters, focusing on technical martial arts choreography, dramatic narrative beats, and smooth execution."
+videos,89p-77m7dqU,Kiku vs Rancor (Anime Fight),Anime Fight Action,"Dramatic anime fight sequence matching a featherweight female champion against a massive pro wrestler, highlighting strategic survival and realistic power dynamics."
+videos,2h0zp8EPpGo,Unchained,Short Film,"Anime short film about a vampiress who escapes captivity and forms an unexpected romantic bond with the bounty hunter sent to eliminate her."
+videos,cwlm7Pg9awQ,The Challenge,Short Film,"Intense animated duel between two martial artists featuring dynamic fighting choreography, dramatic intermissions, and stylized action beats."
+videos,KFuvxwfM7eE,NES - Double Dragon 3 - Rosetta Stone - Mission 1 Part 1,Retro Gaming Short,"Animated fan recreation of the iconic first stage from the classic NES Double Dragon III game, reimagined in a crisp cartoon style."
+videos,Q9h9PiwKsTg,Tyrannosaurus Rex Documentary,AI Documentary,"AI-generated documentary co-locating dinosaurs and modern animals, featuring a surprisingly gentle T-Rex interacting with elephants and triceratops."
+videos,aWXVBylEUwU,Constant Chase,Action Sequence,"High-octane action survival short in a retro cartoon style. A girl protecting a high-value data drive uses martial expertise and agility to defeat incoming attackers."
+videos,VRlOz1UQKQQ,Occurances,Cinematic Short,"Paranormal horror thriller short following a woman experiencing supernatural events in her house who seeks aid from a priest with a protective artifact."
+videos,NpURs7xHu3o,Battle Arena Anime,Anime Battle,"High-energy anime arena battle showcase featuring intense combat choreography and dynamic visual effects."
+videos,FQjfgQadOYM,Fight male vampire attacked by squad (anime) (widescreen),Widescreen Anime,"Tactical squad battle sequence against a powerful male vampire presented in cinematic widescreen anime format."
+videos,Qqa0Xn8UFl4,Unchained (Variant),Cinematic Short,"Cinematic variant cut of the Unchained short film exploring alternative narrative beats and camera angles."
+videos,yZtfWSjewsE,gtk lite infinite sticky notes,Tech Showcase / UI,"Technical UI showcase and interaction demo highlighting lightweight sticky note desktop app functionality."
+videos,N_Jwxtt4WFo,Checkpoint (landscape),Landscape Video,"Elegant short scene of a woman resolving a security checkpoint ID mismatch with effortless style."
+videos,ceeG1ta_pFc,ceraphina and goro,Story Short,"Heartwarming short animation highlighting the playful and affectionate daily bond between a mistress and her cat."
+videos,81AN1DvYFH0,cats and dinos,Fun / AI Video,"Playful anime-style short depicting curious interactions between modern house cats and prehistoric dinosaurs."
+videos,hQBhprfsE6g,Cat bully gets bullied,Short Story,"Comedic short featuring a feisty little kitten teasing a sleeping bully cat by biting its tail and darting away."
+videos,hNPFrEkaLdw,Desert Cravings,Atmospheric Short,"Dark comedy short about an oblivious maid working for a vampiress mistress, completely unaware of the supernatural danger around her."`;
 
-    // Raw Dataset of Music and Videos
-    const musicData = [
-
-
-      { id: "RYCvfB0p0iU", title: "Solar Radio", tag: "Trance" },
-      { id: "o9BwpT6n3IY", title: "Nexus Circuitry (Chiptune Melody)", tag: "Synthwave" },
-      { id: "kUDlfkxiqiE", title: "Silver Slider", tag: "Trance" },
-      { id: "6nCkFvBSd7k", title: "Pixel Pursuit", tag: "Chiptune / Electronic" },
-      { id: "vyMI2nOLFFU", title: "Nexus Circuitry", tag: "Synthwave / Cyber" },
-      { id: "q5JYhDYFosw", title: "Stellar Surge", tag: "Trance / Main" },
-      { id: "oyVJ1jNHvg4", title: "Stellar Surge (Techno Varient)", tag: "Techno" },
-      { id: "NRLCFqcH1xg", title: "Stellar Surge (Chillout Varient)", tag: "Chillout" },
-      { id: "afYSAlAx524", title: "Stardown", tag: "Ambient / Space" },
-      { id: "YnvU4vSxumM", title: "Still Waters", tag: "Melodic / Downtempo" },
-      { id: "YNseoZjoh3w", title: "Broken Factory (Extended Varient)", tag: "Industrial / Extended" },
-      { id: "V-m2RLHv0RA", title: "Quantum Dream", tag: "Electronic" },
-      { id: "rJWdDmblLJs", title: "Quantum Dream (Melodic Extravaganza)", tag: "Melodic / Extended" },
-      { id: "h2YUW-QZSp0", title: "Broken Factory", tag: "Industrial" },
-      { id: "snw_l_Yb2RU", title: "Nebula Haze (Extended Trance Varient)", tag: "Trance / Extended" },
-      { id: "NdwBKmGvBEY", title: "Nebula Haze", tag: "Trance" },
-      { id: "62xUdeS2bzQ", title: "Molten Passage (Varient 2 - Melodic Extravaganza)", tag: "Melodic / Synth" },
-      { id: "OTtV6C8NRCw", title: "Molten Passage (Varient 1)", tag: "Synthwave" },
-      { id: "JrXm3OeiGGs", title: "Ropes and Knots (Ibiza Trance Varient)", tag: "Ibiza Trance" },
-      { id: "ovmer_k71YM", title: "Salty Stone", tag: "Electronic" },
-      { id: "gtdrEZQZPO8", title: "c0smic (EDM Varient)", tag: "EDM" },
-      { id: "tq90GXmXDt0", title: "c0smic (Progressive Trance Varient)", tag: "Progressive Trance" },
-      { id: "E1a9ymIAENY", title: "C0smic", tag: "Electronic" },
-      { id: "6ZOwuOlP2zQ", title: "Twisted Orbit", tag: "Sci-Fi Beat" },
-      { id: "HZbxYKYqcYg", title: "Menace", tag: "Dark Synth" },
-      { id: "RTPswkXl0Gs", title: "Skipix (Clean Varient 1)", tag: "Electronic Clean" },
-      { id: "XZO6TLaZKwo", title: "SkipiX", tag: "Electronic" },
-      { id: "1DgQd3X1tJI", title: "Lemonoid", tag: "Electro Pop" },
-      { id: "6UB9Rq7Kph8", title: "Drunken Topedo", tag: "Experimental Groove" },
-      { id: "_4um9iXQ0tk", title: "Glamour Glide (Yamaha DS-XG MIDI Style)", tag: "Retro MIDI Style" },
-      { id: "96o4xqOqRO0", title: "Viking Vinegar", tag: "Folk Techno" },
-      { id: "9TQMAOHwFKA", title: "Recall (Extended Emotive Trance Varient)", tag: "Emotive Trance" },
-      { id: "wseVxReO88Q", title: "Recall", tag: "Trance" },
-      { id: "llnnGPW-Zaw", title: "Worthy (Trance Varient)", tag: "Trance" },
-      { id: "0YY7inH0eco", title: "Worthy", tag: "Electronic" },
-      { id: "3wjkWO9Y-CY", title: "Curse of Time", tag: "Cinematic Electro" },
-      { id: "_xL1fcfsMcQ", title: "Tulsi", tag: "Atmospheric" },
-      { id: "MFzJe-IC-jQ", title: "Dark Lotus", tag: "Dark EDM" },
-      { id: "66_aFaqJLOs", title: "Unfound (Vocal Trance Varient)", tag: "Vocal Trance" },
-      { id: "kHMBq1dwVaQ", title: "Unfound (Emotive Trance Instrumental Varient 1)", tag: "Trance Instrumental" },
-      { id: "ke6YPE7aHS8", title: "Unfound", tag: "Electronic" },
-      { id: "J_uoRdrxx5E", title: "Twilight Glory", tag: "Melodic" },
-      { id: "LXwOYVDH2HA", title: "Jungle Walk", tag: "Drum & Bass / Rhythm" },
-      { id: "RhJNFoJjlDY", title: "Mesh Rider", tag: "Cyber Synth" },
-      { id: "-8fuUe4yCPg", title: "Siren Of Salema", tag: "Deep Electronic" },
-      { id: "HPe-IA7gpqU", title: "Purple Owl", tag: "Chill Beat" },
-      { id: "Sx-XYKrWsao", title: "kdf0z", tag: "IDM / Experimental" },
-      { id: "pKKiyC0BJnY", title: "Honour", tag: "Cinematic / Epic" }
-    ];
-
-    const videoData = [
-      { id: "YaQYzpjFdPc", title: "He-Man [Workout Pains]", tag: "Short Movie / Animation", desc: "A funny event where ego gets shattered in the gym." },
-      { id: "KX9a1Vo2kgo", title: "Selo vs Mikoz", tag: "Short Movie / Animation", desc: "A short fight film where skill surpasses power." },
-      { id: "1i43ouo-gMU", title: "Cenora Glen", tag: "Short Movie / Animation", desc: "A horror short film on a tea brand that carries with it an essence of the ghosts and sprits of the land on with its grown." },
-      { id: "JWCIPrk-9Bk", title: "Castle Tag", tag: "Short Movie / Animation", desc: "A short 3d film using he-man and his set of characters in cute 3d Pixar style in a fun exciting game of tag within the castle greyskull." },
-      { id: "Ja13YSSPjCc", title: "Flinch", tag: "Short Movie / Animation", desc: "A short 3d anime film of a women's slapping competition. A dramatic playful overconfident vs a stotic strong opponent. Arrogance and overconfidence gets shattered in the midst of the competition turning her into a scared princess and losing the match. A blend of competition and comedy." },
-      { id: "VvZDEq08DMM", title: "The Softest Surrender", tag: "Short Movie / Animation", desc: "Fan made short vampira horror film about Carmilla and Vlad in conflict and combat which turns to love. 3d Anime Cartoon." },
-      { id: "CM35r4XySC8", title: "He-Man and THE EGG", tag: "Short Movie / Animation", desc: "Fan-made short animation featuring He-Man, Evil-Lyn, Teela, and Man-At-Arms in an original dramatic story blending fun character interactions and lighthearted comedy." },
-      { id: "2o4oTMxRTuc", title: "selo vs mikoz (with technicals)", tag: "Technical / Animation", desc: "Gemini-assisted action fight sequence between two characters, focusing on technical martial arts choreography, dramatic narrative beats, and smooth execution." },
-      { id: "89p-77m7dqU", title: "Kiku vs Rancor (Anime Fight)", tag: "Anime Fight Action", desc: "Dramatic anime fight sequence matching a featherweight female champion against a massive pro wrestler, highlighting strategic survival and realistic power dynamics." },
-      { id: "2h0zp8EPpGo", title: "Unchained", tag: "Short Film", desc: "Anime short film about a vampiress who escapes captivity and forms an unexpected romantic bond with the bounty hunter sent to eliminate her." },
-      { id: "cwlm7Pg9awQ", title: "The Challenge", tag: "Short Film", desc: "Intense animated duel between two martial artists featuring dynamic fighting choreography, dramatic intermissions, and stylized action beats." },
-      { id: "KFuvxwfM7eE", title: "NES - Double Dragon 3 - Rosetta Stone - Mission 1 Part 1", tag: "Retro Gaming Short", desc: "Animated fan recreation of the iconic first stage from the classic NES Double Dragon III game, reimagined in a crisp cartoon style." },
-      { id: "Q9h9PiwKsTg", title: "Tyrannosaurus Rex Documentary", tag: "AI Documentary", desc: "AI-generated documentary co-locating dinosaurs and modern animals, featuring a surprisingly gentle T-Rex interacting with elephants and triceratops." },
-      { id: "aWXVBylEUwU", title: "Constant Chase", tag: "Action Sequence", desc: "High-octane action survival short in a retro cartoon style. A girl protecting a high-value data drive uses martial expertise and agility to defeat incoming attackers." },
-      { id: "VRlOz1UQKQQ", title: "Occurances", tag: "Cinematic Short", desc: "Paranormal horror thriller short following a woman experiencing supernatural events in her house who seeks aid from a priest with a protective artifact." },
-      { id: "NpURs7xHu3o", title: "Battle Arena Anime", tag: "Anime Battle", desc: "High-energy anime arena battle showcase featuring intense combat choreography and dynamic visual effects." },
-      { id: "FQjfgQadOYM", title: "Fight male vampire attacked by squad (anime) (widescreen)", tag: "Widescreen Anime", desc: "Tactical squad battle sequence against a powerful male vampire presented in cinematic widescreen anime format." },
-      { id: "Qqa0Xn8UFl4", title: "Unchained (Variant)", tag: "Cinematic Short", desc: "Cinematic variant cut of the Unchained short film exploring alternative narrative beats and camera angles." },
-      { id: "yZtfWSjewsE", title: "gtk lite infinite sticky notes", tag: "Tech Showcase / UI", desc: "Technical UI showcase and interaction demo highlighting lightweight sticky note desktop app functionality." },
-      { id: "N_Jwxtt4WFo", title: "Checkpoint (landscape)", tag: "Landscape Video", desc: "Elegant short scene of a woman resolving a security checkpoint ID mismatch with effortless style." },
-      { id: "ceeG1ta_pFc", title: "ceraphina and goro", tag: "Story Short", desc: "Heartwarming short animation highlighting the playful and affectionate daily bond between a mistress and her cat." },
-      { id: "81AN1DvYFH0", title: "cats and dinos", tag: "Fun / AI Video", desc: "Playful anime-style short depicting curious interactions between modern house cats and prehistoric dinosaurs." },
-      { id: "hQBhprfsE6g", title: "Cat bully gets bullied", tag: "Short Story", desc: "Comedic short featuring a feisty little kitten teasing a sleeping bully cat by biting its tail and darting away." },
-      { id: "hNPFrEkaLdw", title: "Desert Cravings", tag: "Atmospheric Short", desc: "Dark comedy short about an oblivious maid working for a vampiress mistress, completely unaware of the supernatural danger around her." }
-    ];
-
-    // Combine data with type properties
-    const catalog = [
-      ...musicData.map(m => ({ ...m, type: 'music' })),
-      ...videoData.map(v => ({ ...v, type: 'videos' }))
-    ];
-
+    let catalog = [];
     let activeCategory = 'all';
     let searchQuery = '';
 
-    // DOM Elements
-    const catalogListEl = document.getElementById('catalogList');
-    const searchInput = document.getElementById('searchInput');
-    const clearSearchBtn = document.getElementById('clearSearchBtn');
-    const resetSearchBtn = document.getElementById('resetSearchBtn');
-    const emptyStateEl = document.getElementById('emptyState');
-    const visibleCountEl = document.getElementById('visibleCount');
-    const countAllEl = document.getElementById('countAll');
-    const countMusicEl = document.getElementById('countMusic');
-    const countVideosEl = document.getElementById('countVideos');
-    const themeSelect = document.getElementById('themeSelect');
-    const toastEl = document.getElementById('toast');
-    const toastMessage = document.getElementById('toastMessage');
-
-    // Spotlight Carousel Elements
-    const spotlightImg = document.getElementById('spotlightImg');
-    const spotlightTitle = document.getElementById('spotlightTitle');
-    const spotlightSubtitle = document.getElementById('spotlightSubtitle');
-    const spotlightTag = document.getElementById('spotlightTag');
-    const spotlightHeaderTitle = document.getElementById('spotlightHeaderTitle');
-    const spotlightCounter = document.getElementById('spotlightCounter');
-    const spotlightAnchor = document.getElementById('spotlightAnchor');
-    const spotlightLinkTop = document.getElementById('spotlightLinkTop');
-    const spotlightPrevBtn = document.getElementById('spotlightPrevBtn');
-    const spotlightNextBtn = document.getElementById('spotlightNextBtn');
-    const spotlightPlayPauseBtn = document.getElementById('spotlightPlayPauseBtn');
-    const spotlightPlayPauseIcon = document.getElementById('spotlightPlayPauseIcon');
-
-    function updateSpotlightUI(index) {
-      if (!featuredList || featuredList.length === 0) return;
-      currentSpotlightIdx = (index + featuredList.length) % featuredList.length;
-      const item = featuredList[currentSpotlightIdx];
-
-      // Smooth opacity transition
-      spotlightImg.style.opacity = '0.3';
-      setTimeout(() => {
-        spotlightImg.src = item.gifUrl;
-        spotlightTitle.textContent = item.title;
-        spotlightSubtitle.textContent = item.subtitle;
-        spotlightTag.textContent = item.tag || 'Featured Spotlight';
-        spotlightHeaderTitle.textContent = item.title;
-        spotlightAnchor.href = item.youtubeUrl;
-        spotlightLinkTop.href = item.youtubeUrl;
-        spotlightCounter.textContent = `${currentSpotlightIdx + 1}/${featuredList.length}`;
-        spotlightImg.style.opacity = '1';
-      }, 150);
+    // CSV Parser supporting quotes and linebreaks
+    function parseCSV(text) {
+      const rows = [];
+      let curRow = [];
+      let curCell = '';
+      let inQuotes = false;
+      for (let i = 0; i < text.length; i++) {
+        let char = text[i];
+        if (char === '"' && text[i+1] === '"') {
+          curCell += '"'; i++;
+        } else if (char === '"') {
+          inQuotes = !inQuotes;
+        } else if (char === ',' && !inQuotes) {
+          curRow.push(curCell.trim()); curCell = '';
+        } else if (char === '\n' && !inQuotes) {
+          curRow.push(curCell.trim()); rows.push(curRow); curRow = []; curCell = '';
+        } else {
+          if (char !== '\r') curCell += char;
+        }
+      }
+      if (curCell !== '') curRow.push(curCell.trim());
+      if (curRow.length > 0) rows.push(curRow);
+      return rows;
     }
 
-    function startSpotlightTimer() {
-      if (spotlightInterval) clearInterval(spotlightInterval);
-      if (featuredList.length > 1 && isSpotlightPlaying) {
-        spotlightInterval = setInterval(() => {
-          updateSpotlightUI(currentSpotlightIdx + 1);
-        }, 6000); // Cycles every 6 seconds
+    async function initializeData() {
+      document.getElementById('loadingState').classList.remove('hidden');
+      document.getElementById('catalogList').classList.add('hidden');
+
+      let csvText = '';
+      try {
+        const cacheBustUrl = GOOGLE_SHEETS_CSV_URL + (GOOGLE_SHEETS_CSV_URL.includes('?') ? '&' : '?') + 't=' + Date.now();
+        const res = await fetch(cacheBustUrl, { cache: 'no-store' });
+        if (!res.ok) throw new Error("Network HTTP error: " + res.status);
+        csvText = await res.text();
+        
+        if (csvText.trim().startsWith('<!DOCTYPE') || csvText.trim().startsWith('<html')) {
+          throw new Error("Received HTML instead of CSV.");
+        }
+      } catch (err) {
+        console.warn("Could not fetch live Google Sheet CSV directly (e.g. file:// protocol restriction), using fallback dataset:", err);
+        csvText = FALLBACK_CSV;
       }
+
+      const rows = parseCSV(csvText);
+      catalog = [];
+      
+      for(let i=1; i<rows.length; i++) {
+        const row = rows[i];
+        if (row.length >= 4 && row[1]) {
+          catalog.push({
+            type: (row[0] || '').toLowerCase(),
+            id: row[1],
+            title: row[2],
+            tag: row[3],
+            desc: row[4] || ''
+          });
+        }
+      }
+
+      document.getElementById('loadingState').classList.add('hidden');
+      document.getElementById('catalogList').classList.remove('hidden');
+      
+      updateCounters();
+      renderList();
     }
 
-    spotlightNextBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      updateSpotlightUI(currentSpotlightIdx + 1);
-      startSpotlightTimer();
-    });
-
-    spotlightPrevBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      updateSpotlightUI(currentSpotlightIdx - 1);
-      startSpotlightTimer();
-    });
-
-    spotlightPlayPauseBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      isSpotlightPlaying = !isSpotlightPlaying;
-      if (isSpotlightPlaying) {
-        spotlightPlayPauseIcon.className = "fa-solid fa-pause text-[10px]";
-        startSpotlightTimer();
-      } else {
-        spotlightPlayPauseIcon.className = "fa-solid fa-play text-[10px]";
-        if (spotlightInterval) clearInterval(spotlightInterval);
-      }
-    });
-
-    // Update Category Counters
-    countAllEl.textContent = catalog.length;
-    countMusicEl.textContent = musicData.length;
-    countVideosEl.textContent = videoData.length;
-
-    // Helper: Build YouTube Link
     function getUrl(item) {
       return `https://www.youtube.com/watch?v=${item.id}`;
     }
 
+    function updateCounters() {
+      document.getElementById('countAll').textContent = catalog.length;
+      document.getElementById('countMusic').textContent = catalog.filter(c => c.type === 'music').length;
+      document.getElementById('countVideos').textContent = catalog.filter(c => c.type === 'videos').length;
+    }
+
     function renderList() {
-      catalogListEl.innerHTML = '';
+      const listEl = document.getElementById('catalogList');
+      const emptyStateEl = document.getElementById('emptyState');
+      listEl.innerHTML = '';
       
       const filtered = catalog.filter(item => {
         const matchesCategory = (activeCategory === 'all') || (item.type === activeCategory);
         const matchesSearch = searchQuery === '' || 
           item.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
           item.tag.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          (item.desc && item.desc.toLowerCase().includes(searchQuery.toLowerCase()));
+          item.desc.toLowerCase().includes(searchQuery.toLowerCase());
         return matchesCategory && matchesSearch;
       });
 
-      visibleCountEl.textContent = filtered.length;
+      document.getElementById('visibleCount').textContent = filtered.length;
 
       if (filtered.length === 0) {
-        catalogListEl.classList.add('hidden');
+        listEl.classList.add('hidden');
         emptyStateEl.classList.remove('hidden');
         return;
       }
 
-      catalogListEl.classList.remove('hidden');
+      listEl.classList.remove('hidden');
       emptyStateEl.classList.add('hidden');
 
-      filtered.forEach((item, idx) => {
+      filtered.forEach(item => {
         const row = document.createElement('div');
         row.className = 'gtk-row group p-2.5 sm:px-4 sm:py-3.5 flex items-center justify-between gap-2 sm:gap-3 hover:bg-gtk-light-hover dark:hover:bg-gtk-dark-hover transition-colors cursor-pointer';
         
@@ -764,7 +539,6 @@
                 <a href="${targetUrl}" target="_blank" class="font-medium text-xs sm:text-sm text-gray-900 dark:text-gray-100 group-hover:text-gtk-blue dark:group-hover:text-gtk-blue transition-colors truncate">
                   ${item.title}
                 </a>
-                <i class="fa-solid fa-arrow-up-right-from-square text-[9px] sm:text-[10px] opacity-0 group-hover:opacity-100 text-gtk-blue transition-opacity shrink-0"></i>
               </div>
               <div class="flex items-center gap-2 mt-0.5">
                 <span class="text-[10px] sm:text-[11px] font-mono text-gray-500 dark:text-gray-400 truncate">${item.tag}</span>
@@ -773,137 +547,155 @@
             </div>
           </div>
           <div class="flex items-center space-x-1.5 sm:space-x-2 shrink-0">
-            <button class="copy-btn px-2 py-1.5 rounded-lg text-xs font-mono text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white hover:bg-gray-200/60 dark:hover:bg-gray-700 transition-colors flex items-center gap-1" title="Copy Link" onclick="event.stopPropagation(); copyLink('${targetUrl}')">
-              <i class="fa-regular fa-copy text-xs"></i>
-              <span class="hidden sm:inline">Copy</span>
+            <button class="copy-btn px-2 py-1.5 rounded-lg text-xs font-mono text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white hover:bg-gray-200/60 dark:hover:bg-gray-700 transition-colors flex items-center gap-1" onclick="event.stopPropagation(); copyLink('${targetUrl}')">
+              <i class="fa-regular fa-copy text-xs"></i><span class="hidden sm:inline">Copy</span>
             </button>
             <a href="${targetUrl}" target="_blank" onclick="event.stopPropagation();" class="px-2.5 sm:px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gtk-dark-hover hover:bg-gtk-blue hover:text-white dark:hover:bg-gtk-blue text-xs font-medium text-gray-700 dark:text-gray-200 transition-all flex items-center gap-1">
-              <span>Open</span>
-              <i class="fa-solid fa-chevron-right text-[10px]"></i>
+              <span>Open</span><i class="fa-solid fa-chevron-right text-[10px]"></i>
             </a>
           </div>
         `;
-
-        catalogListEl.appendChild(row);
+        listEl.appendChild(row);
       });
     }
 
-    function showToast(msg) {
-      toastMessage.textContent = msg;
-      toastEl.classList.remove('translate-y-16', 'opacity-0');
-      toastEl.classList.add('translate-y-0', 'opacity-100');
-      setTimeout(() => {
-        toastEl.classList.remove('translate-y-0', 'opacity-100');
-        toastEl.classList.add('translate-y-16', 'opacity-0');
-      }, 2500);
-    }
-
-    function copyLink(url) {
-      if (navigator.clipboard && window.isSecureContext) {
-        navigator.clipboard.writeText(url).then(() => {
-          showToast('Link copied to clipboard!');
-        });
-      } else {
-        // Fallback for iFrame or non-HTTPS environment
-        const textArea = document.createElement("textarea");
-        textArea.value = url;
-        document.body.appendChild(textArea);
-        textArea.select();
-        try {
-          document.execCommand('copy');
-          showToast('Link copied to clipboard!');
-        } catch (err) {
-          showToast('Failed to copy link.');
-        }
-        document.body.removeChild(textArea);
-      }
-    }
-
-    // Search listeners
-    searchInput.addEventListener('input', (e) => {
+    // Search and Filters
+    document.getElementById('searchInput').addEventListener('input', (e) => {
       searchQuery = e.target.value;
-      if (searchQuery.length > 0) {
-        clearSearchBtn.classList.remove('hidden');
-      } else {
-        clearSearchBtn.classList.add('hidden');
-      }
+      document.getElementById('clearSearchBtn').classList.toggle('hidden', searchQuery.length === 0);
       renderList();
     });
 
-    clearSearchBtn.addEventListener('click', () => {
-      searchInput.value = '';
+    document.getElementById('clearSearchBtn').addEventListener('click', () => {
+      document.getElementById('searchInput').value = '';
       searchQuery = '';
-      clearSearchBtn.classList.add('hidden');
+      document.getElementById('clearSearchBtn').classList.add('hidden');
       renderList();
     });
 
-    resetSearchBtn.addEventListener('click', () => {
-      searchInput.value = '';
+    document.getElementById('resetSearchBtn')?.addEventListener('click', () => {
+      document.getElementById('searchInput').value = '';
       searchQuery = '';
-      activeCategory = 'all';
-      clearSearchBtn.classList.add('hidden');
-      
-      document.querySelectorAll('.cat-btn').forEach(btn => {
-        if (btn.dataset.cat === 'all') {
-          btn.className = 'cat-btn active px-3 py-1.5 rounded-lg text-xs font-medium transition-all bg-gtk-blue text-white shadow-sm';
-        } else {
-          btn.className = 'cat-btn px-3 py-1.5 rounded-lg text-xs font-medium transition-all bg-gray-200/80 dark:bg-gtk-dark-hover text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700';
-        }
-      });
+      document.getElementById('clearSearchBtn').classList.add('hidden');
       renderList();
     });
 
-    // Category Tabs Listener
     document.getElementById('categoryFilterContainer').addEventListener('click', (e) => {
       const btn = e.target.closest('.cat-btn');
       if (!btn) return;
-      
-      document.querySelectorAll('.cat-btn').forEach(b => {
-        b.className = 'cat-btn px-3 py-1.5 rounded-lg text-xs font-medium transition-all bg-gray-200/80 dark:bg-gtk-dark-hover text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700';
-      });
-
-      btn.className = 'cat-btn active px-3 py-1.5 rounded-lg text-xs font-medium transition-all bg-gtk-blue text-white shadow-sm';
+      document.querySelectorAll('.cat-btn').forEach(b => b.className = 'cat-btn px-2.5 py-1.5 sm:px-3 rounded-lg text-xs font-medium transition-all bg-gray-200/80 dark:bg-gtk-dark-hover text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700');
+      btn.className = 'cat-btn active px-2.5 py-1.5 sm:px-3 rounded-lg text-xs font-medium transition-all bg-gtk-blue text-white shadow-sm';
       activeCategory = btn.dataset.cat;
       renderList();
     });
 
-    function applyTheme(theme) {
-      if (theme === 'dark') {
-        document.documentElement.classList.add('dark');
-      } else if (theme === 'light') {
-        document.documentElement.classList.remove('dark');
+    function copyLink(url) {
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(url).then(() => showToast('Link copied!'));
       } else {
-        // Auto System
-        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-          document.documentElement.classList.add('dark');
-        } else {
-          document.documentElement.classList.remove('dark');
-        }
+        const textArea = document.createElement("textarea");
+        textArea.value = url; document.body.appendChild(textArea);
+        textArea.select(); document.execCommand('copy');
+        document.body.removeChild(textArea); showToast('Link copied!');
+      }
+    }
+    
+    function showToast(msg) {
+      const el = document.getElementById('toast');
+      document.getElementById('toastMessage').textContent = msg;
+      el.classList.remove('translate-y-16', 'opacity-0');
+      setTimeout(() => el.classList.add('translate-y-16', 'opacity-0'), 2500);
+    }
+
+    // Themes
+    function applyTheme(theme) {
+      if (theme === 'dark') document.documentElement.classList.add('dark');
+      else if (theme === 'light') document.documentElement.classList.remove('dark');
+      else document.documentElement.classList.toggle('dark', window.matchMedia('(prefers-color-scheme: dark)').matches);
+    }
+    document.getElementById('themeSelect').addEventListener('change', (e) => {
+      localStorage.setItem('gtk-theme', e.target.value); applyTheme(e.target.value);
+    });
+
+    // Spotlight Carousel Setup
+    const featuredList = [
+      {
+        title: "The Challenge",
+        subtitle: "Cinematic Animation • Gemini Storyboarded & Google Flow Rendered",
+        tag: "Featured Spotlight",
+        gifUrl: "https://trancedemon-collab.github.io/my_apps/gif/the_challenge.gif",
+        youtubeUrl: "https://www.youtube.com/watch?v=cwlm7Pg9awQ"
+      }
+    ];
+    let currentSpotlightIdx = 0;
+    let isSpotlightPlaying = true;
+    let spotlightInterval = null;
+
+    function updateSpotlightUI() {
+      const item = featuredList[currentSpotlightIdx];
+      if (!item) return;
+      document.getElementById('spotlightHeaderTitle').textContent = item.title;
+      document.getElementById('spotlightTitle').textContent = item.title;
+      document.getElementById('spotlightSubtitle').textContent = item.subtitle;
+      document.getElementById('spotlightTag').textContent = item.tag;
+      document.getElementById('spotlightImg').src = item.gifUrl;
+      document.getElementById('spotlightAnchor').href = item.youtubeUrl;
+      document.getElementById('spotlightLinkTop').href = item.youtubeUrl;
+      document.getElementById('spotlightCounter').textContent = `${currentSpotlightIdx + 1}/${featuredList.length}`;
+    }
+
+    function prevSpotlight() {
+      currentSpotlightIdx = (currentSpotlightIdx - 1 + featuredList.length) % featuredList.length;
+      updateSpotlightUI();
+    }
+
+    function nextSpotlight() {
+      currentSpotlightIdx = (currentSpotlightIdx + 1) % featuredList.length;
+      updateSpotlightUI();
+    }
+
+    function toggleSpotlightPlay() {
+      isSpotlightPlaying = !isSpotlightPlaying;
+      const icon = document.getElementById('spotlightPlayPauseIcon');
+      if (isSpotlightPlaying) {
+        icon.className = "fa-solid fa-pause text-[10px]";
+        startSpotlightTimer();
+      } else {
+        icon.className = "fa-solid fa-play text-[10px]";
+        stopSpotlightTimer();
       }
     }
 
-    themeSelect.addEventListener('change', (e) => {
-      const selected = e.target.value;
-      localStorage.setItem('gtk-portfolio-theme', selected);
-      applyTheme(selected);
-    });
-
-    // Listen to OS theme preference changes if set to auto
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-      if (themeSelect.value === 'auto') {
-        applyTheme('auto');
+    function startSpotlightTimer() {
+      stopSpotlightTimer();
+      if (featuredList.length > 1) {
+        spotlightInterval = setInterval(nextSpotlight, 6000);
       }
-    });
+    }
 
-    // On Load Initializers
+    function stopSpotlightTimer() {
+      if (spotlightInterval) clearInterval(spotlightInterval);
+    }
+
+    document.getElementById('spotlightPrevBtn').addEventListener('click', prevSpotlight);
+    document.getElementById('spotlightNextBtn').addEventListener('click', nextSpotlight);
+    document.getElementById('spotlightPlayPauseBtn').addEventListener('click', toggleSpotlightPlay);
+
     window.onload = function() {
-      const savedTheme = localStorage.getItem('gtk-portfolio-theme') || 'auto';
-      themeSelect.value = savedTheme;
-      applyTheme(savedTheme);
-      updateSpotlightUI(0);
+      applyTheme(localStorage.getItem('gtk-theme') || 'auto');
+      document.getElementById('themeSelect').value = localStorage.getItem('gtk-theme') || 'auto';
+      updateSpotlightUI();
       startSpotlightTimer();
-      renderList();
+      initializeData();
     };
   </script>
 </body>
 </html>
+```eof
+
+### How to test your live Google Sheet CSV updates:
+
+Replace your local file on GitHub with this `index.html`. Once pushed to GitHub Pages:
+1. Open your live portfolio website URL on GitHub Pages (`[https://trancedemon-collab.github.io/my_apps/portfolio.html](https://trancedemon-collab.github.io/my_apps/portfolio.html)`).
+2. Add any new row to your published Google Sheet.
+3. Refresh the web page—it will pull the new rows from your published Google Sheet CSV!
