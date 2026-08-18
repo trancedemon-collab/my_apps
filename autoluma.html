@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AutoLuma - Intelligent Video Brightness Booster</title>
+  <style>
+    /* GTK-inspired theme variables & auto dark/light switching */
+    :root {
+      --bg-color: #fafafa;
+      --card-bg: #ffffff;
+      --text-main: #2e3436;
+      --text-muted: #5c616c;
+      --border-color: #d3d7cf;
+      --accent: #e66100;
+      --accent-hover: #f57900;
+      --header-bar: #ededed;
+      --code-bg: #eaeaea;
+      --shadow: rgba(0, 0, 0, 0.08);
+      --badge-bg: #f0f0f0;
+      --quote-bg: #f8f9fa;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-color: #242424;
+        --card-bg: #2d2d2d;
+        --text-main: #eeeeec;
+        --text-muted: #888a85;
+        --border-color: #383838;
+        --accent: #f57900;
+        --accent-hover: #ff9e3b;
+        --header-bar: #1e1e1e;
+        --code-bg: #1e1e1e;
+        --shadow: rgba(0, 0, 0, 0.35);
+        --badge-bg: #353535;
+        --quote-bg: #1f2224;
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Cantarell", "Ubuntu", "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      padding: 40px 16px;
+      line-height: 1.6;
+    }
+
+    .window-card {
+      max-width: 840px;
+      width: 100%;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      box-shadow: 0 10px 30px var(--shadow);
+      overflow: hidden;
+    }
+
+    /* GTK HeaderBar */
+    .header-bar {
+      background: var(--header-bar);
+      border-bottom: 1px solid var(--border-color);
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .window-controls {
+      display: flex;
+      gap: 8px;
+    }
+
+    .win-btn {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--border-color);
+      display: inline-block;
+    }
+
+    .win-title {
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: var(--text-muted);
+    }
+
+    .content {
+      padding: 36px 32px;
+    }
+
+    .hero {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+
+    .hero h1 {
+      font-size: 2.4rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 6px;
+    }
+
+    .hero h1 span {
+      color: var(--accent);
+    }
+
+    .author-subtitle {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    .hero p {
+      color: var(--text-muted);
+      font-size: 1.15rem;
+      max-width: 600px;
+      margin: 0 auto 24px auto;
+    }
+
+    .btn-download {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--accent);
+      color: #ffffff;
+      padding: 12px 24px;
+      font-size: 1rem;
+      font-weight: 600;
+      text-decoration: none;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+      transition: background 0.15s ease;
+    }
+
+    .btn-download:hover {
+      background: var(--accent-hover);
+    }
+
+    /* Canvas Demo Grid */
+    .demo-section {
+      margin: 36px 0;
+    }
+
+    .demo-section h2 {
+      font-size: 1.25rem;
+      margin-bottom: 16px;
+      border-left: 4px solid var(--accent);
+      padding-left: 10px;
+    }
+
+    .canvas-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    @media (max-width: 640px) {
+      .canvas-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .canvas-box {
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      overflow: hidden;
+      background: #020406;
+      text-align: center;
+    }
+
+    .canvas-box canvas {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .canvas-label {
+      padding: 8px 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      background: var(--header-bar);
+      border-top: 1px solid var(--border-color);
+      color: var(--text-muted);
+    }
+
+    /* Layman Explanation Block */
+    .story-block {
+      background: var(--quote-bg);
+      border: 1px solid var(--border-color);
+      border-left: 4px solid var(--accent);
+      padding: 22px 24px;
+      border-radius: 8px;
+      margin: 32px 0;
+    }
+
+    .story-block h3 {
+      font-size: 1.2rem;
+      margin-bottom: 12px;
+      color: var(--text-main);
+    }
+
+    .story-block p {
+      color: var(--text-muted);
+      margin-bottom: 14px;
+      font-size: 0.98rem;
+    }
+
+    .story-block p:last-child {
+      margin-bottom: 0;
+    }
+
+    /* Sections */
+    .section-block {
+      margin-top: 28px;
+    }
+
+    .section-block h3 {
+      font-size: 1.1rem;
+      margin-bottom: 10px;
+    }
+
+    .feature-list, .install-list {
+      padding-left: 20px;
+      color: var(--text-muted);
+    }
+
+    .feature-list li, .install-list li {
+      margin-bottom: 8px;
+    }
+
+    .feature-list strong, .install-list strong {
+      color: var(--text-main);
+    }
+
+    code {
+      background: var(--code-bg);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.9em;
+      border: 1px solid var(--border-color);
+    }
+
+    /* Support & Donation Section */
+    .donation-box {
+      margin-top: 36px;
+      padding: 24px;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      background: var(--badge-bg);
+      text-align: center;
+    }
+
+    .donation-box h3 {
+      font-size: 1.15rem;
+      margin-bottom: 8px;
+    }
+
+    .donation-box p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-bottom: 18px;
+      max-width: 520px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .btn-paypal {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: #0070ba;
+      color: #ffffff;
+      padding: 10px 22px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: background 0.15s ease;
+    }
+
+    .btn-paypal:hover {
+      background: #005ea6;
+    }
+
+    /* Contact Links */
+    .contact-grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 14px;
+      margin-top: 18px;
+      font-size: 0.85rem;
+    }
+
+    .contact-item {
+      color: var(--text-muted);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .contact-item a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .contact-item a:hover {
+      text-decoration: underline;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 36px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border-color);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="window-card">
+    <div class="header-bar">
+      <div class="window-controls">
+        <span class="win-btn"></span>
+        <span class="win-btn"></span>
+        <span class="win-btn"></span>
+      </div>
+      <span class="win-title">AutoLuma • Video Enhancer</span>
+      <div></div>
+    </div>
+
+    <div class="content">
+      <div class="hero">
+        <h1>Auto<span>Luma</span></h1>
+        <div class="author-subtitle">Created by <strong>Bradford R.</strong></div>
+        <p>A lightweight browser enhancement that monitors video luminance, dynamically boosting dark frames while preserving standard brightness floors.</p>
+        <a href="https://trancedemon-collab.github.io/my_apps/autoluma.zip" class="btn-download" download="autoluma.zip">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"></path></svg>
+          Download autoluma.zip
+        </a>
+      </div>
+
+      <div class="demo-section">
+        <h2>Live Algorithmic Comparison</h2>
+        <div class="canvas-grid">
+          <div class="canvas-box">
+            <canvas id="canvasDark" width="400" height="225"></canvas>
+            <div class="canvas-label">Default Dark Stream (Trees & background details hidden)</div>
+          </div>
+          <div class="canvas-box">
+            <canvas id="canvasBoosted" width="400" height="225"></canvas>
+            <div class="canvas-label">AutoLuma Corrected (Full forest scenery revealed)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- The Real-World Purpose & Layman Explanation -->
+      <div class="story-block">
+        <h3>Why AutoLuma? (In Simple Terms)</h3>
+        <p>AutoLuma is a truly one-of-a-kind extension. Most video tools in web stores only give you manual sliders or hotkeys. That means when you settle back on your couch to watch a stream, you're forced to keep getting up or clicking around to manually crank up the brightness whenever a scene gets too dark, only to have to dial it right back down when daytime returns.</p>
+        <p>This is especially frustrating on platforms like <strong>YouTube</strong>, where video lighting varies wildly from creator to creator depending on their cameras and filming setups. Some videos are naturally bright, while others are muddy and unwatchable.</p>
+        <p><strong>AutoLuma completely eliminates that hassle.</strong> It works quietly in the background, analyzing playback in real time without putting any load on your CPU (near 0% system usage). It calculates the optimal brightness boost automatically, bringing out the best in your monitor and revealing shadow details that would otherwise remain hidden in the dark.</p>
+      </div>
+
+      <div class="section-block">
+        <h3>Technical Highlights</h3>
+        <ul class="feature-list">
+          <li><strong>ITU-R BT.709 Luma Sampling:</strong> Measures perceived luminance rather than basic RGB averages.</li>
+          <li><strong>Strict 100% Floor:</strong> Never dims clean, well-lit videos or slide decks below their default baseline.</li>
+          <li><strong>Statistical 8-Sample Lock:</strong> Analyzes playback trends, locks the final boost level, and shuts down to maintain zero CPU overhead.</li>
+        </ul>
+      </div>
+
+      <div class="section-block">
+        <h3>Installation Instructions</h3>
+        <ol class="install-list">
+          <li>Download and extract <code>autoluma.zip</code>.</li>
+          <li>In Chrome or any Chromium browser, open <code>chrome://extensions</code>.</li>
+          <li>Enable <strong>Developer mode</strong> in the top-right corner.</li>
+          <li>Click <strong>Load unpacked</strong> and select the extracted folder.</li>
+        </ol>
+      </div>
+
+      <!-- Support & Developer Info -->
+      <div class="donation-box">
+        <h3>Support the Developer</h3>
+        <p>If you like this extension and want to support the developer, please consider donating anything. Your support helps keep open projects active!</p>
+        <a href="https://paypal.com/paypalme/BradfordRisbert" target="_blank" rel="noopener noreferrer" class="btn-paypal">
+          <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944 3.72a.785.785 0 0 1 .773-.64h7.527c3.483 0 6.037 1.83 5.485 5.586-.484 3.328-2.673 5.176-5.836 5.176h-2.14l-1.32 8.495a.64.64 0 0 1-.633.541z"/></svg>
+          Donate with PayPal
+        </a>
+
+        <div class="contact-grid">
+          <div class="contact-item">📧 Email: <a href="mailto:trancedemon@gmail.com">trancedemon@gmail.com</a></div>
+          <div class="contact-item">🌐 Facebook: <a href="https://facebook.com/bradford.risbert" target="_blank" rel="noopener noreferrer">bradford.risbert</a></div>
+          <div class="contact-item">💬 WhatsApp: <strong>@B_Risbert</strong></div>
+        </div>
+      </div>
+
+      <footer>
+        AutoLuma • by Bradford R. • Free & Open Browser Utility
+      </footer>
+    </div>
+  </div>
+
+  <script>
+    // Procedurally render a detailed night forest scene
+    function renderForestScene(canvasId, brightnessBoost) {
+      const canvas = document.getElementById(canvasId);
+      const ctx = canvas.getContext('2d');
+      const w = canvas.width;
+      const h = canvas.height;
+
+      // Base night sky
+      const skyGrad = ctx.createLinearGradient(0, 0, 0, h);
+      skyGrad.addColorStop(0, '#020407');
+      skyGrad.addColorStop(0.6, '#060d17');
+      skyGrad.addColorStop(1, '#0c1524');
+      ctx.fillStyle = skyGrad;
+      ctx.fillRect(0, 0, w, h);
+
+      // Distant tree line (Background layer)
+      ctx.fillStyle = '#060a12';
+      for (let x = 0; x < w; x += 18) {
+        const treeH = 50 + Math.sin(x * 0.05) * 20;
+        ctx.beginPath();
+        ctx.moveTo(x, h * 0.75);
+        ctx.lineTo(x + 9, h * 0.75 - treeH);
+        ctx.lineTo(x + 18, h * 0.75);
+        ctx.fill();
+      }
+
+      // Midground Pine Trees
+      const pines = [30, 80, 140, 210, 280, 340, 380];
+      pines.forEach(x => {
+        const baseH = h * 0.85;
+        // Trunk
+        ctx.fillStyle = '#080d12';
+        ctx.fillRect(x + 12, baseH - 90, 6, 90);
+        // Foliage tiers
+        ctx.fillStyle = '#0b161e';
+        for (let i = 0; i < 4; i++) {
+          ctx.beginPath();
+          const tierY = baseH - 40 - (i * 20);
+          ctx.moveTo(x - 15 + (i * 3), tierY);
+          ctx.lineTo(x + 15, tierY - 30);
+          ctx.lineTo(x + 45 - (i * 3), tierY);
+          ctx.fill();
+        }
+      });
+
+      // Uneven Ground & Foliage
+      ctx.fillStyle = '#04070a';
+      ctx.beginPath();
+      ctx.moveTo(0, h * 0.8);
+      ctx.quadraticCurveTo(w * 0.25, h * 0.75, w * 0.5, h * 0.82);
+      ctx.quadraticCurveTo(w * 0.75, h * 0.88, w, h * 0.8);
+      ctx.lineTo(w, h);
+      ctx.lineTo(0, h);
+      ctx.fill();
+
+      // Foreground Detailed Silhouette Tree (Left)
+      ctx.fillStyle = '#030508';
+      ctx.beginPath();
+      ctx.moveTo(40, h);
+      ctx.quadraticCurveTo(55, h * 0.6, 50, h * 0.2); // Trunk
+      ctx.lineTo(60, h * 0.2);
+      ctx.quadraticCurveTo(65, h * 0.6, 75, h);
+      ctx.fill();
+
+      // Branches & leafy clusters
+      ctx.beginPath();
+      ctx.arc(55, h * 0.25, 35, 0, Math.PI * 2);
+      ctx.arc(85, h * 0.35, 25, 0, Math.PI * 2);
+      ctx.arc(30, h * 0.38, 20, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Apply AutoLuma Enhancement Simulation
+      if (brightnessBoost > 1.0) {
+        ctx.save();
+        ctx.globalCompositeOperation = 'screen';
+        const alpha = (brightnessBoost - 1.0) * 0.75;
+        ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+        ctx.fillRect(0, 0, w, h);
+        ctx.restore();
+      }
+    }
+
+    // Render baseline dark frame and AutoLuma boosted frame
+    renderForestScene('canvasDark', 1.0);
+    renderForestScene('canvasBoosted', 1.55);
+  </script>
+</body>
+</html>
