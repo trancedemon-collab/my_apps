@@ -68,7 +68,7 @@
     .header-bar {
       background: var(--header-bar);
       border-bottom: 1px solid var(--border-color);
-      padding: 14px 20px;
+      padding: 12px 20px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -87,6 +87,18 @@
       display: inline-block;
     }
 
+    .win-title-container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .win-icon {
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
+    }
+
     .win-title {
       font-weight: 600;
       font-size: 0.95rem;
@@ -100,6 +112,15 @@
     .hero {
       text-align: center;
       margin-bottom: 36px;
+    }
+
+    .hero-icon {
+      width: 88px;
+      height: 88px;
+      border-radius: 20px;
+      box-shadow: 0 6px 16px var(--shadow);
+      margin-bottom: 14px;
+      display: inline-block;
     }
 
     .hero h1 {
@@ -337,12 +358,16 @@
         <span class="win-btn"></span>
         <span class="win-btn"></span>
       </div>
-      <span class="win-title">AutoLuma • Video Enhancer</span>
+      <div class="win-title-container">
+        <img src="https://trancedemon-collab.github.io/my_apps/autoluma.png" alt="AutoLuma icon" class="win-icon">
+        <span class="win-title">AutoLuma • Video Enhancer</span>
+      </div>
       <div></div>
     </div>
 
     <div class="content">
       <div class="hero">
+        <img src="https://trancedemon-collab.github.io/my_apps/autoluma.png" alt="AutoLuma Logo" class="hero-icon">
         <h1>Auto<span>Luma</span></h1>
         <div class="author-subtitle">Created by <strong>Bradford R.</strong></div>
         <p>A lightweight browser enhancement that monitors video luminance, dynamically boosting dark frames while preserving standard brightness floors.</p>
