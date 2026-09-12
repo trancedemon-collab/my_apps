@@ -1,0 +1,2857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VectorMotion Pro - Vector Animator</title>
+  <!-- JSZip for exporting frame sequences -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Cantarell', 'Inter', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif'],
+            mono: ['JetBrains Mono', 'Fira Code', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    :root {
+      --gtk-window-bg: #f6f6f6;
+      --gtk-header-bg: #ebebeb;
+      --gtk-view-bg: #ffffff;
+      --gtk-card-bg: #ffffff;
+      --gtk-border: #dcdcdc;
+      --gtk-border-dark: #c0c0c0;
+      --gtk-fg: #2e3436;
+      --gtk-dim-fg: #6e7375;
+      --gtk-accent: #3584e4;
+      --gtk-accent-hover: #1c71d8;
+      --gtk-accent-fg: #ffffff;
+      --gtk-button-bg: #e6e6e6;
+      --gtk-button-hover: #dadada;
+      --gtk-button-active: #cfcfcf;
+      --gtk-canvas-grid: #e5e5e5;
+      --gtk-canvas-bg: #ffffff;
+      --gtk-timeline-track: #ededed;
+      --gtk-keyframe-diamond: #e66100;
+      --gtk-keyframe-selected: #3584e4;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --gtk-window-bg: #242424;
+        --gtk-header-bg: #303030;
+        --gtk-view-bg: #1e1e1e;
+        --gtk-card-bg: #2d2d2d;
+        --gtk-border: #3c3c3c;
+        --gtk-border-dark: #484848;
+        --gtk-fg: #eeeeec;
+        --gtk-dim-fg: #9a9996;
+        --gtk-accent: #3584e4;
+        --gtk-accent-hover: #62a0ea;
+        --gtk-accent-fg: #ffffff;
+        --gtk-button-bg: #383838;
+        --gtk-button-hover: #454545;
+        --gtk-button-active: #505050;
+        --gtk-canvas-grid: #2c2c2c;
+        --gtk-canvas-bg: #181818;
+        --gtk-timeline-track: #2a2a2a;
+        --gtk-keyframe-diamond: #f69a48;
+        --gtk-keyframe-selected: #62a0ea;
+      }
+    }
+
+    [data-theme="dark"] {
+      --gtk-window-bg: #242424;
+      --gtk-header-bg: #303030;
+      --gtk-view-bg: #1e1e1e;
+      --gtk-card-bg: #2d2d2d;
+      --gtk-border: #3c3c3c;
+      --gtk-border-dark: #484848;
+      --gtk-fg: #eeeeec;
+      --gtk-dim-fg: #9a9996;
+      --gtk-accent: #3584e4;
+      --gtk-accent-hover: #62a0ea;
+      --gtk-accent-fg: #ffffff;
+      --gtk-button-bg: #383838;
+      --gtk-button-hover: #454545;
+      --gtk-button-active: #505050;
+      --gtk-canvas-grid: #2c2c2c;
+      --gtk-canvas-bg: #181818;
+      --gtk-timeline-track: #2a2a2a;
+      --gtk-keyframe-diamond: #f69a48;
+      --gtk-keyframe-selected: #62a0ea;
+    }
+
+    body {
+      background-color: var(--gtk-window-bg);
+      color: var(--gtk-fg);
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .gtk-btn {
+      background: var(--gtk-button-bg);
+      border: 1px solid var(--gtk-border);
+      color: var(--gtk-fg);
+      border-radius: 6px;
+      transition: all 0.12s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.82rem;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .gtk-btn:hover {
+      background: var(--gtk-button-hover);
+      border-color: var(--gtk-border-dark);
+    }
+    .gtk-btn:active {
+      background: var(--gtk-button-active);
+    }
+    .gtk-btn.active {
+      background: var(--gtk-accent);
+      color: var(--gtk-accent-fg);
+      border-color: var(--gtk-accent-hover);
+    }
+    .gtk-btn-primary {
+      background: var(--gtk-accent);
+      color: var(--gtk-accent-fg);
+      border: 1px solid var(--gtk-accent-hover);
+    }
+    .gtk-btn-primary:hover {
+      background: var(--gtk-accent-hover);
+    }
+
+    .gtk-input {
+      background-color: var(--gtk-view-bg);
+      border: 1px solid var(--gtk-border);
+      color: var(--gtk-fg);
+      border-radius: 6px;
+      padding: 0.25rem 0.5rem;
+      font-size: 0.8rem;
+    }
+    .gtk-input:focus {
+      outline: 2px solid var(--gtk-accent);
+      border-color: transparent;
+    }
+
+    .checkerboard-pattern {
+      background-image: linear-gradient(45deg, #ccc 25%, transparent 25%),
+                        linear-gradient(-45deg, #ccc 25%, transparent 25%),
+                        linear-gradient(45deg, transparent 75%, #ccc 75%),
+                        linear-gradient(-45deg, transparent 75%, #ccc 75%);
+      background-size: 16px 16px;
+      background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+    }
+    .dark .checkerboard-pattern {
+      background-image: linear-gradient(45deg, #222 25%, transparent 25%),
+                        linear-gradient(-45deg, #222 25%, transparent 25%),
+                        linear-gradient(45deg, transparent 75%, #222 75%),
+                        linear-gradient(-45deg, transparent 75%, #222 75%);
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--gtk-dim-fg);
+      border-radius: 4px;
+      opacity: 0.3;
+    }
+
+    .modal-backdrop {
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(3px);
+    }
+  </style>
+</head>
+<body class="h-screen w-screen overflow-hidden flex flex-col font-sans text-sm">
+
+  <header class="h-12 border-b flex items-center justify-between px-3 shrink-0 shadow-sm z-30"
+          style="background-color: var(--gtk-header-bg); border-color: var(--gtk-border);">
+    
+    <div class="flex items-center space-x-2">
+      <!-- Window decoration -->
+      <div class="flex items-center space-x-1.5 mr-2">
+        <span class="w-3 h-3 rounded-full bg-red-400 inline-block border border-red-500/20"></span>
+        <span class="w-3 h-3 rounded-full bg-amber-400 inline-block border border-amber-500/20"></span>
+        <span class="w-3 h-3 rounded-full bg-emerald-400 inline-block border border-emerald-500/20"></span>
+      </div>
+
+      <div class="flex items-center space-x-1 font-semibold tracking-tight text-sm mr-2">
+        <svg class="w-5 h-5 text-blue-500 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+        </svg>
+        <span>VectorMotion Pro</span>
+      </div>
+
+      <div class="h-4 w-px bg-stone-300 dark:bg-stone-700 mx-1"></div>
+
+      <button id="btn-new" title="New Project" class="gtk-btn px-2.5 py-1">
+        <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        New
+      </button>
+      <button id="btn-demo" title="Load Sample Animation" class="gtk-btn px-2.5 py-1">
+        <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3" fill="currentColor"/></svg>
+        Demo
+      </button>
+      <button id="btn-clear" title="Clear Canvas" class="gtk-btn px-2.5 py-1 text-red-500 hover:bg-red-500/10">
+        Clear
+      </button>
+    </div>
+
+    <!-- Center: Preset selector, Canvas Color & Orientation -->
+    <div class="flex items-center space-x-2 text-xs">
+      <label class="font-medium text-xs opacity-75">Preset:</label>
+      <select id="preset-resolution" class="gtk-input text-xs py-0.5 cursor-pointer">
+        <option value="1080">1080p (FHD)</option>
+        <option value="720" selected>720p (HD)</option>
+        <option value="480">480p (SD)</option>
+        <option value="360">360p (Low)</option>
+      </select>
+
+      <div class="inline-flex rounded-md shadow-sm border overflow-hidden" style="border-color: var(--gtk-border);">
+        <button id="btn-orient-land" class="gtk-btn px-2 py-0.5 active text-[11px] rounded-none border-none">Landscape</button>
+        <button id="btn-orient-port" class="gtk-btn px-2 py-0.5 text-[11px] rounded-none border-none">Portrait</button>
+      </div>
+
+      <span id="canvas-dim-display" class="font-mono text-xs opacity-70 ml-1">1280 × 720</span>
+
+      <div class="h-4 w-px bg-stone-300 dark:bg-stone-700 mx-1"></div>
+
+      <!-- Canvas Background Color -->
+      <div class="flex items-center space-x-1.5 bg-stone-200/50 dark:bg-stone-800/50 px-2 py-0.5 rounded border border-stone-300 dark:border-stone-700" title="Canvas & Video Export Background Color">
+        <span class="text-[11px] opacity-75">BG:</span>
+        <input type="checkbox" id="canvas-bg-trans" class="accent-blue-600 rounded cursor-pointer" title="Transparent background">
+        <span class="text-[10px] opacity-60">Transp</span>
+        <input type="color" id="canvas-bg-color" value="#ffffff" class="w-5 h-5 rounded border-0 p-0 cursor-pointer bg-transparent">
+      </div>
+
+      <div class="h-4 w-px bg-stone-300 dark:bg-stone-700 mx-1"></div>
+
+      <button id="btn-zoom-fit" class="gtk-btn px-2 py-0.5 text-xs" title="Fit to Viewport">Fit</button>
+      <button id="btn-zoom-100" class="gtk-btn px-2 py-0.5 text-xs" title="100% Zoom">1:1</button>
+    </div>
+
+    <!-- Right: Theme and Export buttons -->
+    <div class="flex items-center space-x-2">
+      <button id="btn-theme-toggle" class="gtk-btn p-1.5 rounded-lg" title="Toggle Theme">
+        <svg id="theme-icon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+        </svg>
+      </button>
+
+      <div class="flex items-center space-x-1">
+        <button id="btn-export-mp4" class="gtk-btn-primary px-2.5 py-1 text-xs rounded shadow-sm flex items-center font-medium" title="Export as MP4 Video">
+          <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          MP4
+        </button>
+        <button id="btn-export-webm" class="gtk-btn px-2 py-1 text-xs rounded flex items-center" title="Export as WebM Video">
+          WebM
+        </button>
+        <button id="btn-export-zip" class="gtk-btn px-2 py-1 text-xs rounded flex items-center" title="Export PNG Frames Zip">
+          ZIP PNG
+        </button>
+      </div>
+    </div>
+
+  </header>
+
+  <div class="flex-1 flex overflow-hidden">
+    
+    <!-- Left Tools Palette -->
+    <aside class="w-16 border-r flex flex-col items-center py-2.5 gap-1 shrink-0 select-none z-20"
+           style="background-color: var(--gtk-header-bg); border-color: var(--gtk-border);">
+      
+      <!-- Select & Transform Tool -->
+      <button data-tool="select" class="tool-btn gtk-btn active w-11 h-11 flex flex-col items-center justify-center p-1" title="Select & Transform (V) - Double click shape to edit nodes, double click text to edit text">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3l7 18 3-7 7-3L3 3z"/></svg>
+        <span class="text-[9px] mt-0.5">Select</span>
+      </button>
+
+      <!-- Node / Bézier Curve Edit Tool -->
+      <button data-tool="node" class="tool-btn gtk-btn w-11 h-11 flex flex-col items-center justify-center p-1" title="Node Edit Tool (A) - Direct control handles & vertices">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <circle cx="6" cy="6" r="3" stroke-width="2"/>
+          <circle cx="18" cy="18" r="3" stroke-width="2"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6 9v3a6 6 0 006 6h3"/>
+        </svg>
+        <span class="text-[9px] mt-0.5">Node</span>
+      </button>
+
+      <div class="w-8 h-px bg-stone-300 dark:bg-stone-700 my-1"></div>
+
+      <!-- Drag-to-Curve Bézier Pen Tool -->
+      <button data-tool="bezier" class="tool-btn gtk-btn w-11 h-11 flex flex-col items-center justify-center p-1" title="Bézier Pen Tool (P) - Click & drag to pull out curve handles on the fly! Enter or double-click to finish.">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+        <span class="text-[9px] mt-0.5">Pen</span>
+      </button>
+
+      <!-- Freehand Smooth Pen -->
+      <button data-tool="smoothpen" class="tool-btn gtk-btn w-11 h-11 flex flex-col items-center justify-center p-1" title="Smooth Freehand Brush (B)">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2m0-2h8v4H8V2z"/>
+        </svg>
+        <span class="text-[9px] mt-0.5">Brush</span>
+      </button>
+
+      <button data-tool="rect" class="tool-btn gtk-btn w-11 h-11 flex flex-col items-center justify-center p-1" title="Rectangle (R)">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" stroke-width="2"/></svg>
+        <span class="text-[9px] mt-0.5">Rect</span>
+      </button>
+
+      <button data-tool="circle" class="tool-btn gtk-btn w-11 h-11 flex flex-col items-center justify-center p-1" title="Ellipse / Circle (C)">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" stroke-width="2"/></svg>
+        <span class="text-[9px] mt-0.5">Circle</span>
+      </button>
+
+      <button data-tool="line" class="tool-btn gtk-btn w-11 h-11 flex flex-col items-center justify-center p-1" title="Line (L)">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><line x1="4" y1="20" x2="20" y2="4" stroke-width="2" stroke-linecap="round"/></svg>
+        <span class="text-[9px] mt-0.5">Line</span>
+      </button>
+
+      <!-- Vector Text Tool -->
+      <button data-tool="text" class="tool-btn gtk-btn w-11 h-11 flex flex-col items-center justify-center p-1" title="Text Tool (T)">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7V4h16v3M9 20h6M12 4v16"/></svg>
+        <span class="text-[9px] mt-0.5">Text</span>
+      </button>
+
+      <!-- Bottom toggles: Grid & Onion skinning -->
+      <div class="mt-auto mb-2 flex flex-col items-center gap-2">
+        <button id="btn-grid-toggle" class="gtk-btn w-9 h-9 active" title="Toggle Snapping Grid">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4h16M4 12h16M4 20h16M4 4v16M12 4v16M20 4v16"/></svg>
+        </button>
+        <button id="btn-onion-toggle" class="gtk-btn w-9 h-9 active" title="Toggle Onion Skinning">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" stroke-dasharray="3 3" stroke-width="2"/></svg>
+        </button>
+      </div>
+
+    </aside>
+
+    <!-- Center Stage Canvas Viewport -->
+    <main id="viewport" class="flex-1 overflow-hidden relative flex items-center justify-center select-none"
+          style="background-color: var(--gtk-window-bg); cursor: default;">
+      
+      <!-- Stage Transformation Container -->
+      <div id="stage-transform-wrapper" class="relative transition-transform duration-75 origin-center shadow-2xl rounded-sm border checkerboard-pattern"
+           style="border-color: var(--gtk-border-dark);">
+        <canvas id="main-canvas" width="1280" height="720" class="block"></canvas>
+      </div>
+
+      <!-- Quick status hint banner -->
+      <div id="status-hint" class="absolute bottom-3 left-4 px-3 py-1 rounded-full text-xs font-medium pointer-events-none shadow border z-10"
+           style="background-color: var(--gtk-card-bg); border-color: var(--gtk-border); color: var(--gtk-fg);">
+        Ready. Pen Tool: Click & drag to pull out curve handles on the fly!
+      </div>
+
+      <!-- Zoom indicator pill -->
+      <div id="zoom-indicator" class="absolute bottom-3 right-4 px-2 py-0.5 rounded text-[11px] font-mono border"
+           style="background-color: var(--gtk-card-bg); border-color: var(--gtk-border); color: var(--gtk-dim-fg);">
+        Zoom: 100%
+      </div>
+    </main>
+
+    <aside class="w-72 border-l flex flex-col shrink-0 overflow-y-auto z-20"
+           style="background-color: var(--gtk-header-bg); border-color: var(--gtk-border);">
+      
+      <div class="px-3.5 py-2.5 border-b font-medium text-xs tracking-wider uppercase flex items-center justify-between"
+           style="border-color: var(--gtk-border); color: var(--gtk-dim-fg);">
+        <span>Inspector</span>
+        <span id="selection-label" class="text-[11px] font-normal normal-case truncate max-w-[130px]">No selection</span>
+      </div>
+
+      <div class="p-3 space-y-3.5 text-xs">
+        
+        <!-- Fill & Stroke Styling -->
+        <div class="space-y-3 p-3 rounded-lg border" style="background-color: var(--gtk-card-bg); border-color: var(--gtk-border);">
+          <div class="font-semibold" style="color: var(--gtk-fg);">Fill & Color</div>
+          
+          <div class="flex items-center justify-between">
+            <span style="color: var(--gtk-dim-fg);">Fill Enabled</span>
+            <input type="checkbox" id="prop-has-fill" class="accent-blue-600 rounded cursor-pointer" checked>
+          </div>
+
+          <div class="flex items-center space-x-2">
+            <input type="color" id="prop-fill-color" value="#3584e4" class="w-8 h-8 rounded border p-0 cursor-pointer bg-transparent">
+            <input type="text" id="prop-fill-hex" value="#3584e4" class="gtk-input flex-1 font-mono uppercase text-xs">
+          </div>
+
+          <div class="h-px bg-stone-200 dark:bg-stone-700 my-1"></div>
+
+          <div class="font-semibold" style="color: var(--gtk-fg);">Stroke</div>
+
+          <div class="flex items-center justify-between">
+            <span style="color: var(--gtk-dim-fg);">Stroke Enabled</span>
+            <input type="checkbox" id="prop-has-stroke" class="accent-blue-600 rounded cursor-pointer" checked>
+          </div>
+
+          <div class="flex items-center space-x-2">
+            <input type="color" id="prop-stroke-color" value="#1c71d8" class="w-8 h-8 rounded border p-0 cursor-pointer bg-transparent">
+            <input type="text" id="prop-stroke-hex" value="#1c71d8" class="gtk-input flex-1 font-mono uppercase text-xs">
+          </div>
+
+          <div>
+            <div class="flex justify-between mb-1">
+              <span style="color: var(--gtk-dim-fg);">Stroke Width</span>
+              <span id="prop-stroke-width-val" class="font-mono">4px</span>
+            </div>
+            <input type="range" id="prop-stroke-width" min="1" max="50" value="4" class="w-full accent-blue-600 cursor-pointer">
+          </div>
+
+          <!-- Line Cap & Join -->
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <span class="block mb-1 opacity-70">Line Cap</span>
+              <select id="prop-line-cap" class="gtk-input w-full cursor-pointer py-1">
+                <option value="round" selected>Round</option>
+                <option value="butt">Butt</option>
+                <option value="square">Square</option>
+              </select>
+            </div>
+            <div>
+              <span class="block mb-1 opacity-70">Line Join</span>
+              <select id="prop-line-join" class="gtk-input w-full cursor-pointer py-1">
+                <option value="round" selected>Round</option>
+                <option value="bevel">Bevel</option>
+                <option value="miter">Miter</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <div class="flex justify-between mb-1">
+              <span style="color: var(--gtk-dim-fg);">Opacity</span>
+              <span id="prop-opacity-val" class="font-mono">100%</span>
+            </div>
+            <input type="range" id="prop-opacity" min="0" max="1" step="0.05" value="1" class="w-full accent-blue-600 cursor-pointer">
+          </div>
+        </div>
+
+        <!-- Transform Controls Info Panel -->
+        <div class="space-y-2 p-3 rounded-lg border" style="background-color: var(--gtk-card-bg); border-color: var(--gtk-border);">
+          <div class="font-semibold text-xs" style="color: var(--gtk-fg);">Transform & Morph</div>
+          <div class="text-[11px] opacity-75 space-y-1">
+            <p>• <strong>Corners:</strong> Scale / Resize shape.</p>
+            <p>• <strong>Edges:</strong> Stretch horizontally / vertically.</p>
+            <p>• <strong>Alt + Edge:</strong> Skew & shear angle.</p>
+            <p>• <strong>Top Handle:</strong> Rotate shape.</p>
+            <p>• <strong>Double Click:</strong> Switch to Node Editor or Edit Text.</p>
+          </div>
+        </div>
+
+        <!-- Text Properties Panel (Conditional for Text Objects) -->
+        <div id="text-prop-container" class="space-y-2.5 p-3 rounded-lg border hidden" style="background-color: var(--gtk-card-bg); border-color: var(--gtk-border);">
+          <div class="font-semibold text-xs" style="color: var(--gtk-fg);">Typography</div>
+          <div>
+            <span class="block mb-1 opacity-70">Content</span>
+            <input type="text" id="prop-text-content" value="Hello Vector" class="gtk-input w-full">
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <span class="block mb-1 opacity-70">Font Size</span>
+              <input type="number" id="prop-font-size" value="48" min="8" max="250" class="gtk-input w-full font-mono">
+            </div>
+            <div>
+              <span class="block mb-1 opacity-70">Font Family</span>
+              <select id="prop-font-family" class="gtk-input w-full cursor-pointer">
+                <option value="Inter, sans-serif">Sans-Serif</option>
+                <option value="serif">Serif</option>
+                <option value="JetBrains Mono, monospace">Monospace</option>
+                <option value="Impact, fantasy">Impact</option>
+                <option value="cursive">Cursive</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Node & Curve Controls (Active when editing nodes) -->
+        <div class="space-y-2 p-3 rounded-lg border" style="background-color: var(--gtk-card-bg); border-color: var(--gtk-border);">
+          <div class="font-semibold text-xs" style="color: var(--gtk-fg);">Curve & Node Handles</div>
+          <div class="grid grid-cols-3 gap-1">
+            <button id="btn-node-smooth" class="gtk-btn py-1 text-[11px]" title="Smooth Bézier Handles">Smooth</button>
+            <button id="btn-node-corner" class="gtk-btn py-1 text-[11px]" title="Corner Sharp Node">Corner</button>
+            <button id="btn-node-del" class="gtk-btn py-1 text-[11px] text-red-500 hover:bg-red-500/10" title="Delete Point">Delete</button>
+          </div>
+          <p class="text-[10.5px] opacity-60 leading-tight">
+            Use the <strong>Node Tool (A)</strong> to drag vertices and adjust tangent handles.
+          </p>
+        </div>
+
+        <!-- Layer & Keyframe Actions -->
+        <div class="space-y-2 p-3 rounded-lg border" style="background-color: var(--gtk-card-bg); border-color: var(--gtk-border);">
+          <div class="font-semibold text-xs" style="color: var(--gtk-fg);">Layer Ordering</div>
+          <div class="grid grid-cols-2 gap-1.5">
+            <button id="btn-bring-forward" class="gtk-btn py-1 text-xs">Bring Forward</button>
+            <button id="btn-send-backward" class="gtk-btn py-1 text-xs">Send Backward</button>
+            <button id="btn-duplicate" class="gtk-btn py-1 text-xs">Duplicate</button>
+            <button id="btn-delete-obj" class="gtk-btn py-1 text-xs text-red-500 hover:bg-red-500/10">Delete</button>
+          </div>
+        </div>
+
+      </div>
+
+    </aside>
+
+  </div>
+
+  <footer class="h-44 border-t flex flex-col shrink-0 z-30"
+          style="background-color: var(--gtk-header-bg); border-color: var(--gtk-border);">
+    
+    <!-- Timeline Header Bar -->
+    <div class="h-10 px-3 border-b flex items-center justify-between shrink-0 select-none"
+         style="border-color: var(--gtk-border); background-color: var(--gtk-window-bg);">
+      
+      <!-- Left: Transport Controls -->
+      <div class="flex items-center space-x-1">
+        <button id="btn-first-frame" class="gtk-btn w-7 h-7" title="First Frame (Home)">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/></svg>
+        </button>
+        <button id="btn-prev-frame" class="gtk-btn w-7 h-7" title="Previous Frame (Left Arrow)">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+        </button>
+        <button id="btn-play" class="gtk-btn-primary w-8 h-7 flex items-center justify-center font-bold" title="Play / Pause (Space)">
+          <svg id="play-icon" class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><polygon points="6 3 20 12 6 21 6 3"></polygon></svg>
+        </button>
+        <button id="btn-next-frame" class="gtk-btn w-7 h-7" title="Next Frame (Right Arrow)">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        </button>
+        <button id="btn-last-frame" class="gtk-btn w-7 h-7" title="Last Frame (End)">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"/></svg>
+        </button>
+        <button id="btn-loop" class="gtk-btn active w-7 h-7 ml-1" title="Loop Playback">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+        </button>
+      </div>
+
+      <!-- Frame Copy & Paste Operations -->
+      <div class="flex items-center space-x-1.5">
+        <button id="btn-copy-frame" class="gtk-btn px-2 py-1 text-xs" title="Copy Current Frame (Ctrl+C)">
+          <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" stroke-width="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" stroke-width="2"/></svg>
+          Copy Frame
+        </button>
+        <button id="btn-paste-frame" class="gtk-btn px-2 py-1 text-xs" title="Paste Frame to Current Frame (Ctrl+V)">
+          <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+          Paste Frame
+        </button>
+        
+        <div class="h-4 w-px bg-stone-300 dark:bg-stone-700 mx-1"></div>
+
+        <button id="btn-add-keyframe" class="gtk-btn-primary px-2.5 py-1 text-xs font-semibold rounded" title="Add Keyframe on Current Frame">
+          ◆ Key
+        </button>
+        <button id="btn-del-keyframe" class="gtk-btn px-2 py-1 text-xs text-red-500 hover:bg-red-500/10" title="Delete Keyframe on Current Frame">
+          ✕
+        </button>
+      </div>
+
+      <!-- Frame Indicator & Controls -->
+      <div class="flex items-center space-x-3 text-xs font-mono">
+        <div>
+          <span style="color: var(--gtk-dim-fg);">Frame:</span>
+          <span id="txt-current-frame" class="font-bold text-blue-500 w-7 inline-block text-right">1</span>
+          <span style="color: var(--gtk-dim-fg);">/</span>
+          <span id="txt-total-frames" style="color: var(--gtk-dim-fg);">60</span>
+        </div>
+        <div class="flex items-center space-x-1">
+          <span style="color: var(--gtk-dim-fg);">FPS:</span>
+          <select id="select-fps" class="gtk-input py-0 px-1 text-xs font-sans cursor-pointer">
+            <option value="12">12</option>
+            <option value="24" selected>24</option>
+            <option value="30">30</option>
+            <option value="60">60</option>
+          </select>
+        </div>
+        <div class="flex items-center space-x-1">
+          <span style="color: var(--gtk-dim-fg);">Total:</span>
+          <input type="number" id="input-total-frames" value="60" min="10" max="300" step="5" class="gtk-input py-0 px-1 text-xs w-14 text-center font-mono">
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Timeline Scrubber Body -->
+    <div class="flex-1 flex overflow-hidden relative" style="background-color: var(--gtk-view-bg);">
+      
+      <!-- Track Names Sidebar -->
+      <div class="w-44 border-r flex flex-col shrink-0 text-xs select-none"
+           style="border-color: var(--gtk-border); background-color: var(--gtk-card-bg);">
+        <div class="h-6 border-b px-3 flex items-center font-semibold text-[10px] uppercase tracking-wider"
+             style="border-color: var(--gtk-border); color: var(--gtk-dim-fg);">
+          Track / Layers
+        </div>
+        <div id="timeline-layer-list" class="flex-1 overflow-y-auto divide-y" style="border-color: var(--gtk-border);">
+          <!-- Dynamic tracks -->
+        </div>
+      </div>
+
+      <!-- Ruler & Keyframes Area -->
+      <div id="timeline-scroll-area" class="flex-1 overflow-x-auto overflow-y-auto relative select-none cursor-pointer">
+        <div id="timeline-ruler" class="h-6 border-b relative font-mono text-[9px] select-none sticky top-0 z-20"
+             style="border-color: var(--gtk-border); background-color: var(--gtk-card-bg); width: 1400px;">
+        </div>
+
+        <div id="timeline-track-rows" class="relative" style="width: 1400px; min-height: 100px;">
+          <!-- Playhead Needle -->
+          <div id="timeline-needle" class="absolute top-0 bottom-0 w-0.5 bg-red-500 z-30 pointer-events-none" style="left: 10px;">
+            <div class="w-3 h-3 -ml-[5px] -mt-0.5 bg-red-500 rounded-sm transform rotate-45 border border-white shadow"></div>
+          </div>
+
+          <div id="timeline-diamonds-container" class="w-full">
+            <!-- Keyframe track lines dynamically injected -->
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </footer>
+
+  <!-- Inline Text Edit Modal -->
+  <div id="text-edit-modal" class="fixed inset-0 z-50 modal-backdrop hidden flex items-center justify-center p-4">
+    <div class="w-full max-w-sm rounded-xl p-5 shadow-2xl border"
+         style="background-color: var(--gtk-card-bg); border-color: var(--gtk-border-dark);">
+      <h3 class="font-bold text-sm mb-2">Edit Vector Text</h3>
+      <input type="text" id="modal-text-input" class="gtk-input w-full mb-4 text-sm" placeholder="Type text here...">
+      <div class="flex justify-end space-x-2">
+        <button id="btn-text-modal-cancel" class="gtk-btn px-3 py-1 text-xs">Cancel</button>
+        <button id="btn-text-modal-save" class="gtk-btn-primary px-3 py-1 text-xs">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Export Progress Modal -->
+  <div id="export-modal" class="fixed inset-0 z-50 modal-backdrop hidden flex items-center justify-center p-4">
+    <div class="w-full max-w-sm rounded-xl p-5 shadow-2xl border"
+         style="background-color: var(--gtk-card-bg); border-color: var(--gtk-border-dark);">
+      <h3 id="export-modal-title" class="font-bold text-base mb-1">Exporting Animation...</h3>
+      <p id="export-modal-desc" class="text-xs mb-4" style="color: var(--gtk-dim-fg);">Rendering frames. Please keep this tab active.</p>
+      
+      <div class="w-full h-2.5 rounded-full overflow-hidden mb-2 bg-stone-200 dark:bg-stone-700">
+        <div id="export-progress-bar" class="h-full bg-blue-500 transition-all duration-75" style="width: 0%;"></div>
+      </div>
+      <div id="export-progress-text" class="text-right font-mono text-xs mb-4" style="color: var(--gtk-dim-fg);">0%</div>
+
+      <div class="flex justify-end">
+        <button id="btn-export-cancel" class="gtk-btn px-4 py-1.5 text-xs">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /**
+     * VectorMotion Pro - Vector Animator
+     * Full interactive transform bounding box (Scale, Stretch, Rotate, Skew),
+     * Pen tool with drag-to-curve control handles,
+     * Node editing, double-click switching,
+     * Custom canvas & export background colors (transparent/opaque),
+     * Keyframe animation, copy/paste frame, and MP4/WebM/ZIP export.
+     */
+
+    const App = {
+      preset: 720,
+      orientation: 'landscape',
+      width: 1280,
+      height: 720,
+      zoom: 1.0,
+
+      // Canvas background
+      canvasBgColor: '#ffffff',
+      canvasBgTransparent: false,
+
+      // Active tool
+      tool: 'select', // 'select' | 'node' | 'bezier' | 'smoothpen' | 'rect' | 'circle' | 'line' | 'text'
+      snapToGrid: true,
+      gridSize: 20,
+      onionSkin: true,
+
+      // Playback & Timeline
+      currentFrame: 1,
+      totalFrames: 60,
+      fps: 24,
+      isPlaying: false,
+      isLooping: true,
+      playTimer: null,
+
+      // Clipboard
+      frameClipboard: null,
+
+      // Shapes collection
+      shapes: [],
+      selectedShapeId: null,
+      selectedNodeIndex: -1,
+      selectedHandle: null, // null | 'cp1' | 'cp2'
+
+      // Transform Bounding Box Handles
+      transformHandle: null, // 'tl','tr','bl','br','t','b','l','r','rot'
+      transformStartBox: null,
+      transformStartPts: null,
+      transformCenter: null,
+      transformStartAngle: 0,
+
+      // Pen Tool Drag-to-Curve In-Progress State
+      penActivePoints: [],
+      isPenDraggingHandle: false,
+      currentPenNodeIndex: -1,
+
+      // Interaction flags
+      isDrawing: false,
+      isDraggingShape: false,
+      isDraggingNode: false,
+      isDraggingHandle: false,
+      isScrubbingTimeline: false,
+      isDraggingKeyframe: false,
+      draggedKeyframeData: null,
+
+      dragStart: { x: 0, y: 0 },
+      shapeInitialSnapshot: null,
+      activeDrawingPoints: []
+    };
+
+    const canvas = document.getElementById('main-canvas');
+    const ctx = canvas.getContext('2d');
+    const FRAME_PX = 20;
+
+    function uid() {
+      return 'vm_' + Math.random().toString(36).substr(2, 9);
+    }
+
+    function lerp(a, b, t) {
+      return a + (b - a) * t;
+    }
+
+    function clone(obj) {
+      return JSON.parse(JSON.stringify(obj));
+    }
+
+    function parseHex(hex) {
+      if (!hex) return { r: 0, g: 0, b: 0, a: 1 };
+      let c = hex.replace('#', '');
+      if (c.length === 3) c = c.split('').map(x => x + x).join('');
+      const n = parseInt(c, 16);
+      return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255, a: 1 };
+    }
+
+    function lerpColor(c1, c2, t) {
+      if (!c1) return c2;
+      if (!c2) return c1;
+      const rgb1 = parseHex(c1);
+      const rgb2 = parseHex(c2);
+      const r = Math.round(lerp(rgb1.r, rgb2.r, t));
+      const g = Math.round(lerp(rgb1.g, rgb2.g, t));
+      const b = Math.round(lerp(rgb1.b, rgb2.b, t));
+      return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+    }
+
+    function getShapePropsAtFrame(shape, frame) {
+      const keys = Object.keys(shape.keyframes).map(Number).sort((a, b) => a - b);
+      if (keys.length === 0) return null;
+
+      if (shape.keyframes[frame]) {
+        return clone(shape.keyframes[frame]);
+      }
+
+      if (frame <= keys[0]) {
+        return clone(shape.keyframes[keys[0]]);
+      }
+
+      if (frame >= keys[keys.length - 1]) {
+        return clone(shape.keyframes[keys[keys.length - 1]]);
+      }
+
+      let prevKey = keys[0];
+      let nextKey = keys[keys.length - 1];
+      for (let i = 0; i < keys.length - 1; i++) {
+        if (keys[i] <= frame && keys[i + 1] >= frame) {
+          prevKey = keys[i];
+          nextKey = keys[i + 1];
+          break;
+        }
+      }
+
+      const p1 = shape.keyframes[prevKey];
+      const p2 = shape.keyframes[nextKey];
+      const t = (frame - prevKey) / (nextKey - prevKey);
+
+      // Interpolate points & tangent handles
+      const points = [];
+      const numPts = Math.max(p1.points.length, p2.points.length);
+
+      for (let i = 0; i < numPts; i++) {
+        const ptA = p1.points[i] || p1.points[p1.points.length - 1];
+        const ptB = p2.points[i] || p2.points[p2.points.length - 1];
+
+        const node = {
+          x: lerp(ptA.x, ptB.x, t),
+          y: lerp(ptA.y, ptB.y, t)
+        };
+
+        if (ptA.cp1 || ptB.cp1) {
+          const cp1A = ptA.cp1 || ptA;
+          const cp1B = ptB.cp1 || ptB;
+          node.cp1 = { x: lerp(cp1A.x, cp1B.x, t), y: lerp(cp1A.y, cp1B.y, t) };
+        }
+        if (ptA.cp2 || ptB.cp2) {
+          const cp2A = ptA.cp2 || ptA;
+          const cp2B = ptB.cp2 || ptB;
+          node.cp2 = { x: lerp(cp2A.x, cp2B.x, t), y: lerp(cp2A.y, cp2B.y, t) };
+        }
+
+        points.push(node);
+      }
+
+      return {
+        points: points,
+        fill: p1.fill && p2.fill ? lerpColor(p1.fill, p2.fill, t) : (p1.fill || p2.fill),
+        stroke: p1.stroke && p2.stroke ? lerpColor(p1.stroke, p2.stroke, t) : (p1.stroke || p2.stroke),
+        strokeWidth: lerp(p1.strokeWidth || 0, p2.strokeWidth || 0, t),
+        opacity: lerp(p1.opacity !== undefined ? p1.opacity : 1, p2.opacity !== undefined ? p2.opacity : 1, t),
+        lineCap: p1.lineCap || 'round',
+        lineJoin: p1.lineJoin || 'round',
+        closed: p1.closed !== undefined ? p1.closed : true,
+        text: p1.text || '',
+        fontSize: lerp(p1.fontSize || 40, p2.fontSize || 40, t),
+        fontFamily: p1.fontFamily || 'Inter, sans-serif'
+      };
+    }
+
+    function drawGrid() {
+      if (!App.snapToGrid) return;
+      const step = App.gridSize;
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark' ||
+        (!document.documentElement.getAttribute('data-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+
+      ctx.save();
+      ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+      ctx.lineWidth = 1;
+
+      for (let x = 0; x <= App.width; x += step) {
+        ctx.beginPath();
+        ctx.moveTo(x + 0.5, 0);
+        ctx.lineTo(x + 0.5, App.height);
+        ctx.stroke();
+      }
+      for (let y = 0; y <= App.height; y += step) {
+        ctx.beginPath();
+        ctx.moveTo(0, y + 0.5);
+        ctx.lineTo(App.width, y + 0.5);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    function renderPathOnContext(targetCtx, points, closed) {
+      if (!points || points.length === 0) return;
+
+      targetCtx.beginPath();
+      targetCtx.moveTo(points[0].x, points[0].y);
+
+      for (let i = 1; i < points.length; i++) {
+        const prev = points[i - 1];
+        const cur = points[i];
+
+        if (prev.cp2 && cur.cp1) {
+          targetCtx.bezierCurveTo(prev.cp2.x, prev.cp2.y, cur.cp1.x, cur.cp1.y, cur.x, cur.y);
+        } else if (prev.cp2) {
+          targetCtx.quadraticCurveTo(prev.cp2.x, prev.cp2.y, cur.x, cur.y);
+        } else if (cur.cp1) {
+          targetCtx.quadraticCurveTo(cur.cp1.x, cur.cp1.y, cur.x, cur.y);
+        } else {
+          targetCtx.lineTo(cur.x, cur.y);
+        }
+      }
+
+      if (closed && points.length > 2) {
+        const last = points[points.length - 1];
+        const first = points[0];
+        if (last.cp2 && first.cp1) {
+          targetCtx.bezierCurveTo(last.cp2.x, last.cp2.y, first.cp1.x, first.cp1.y, first.x, first.y);
+        } else {
+          targetCtx.closePath();
+        }
+      }
+    }
+
+    function drawVectorShape(shape, props, isGhost = false, ghostColor = null) {
+      if (!props) return;
+      ctx.save();
+      ctx.globalAlpha = isGhost ? 0.22 : (props.opacity !== undefined ? props.opacity : 1);
+
+      if (shape.type === 'text') {
+        ctx.font = `${props.fontSize || 40}px ${props.fontFamily || 'Inter, sans-serif'}`;
+        ctx.textBaseline = 'middle';
+        const p = props.points[0] || { x: 100, y: 100 };
+
+        if (props.fill) {
+          ctx.fillStyle = isGhost ? ghostColor : props.fill;
+          ctx.fillText(props.text || '', p.x, p.y);
+        }
+        if (props.stroke && props.strokeWidth > 0) {
+          ctx.strokeStyle = isGhost ? ghostColor : props.stroke;
+          ctx.lineWidth = props.strokeWidth;
+          ctx.strokeText(props.text || '', p.x, p.y);
+        }
+      } else {
+        renderPathOnContext(ctx, props.points, props.closed !== false);
+
+        if (props.fill && props.points.length > 2) {
+          ctx.fillStyle = isGhost ? ghostColor : props.fill;
+          ctx.fill();
+        }
+
+        if (props.stroke && props.strokeWidth > 0) {
+          ctx.strokeStyle = isGhost ? ghostColor : props.stroke;
+          ctx.lineWidth = props.strokeWidth;
+          ctx.lineCap = props.lineCap || 'round';
+          ctx.lineJoin = props.lineJoin || 'round';
+          ctx.stroke();
+        }
+      }
+
+      ctx.restore();
+    }
+
+    function computePointsBoundingBox(points, isText = false, fontSize = 40, textContent = '') {
+      if (!points || points.length === 0) return { minX: 0, minY: 0, maxX: 0, maxY: 0, width: 0, height: 0, cx: 0, cy: 0 };
+      
+      let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+
+      if (isText) {
+        const p = points[0];
+        const w = (textContent || '').length * (fontSize * 0.58) + 12;
+        const h = fontSize * 1.2;
+        minX = p.x;
+        minY = p.y - h / 2;
+        maxX = p.x + w;
+        maxY = p.y + h / 2;
+      } else {
+        points.forEach(p => {
+          if (p.x < minX) minX = p.x;
+          if (p.y < minY) minY = p.y;
+          if (p.x > maxX) maxX = p.x;
+          if (p.y > maxY) maxY = p.y;
+
+          if (p.cp1) {
+            if (p.cp1.x < minX) minX = p.cp1.x;
+            if (p.cp1.y < minY) minY = p.cp1.y;
+            if (p.cp1.x > maxX) maxX = p.cp1.x;
+            if (p.cp1.y > maxY) maxY = p.cp1.y;
+          }
+          if (p.cp2) {
+            if (p.cp2.x < minX) minX = p.cp2.x;
+            if (p.cp2.y < minY) minY = p.cp2.y;
+            if (p.cp2.x > maxX) maxX = p.cp2.x;
+            if (p.cp2.y > maxY) maxY = p.cp2.y;
+          }
+        });
+      }
+
+      const pad = 6;
+      minX -= pad; minY -= pad;
+      maxX += pad; maxY += pad;
+
+      return {
+        minX, minY, maxX, maxY,
+        width: maxX - minX,
+        height: maxY - minY,
+        cx: (minX + maxX) / 2,
+        cy: (minY + maxY) / 2
+      };
+    }
+
+    function getTransformHandles(box) {
+      const { minX, minY, maxX, maxY, cx, cy } = box;
+      return {
+        tl: { x: minX, y: minY, cursor: 'nwse-resize' },
+        tr: { x: maxX, y: minY, cursor: 'nesw-resize' },
+        bl: { x: minX, y: maxY, cursor: 'nesw-resize' },
+        br: { x: maxX, y: maxY, cursor: 'nwse-resize' },
+        t:  { x: cx,   y: minY, cursor: 'ns-resize' },
+        b:  { x: cx,   y: maxY, cursor: 'ns-resize' },
+        l:  { x: minX, y: cy,   cursor: 'ew-resize' },
+        r:  { x: maxX, y: cy,   cursor: 'ew-resize' },
+        rot: { x: cx,  y: minY - 24, cursor: 'crosshair' }
+      };
+    }
+
+    function drawSelectionTransformGizmo(shape, props) {
+      if (!props || !props.points || props.points.length === 0) return;
+      const pts = props.points;
+      const isText = shape.type === 'text';
+      const box = computePointsBoundingBox(pts, isText, props.fontSize, props.text);
+
+      // 1. SELECT MODE: Illustrator-style full transform bounding box
+      if (App.tool === 'select') {
+        ctx.save();
+        ctx.strokeStyle = '#3584e4';
+        ctx.lineWidth = 1.2;
+        ctx.strokeRect(box.minX, box.minY, box.width, box.height);
+
+        // Rotation stalk
+        ctx.beginPath();
+        ctx.moveTo(box.cx, box.minY);
+        ctx.lineTo(box.cx, box.minY - 24);
+        ctx.stroke();
+
+        const handles = getTransformHandles(box);
+
+        // Draw handles
+        ctx.fillStyle = '#ffffff';
+        ctx.strokeStyle = '#3584e4';
+        ctx.lineWidth = 1.5;
+
+        // Rotation circular knob
+        ctx.beginPath();
+        ctx.arc(handles.rot.x, handles.rot.y, 4.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // Corner and Edge handles
+        const drawHandleSquare = (pt) => {
+          ctx.fillRect(pt.x - 3.5, pt.y - 3.5, 7, 7);
+          ctx.strokeRect(pt.x - 3.5, pt.y - 3.5, 7, 7);
+        };
+
+        ['tl', 'tr', 'bl', 'br', 't', 'b', 'l', 'r'].forEach(k => {
+          drawHandleSquare(handles[k]);
+        });
+
+        ctx.restore();
+      }
+
+      // 2. NODE EDIT MODE: Direct vertices and Bézier tangent handles
+      if (App.tool === 'node' && !isText) {
+        pts.forEach((p, i) => {
+          // Tangent handles
+          if (p.cp1 || p.cp2) {
+            ctx.save();
+            ctx.strokeStyle = 'rgba(53, 132, 228, 0.75)';
+            ctx.lineWidth = 1.2;
+
+            if (p.cp1) {
+              ctx.beginPath();
+              ctx.moveTo(p.x, p.y);
+              ctx.lineTo(p.cp1.x, p.cp1.y);
+              ctx.stroke();
+
+              ctx.fillStyle = (i === App.selectedNodeIndex && App.selectedHandle === 'cp1') ? '#e66100' : '#3584e4';
+              ctx.beginPath();
+              ctx.arc(p.cp1.x, p.cp1.y, 4, 0, Math.PI * 2);
+              ctx.fill();
+            }
+
+            if (p.cp2) {
+              ctx.beginPath();
+              ctx.moveTo(p.x, p.y);
+              ctx.lineTo(p.cp2.x, p.cp2.y);
+              ctx.stroke();
+
+              ctx.fillStyle = (i === App.selectedNodeIndex && App.selectedHandle === 'cp2') ? '#e66100' : '#3584e4';
+              ctx.beginPath();
+              ctx.arc(p.cp2.x, p.cp2.y, 4, 0, Math.PI * 2);
+              ctx.fill();
+            }
+            ctx.restore();
+          }
+
+          // Main vertex node
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 5.5, 0, Math.PI * 2);
+          if (i === App.selectedNodeIndex && !App.selectedHandle) {
+            ctx.fillStyle = '#e66100';
+            ctx.strokeStyle = '#ffffff';
+          } else {
+            ctx.fillStyle = '#ffffff';
+            ctx.strokeStyle = '#3584e4';
+          }
+          ctx.lineWidth = 1.8;
+          ctx.fill();
+          ctx.stroke();
+          ctx.restore();
+        });
+      }
+    }
+
+    function renderCanvas() {
+      ctx.clearRect(0, 0, App.width, App.height);
+
+      // Render canvas background color if not transparent
+      if (!App.canvasBgTransparent) {
+        ctx.fillStyle = App.canvasBgColor;
+        ctx.fillRect(0, 0, App.width, App.height);
+      }
+
+      drawGrid();
+
+      // Onion Skinning
+      if (App.onionSkin && !App.isPlaying) {
+        if (App.currentFrame > 1) {
+          App.shapes.forEach(shape => {
+            const p = getShapePropsAtFrame(shape, App.currentFrame - 1);
+            if (p) drawVectorShape(shape, p, true, '#e01b24');
+          });
+        }
+        if (App.currentFrame < App.totalFrames) {
+          App.shapes.forEach(shape => {
+            const p = getShapePropsAtFrame(shape, App.currentFrame + 1);
+            if (p) drawVectorShape(shape, p, true, '#26a269');
+          });
+        }
+      }
+
+      // Render shapes
+      App.shapes.forEach(shape => {
+        const props = getShapePropsAtFrame(shape, App.currentFrame);
+        if (props) {
+          drawVectorShape(shape, props);
+          if (shape.id === App.selectedShapeId) {
+            drawSelectionTransformGizmo(shape, props);
+          }
+        }
+      });
+
+      // Render Active Pen Tool drawing with interactive curve preview
+      if (App.tool === 'bezier' && App.penActivePoints.length > 0) {
+        ctx.save();
+        ctx.strokeStyle = '#3584e4';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([4, 3]);
+        renderPathOnContext(ctx, App.penActivePoints, false);
+        ctx.stroke();
+
+        App.penActivePoints.forEach((pt, idx) => {
+          // Tangent lines for currently dragged handles
+          if (pt.cp1 || pt.cp2) {
+            ctx.strokeStyle = 'rgba(53, 132, 228, 0.6)';
+            ctx.lineWidth = 1.2;
+            if (pt.cp1) {
+              ctx.beginPath();
+              ctx.moveTo(pt.x, pt.y);
+              ctx.lineTo(pt.cp1.x, pt.cp1.y);
+              ctx.stroke();
+              ctx.fillStyle = '#3584e4';
+              ctx.beginPath();
+              ctx.arc(pt.cp1.x, pt.cp1.y, 3.5, 0, Math.PI * 2);
+              ctx.fill();
+            }
+            if (pt.cp2) {
+              ctx.beginPath();
+              ctx.moveTo(pt.x, pt.y);
+              ctx.lineTo(pt.cp2.x, pt.cp2.y);
+              ctx.stroke();
+              ctx.fillStyle = '#3584e4';
+              ctx.beginPath();
+              ctx.arc(pt.cp2.x, pt.cp2.y, 3.5, 0, Math.PI * 2);
+              ctx.fill();
+            }
+          }
+
+          // Anchor point
+          ctx.fillStyle = (idx === App.penActivePoints.length - 1) ? '#e66100' : '#ffffff';
+          ctx.strokeStyle = '#3584e4';
+          ctx.lineWidth = 1.8;
+          ctx.beginPath();
+          ctx.arc(pt.x, pt.y, 4.5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+        });
+        ctx.restore();
+      }
+
+      // Smooth Freehand Pen in-progress path
+      if (App.tool === 'smoothpen' && App.activeDrawingPoints.length > 0) {
+        ctx.save();
+        ctx.strokeStyle = '#3584e4';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([3, 3]);
+        renderPathOnContext(ctx, App.activeDrawingPoints, false);
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
+
+    function getCanvasPoint(evt) {
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      let x = (evt.clientX - rect.left) * scaleX;
+      let y = (evt.clientY - rect.top) * scaleY;
+
+      if (App.snapToGrid) {
+        x = Math.round(x / App.gridSize) * App.gridSize;
+        y = Math.round(y / App.gridSize) * App.gridSize;
+      }
+      return { x, y };
+    }
+
+    function hitTestTransformHandle(shape, pos) {
+      const props = getShapePropsAtFrame(shape, App.currentFrame);
+      if (!props || !props.points) return null;
+      const box = computePointsBoundingBox(props.points, shape.type === 'text', props.fontSize, props.text);
+      const handles = getTransformHandles(box);
+
+      for (const [k, pt] of Object.entries(handles)) {
+        if (Math.hypot(pt.x - pos.x, pt.y - pos.y) <= 8) {
+          return k;
+        }
+      }
+      return null;
+    }
+
+    function hitTestNodeOrHandle(shape, pos) {
+      const props = getShapePropsAtFrame(shape, App.currentFrame);
+      if (!props || !props.points) return null;
+
+      for (let i = 0; i < props.points.length; i++) {
+        const p = props.points[i];
+        if (p.cp1 && Math.hypot(p.cp1.x - pos.x, p.cp1.y - pos.y) <= 8) {
+          return { index: i, handle: 'cp1' };
+        }
+        if (p.cp2 && Math.hypot(p.cp2.x - pos.x, p.cp2.y - pos.y) <= 8) {
+          return { index: i, handle: 'cp2' };
+        }
+      }
+
+      for (let i = 0; i < props.points.length; i++) {
+        const p = props.points[i];
+        if (Math.hypot(p.x - pos.x, p.y - pos.y) <= 9) {
+          return { index: i, handle: null };
+        }
+      }
+
+      return null;
+    }
+
+    function hitTestShape(shape, pos) {
+      const props = getShapePropsAtFrame(shape, App.currentFrame);
+      if (!props || !props.points || props.points.length === 0) return false;
+
+      if (shape.type === 'text') {
+        const p = props.points[0];
+        const size = props.fontSize || 40;
+        const w = (props.text || '').length * (size * 0.58) + 12;
+        return pos.x >= p.x - 10 && pos.x <= p.x + w && pos.y >= p.y - size && pos.y <= p.y + 12;
+      }
+
+      if (props.points.length > 2) {
+        let inside = false;
+        const vs = props.points;
+        for (let i = 0, j = vs.length - 1; i < vs.length; j = i++) {
+          const xi = vs[i].x, yi = vs[i].y;
+          const xj = vs[j].x, yj = vs[j].y;
+          const intersect = ((yi > pos.y) !== (yj > pos.y)) &&
+              (pos.x < (xj - xi) * (pos.y - yi) / (yj - yi) + xi);
+          if (intersect) inside = !inside;
+        }
+        if (inside) return true;
+      }
+
+      for (let i = 0; i < props.points.length - 1; i++) {
+        const p1 = props.points[i];
+        const p2 = props.points[i + 1];
+        const l2 = Math.hypot(p2.x - p1.x, p2.y - p1.y) ** 2;
+        let t = l2 === 0 ? 0 : ((pos.x - p1.x) * (p2.x - p1.x) + (pos.y - p1.y) * (p2.y - p1.y)) / l2;
+        t = Math.max(0, Math.min(1, t));
+        const projX = p1.x + t * (p2.x - p1.x);
+        const projY = p1.y + t * (p2.y - p1.y);
+        if (Math.hypot(pos.x - projX, pos.y - projY) < 12 + (props.strokeWidth || 2)) {
+          return true;
+        }
+      }
+
+      return false;
+    }
+
+    function recordCurrentStateAsKeyframe(shapeId) {
+      const shape = App.shapes.find(s => s.id === shapeId);
+      if (!shape) return;
+      const cur = getShapePropsAtFrame(shape, App.currentFrame);
+      if (!cur) return;
+      shape.keyframes[App.currentFrame] = clone(cur);
+      updateUI();
+    }
+
+    function removeCurrentKeyframe(shapeId) {
+      const shape = App.shapes.find(s => s.id === shapeId);
+      if (!shape) return;
+      const keys = Object.keys(shape.keyframes);
+      if (keys.length <= 1) {
+        showStatus('Shapes must retain at least one keyframe.');
+        return;
+      }
+      if (shape.keyframes[App.currentFrame]) {
+        delete shape.keyframes[App.currentFrame];
+        showStatus(`Deleted keyframe at Frame ${App.currentFrame}`);
+        updateUI();
+      }
+    }
+
+    function mutateCurrentPoints(shapeId, newPoints) {
+      const shape = App.shapes.find(s => s.id === shapeId);
+      if (!shape) return;
+      if (!shape.keyframes[App.currentFrame]) {
+        const cur = getShapePropsAtFrame(shape, App.currentFrame);
+        shape.keyframes[App.currentFrame] = clone(cur);
+      }
+      shape.keyframes[App.currentFrame].points = clone(newPoints);
+      updateUI();
+    }
+
+    canvas.addEventListener('mousedown', (e) => {
+      const pos = getCanvasPoint(e);
+      App.dragStart = pos;
+
+      // 1. SELECT TOOL: Check bounding box transform handles first, else pick shape
+      if (App.tool === 'select') {
+        if (App.selectedShapeId) {
+          const selected = App.shapes.find(s => s.id === App.selectedShapeId);
+          const handle = hitTestTransformHandle(selected, pos);
+          if (handle) {
+            App.transformHandle = handle;
+            const cur = getShapePropsAtFrame(selected, App.currentFrame);
+            App.transformStartPts = clone(cur.points);
+            App.transformStartBox = computePointsBoundingBox(cur.points, selected.type === 'text', cur.fontSize, cur.text);
+            App.transformCenter = { x: App.transformStartBox.cx, y: App.transformStartBox.cy };
+            App.transformStartAngle = Math.atan2(pos.y - App.transformCenter.y, pos.x - App.transformCenter.x);
+            return;
+          }
+        }
+
+        let hit = null;
+        for (let i = App.shapes.length - 1; i >= 0; i--) {
+          if (hitTestShape(App.shapes[i], pos)) {
+            hit = App.shapes[i];
+            break;
+          }
+        }
+
+        if (hit) {
+          App.selectedShapeId = hit.id;
+          App.isDraggingShape = true;
+          const cur = getShapePropsAtFrame(hit, App.currentFrame);
+          App.shapeInitialSnapshot = clone(cur.points);
+        } else {
+          App.selectedShapeId = null;
+        }
+        updateUI();
+      }
+
+      // 2. NODE EDIT TOOL (A): Select and drag node vertices or Bézier handles
+      else if (App.tool === 'node') {
+        if (App.selectedShapeId) {
+          const shape = App.shapes.find(s => s.id === App.selectedShapeId);
+          const hit = hitTestNodeOrHandle(shape, pos);
+          if (hit) {
+            App.selectedNodeIndex = hit.index;
+            App.selectedHandle = hit.handle;
+            if (hit.handle) {
+              App.isDraggingHandle = true;
+            } else {
+              App.isDraggingNode = true;
+            }
+            const cur = getShapePropsAtFrame(shape, App.currentFrame);
+            App.shapeInitialSnapshot = clone(cur.points);
+            updateUI();
+            return;
+          }
+        }
+
+        // Pick other shape
+        let hit = null;
+        for (let i = App.shapes.length - 1; i >= 0; i--) {
+          if (hitTestShape(App.shapes[i], pos)) {
+            hit = App.shapes[i];
+            break;
+          }
+        }
+        if (hit) {
+          App.selectedShapeId = hit.id;
+          const nodeHit = hitTestNodeOrHandle(hit, pos);
+          App.selectedNodeIndex = nodeHit ? nodeHit.index : -1;
+          App.selectedHandle = nodeHit ? nodeHit.handle : null;
+        } else {
+          App.selectedShapeId = null;
+          App.selectedNodeIndex = -1;
+          App.selectedHandle = null;
+        }
+        updateUI();
+      }
+
+      // 3. PEN TOOL (P): Click down to place anchor, drag to pull out curve handles on the fly!
+      else if (App.tool === 'bezier') {
+        // If clicking close to the initial point, close the curve!
+        if (App.penActivePoints.length >= 2 && Math.hypot(pos.x - App.penActivePoints[0].x, pos.y - App.penActivePoints[0].y) <= 12) {
+          finishPenDrawing(true);
+          return;
+        }
+
+        const newNode = {
+          x: pos.x,
+          y: pos.y,
+          cp1: { x: pos.x, y: pos.y },
+          cp2: { x: pos.x, y: pos.y }
+        };
+
+        App.penActivePoints.push(newNode);
+        App.currentPenNodeIndex = App.penActivePoints.length - 1;
+        App.isPenDraggingHandle = true;
+        renderCanvas();
+        showStatus('Drag mouse to shape curve handles. Release when satisfied.');
+      }
+
+      else if (App.tool === 'smoothpen') {
+        App.isDrawing = true;
+        App.activeDrawingPoints = [{ x: pos.x, y: pos.y }];
+      }
+
+      else if (App.tool === 'text') {
+        createVectorText(pos.x, pos.y);
+      }
+
+      else if (['rect', 'circle', 'line'].includes(App.tool)) {
+        App.isDrawing = true;
+      }
+    });
+
+    canvas.addEventListener('dblclick', (e) => {
+      const pos = getCanvasPoint(e);
+
+      // Finish pen tool on double-click
+      if (App.tool === 'bezier' && App.penActivePoints.length > 1) {
+        finishPenDrawing(false);
+        return;
+      }
+
+      // Select mode double-click interaction
+      if (App.tool === 'select') {
+        for (let i = App.shapes.length - 1; i >= 0; i--) {
+          const shape = App.shapes[i];
+          if (hitTestShape(shape, pos)) {
+            App.selectedShapeId = shape.id;
+
+            if (shape.type === 'text') {
+              // Open modal to edit text directly
+              openTextEditModal(shape);
+            } else {
+              // Switch directly to Node Edit Mode ('A')
+              setTool('node');
+              showStatus(`Switched to Node Editor for "${shape.name}". Drag vertices & handles.`);
+            }
+            return;
+          }
+        }
+      }
+    });
+
+    function openTextEditModal(shape) {
+      const modal = document.getElementById('text-edit-modal');
+      const input = document.getElementById('modal-text-input');
+      const cur = getShapePropsAtFrame(shape, App.currentFrame);
+      input.value = cur.text || '';
+      modal.classList.remove('hidden');
+      input.focus();
+
+      const saveHandler = () => {
+        if (!shape.keyframes[App.currentFrame]) {
+          shape.keyframes[App.currentFrame] = clone(cur);
+        }
+        shape.keyframes[App.currentFrame].text = input.value;
+        modal.classList.add('hidden');
+        cleanup();
+        updateUI();
+      };
+
+      const cancelHandler = () => {
+        modal.classList.add('hidden');
+        cleanup();
+      };
+
+      const cleanup = () => {
+        document.getElementById('btn-text-modal-save').removeEventListener('click', saveHandler);
+        document.getElementById('btn-text-modal-cancel').removeEventListener('click', cancelHandler);
+      };
+
+      document.getElementById('btn-text-modal-save').addEventListener('click', saveHandler);
+      document.getElementById('btn-text-modal-cancel').addEventListener('click', cancelHandler);
+    }
+
+    window.addEventListener('mousemove', (e) => {
+      const pos = getCanvasPoint(e);
+
+      // 1. Pen Tool: Dragging out tangent handles on mouse-down
+      if (App.tool === 'bezier' && App.isPenDraggingHandle && App.currentPenNodeIndex >= 0) {
+        const node = App.penActivePoints[App.currentPenNodeIndex];
+        const dx = pos.x - node.x;
+        const dy = pos.y - node.y;
+
+        node.cp2 = { x: node.x + dx, y: node.y + dy };
+        node.cp1 = { x: node.x - dx, y: node.y - dy };
+        renderCanvas();
+        return;
+      }
+
+      // 2. Transform Bounding Box Handle Dragging (Scale, Stretch, Rotate, Skew)
+      if (App.tool === 'select' && App.transformHandle && App.selectedShapeId && App.transformStartPts) {
+        const shape = App.shapes.find(s => s.id === App.selectedShapeId);
+        const box = App.transformStartBox;
+        const center = App.transformCenter;
+        const newPts = clone(App.transformStartPts);
+
+        if (App.transformHandle === 'rot') {
+          // Rotation
+          const currentAngle = Math.atan2(pos.y - center.y, pos.x - center.x);
+          const deltaAngle = currentAngle - App.transformStartAngle;
+          const cos = Math.cos(deltaAngle);
+          const sin = Math.sin(deltaAngle);
+
+          const rotPt = (p) => {
+            const rx = p.x - center.x;
+            const ry = p.y - center.y;
+            return {
+              x: Math.round(center.x + rx * cos - ry * sin),
+              y: Math.round(center.y + rx * sin + ry * cos)
+            };
+          };
+
+          newPts.forEach(p => {
+            const r = rotPt(p);
+            p.x = r.x; p.y = r.y;
+            if (p.cp1) { const r1 = rotPt(p.cp1); p.cp1.x = r1.x; p.cp1.y = r1.y; }
+            if (p.cp2) { const r2 = rotPt(p.cp2); p.cp2.x = r2.x; p.cp2.y = r2.y; }
+          });
+        } else if (e.altKey && ['t', 'b', 'l', 'r'].includes(App.transformHandle)) {
+          // Skew & Shearing mode via Alt + Edge Drag
+          const dx = pos.x - App.dragStart.x;
+          const dy = pos.y - App.dragStart.y;
+
+          if (App.transformHandle === 't' || App.transformHandle === 'b') {
+            const skewX = dx / (box.height || 1);
+            newPts.forEach(p => {
+              const relY = p.y - center.y;
+              p.x = Math.round(p.x + relY * skewX);
+              if (p.cp1) p.cp1.x = Math.round(p.cp1.x + (p.cp1.y - center.y) * skewX);
+              if (p.cp2) p.cp2.x = Math.round(p.cp2.x + (p.cp2.y - center.y) * skewX);
+            });
+          } else {
+            const skewY = dy / (box.width || 1);
+            newPts.forEach(p => {
+              const relX = p.x - center.x;
+              p.y = Math.round(p.y + relX * skewY);
+              if (p.cp1) p.cp1.y = Math.round(p.cp1.y + (p.cp1.x - center.x) * skewY);
+              if (p.cp2) p.cp2.y = Math.round(p.cp2.y + (p.cp2.x - center.x) * skewY);
+            });
+          }
+        } else {
+          // Scaling & Stretching
+          let scaleX = 1;
+          let scaleY = 1;
+          let originX = center.x;
+          let originY = center.y;
+
+          const h = App.transformHandle;
+          if (h.includes('r')) { originX = box.minX; scaleX = (pos.x - box.minX) / (box.width || 1); }
+          if (h.includes('l')) { originX = box.maxX; scaleX = (box.maxX - pos.x) / (box.width || 1); }
+          if (h.includes('b')) { originY = box.minY; scaleY = (pos.y - box.minY) / (box.height || 1); }
+          if (h.includes('t')) { originY = box.maxY; scaleY = (box.maxY - pos.y) / (box.height || 1); }
+
+          if (['tl', 'tr', 'bl', 'br'].includes(h) && e.shiftKey) {
+            const s = Math.max(Math.abs(scaleX), Math.abs(scaleY));
+            scaleX = scaleX < 0 ? -s : s;
+            scaleY = scaleY < 0 ? -s : s;
+          }
+
+          newPts.forEach(p => {
+            p.x = Math.round(originX + (p.x - originX) * scaleX);
+            p.y = Math.round(originY + (p.y - originY) * scaleY);
+            if (p.cp1) {
+              p.cp1.x = Math.round(originX + (p.cp1.x - originX) * scaleX);
+              p.cp1.y = Math.round(originY + (p.cp1.y - originY) * scaleY);
+            }
+            if (p.cp2) {
+              p.cp2.x = Math.round(originX + (p.cp2.x - originX) * scaleX);
+              p.cp2.y = Math.round(originY + (p.cp2.y - originY) * scaleY);
+            }
+          });
+        }
+
+        mutateCurrentPoints(App.selectedShapeId, newPts);
+        return;
+      }
+
+      // 3. Dragging entire shape position
+      if (App.isDraggingShape && App.selectedShapeId && App.shapeInitialSnapshot) {
+        const dx = pos.x - App.dragStart.x;
+        const dy = pos.y - App.dragStart.y;
+        const newPts = App.shapeInitialSnapshot.map(p => {
+          const pt = { x: Math.round(p.x + dx), y: Math.round(p.y + dy) };
+          if (p.cp1) pt.cp1 = { x: Math.round(p.cp1.x + dx), y: Math.round(p.cp1.y + dy) };
+          if (p.cp2) pt.cp2 = { x: Math.round(p.cp2.x + dx), y: Math.round(p.cp2.y + dy) };
+          return pt;
+        });
+        mutateCurrentPoints(App.selectedShapeId, newPts);
+      }
+
+      // 4. Node Tool: Dragging vertex
+      else if (App.isDraggingNode && App.selectedShapeId && App.selectedNodeIndex >= 0) {
+        const shape = App.shapes.find(s => s.id === App.selectedShapeId);
+        const cur = getShapePropsAtFrame(shape, App.currentFrame);
+        const newPts = clone(cur.points);
+        const target = newPts[App.selectedNodeIndex];
+        const dx = pos.x - target.x;
+        const dy = pos.y - target.y;
+
+        target.x = pos.x;
+        target.y = pos.y;
+        if (target.cp1) { target.cp1.x += dx; target.cp1.y += dy; }
+        if (target.cp2) { target.cp2.x += dx; target.cp2.y += dy; }
+
+        mutateCurrentPoints(App.selectedShapeId, newPts);
+      }
+
+      // 5. Node Tool: Dragging Bézier tangent handle
+      else if (App.isDraggingHandle && App.selectedShapeId && App.selectedNodeIndex >= 0 && App.selectedHandle) {
+        const shape = App.shapes.find(s => s.id === App.selectedShapeId);
+        const cur = getShapePropsAtFrame(shape, App.currentFrame);
+        const newPts = clone(cur.points);
+        const target = newPts[App.selectedNodeIndex];
+
+        target[App.selectedHandle] = { x: pos.x, y: pos.y };
+
+        // Symmetrical opposite handle adjustment
+        if (App.selectedHandle === 'cp2' && target.cp1) {
+          const vx = pos.x - target.x;
+          const vy = pos.y - target.y;
+          target.cp1 = { x: Math.round(target.x - vx), y: Math.round(target.y - vy) };
+        } else if (App.selectedHandle === 'cp1' && target.cp2) {
+          const vx = pos.x - target.x;
+          const vy = pos.y - target.y;
+          target.cp2 = { x: Math.round(target.x - vx), y: Math.round(target.y - vy) };
+        }
+
+        mutateCurrentPoints(App.selectedShapeId, newPts);
+      }
+
+      // 6. Smooth Freehand Pen
+      else if (App.isDrawing && App.tool === 'smoothpen') {
+        const last = App.activeDrawingPoints[App.activeDrawingPoints.length - 1];
+        if (Math.hypot(pos.x - last.x, pos.y - last.y) > 6) {
+          App.activeDrawingPoints.push({ x: pos.x, y: pos.y });
+          renderCanvas();
+        }
+      }
+
+      // 7. Primitive Shape drag preview
+      else if (App.isDrawing && ['rect', 'circle', 'line'].includes(App.tool)) {
+        renderCanvas();
+        ctx.save();
+        ctx.strokeStyle = '#3584e4';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([4, 4]);
+
+        const start = App.dragStart;
+        if (App.tool === 'rect') {
+          ctx.strokeRect(start.x, start.y, pos.x - start.x, pos.y - start.y);
+        } else if (App.tool === 'circle') {
+          const rx = Math.abs(pos.x - start.x);
+          const ry = Math.abs(pos.y - start.y);
+          ctx.beginPath();
+          ctx.ellipse(start.x, start.y, rx, ry, 0, 0, Math.PI * 2);
+          ctx.stroke();
+        } else if (App.tool === 'line') {
+          ctx.beginPath();
+          ctx.moveTo(start.x, start.y);
+          ctx.lineTo(pos.x, pos.y);
+          ctx.stroke();
+        }
+        ctx.restore();
+      }
+    });
+
+    window.addEventListener('mouseup', (e) => {
+      const pos = getCanvasPoint(e);
+
+      if (App.isPenDraggingHandle) {
+        App.isPenDraggingHandle = false;
+        App.currentPenNodeIndex = -1;
+      }
+
+      if (App.transformHandle) {
+        App.transformHandle = null;
+        App.transformStartPts = null;
+        App.transformStartBox = null;
+      }
+
+      if (App.isDraggingShape) {
+        App.isDraggingShape = false;
+        App.shapeInitialSnapshot = null;
+      }
+
+      if (App.isDraggingNode) {
+        App.isDraggingNode = false;
+        App.shapeInitialSnapshot = null;
+      }
+
+      if (App.isDraggingHandle) {
+        App.isDraggingHandle = false;
+        App.shapeInitialSnapshot = null;
+      }
+
+      if (App.isDrawing && App.tool === 'smoothpen') {
+        App.isDrawing = false;
+        if (App.activeDrawingPoints.length > 2) {
+          const smoothed = convertToSmoothedBezier(App.activeDrawingPoints);
+          createShapeFromPoints(smoothed, 'bezier', false);
+        }
+        App.activeDrawingPoints = [];
+        setTool('select');
+      }
+
+      else if (App.isDrawing && ['rect', 'circle', 'line'].includes(App.tool)) {
+        App.isDrawing = false;
+        const start = App.dragStart;
+        const w = pos.x - start.x;
+        const h = pos.y - start.y;
+
+        if (Math.hypot(w, h) > 6) {
+          let points = [];
+          let closed = true;
+
+          if (App.tool === 'rect') {
+            points = [
+              { x: start.x, y: start.y },
+              { x: start.x + w, y: start.y },
+              { x: start.x + w, y: start.y + h },
+              { x: start.x, y: start.y + h }
+            ];
+          } else if (App.tool === 'circle') {
+            const rx = Math.abs(w);
+            const ry = Math.abs(h);
+            const cx = start.x;
+            const cy = start.y;
+            const kappa = 0.5522847498;
+            const ox = rx * kappa;
+            const oy = ry * kappa;
+
+            points = [
+              { x: cx, y: cy - ry, cp1: { x: cx - ox, y: cy - ry }, cp2: { x: cx + ox, y: cy - ry } },
+              { x: cx + rx, y: cy, cp1: { x: cx + rx, y: cy - oy }, cp2: { x: cx + rx, y: cy + oy } },
+              { x: cx, y: cy + ry, cp1: { x: cx + ox, y: cy + ry }, cp2: { x: cx - ox, y: cy + ry } },
+              { x: cx - rx, y: cy, cp1: { x: cx - rx, y: cy + oy }, cp2: { x: cx - rx, y: cy - oy } }
+            ];
+          } else if (App.tool === 'line') {
+            points = [
+              { x: start.x, y: start.y },
+              { x: pos.x, y: pos.y }
+            ];
+            closed = false;
+          }
+
+          createShapeFromPoints(points, App.tool, closed);
+          setTool('select');
+        }
+      }
+    });
+
+    function convertToSmoothedBezier(rawPoints) {
+      if (rawPoints.length < 3) return rawPoints;
+      const sampled = [rawPoints[0]];
+      let prev = rawPoints[0];
+      for (let i = 1; i < rawPoints.length - 1; i++) {
+        if (Math.hypot(rawPoints[i].x - prev.x, rawPoints[i].y - prev.y) > 22) {
+          sampled.push(rawPoints[i]);
+          prev = rawPoints[i];
+        }
+      }
+      sampled.push(rawPoints[rawPoints.length - 1]);
+
+      const smoothed = [];
+      for (let i = 0; i < sampled.length; i++) {
+        const cur = sampled[i];
+        const prevPt = sampled[i - 1] || cur;
+        const nextPt = sampled[i + 1] || cur;
+
+        const tangentX = (nextPt.x - prevPt.x) * 0.25;
+        const tangentY = (nextPt.y - prevPt.y) * 0.25;
+
+        smoothed.push({
+          x: cur.x,
+          y: cur.y,
+          cp1: { x: Math.round(cur.x - tangentX), y: Math.round(cur.y - tangentY) },
+          cp2: { x: Math.round(cur.x + tangentX), y: Math.round(cur.y + tangentY) }
+        });
+      }
+
+      return smoothed;
+    }
+
+    function finishPenDrawing(isClosed = true) {
+      if (App.penActivePoints.length > 1) {
+        createShapeFromPoints([...App.penActivePoints], 'bezier', isClosed);
+        App.penActivePoints = [];
+        setTool('select');
+        showStatus('Bézier curve created.');
+      }
+    }
+
+    function createShapeFromPoints(points, type = 'bezier', closed = true) {
+      const fillEnabled = document.getElementById('prop-has-fill').checked;
+      const strokeEnabled = document.getElementById('prop-has-stroke').checked;
+      const fillColor = document.getElementById('prop-fill-hex').value;
+      const strokeColor = document.getElementById('prop-stroke-hex').value;
+      const strokeWidth = parseInt(document.getElementById('prop-stroke-width').value, 10);
+      const opacity = parseFloat(document.getElementById('prop-opacity').value);
+      const lineCap = document.getElementById('prop-line-cap').value;
+      const lineJoin = document.getElementById('prop-line-join').value;
+
+      const shapeId = uid();
+      const newShape = {
+        id: shapeId,
+        name: `${type.charAt(0).toUpperCase() + type.slice(1)} ${App.shapes.length + 1}`,
+        type: type,
+        keyframes: {
+          [App.currentFrame]: {
+            points: clone(points),
+            fill: fillEnabled ? fillColor : null,
+            stroke: strokeEnabled ? strokeColor : null,
+            strokeWidth: strokeWidth,
+            opacity: opacity,
+            lineCap: lineCap,
+            lineJoin: lineJoin,
+            closed: closed
+          }
+        }
+      };
+
+      App.shapes.push(newShape);
+      App.selectedShapeId = shapeId;
+      updateUI();
+    }
+
+    function createVectorText(x, y) {
+      const shapeId = uid();
+      const fillEnabled = document.getElementById('prop-has-fill').checked;
+      const fillColor = document.getElementById('prop-fill-hex').value;
+      const strokeEnabled = document.getElementById('prop-has-stroke').checked;
+      const strokeColor = document.getElementById('prop-stroke-hex').value;
+      const strokeWidth = parseInt(document.getElementById('prop-stroke-width').value, 10);
+
+      const textShape = {
+        id: shapeId,
+        name: `Text ${App.shapes.length + 1}`,
+        type: 'text',
+        keyframes: {
+          [App.currentFrame]: {
+            points: [{ x, y }],
+            text: 'Vector Motion',
+            fontSize: 48,
+            fontFamily: 'Inter, sans-serif',
+            fill: fillEnabled ? fillColor : '#3584e4',
+            stroke: strokeEnabled ? strokeColor : null,
+            strokeWidth: strokeWidth,
+            opacity: 1
+          }
+        }
+      };
+
+      App.shapes.push(textShape);
+      App.selectedShapeId = shapeId;
+      setTool('select');
+      updateUI();
+      showStatus('Vector text created. Double click to edit.');
+    }
+
+    function applyResolutionPreset(presetVal, orient) {
+      App.preset = parseInt(presetVal, 10);
+      App.orientation = orient;
+
+      let w = 1280;
+      let h = 720;
+
+      if (App.preset === 1080) { w = 1920; h = 1080; }
+      else if (App.preset === 720) { w = 1280; h = 720; }
+      else if (App.preset === 480) { w = 854; h = 480; }
+      else if (App.preset === 360) { w = 640; h = 360; }
+
+      if (App.orientation === 'portrait') {
+        const temp = w;
+        w = h;
+        h = temp;
+      }
+
+      App.width = w;
+      App.height = h;
+      canvas.width = w;
+      canvas.height = h;
+
+      document.getElementById('canvas-dim-display').innerText = `${w} × ${h}`;
+      fitZoomToViewport();
+      updateUI();
+    }
+
+    function fitZoomToViewport() {
+      const viewport = document.getElementById('viewport');
+      const vW = viewport.clientWidth - 50;
+      const vH = viewport.clientHeight - 50;
+
+      const scale = Math.min(vW / App.width, vH / App.height, 1.0);
+      setZoom(scale);
+    }
+
+    function setZoom(factor) {
+      App.zoom = Math.max(0.2, Math.min(2.5, factor));
+      const wrapper = document.getElementById('stage-transform-wrapper');
+      wrapper.style.transform = `scale(${App.zoom})`;
+      document.getElementById('zoom-indicator').innerText = `Zoom: ${Math.round(App.zoom * 100)}%`;
+    }
+
+    function setupTimelineRuler() {
+      const ruler = document.getElementById('timeline-ruler');
+      const totalWidth = App.totalFrames * FRAME_PX + 120;
+      ruler.style.width = `${totalWidth}px`;
+      document.getElementById('timeline-track-rows').style.width = `${totalWidth}px`;
+      ruler.innerHTML = '';
+
+      for (let f = 1; f <= App.totalFrames; f++) {
+        const tick = document.createElement('div');
+        tick.className = 'absolute top-0 bottom-0 flex flex-col justify-end pb-0.5 border-r border-stone-300 dark:border-stone-800 pointer-events-none';
+        tick.style.left = `${(f - 1) * FRAME_PX}px`;
+        tick.style.width = `${FRAME_PX}px`;
+
+        if (f % 5 === 0 || f === 1) {
+          tick.innerHTML = `<span class="px-0.5 font-mono text-[9px] opacity-75">${f}</span>`;
+        }
+        ruler.appendChild(tick);
+      }
+    }
+
+    function renderTimeline() {
+      const layerList = document.getElementById('timeline-layer-list');
+      const diamondsContainer = document.getElementById('timeline-diamonds-container');
+      layerList.innerHTML = '';
+      diamondsContainer.innerHTML = '';
+
+      App.shapes.forEach(shape => {
+        const isSelected = shape.id === App.selectedShapeId;
+
+        // Sidebar Track Item
+        const item = document.createElement('div');
+        item.className = `h-7 px-3 flex items-center justify-between text-xs cursor-pointer truncate ${isSelected ? 'bg-blue-500/15 font-semibold text-blue-600 dark:text-blue-400' : 'hover:bg-stone-500/10'}`;
+        item.innerHTML = `
+          <span class="truncate">${shape.name}</span>
+          <span class="text-[10px] opacity-60 font-mono">${Object.keys(shape.keyframes).length}◆</span>
+        `;
+        item.addEventListener('click', () => {
+          App.selectedShapeId = shape.id;
+          updateUI();
+        });
+        layerList.appendChild(item);
+
+        // Track Row with Draggable Keyframes
+        const row = document.createElement('div');
+        row.className = `h-7 relative border-b border-stone-200 dark:border-stone-800 ${isSelected ? 'bg-blue-500/5' : ''}`;
+
+        Object.keys(shape.keyframes).forEach(frameStr => {
+          const frameNum = parseInt(frameStr, 10);
+          const diamond = document.createElement('div');
+          diamond.className = 'absolute top-1.5 w-3.5 h-3.5 transform -translate-x-1/2 rotate-45 rounded-[2px] cursor-grab active:cursor-grabbing transition-transform hover:scale-125 z-10 shadow-sm';
+          diamond.style.backgroundColor = isSelected ? 'var(--gtk-keyframe-diamond)' : 'var(--gtk-dim-fg)';
+          diamond.style.left = `${(frameNum - 0.5) * FRAME_PX}px`;
+          diamond.title = `${shape.name} - Frame ${frameNum} (Drag to move)`;
+
+          diamond.addEventListener('mousedown', (e) => {
+            e.stopPropagation();
+            App.isDraggingKeyframe = true;
+            App.draggedKeyframeData = {
+              shapeId: shape.id,
+              fromFrame: frameNum
+            };
+            seekToFrame(frameNum);
+            App.selectedShapeId = shape.id;
+            updateUI();
+          });
+
+          row.appendChild(diamond);
+        });
+
+        diamondsContainer.appendChild(row);
+      });
+    }
+
+    function seekToFrame(f) {
+      App.currentFrame = Math.max(1, Math.min(App.totalFrames, f));
+      document.getElementById('txt-current-frame').innerText = App.currentFrame;
+      
+      const needle = document.getElementById('timeline-needle');
+      needle.style.left = `${(App.currentFrame - 0.5) * FRAME_PX}px`;
+
+      syncInspectorPanel();
+      renderCanvas();
+    }
+
+    const scrollArea = document.getElementById('timeline-scroll-area');
+    function getScrubberFrameFromEvent(e) {
+      const rect = scrollArea.getBoundingClientRect();
+      const clickX = e.clientX - rect.left + scrollArea.scrollLeft;
+      return Math.round((clickX / FRAME_PX) + 0.5);
+    }
+
+    scrollArea.addEventListener('mousedown', (e) => {
+      if (e.target.closest('#timeline-ruler') || e.target.closest('#timeline-track-rows')) {
+        App.isScrubbingTimeline = true;
+        seekToFrame(getScrubberFrameFromEvent(e));
+      }
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (App.isScrubbingTimeline) {
+        seekToFrame(getScrubberFrameFromEvent(e));
+      } else if (App.isDraggingKeyframe && App.draggedKeyframeData) {
+        const targetFrame = Math.max(1, Math.min(App.totalFrames, getScrubberFrameFromEvent(e)));
+        seekToFrame(targetFrame);
+      }
+    });
+
+    window.addEventListener('mouseup', (e) => {
+      if (App.isScrubbingTimeline) {
+        App.isScrubbingTimeline = false;
+      }
+
+      if (App.isDraggingKeyframe && App.draggedKeyframeData) {
+        const targetFrame = Math.max(1, Math.min(App.totalFrames, getScrubberFrameFromEvent(e)));
+        const { shapeId, fromFrame } = App.draggedKeyframeData;
+        const shape = App.shapes.find(s => s.id === shapeId);
+
+        if (shape && fromFrame !== targetFrame) {
+          const snapshot = shape.keyframes[fromFrame];
+          delete shape.keyframes[fromFrame];
+          shape.keyframes[targetFrame] = snapshot;
+          seekToFrame(targetFrame);
+          showStatus(`Moved keyframe to Frame ${targetFrame}`);
+        }
+
+        App.isDraggingKeyframe = false;
+        App.draggedKeyframeData = null;
+        updateUI();
+      }
+    });
+
+    function copyCurrentFrame() {
+      const snapshot = {};
+      App.shapes.forEach(shape => {
+        const p = getShapePropsAtFrame(shape, App.currentFrame);
+        if (p) {
+          snapshot[shape.id] = clone(p);
+        }
+      });
+      App.frameClipboard = snapshot;
+      showStatus(`Copied configuration from Frame ${App.currentFrame}`);
+    }
+
+    function pasteToCurrentFrame() {
+      if (!App.frameClipboard) {
+        showStatus('Clipboard is empty. Copy a frame first.');
+        return;
+      }
+      Object.keys(App.frameClipboard).forEach(shapeId => {
+        const shape = App.shapes.find(s => s.id === shapeId);
+        if (shape) {
+          shape.keyframes[App.currentFrame] = clone(App.frameClipboard[shapeId]);
+        }
+      });
+      showStatus(`Pasted frame state onto Frame ${App.currentFrame}`);
+      updateUI();
+    }
+
+    function startPlayback() {
+      if (App.isPlaying) return;
+      App.isPlaying = true;
+      document.getElementById('play-icon').innerHTML = `<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>`;
+
+      const interval = 1000 / App.fps;
+      App.playTimer = setInterval(() => {
+        let next = App.currentFrame + 1;
+        if (next > App.totalFrames) {
+          if (App.isLooping) next = 1;
+          else {
+            stopPlayback();
+            return;
+          }
+        }
+        seekToFrame(next);
+      }, interval);
+    }
+
+    function stopPlayback() {
+      if (!App.isPlaying) return;
+      App.isPlaying = false;
+      clearInterval(App.playTimer);
+      document.getElementById('play-icon').innerHTML = `<polygon points="6 3 20 12 6 21 6 3"></polygon>`;
+    }
+
+    function togglePlayback() {
+      if (App.isPlaying) stopPlayback();
+      else startPlayback();
+    }
+
+    function syncInspectorPanel() {
+      const selected = App.shapes.find(s => s.id === App.selectedShapeId);
+      const label = document.getElementById('selection-label');
+      const textPropBox = document.getElementById('text-prop-container');
+
+      if (!selected) {
+        label.innerText = 'No selection';
+        textPropBox.classList.add('hidden');
+        return;
+      }
+
+      label.innerText = selected.name;
+
+      if (selected.type === 'text') {
+        textPropBox.classList.remove('hidden');
+      } else {
+        textPropBox.classList.add('hidden');
+      }
+
+      const cur = getShapePropsAtFrame(selected, App.currentFrame);
+      if (cur) {
+        document.getElementById('prop-has-fill').checked = !!cur.fill;
+        if (cur.fill) {
+          document.getElementById('prop-fill-color').value = cur.fill;
+          document.getElementById('prop-fill-hex').value = cur.fill.toUpperCase();
+        }
+
+        document.getElementById('prop-has-stroke').checked = !!cur.stroke;
+        if (cur.stroke) {
+          document.getElementById('prop-stroke-color').value = cur.stroke;
+          document.getElementById('prop-stroke-hex').value = cur.stroke.toUpperCase();
+        }
+
+        document.getElementById('prop-stroke-width').value = cur.strokeWidth || 1;
+        document.getElementById('prop-stroke-width-val').innerText = `${cur.strokeWidth || 1}px`;
+
+        document.getElementById('prop-line-cap').value = cur.lineCap || 'round';
+        document.getElementById('prop-line-join').value = cur.lineJoin || 'round';
+
+        document.getElementById('prop-opacity').value = cur.opacity !== undefined ? cur.opacity : 1;
+        document.getElementById('prop-opacity-val').innerText = `${Math.round((cur.opacity !== undefined ? cur.opacity : 1) * 100)}%`;
+
+        if (selected.type === 'text') {
+          document.getElementById('prop-text-content').value = cur.text || '';
+          document.getElementById('prop-font-size').value = cur.fontSize || 48;
+          document.getElementById('prop-font-family').value = cur.fontFamily || 'Inter, sans-serif';
+        }
+      }
+    }
+
+    function applyInspectorChanges() {
+      const selected = App.shapes.find(s => s.id === App.selectedShapeId);
+      if (!selected) return;
+
+      const fillOn = document.getElementById('prop-has-fill').checked;
+      const strokeOn = document.getElementById('prop-has-stroke').checked;
+      const fillHex = document.getElementById('prop-fill-hex').value;
+      const strokeHex = document.getElementById('prop-stroke-hex').value;
+      const strokeW = parseInt(document.getElementById('prop-stroke-width').value, 10);
+      const cap = document.getElementById('prop-line-cap').value;
+      const join = document.getElementById('prop-line-join').value;
+      const opacity = parseFloat(document.getElementById('prop-opacity').value);
+
+      document.getElementById('prop-stroke-width-val').innerText = `${strokeW}px`;
+      document.getElementById('prop-opacity-val').innerText = `${Math.round(opacity * 100)}%`;
+
+      if (!selected.keyframes[App.currentFrame]) {
+        const cur = getShapePropsAtFrame(selected, App.currentFrame);
+        selected.keyframes[App.currentFrame] = clone(cur);
+      }
+
+      const frameData = selected.keyframes[App.currentFrame];
+      frameData.fill = fillOn ? fillHex : null;
+      frameData.stroke = strokeOn ? strokeHex : null;
+      frameData.strokeWidth = strokeW;
+      frameData.lineCap = cap;
+      frameData.lineJoin = join;
+      frameData.opacity = opacity;
+
+      if (selected.type === 'text') {
+        frameData.text = document.getElementById('prop-text-content').value;
+        frameData.fontSize = parseInt(document.getElementById('prop-font-size').value, 10);
+        frameData.fontFamily = document.getElementById('prop-font-family').value;
+      }
+
+      updateUI();
+    }
+
+    function setTool(toolName) {
+      App.tool = toolName;
+      document.querySelectorAll('.tool-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.tool === toolName);
+      });
+
+      if (toolName === 'node') {
+        canvas.style.cursor = 'crosshair';
+        showStatus('Node Tool: Drag vertices & handles.');
+      } else if (toolName === 'select') {
+        canvas.style.cursor = 'default';
+        showStatus('Select Tool: Pick, scale, stretch, rotate, or Alt+edge to skew.');
+      } else if (toolName === 'bezier') {
+        canvas.style.cursor = 'crosshair';
+        App.penActivePoints = [];
+        showStatus('Pen Tool: Click & drag to pull out curve handles on the fly! Enter to finish.');
+      } else if (toolName === 'smoothpen') {
+        canvas.style.cursor = 'crosshair';
+        showStatus('Brush Tool: Draw freehand curves.');
+      } else if (toolName === 'text') {
+        canvas.style.cursor = 'text';
+        showStatus('Text Tool: Click anywhere to place text.');
+      } else {
+        canvas.style.cursor = 'crosshair';
+        showStatus(`Shape Tool: Draw a ${toolName}.`);
+      }
+      renderCanvas();
+    }
+
+    function showStatus(text) {
+      const el = document.getElementById('status-hint');
+      el.innerText = text;
+      el.style.opacity = '1';
+      clearTimeout(window._statusT);
+      window._statusT = setTimeout(() => { el.style.opacity = '0.7'; }, 3500);
+    }
+
+    function updateUI() {
+      renderCanvas();
+      renderTimeline();
+      syncInspectorPanel();
+    }
+
+    async function exportVideo(format = 'mp4') {
+      stopPlayback();
+      const modal = document.getElementById('export-modal');
+      const pBar = document.getElementById('export-progress-bar');
+      const pText = document.getElementById('export-progress-text');
+      const title = document.getElementById('export-modal-title');
+
+      modal.classList.remove('hidden');
+      title.innerText = format === 'mp4' ? 'Encoding MP4 Video...' : 'Encoding WebM Video...';
+
+      const originalFrame = App.currentFrame;
+
+      // Offscreen dedicated export canvas
+      const offscreen = document.createElement('canvas');
+      offscreen.width = App.width;
+      offscreen.height = App.height;
+      const offCtx = offscreen.getContext('2d');
+
+      const stream = offscreen.captureStream(App.fps);
+
+      let mimeType = 'video/mp4;codecs=avc1.42E01E';
+      let ext = 'mp4';
+
+      if (format === 'mp4') {
+        if (!MediaRecorder.isTypeSupported(mimeType)) {
+          mimeType = MediaRecorder.isTypeSupported('video/mp4') ? 'video/mp4' : 'video/webm;codecs=vp9';
+        }
+      } else {
+        mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9') ? 'video/webm;codecs=vp9' : 'video/webm';
+        ext = 'webm';
+      }
+
+      let recorder;
+      try {
+        recorder = new MediaRecorder(stream, { mimeType });
+      } catch (err) {
+        recorder = new MediaRecorder(stream);
+      }
+
+      const chunks = [];
+      recorder.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) chunks.push(e.data);
+      };
+
+      recorder.onstop = () => {
+        const blob = new Blob(chunks, { type: recorder.mimeType || 'video/mp4' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `vectormotion_${Date.now()}.${ext}`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        modal.classList.add('hidden');
+        seekToFrame(originalFrame);
+        showStatus(`${ext.toUpperCase()} export complete!`);
+      };
+
+      recorder.start();
+
+      for (let f = 1; f <= App.totalFrames; f++) {
+        seekToFrame(f);
+
+        offCtx.clearRect(0, 0, App.width, App.height);
+        if (!App.canvasBgTransparent) {
+          offCtx.fillStyle = App.canvasBgColor;
+          offCtx.fillRect(0, 0, App.width, App.height);
+        }
+
+        App.shapes.forEach(shape => {
+          const p = getShapePropsAtFrame(shape, f);
+          if (p) {
+            offCtx.save();
+            offCtx.globalAlpha = p.opacity !== undefined ? p.opacity : 1;
+            if (shape.type === 'text') {
+              offCtx.font = `${p.fontSize || 40}px ${p.fontFamily || 'Inter, sans-serif'}`;
+              offCtx.textBaseline = 'middle';
+              const pt = p.points[0] || { x: 100, y: 100 };
+              if (p.fill) { offCtx.fillStyle = p.fill; offCtx.fillText(p.text || '', pt.x, pt.y); }
+              if (p.stroke && p.strokeWidth > 0) { offCtx.strokeStyle = p.stroke; offCtx.lineWidth = p.strokeWidth; offCtx.strokeText(p.text || '', pt.x, pt.y); }
+            } else {
+              renderPathOnContext(offCtx, p.points, p.closed !== false);
+              if (p.fill && p.points.length > 2) { offCtx.fillStyle = p.fill; offCtx.fill(); }
+              if (p.stroke && p.strokeWidth > 0) {
+                offCtx.strokeStyle = p.stroke;
+                offCtx.lineWidth = p.strokeWidth;
+                offCtx.lineCap = p.lineCap || 'round';
+                offCtx.lineJoin = p.lineJoin || 'round';
+                offCtx.stroke();
+              }
+            }
+            offCtx.restore();
+          }
+        });
+
+        const pct = Math.round((f / App.totalFrames) * 100);
+        pBar.style.width = `${pct}%`;
+        pText.innerText = `${pct}% (Frame ${f} / ${App.totalFrames})`;
+        await new Promise(r => setTimeout(r, 1000 / App.fps));
+      }
+
+      recorder.stop();
+    }
+
+    async function exportPNGZip() {
+      if (typeof JSZip === 'undefined') {
+        showStatus('JSZip library not available.');
+        return;
+      }
+      stopPlayback();
+      const modal = document.getElementById('export-modal');
+      const pBar = document.getElementById('export-progress-bar');
+      const pText = document.getElementById('export-progress-text');
+      const title = document.getElementById('export-modal-title');
+
+      modal.classList.remove('hidden');
+      title.innerText = 'Rendering PNG Image Sequence...';
+
+      const zip = new JSZip();
+      const folder = zip.folder('sequence');
+      const originalFrame = App.currentFrame;
+
+      for (let f = 1; f <= App.totalFrames; f++) {
+        seekToFrame(f);
+
+        const offscreen = document.createElement('canvas');
+        offscreen.width = App.width;
+        offscreen.height = App.height;
+        const offCtx = offscreen.getContext('2d');
+
+        offCtx.clearRect(0, 0, App.width, App.height);
+        if (!App.canvasBgTransparent) {
+          offCtx.fillStyle = App.canvasBgColor;
+          offCtx.fillRect(0, 0, App.width, App.height);
+        }
+
+        App.shapes.forEach(shape => {
+          const p = getShapePropsAtFrame(shape, f);
+          if (p) {
+            offCtx.save();
+            offCtx.globalAlpha = p.opacity !== undefined ? p.opacity : 1;
+            if (shape.type === 'text') {
+              offCtx.font = `${p.fontSize || 40}px ${p.fontFamily || 'Inter, sans-serif'}`;
+              offCtx.textBaseline = 'middle';
+              const pt = p.points[0] || { x: 100, y: 100 };
+              if (p.fill) { offCtx.fillStyle = p.fill; offCtx.fillText(p.text || '', pt.x, pt.y); }
+              if (p.stroke && p.strokeWidth > 0) { offCtx.strokeStyle = p.stroke; offCtx.lineWidth = p.strokeWidth; offCtx.strokeText(p.text || '', pt.x, pt.y); }
+            } else {
+              renderPathOnContext(offCtx, p.points, p.closed !== false);
+              if (p.fill && p.points.length > 2) { offCtx.fillStyle = p.fill; offCtx.fill(); }
+              if (p.stroke && p.strokeWidth > 0) {
+                offCtx.strokeStyle = p.stroke;
+                offCtx.lineWidth = p.strokeWidth;
+                offCtx.lineCap = p.lineCap || 'round';
+                offCtx.lineJoin = p.lineJoin || 'round';
+                offCtx.stroke();
+              }
+            }
+            offCtx.restore();
+          }
+        });
+
+        const dataUrl = offscreen.toDataURL('image/png');
+        const b64 = dataUrl.replace(/^data:image\/png;base64,/, '');
+        folder.file(`frame_${String(f).padStart(4, '0')}.png`, b64, { base64: true });
+
+        const pct = Math.round((f / App.totalFrames) * 90);
+        pBar.style.width = `${pct}%`;
+        pText.innerText = `${pct}% (Frame ${f} / ${App.totalFrames})`;
+        await new Promise(r => setTimeout(r, 12));
+      }
+
+      pText.innerText = 'Creating ZIP container...';
+      const content = await zip.generateAsync({ type: 'blob' });
+      const url = URL.createObjectURL(content);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `sequence_${Date.now()}.zip`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      modal.classList.add('hidden');
+      seekToFrame(originalFrame);
+      showStatus('ZIP frame sequence exported successfully!');
+    }
+
+    function loadSampleDemo() {
+      App.shapes = [];
+      App.totalFrames = 60;
+      document.getElementById('input-total-frames').value = 60;
+      document.getElementById('txt-total-frames').innerText = 60;
+
+      // Morphing Bézier Mascot / Star
+      const mascot = {
+        id: uid(),
+        name: 'Animated Mascot',
+        type: 'bezier',
+        keyframes: {
+          1: {
+            points: [
+              { x: 420, y: 220, cp1: { x: 370, y: 150 }, cp2: { x: 470, y: 150 } },
+              { x: 520, y: 320, cp1: { x: 590, y: 270 }, cp2: { x: 590, y: 370 } },
+              { x: 420, y: 420, cp1: { x: 470, y: 490 }, cp2: { x: 370, y: 490 } },
+              { x: 320, y: 320, cp1: { x: 250, y: 370 }, cp2: { x: 250, y: 270 } }
+            ],
+            fill: '#e66100',
+            stroke: '#ffffff',
+            strokeWidth: 4,
+            opacity: 0.95,
+            lineCap: 'round',
+            lineJoin: 'round',
+            closed: true
+          },
+          30: {
+            points: [
+              { x: 420, y: 180, cp1: { x: 330, y: 210 }, cp2: { x: 510, y: 210 } },
+              { x: 560, y: 320, cp1: { x: 530, y: 230 }, cp2: { x: 530, y: 410 } },
+              { x: 420, y: 460, cp1: { x: 510, y: 430 }, cp2: { x: 330, y: 430 } },
+              { x: 280, y: 320, cp1: { x: 310, y: 410 }, cp2: { x: 310, y: 230 } }
+            ],
+            fill: '#9141ac',
+            stroke: '#62a0ea',
+            strokeWidth: 6,
+            opacity: 0.9,
+            lineCap: 'round',
+            lineJoin: 'round',
+            closed: true
+          },
+          60: {
+            points: [
+              { x: 420, y: 220, cp1: { x: 370, y: 150 }, cp2: { x: 470, y: 150 } },
+              { x: 520, y: 320, cp1: { x: 590, y: 270 }, cp2: { x: 590, y: 370 } },
+              { x: 420, y: 420, cp1: { x: 470, y: 490 }, cp2: { x: 370, y: 490 } },
+              { x: 320, y: 320, cp1: { x: 250, y: 370 }, cp2: { x: 250, y: 270 } }
+            ],
+            fill: '#e66100',
+            stroke: '#ffffff',
+            strokeWidth: 4,
+            opacity: 0.95,
+            lineCap: 'round',
+            lineJoin: 'round',
+            closed: true
+          }
+        }
+      };
+
+      // Animated Typography Title
+      const titleText = {
+        id: uid(),
+        name: 'Animated Text',
+        type: 'text',
+        keyframes: {
+          1: {
+            points: [{ x: 700, y: 300 }],
+            text: 'Bézier Motion',
+            fontSize: 50,
+            fontFamily: 'Inter, sans-serif',
+            fill: '#3584e4',
+            stroke: '#1c71d8',
+            strokeWidth: 1,
+            opacity: 0.3
+          },
+          30: {
+            points: [{ x: 700, y: 340 }],
+            text: 'Bézier Motion',
+            fontSize: 62,
+            fontFamily: 'Inter, sans-serif',
+            fill: '#2ec27e',
+            stroke: '#26a269',
+            strokeWidth: 2,
+            opacity: 1
+          },
+          60: {
+            points: [{ x: 700, y: 300 }],
+            text: 'Bézier Motion',
+            fontSize: 50,
+            fontFamily: 'Inter, sans-serif',
+            fill: '#3584e4',
+            stroke: '#1c71d8',
+            strokeWidth: 1,
+            opacity: 0.3
+          }
+        }
+      };
+
+      App.shapes.push(mascot);
+      App.shapes.push(titleText);
+      App.selectedShapeId = mascot.id;
+      setupTimelineRuler();
+      seekToFrame(1);
+      updateUI();
+      showStatus('Sample character demo loaded!');
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      applyResolutionPreset(720, 'landscape');
+      setupTimelineRuler();
+
+      // Tool click buttons
+      document.querySelectorAll('.tool-btn').forEach(btn => {
+        btn.addEventListener('click', () => setTool(btn.dataset.tool));
+      });
+
+      // Resolution Preset and Orientation toggles
+      document.getElementById('preset-resolution').addEventListener('change', (e) => {
+        applyResolutionPreset(e.target.value, App.orientation);
+      });
+
+      const orientLand = document.getElementById('btn-orient-land');
+      const orientPort = document.getElementById('btn-orient-port');
+      orientLand.addEventListener('click', () => {
+        orientLand.classList.add('active');
+        orientPort.classList.remove('active');
+        applyResolutionPreset(App.preset, 'landscape');
+      });
+      orientPort.addEventListener('click', () => {
+        orientPort.classList.add('active');
+        orientLand.classList.remove('active');
+        applyResolutionPreset(App.preset, 'portrait');
+      });
+
+      // Canvas Background Color & Transparency
+      const bgCol = document.getElementById('canvas-bg-color');
+      const bgTrans = document.getElementById('canvas-bg-trans');
+      bgCol.addEventListener('input', (e) => {
+        App.canvasBgColor = e.target.value;
+        renderCanvas();
+      });
+      bgTrans.addEventListener('change', (e) => {
+        App.canvasBgTransparent = e.target.checked;
+        renderCanvas();
+      });
+
+      // Zoom
+      document.getElementById('btn-zoom-fit').addEventListener('click', fitZoomToViewport);
+      document.getElementById('btn-zoom-100').addEventListener('click', () => setZoom(1.0));
+
+      // Header project buttons
+      document.getElementById('btn-new').addEventListener('click', () => {
+        App.shapes = [];
+        App.selectedShapeId = null;
+        seekToFrame(1);
+        updateUI();
+        showStatus('Created new canvas.');
+      });
+      document.getElementById('btn-demo').addEventListener('click', loadSampleDemo);
+      document.getElementById('btn-clear').addEventListener('click', () => {
+        App.shapes = [];
+        App.selectedShapeId = null;
+        updateUI();
+        showStatus('Canvas cleared.');
+      });
+
+      // Theme toggle
+      document.getElementById('btn-theme-toggle').addEventListener('click', () => {
+        const doc = document.documentElement;
+        const cur = doc.getAttribute('data-theme');
+        if (cur === 'dark') doc.setAttribute('data-theme', 'light');
+        else if (cur === 'light') doc.setAttribute('data-theme', 'dark');
+        else {
+          const dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          doc.setAttribute('data-theme', dark ? 'light' : 'dark');
+        }
+        renderCanvas();
+      });
+
+      // Grid & Onion Toggles
+      const gridBtn = document.getElementById('btn-grid-toggle');
+      gridBtn.addEventListener('click', () => {
+        App.snapToGrid = !App.snapToGrid;
+        gridBtn.classList.toggle('active', App.snapToGrid);
+        renderCanvas();
+      });
+
+      const onionBtn = document.getElementById('btn-onion-toggle');
+      onionBtn.addEventListener('click', () => {
+        App.onionSkin = !App.onionSkin;
+        onionBtn.classList.toggle('active', App.onionSkin);
+        renderCanvas();
+      });
+
+      // Transport controls
+      document.getElementById('btn-play').addEventListener('click', togglePlayback);
+      document.getElementById('btn-first-frame').addEventListener('click', () => seekToFrame(1));
+      document.getElementById('btn-prev-frame').addEventListener('click', () => seekToFrame(App.currentFrame - 1));
+      document.getElementById('btn-next-frame').addEventListener('click', () => seekToFrame(App.currentFrame + 1));
+      document.getElementById('btn-last-frame').addEventListener('click', () => seekToFrame(App.totalFrames));
+
+      const loopBtn = document.getElementById('btn-loop');
+      loopBtn.addEventListener('click', () => {
+        App.isLooping = !App.isLooping;
+        loopBtn.classList.toggle('active', App.isLooping);
+      });
+
+      // Frame copy and paste
+      document.getElementById('btn-copy-frame').addEventListener('click', copyCurrentFrame);
+      document.getElementById('btn-paste-frame').addEventListener('click', pasteToCurrentFrame);
+
+      // Keyframe Add & Delete
+      document.getElementById('btn-add-keyframe').addEventListener('click', () => {
+        if (App.selectedShapeId) {
+          recordCurrentStateAsKeyframe(App.selectedShapeId);
+          showStatus(`Keyframe recorded at Frame ${App.currentFrame}`);
+        } else {
+          showStatus('Select an element first.');
+        }
+      });
+      document.getElementById('btn-del-keyframe').addEventListener('click', () => {
+        if (App.selectedShapeId) removeCurrentKeyframe(App.selectedShapeId);
+      });
+
+      // FPS & Total frame adjust
+      document.getElementById('select-fps').addEventListener('change', (e) => {
+        App.fps = parseInt(e.target.value, 10);
+        if (App.isPlaying) {
+          stopPlayback();
+          startPlayback();
+        }
+      });
+
+      document.getElementById('input-total-frames').addEventListener('change', (e) => {
+        const val = parseInt(e.target.value, 10);
+        if (val >= 10 && val <= 300) {
+          App.totalFrames = val;
+          document.getElementById('txt-total-frames').innerText = val;
+          setupTimelineRuler();
+          seekToFrame(App.currentFrame);
+        }
+      });
+
+      // Inspector Color & Stroke inputs synchronization
+      const syncHexFromPicker = (colorId, hexId) => {
+        document.getElementById(colorId).addEventListener('input', (e) => {
+          document.getElementById(hexId).value = e.target.value.toUpperCase();
+          applyInspectorChanges();
+        });
+        document.getElementById(hexId).addEventListener('input', (e) => {
+          if (/^#[0-9A-F]{6}$/i.test(e.target.value)) {
+            document.getElementById(colorId).value = e.target.value;
+            applyInspectorChanges();
+          }
+        });
+      };
+      syncHexFromPicker('prop-fill-color', 'prop-fill-hex');
+      syncHexFromPicker('prop-stroke-color', 'prop-stroke-hex');
+
+      ['prop-has-fill', 'prop-has-stroke', 'prop-stroke-width', 'prop-line-cap', 'prop-line-join', 'prop-opacity',
+       'prop-text-content', 'prop-font-size', 'prop-font-family'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', applyInspectorChanges);
+      });
+
+      // Node handle modifications
+      document.getElementById('btn-node-smooth').addEventListener('click', () => {
+        if (App.selectedShapeId && App.selectedNodeIndex >= 0) {
+          const shape = App.shapes.find(s => s.id === App.selectedShapeId);
+          const cur = getShapePropsAtFrame(shape, App.currentFrame);
+          const newPts = clone(cur.points);
+          const node = newPts[App.selectedNodeIndex];
+          node.cp1 = { x: node.x - 30, y: node.y };
+          node.cp2 = { x: node.x + 30, y: node.y };
+          mutateCurrentPoints(App.selectedShapeId, newPts);
+          showStatus('Applied smooth Bézier tangent handles.');
+        }
+      });
+
+      document.getElementById('btn-node-corner').addEventListener('click', () => {
+        if (App.selectedShapeId && App.selectedNodeIndex >= 0) {
+          const shape = App.shapes.find(s => s.id === App.selectedShapeId);
+          const cur = getShapePropsAtFrame(shape, App.currentFrame);
+          const newPts = clone(cur.points);
+          delete newPts[App.selectedNodeIndex].cp1;
+          delete newPts[App.selectedNodeIndex].cp2;
+          mutateCurrentPoints(App.selectedShapeId, newPts);
+          showStatus('Converted node to corner.');
+        }
+      });
+
+      document.getElementById('btn-node-del').addEventListener('click', () => {
+        if (App.selectedShapeId && App.selectedNodeIndex >= 0) {
+          const shape = App.shapes.find(s => s.id === App.selectedShapeId);
+          const cur = getShapePropsAtFrame(shape, App.currentFrame);
+          if (cur.points.length > 2) {
+            const newPts = clone(cur.points);
+            newPts.splice(App.selectedNodeIndex, 1);
+            App.selectedNodeIndex = -1;
+            mutateCurrentPoints(App.selectedShapeId, newPts);
+            showStatus('Deleted node vertex.');
+          }
+        }
+      });
+
+      // Layer ordering actions
+      document.getElementById('btn-duplicate').addEventListener('click', () => {
+        if (!App.selectedShapeId) return;
+        const orig = App.shapes.find(s => s.id === App.selectedShapeId);
+        if (!orig) return;
+        const copy = clone(orig);
+        copy.id = uid();
+        copy.name = `${orig.name} (Copy)`;
+        Object.keys(copy.keyframes).forEach(k => {
+          copy.keyframes[k].points = copy.keyframes[k].points.map(p => ({
+            ...p,
+            x: p.x + 25,
+            y: p.y + 25
+          }));
+        });
+        App.shapes.push(copy);
+        App.selectedShapeId = copy.id;
+        updateUI();
+        showStatus('Duplicated layer.');
+      });
+
+      document.getElementById('btn-delete-obj').addEventListener('click', () => {
+        if (App.selectedShapeId) {
+          App.shapes = App.shapes.filter(s => s.id !== App.selectedShapeId);
+          App.selectedShapeId = null;
+          updateUI();
+          showStatus('Layer removed.');
+        }
+      });
+
+      document.getElementById('btn-bring-forward').addEventListener('click', () => {
+        const i = App.shapes.findIndex(s => s.id === App.selectedShapeId);
+        if (i < App.shapes.length - 1 && i !== -1) {
+          const t = App.shapes[i];
+          App.shapes[i] = App.shapes[i + 1];
+          App.shapes[i + 1] = t;
+          updateUI();
+        }
+      });
+
+      document.getElementById('btn-send-backward').addEventListener('click', () => {
+        const i = App.shapes.findIndex(s => s.id === App.selectedShapeId);
+        if (i > 0) {
+          const t = App.shapes[i];
+          App.shapes[i] = App.shapes[i - 1];
+          App.shapes[i - 1] = t;
+          updateUI();
+        }
+      });
+
+      // Export buttons
+      document.getElementById('btn-export-mp4').addEventListener('click', () => exportVideo('mp4'));
+      document.getElementById('btn-export-webm').addEventListener('click', () => exportVideo('webm'));
+      document.getElementById('btn-export-zip').addEventListener('click', exportPNGZip);
+      document.getElementById('btn-export-cancel').addEventListener('click', () => {
+        document.getElementById('export-modal').classList.add('hidden');
+      });
+
+      // Keyboard shortcuts
+      window.addEventListener('keydown', (e) => {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+
+        if (e.code === 'Space') {
+          e.preventDefault();
+          togglePlayback();
+        } else if (e.key === 'v' || e.key === 'V') {
+          setTool('select');
+        } else if (e.key === 'a' || e.key === 'A') {
+          setTool('node');
+        } else if (e.key === 'p' || e.key === 'P') {
+          setTool('bezier');
+        } else if (e.key === 'b' || e.key === 'B') {
+          setTool('smoothpen');
+        } else if (e.key === 'r' || e.key === 'R') {
+          setTool('rect');
+        } else if (e.key === 'c' && !e.ctrlKey && !e.metaKey) {
+          setTool('circle');
+        } else if (e.key === 'l' || e.key === 'L') {
+          setTool('line');
+        } else if (e.key === 't' || e.key === 'T') {
+          setTool('text');
+        } else if ((e.ctrlKey || e.metaKey) && (e.key === 'c' || e.key === 'C')) {
+          e.preventDefault();
+          copyCurrentFrame();
+        } else if ((e.ctrlKey || e.metaKey) && (e.key === 'v' || e.key === 'V')) {
+          e.preventDefault();
+          pasteToCurrentFrame();
+        } else if (e.key === 'ArrowLeft') {
+          seekToFrame(App.currentFrame - 1);
+        } else if (e.key === 'ArrowRight') {
+          seekToFrame(App.currentFrame + 1);
+        } else if (e.key === 'Home') {
+          seekToFrame(1);
+        } else if (e.key === 'End') {
+          seekToFrame(App.totalFrames);
+        } else if (e.key === 'Enter') {
+          if (App.tool === 'bezier') finishPenDrawing(false);
+        } else if (e.key === 'Delete' || e.key === 'Backspace') {
+          if (App.tool === 'node' && App.selectedShapeId && App.selectedNodeIndex >= 0) {
+            const shape = App.shapes.find(s => s.id === App.selectedShapeId);
+            const cur = getShapePropsAtFrame(shape, App.currentFrame);
+            if (cur && cur.points.length > 2) {
+              const newPts = clone(cur.points);
+              newPts.splice(App.selectedNodeIndex, 1);
+              App.selectedNodeIndex = -1;
+              mutateCurrentPoints(App.selectedShapeId, newPts);
+              showStatus('Deleted node vertex.');
+            }
+          } else if (App.selectedShapeId) {
+            App.shapes = App.shapes.filter(s => s.id !== App.selectedShapeId);
+            App.selectedShapeId = null;
+            updateUI();
+            showStatus('Deleted element.');
+          }
+        }
+      });
+
+      // Window resize
+      window.addEventListener('resize', fitZoomToViewport);
+
+      // Load sample animation
+      loadSampleDemo();
+    });
+  </script>
+</body>
+</html>
