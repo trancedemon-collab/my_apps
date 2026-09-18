@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thanks for Watching - Bradford R.</title>
+    <style>
+        /* Base GTK Light/Dark Theme Setup */
+        :root {
+            --bg-color: #fafafa;
+            --card-bg: #ffffff;
+            --text-color: #242424;
+            --border-color: #d1d1d1;
+            --accent-color: #3584e4;
+            --accent-hover: #1c71d8;
+            --success-color: #26a269;
+            --donate-color: #26a269;
+            --donate-hover: #2ec27e;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #242424;
+                --card-bg: #303030;
+                --text-color: #ffffff;
+                --border-color: #4a4a4a;
+                --accent-color: #78aeed;
+                --accent-hover: #3584e4;
+                --success-color: #2ec27e;
+                --donate-color: #2ec27e;
+                --donate-hover: #33d18a;
+            }
+        }
+        
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .gtk-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            text-align: center;
+            text-decoration: none;
+            font-weight: 500;
+            cursor: pointer;
+            box-sizing: border-box;
+            transition: background-color 0.2s;
+        }
+
+        .btn:hover {
+            background-color: var(--border-color);
+        }
+
+        .btn.primary {
+            background-color: var(--accent-color);
+            color: #ffffff;
+            border: none;
+        }
+
+        .btn.primary:hover {
+            background-color: var(--accent-hover);
+        }
+        
+        .btn.donate {
+            background-color: var(--donate-color);
+            color: #ffffff;
+            border: none;
+            font-weight: bold;
+        }
+        
+        .btn.donate:hover {
+            background-color: var(--donate-hover);
+        }
+        
+        .static-box {
+            background-color: var(--bg-color);
+            cursor: default;
+        }
+        
+        .static-box:hover {
+            background-color: var(--bg-color);
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            box-sizing: border-box;
+        }
+        
+        #form-status {
+            display: none;
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 6px;
+            background-color: var(--success-color);
+            color: white;
+            text-align: center;
+        }
+
+        .visitor-counter {
+            text-align: center;
+            font-size: 0.85em;
+            color: #888;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Intro & Support Card (Top) -->
+        <div class="gtk-card">
+            <h2 style="margin-top: 0;">Thanks for watching!</h2>
+            <p>My name is Bradford R. and I am the creator of this project. Thank you for checking my video out.</p>
+            <p>If you like my work and want to support me, you can donate any amount you feel comfortable donating by clicking below:</p>
+            <a href="https://paypal.com/paypalme/BradfordRisbert" class="btn donate" target="_blank">Donate via PayPal</a>
+            
+            <h4 style="margin-bottom: 5px;">Connect with me:</h4>
+            <a href="https://facebook.com/bradford.risbert" class="btn" target="_blank">Facebook Profile</a>
+            <div class="btn static-box">WhatsApp ID: @B_Risbert</div>
+        </div>
+
+        <!-- Services & Portfolio Card -->
+        <div class="gtk-card">
+            <h3 style="margin-top: 0;">Custom Projects & Freelance</h3>
+            <p>If you like my work and have any similar projects you need done for yourself, get in touch with me by email so we can discuss your requirements.</p>
+            <p><em>If you want to recommend me to someone, simply share my email address with them and tell them to get in touch with me!</em></p>
+            
+            <a href="mailto:trancedemon@gmail.com" class="btn primary">Email Me: trancedemon@gmail.com</a>
+            <a href="https://youtu.be/yT8As8qka-I" class="btn" target="_blank">Watch the Film Again</a>
+            <a href="https://trancedemon-collab.github.io/my_apps/portfolio.html" class="btn" target="_blank">View My Portfolio</a>
+            <a href="https://trancedemon-collab.github.io/my_apps/resume_gtk.html" class="btn" target="_blank">View My CV</a>
+        </div>
+
+        <!-- Guestbook / Google Sheets Form -->
+        <div class="gtk-card">
+            <h3 style="margin-top: 0;">Leave a message or get notified</h3>
+            <p>Drop your details below to leave feedback or get notified when I release new projects.</p>
+            
+            <form id="guestbook-form">
+                <input type="text" name="firstName" placeholder="First Name" required>
+                <input type="text" name="lastName" placeholder="Last Name" required>
+                <input type="email" name="email" placeholder="Email Address" required>
+                <textarea name="message" rows="4" placeholder="Your feedback or project ideas..."></textarea>
+                <button type="submit" class="btn primary">Submit</button>
+            </form>
+            <div id="form-status">Thanks! Your message has been saved.</div>
+        </div>
+
+        <!-- Visitor Counter -->
+        <div class="visitor-counter">
+            Visitor number: <span id="hit-count">...</span>
+        </div>
+    </div>
+
+    <script>
+        // Deployed Google Apps Script Web App URL
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbyBfurYa3HF4VDYv0LjPOrZjjgn82Hik2jIHaeFsvKEzO6V4dkLId4A_Gd-shsgsCvO/exec';
+
+        // 1. Fetch and update the page hit counter on load
+        fetch(scriptURL)
+            .then(response => response.text())
+            .then(count => {
+                if (!isNaN(count) && count !== "") {
+                    document.getElementById('hit-count').innerText = count;
+                }
+            })
+            .catch(error => console.error('Error fetching counter:', error));
+
+        // 2. Background Form Submission via Google Apps Script
+        const form = document.getElementById('guestbook-form');
+        const statusDiv = document.getElementById('form-status');
+
+        form.addEventListener('submit', e => {
+            e.preventDefault();
+            const submitBtn = form.querySelector('button[type="submit"]');
+            submitBtn.textContent = 'Sending...';
+            submitBtn.disabled = true;
+
+            fetch(scriptURL, { method: 'POST', body: new FormData(form) })
+                .then(response => {
+                    form.reset();
+                    form.style.display = 'none';
+                    statusDiv.style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('Error!', error.message);
+                    submitBtn.textContent = 'Submit';
+                    submitBtn.disabled = false;
+                    alert('There was an error sending your message. Please try again.');
+                });
+        });
+    </script>
+</body>
+</html>
