@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Height Calculator</title>
+    <style>
+        :root {
+            /* GTK Adwaita Light Theme */
+            --bg-window: #f6f5f4;
+            --bg-view: #ffffff;
+            --text-main: #242424;
+            --text-muted: #77767b;
+            --border-color: #cdc7c2;
+            --accent-color: #3584e4;
+            --accent-hover: #1c71d8;
+            --button-bg: #f6f5f4;
+            --button-hover: #ebebeb;
+            --danger-color: #e01b24;
+            --card-shadow: rgba(0, 0, 0, 0.08);
+            
+            /* Character Colors */
+            --c1: #3584e4; /* Blue */
+            --c2: #ff7800; /* Orange */
+            --c3: #2ec27e; /* Green */
+            --c4: #9141ac; /* Purple */
+            --c5: #e01b24; /* Red */
+        }
+
+        [data-theme="dark"] {
+            /* GTK Adwaita Dark Theme */
+            --bg-window: #242424;
+            --bg-view: #1e1e1e;
+            --text-main: #ffffff;
+            --text-muted: #9a9996;
+            --border-color: #3e3e3e;
+            --accent-color: #78aeed;
+            --accent-hover: #3584e4;
+            --button-bg: #303030;
+            --button-hover: #3a3a3a;
+            --danger-color: #c01c28;
+            --card-shadow: rgba(0, 0, 0, 0.3);
+            
+            --c1: #78aeed; 
+            --c2: #ff9333; 
+            --c3: #33d17a;
+            --c4: #c061cb;
+            --c5: #f66151;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-window);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            line-height: 1.5;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .gtk-headerbar {
+            background-color: var(--bg-window);
+            border-bottom: 1px solid var(--border-color);
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .gtk-headerbar h1 {
+            font-size: 1.15em;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .icon-btn {
+            background: transparent;
+            border: none;
+            font-size: 1.2em;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 50%;
+            color: var(--text-main);
+        }
+        .icon-btn:hover { background: rgba(127, 127, 127, 0.15); }
+
+        .content {
+            display: flex;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+            gap: 24px;
+        }
+
+        .sidebar {
+            flex: 0 0 340px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .main-view {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            min-width: 0;
+        }
+
+        .gtk-card {
+            background-color: var(--bg-view);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            box-shadow: 0 2px 6px var(--card-shadow);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .card-header h3 {
+            margin: 0;
+            font-size: 1.1em;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .color-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .gtk-label {
+            display: block;
+            font-size: 0.9em;
+            font-weight: 600;
+            margin-bottom: 6px;
+            margin-top: 12px;
+            color: var(--text-main);
+        }
+
+        .gtk-input, .gtk-range {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background-color: var(--bg-window);
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 0.95em;
+            box-sizing: border-box;
+        }
+
+        .gtk-input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 2px rgba(53, 132, 228, 0.25);
+        }
+
+        .input-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+        .input-row > input { flex: 1; min-width: 0; }
+        .unit-label { color: var(--text-muted); font-size: 0.9em; }
+
+        .gtk-button {
+            background-color: var(--button-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            width: 100%;
+            transition: background 0.2s;
+        }
+        .gtk-button:hover { background-color: var(--button-hover); }
+
+        .remove-btn {
+            background: none;
+            border: none;
+            color: var(--danger-color);
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 600;
+            padding: 4px 8px;
+        }
+
+        .visual-container {
+            display: flex;
+            height: 500px; /* Fixed height for exact percentage scaling */
+            align-items: flex-end;
+            justify-content: center;
+            border-bottom: 3px solid var(--text-muted);
+            position: relative;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 49px,
+                var(--border-color) 50px
+            ); /* Adds subtle grid lines for scale reference */
+        }
+
+        .silhouette-wrapper {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            transition: margin 0.2s, height 0.4s;
+            transform-origin: bottom center;
+        }
+
+        .silhouette-wrapper svg {
+            height: 100%; /* Take 100% of wrapper's height */
+            width: auto;
+            transition: fill 0.3s;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));
+        }
+
+        /* Labels and Summary */
+        .labels-container {
+            display: flex;
+            justify-content: center;
+            padding-top: 16px;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .person-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: var(--bg-window);
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            min-width: 100px;
+        }
+
+        .name-label { font-weight: 600; font-size: 0.95em; display: flex; align-items: center; gap: 6px; }
+        .height-label { color: var(--text-muted); font-size: 0.9em; margin-top: 4px; }
+        .summary-card { font-size: 1.05em; line-height: 1.6; text-align: center; }
+        
+        @media (max-width: 768px) {
+            .content { flex-direction: column; padding: 12px; }
+            .sidebar { flex: auto; width: 100%; }
+            .visual-container { height: 400px; } 
+        }
+    </style>
+</head>
+<body>
+    <header class="gtk-headerbar">
+        <h1>Height Calculator</h1>
+        <button id="theme-btn" class="icon-btn" title="Toggle Theme">🌓</button>
+    </header>
+
+    <div class="content">
+        <aside class="sidebar">
+            <div class="gtk-card">
+                <h3>Settings</h3>
+                <label class="gtk-label">Unit of Measurement</label>
+                <select id="unit-select" class="gtk-input">
+                    <option value="ftin">Feet & Inches</option>
+                    <option value="cm">Centimeters</option>
+                </select>
+
+                <label class="gtk-label">Closeness (Overlap)</label>
+                <input type="range" id="spacing-slider" class="gtk-range" min="-80" max="100" value="10">
+                <div style="display: flex; justify-content: space-between; font-size: 0.8em; color: var(--text-muted);">
+                    <span>Overlap</span>
+                    <span>Separated</span>
+                </div>
+            </div>
+
+            <div id="characters-list" style="display:flex; flex-direction:column; gap:16px;">
+                <!-- Character cards injected here -->
+            </div>
+
+            <button id="add-char-btn" class="gtk-button">+ Add Character</button>
+        </aside>
+
+        <main class="main-view">
+            <div class="gtk-card" style="padding: 0; overflow: hidden; border-radius: 12px;">
+                <div style="padding: 24px;">
+                    <div class="visual-container" id="visual-stage">
+                        <!-- SVGs injected here -->
+                    </div>
+                    <div class="labels-container" id="labels-stage">
+                        <!-- Labels injected here -->
+                    </div>
+                </div>
+            </div>
+            
+            <div class="gtk-card summary-card" id="summary-card">
+                <p id="summary-text" style="margin:0;">Loading summary...</p>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Core configuration
+        const MAX_CHARS = 5;
+        const MAX_HEIGHT_CM = 250; // 250cm = ~8ft 2in. Represents 100% of the visual container height.
+        const COLORS = ['var(--c1)', 'var(--c2)', 'var(--c3)', 'var(--c4)', 'var(--c5)'];
+        
+        let state = {
+            unit: 'ftin',
+            spacing: 10,
+            nextId: 3,
+            chars: [
+                { id: 1, name: 'Character A', heightCm: 175.26, colorIdx: 0 }, // 5'9"
+                { id: 2, name: 'Character B', heightCm: 187.96, colorIdx: 1 }  // 6'2"
+            ]
+        };
+
+        // Conversion utilities
+        function cmToFtIn(cm) {
+            let totalInches = cm / 2.54;
+            let ft = Math.floor(totalInches / 12);
+            let inches = Math.round(totalInches % 12);
+            if (inches === 12) { ft += 1; inches = 0; }
+            return { ft, in: inches };
+        }
+
+        function ftInToCm(ft, inch) {
+            return ((parseFloat(ft) || 0) * 12 + (parseFloat(inch) || 0)) * 2.54;
+        }
+
+        function formatHeight(cm) {
+            if (state.unit === 'cm') {
+                return `${Math.round(cm)} cm`;
+            } else {
+                const { ft, in: inches } = cmToFtIn(cm);
+                return `${ft}'${inches}"`;
+            }
+        }
+
+        function formatDiff(cmDiff) {
+            if (state.unit === 'cm') {
+                return `${Math.round(cmDiff)} cm`;
+            } else {
+                const totalInches = Math.round(cmDiff / 2.54);
+                const ft = Math.floor(totalInches / 12);
+                const inches = totalInches % 12;
+                if (ft === 0) return `${inches} inches`;
+                if (inches === 0) return `${ft} feet`;
+                return `${ft} ft ${inches} in`;
+            }
+        }
+
+        function renderUI() {
+            const list = document.getElementById('characters-list');
+            list.innerHTML = '';
+
+            state.chars.forEach((char, index) => {
+                const card = document.createElement('div');
+                card.className = 'gtk-card';
+                const color = COLORS[char.colorIdx % COLORS.length];
+
+                let inputsHTML = '';
+                if (state.unit === 'cm') {
+                    inputsHTML = `
+                        <div class="input-row">
+                            <input type="number" class="gtk-input cm-input" value="${Math.round(char.heightCm)}" min="1">
+                            <span class="unit-label">cm</span>
+                        </div>`;
+                } else {
+                    const h = cmToFtIn(char.heightCm);
+                    inputsHTML = `
+                        <div class="input-row">
+                            <input type="number" class="gtk-input ft-input" value="${h.ft}" min="0">
+                            <span class="unit-label">ft</span>
+                            <input type="number" class="gtk-input in-input" value="${h.in}" min="0" max="11">
+                            <span class="unit-label">in</span>
+                        </div>`;
+                }
+
+                card.innerHTML = `
+                    <div class="card-header">
+                        <h3><span class="color-dot" style="background-color: ${color};"></span> ${char.name}</h3>
+                        ${state.chars.length > 2 ? `<button class="remove-btn" onclick="removeChar(${char.id})">Remove</button>` : ''}
+                    </div>
+                    <label class="gtk-label" style="margin-top:0;">Name</label>
+                    <input type="text" class="gtk-input name-input" value="${char.name}">
+                    <label class="gtk-label">Height</label>
+                    ${inputsHTML}
+                `;
+
+                // Event Listeners for inputs
+                card.querySelector('.name-input').addEventListener('input', (e) => {
+                    char.name = e.target.value || `Character ${String.fromCharCode(65 + index)}`;
+                    card.querySelector('h3').innerHTML = `<span class="color-dot" style="background-color: ${color};"></span> ${char.name}`;
+                    updateVisuals();
+                });
+
+                const updateHeight = () => {
+                    if (state.unit === 'cm') {
+                        char.heightCm = Math.max(1, parseFloat(card.querySelector('.cm-input').value) || 0);
+                    } else {
+                        char.heightCm = Math.max(1, ftInToCm(
+                            card.querySelector('.ft-input').value,
+                            card.querySelector('.in-input').value
+                        ));
+                    }
+                    updateVisuals();
+                };
+
+                if (state.unit === 'cm') {
+                    card.querySelector('.cm-input').addEventListener('input', updateHeight);
+                } else {
+                    card.querySelector('.ft-input').addEventListener('input', updateHeight);
+                    card.querySelector('.in-input').addEventListener('input', updateHeight);
+                }
+
+                list.appendChild(card);
+            });
+
+            document.getElementById('add-char-btn').style.display = state.chars.length >= MAX_CHARS ? 'none' : 'block';
+            updateVisuals();
+        }
+
+        function updateVisuals() {
+            const visualStage = document.getElementById('visual-stage');
+            const labelsStage = document.getElementById('labels-stage');
+            const summaryBox = document.getElementById('summary-text');
+            
+            visualStage.innerHTML = '';
+            labelsStage.innerHTML = '';
+
+            state.chars.forEach((char) => {
+                const color = COLORS[char.colorIdx % COLORS.length];
+                const heightStr = formatHeight(char.heightCm);
+                
+                // Height percentage relative to absolute max (250cm)
+                // This guarantees precise scaling. 1% of height = 2.5cm.
+                const heightPct = Math.min((char.heightCm / MAX_HEIGHT_CM) * 100, 150); // Cap at 150% visually
+                
+                // Z-index: Shorter characters get higher z-index so they aren't hidden when overlapping
+                const zIndex = Math.round(1000 - char.heightCm);
+
+                // Build SVG element
+                const wrapper = document.createElement('div');
+                wrapper.className = 'silhouette-wrapper';
+                wrapper.style.height = `${heightPct}%`;
+                wrapper.style.margin = `0 ${state.spacing}px`;
+                wrapper.style.zIndex = zIndex;
+                
+                // Valid SVG structure explicitly ensuring dimensions and namespace
+                wrapper.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 250" preserveAspectRatio="xMidYMax meet" fill="${color}">
+                        <circle cx="50" cy="20" r="16" />
+                        <path d="M 33 42 Q 18 42 18 60 L 18 130 L 30 130 L 30 70 L 35 70 L 35 250 L 48 250 L 48 150 L 52 150 L 52 250 L 65 250 L 65 70 L 70 70 L 70 130 L 82 130 L 82 60 Q 82 42 67 42 Z" />
+                    </svg>
+                `;
+                visualStage.appendChild(wrapper);
+
+                // Build Label
+                const label = document.createElement('div');
+                label.className = 'person-info';
+                label.innerHTML = `
+                    <div class="name-label">
+                        <span class="color-dot" style="background-color: ${color};"></span>
+                        ${char.name}
+                    </div>
+                    <div class="height-label">${heightStr}</div>
+                `;
+                labelsStage.appendChild(label);
+            });
+
+            // Summary Logic
+            if (state.chars.length === 2) {
+                const [c1, c2] = state.chars;
+                const diffCm = Math.abs(c1.heightCm - c2.heightCm);
+                if (Math.round(diffCm) === 0) {
+                    summaryBox.innerHTML = `<strong>${c1.name}</strong> and <strong>${c2.name}</strong> are exactly the same height (${formatHeight(c1.heightCm)}).`;
+                } else {
+                    const taller = c1.heightCm > c2.heightCm ? c1 : c2;
+                    const shorter = c1.heightCm > c2.heightCm ? c2 : c1;
+                    summaryBox.innerHTML = `<strong>${taller.name}</strong> is <strong>${formatDiff(diffCm)}</strong> taller than <strong>${shorter.name}</strong>.`;
+                }
+            } else if (state.chars.length > 2) {
+                const sorted = [...state.chars].sort((a, b) => b.heightCm - a.heightCm);
+                const tallest = sorted[0];
+                const shortest = sorted[sorted.length - 1];
+                const diffCm = tallest.heightCm - shortest.heightCm;
+                summaryBox.innerHTML = `<strong>${tallest.name}</strong> is the tallest at ${formatHeight(tallest.heightCm)}. <br>They are <strong>${formatDiff(diffCm)}</strong> taller than the shortest (${shortest.name}).`;
+            } else {
+                summaryBox.innerHTML = "Add more characters to compare.";
+            }
+        }
+
+        function addChar() {
+            if (state.chars.length >= MAX_CHARS) return;
+            const usedColors = state.chars.map(c => c.colorIdx);
+            let newColorIdx = 0;
+            while(usedColors.includes(newColorIdx)) newColorIdx++;
+            
+            state.chars.push({
+                id: state.nextId++,
+                name: `Character ${String.fromCharCode(65 + state.chars.length)}`,
+                heightCm: 170, // Default 5'7"ish
+                colorIdx: newColorIdx
+            });
+            renderUI();
+        }
+
+        function removeChar(id) {
+            state.chars = state.chars.filter(c => c.id !== id);
+            renderUI();
+        }
+
+        document.getElementById('unit-select').addEventListener('change', (e) => {
+            state.unit = e.target.value;
+            renderUI();
+        });
+
+        document.getElementById('spacing-slider').addEventListener('input', (e) => {
+            state.spacing = parseInt(e.target.value);
+            document.querySelectorAll('.silhouette-wrapper').forEach(el => {
+                el.style.margin = `0 ${state.spacing}px`;
+            });
+        });
+
+        document.getElementById('add-char-btn').addEventListener('click', addChar);
+
+        document.getElementById('theme-btn').addEventListener('click', () => {
+            const html = document.documentElement;
+            html.setAttribute('data-theme', html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+        });
+
+        // Initialize Dark mode if system prefers it
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
+
+        renderUI();
+    </script>
+</body>
+</html>
