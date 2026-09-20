@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVG Rigging & Posing Studio</title>
+    <style>
+        :root {
+            --bg-base: #242424;
+            --bg-panel: #303030;
+            --bg-header: #1e1e1e;
+            --border-dark: #1c1c1c;
+            --border-light: #454545;
+            --text-main: #eeeeee;
+            --text-muted: #a0a0a0;
+            --accent-blue: #3584e4;
+            --accent-blue-hover: #4a90d9;
+            --btn-bg: #3d3d3d;
+            --btn-hover: #4d4d4d;
+            --btn-active: #2a2a2a;
+            --joint-idle: #ffffff;
+            --joint-selected: #3584e4;
+            --bone-color: rgba(53, 132, 228, 0.6);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', system-ui, sans-serif; }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        .sidebar {
+            width: 320px;
+            background-color: var(--bg-panel);
+            border-right: 1px solid var(--border-dark);
+            display: flex;
+            flex-direction: column;
+            z-index: 10;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+            overflow-y: auto;
+        }
+
+        .header {
+            background-color: var(--bg-header);
+            padding: 16px;
+            font-weight: 600;
+            border-bottom: 1px solid var(--border-dark);
+            text-align: center;
+            letter-spacing: 0.5px;
+        }
+
+        .panel-section {
+            padding: 16px;
+            border-bottom: 1px solid var(--border-light);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        h3 { font-size: 11px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 1px; margin-bottom: 4px; }
+        p.help-text { font-size: 12px; color: var(--text-muted); line-height: 1.4; }
+
+        button, .btn-label {
+            background-color: var(--btn-bg);
+            color: var(--text-main);
+            border: 1px solid var(--border-light);
+            border-radius: 6px;
+            padding: 10px 14px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            font-weight: 500;
+            display: block;
+            width: 100%;
+        }
+        button:hover, .btn-label:hover { background-color: var(--btn-hover); }
+        button:active, .btn-label:active { background-color: var(--btn-active); }
+        
+        button.primary, .btn-label.primary { background-color: var(--accent-blue); border-color: #2a6ab8; }
+        button.primary:hover, .btn-label.primary:hover { background-color: var(--accent-blue-hover); }
+
+        input[type="file"] { display: none; }
+        input[type="range"] { accent-color: var(--accent-blue); width: 100%; cursor: pointer;}
+        input[type="color"] {
+            -webkit-appearance: none; border: none; width: 100%; height: 36px; border-radius: 6px; cursor: pointer;
+            background-color: transparent;
+        }
+        input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+        input[type="color"]::-webkit-color-swatch { border: 1px solid var(--border-light); border-radius: 6px; }
+
+        .mode-toggle {
+            display: flex; background: var(--bg-base); border-radius: 6px; border: 1px solid var(--border-light); overflow: hidden;
+        }
+        .mode-toggle label {
+            flex: 1; text-align: center; padding: 8px 0; font-size: 12px; cursor: pointer; color: var(--text-muted); transition: 0.2s;
+        }
+        .mode-toggle input { display: none; }
+        .mode-toggle input:checked + label { background: var(--btn-hover); color: var(--text-main); font-weight: 600; }
+
+        .workspace {
+            flex: 1; position: relative; background-color: #e4e4e4;
+            background-image: linear-gradient(45deg, #d4d4d4 25%, transparent 25%), linear-gradient(-45deg, #d4d4d4 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #d4d4d4 75%), linear-gradient(-45deg, transparent 75%, #d4d4d4 75%);
+            background-size: 24px 24px; background-position: 0 0, 0 12px, 12px -12px, -12px 0px;
+            overflow: hidden; display: flex; justify-content: center; align-items: center;
+        }
+
+        svg#stage { width: 100%; height: 100%; overflow: visible; touch-action: none; }
+        .mesh-path { stroke: #333; stroke-width: 1; stroke-linejoin: round; }
+        .draw-path { fill: none; stroke: #ff4444; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; pointer-events: none; }
+        
+        .bone-line { stroke: var(--bone-color); stroke-width: 8; stroke-linecap: round; pointer-events: none; }
+        .joint-circle { fill: var(--joint-idle); stroke: #222; stroke-width: 2; transition: r 0.1s; cursor: pointer; }
+        .joint-circle:hover { r: 8; }
+        .joint-circle.selected { fill: var(--joint-selected); stroke: #fff; r: 7; }
+        .joint-circle.root { stroke: #e01b24; stroke-width: 3; }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="header" style="display:flex; justify-content:space-between; align-items:center;">
+            <span>Vector Rigging Studio</span>
+            <div style="display:flex; gap:4px;">
+                <button id="undo-btn" style="padding: 4px 8px; font-size:11px; width:auto;">Undo</button>
+                <button id="redo-btn" style="padding: 4px 8px; font-size:11px; width:auto;">Redo</button>
+            </div>
+        </div>
+        
+        <div class="panel-section">
+            <h3>1. Target Graphic</h3>
+            <div class="mode-toggle" style="margin-bottom: 12px;">
+                <input type="radio" id="src-draw" name="source_mode" value="draw" checked>
+                <label for="src-draw">Draw Shape</label>
+                
+                <input type="radio" id="src-upload" name="source_mode" value="upload">
+                <label for="src-upload">Upload SVG</label>
+            </div>
+
+            <div id="ui-draw-tools">
+                <p class="help-text" style="margin-bottom: 8px;"><b>Draw Mode:</b> Click and drag on the canvas to draw a character silhouette. It will auto-smooth.</p>
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="font-size:12px; color:var(--text-muted);">Fill Color:</span>
+                    <input type="color" id="shape-color" value="#1a1a1a">
+                </div>
+            </div>
+
+            <div id="ui-upload-tools" style="display:none;">
+                <label style="display:flex; align-items:center; gap:8px; margin-bottom: 10px; font-size:12px; color:var(--text-muted); cursor:pointer;">
+                    <input type="checkbox" id="auto-silhouette" checked> Merge into Silhouette
+                </label>
+                <label class="btn-label primary">Upload SVG File<input type="file" id="upload-svg" accept=".svg"></label>
+            </div>
+        </div>
+
+        <div class="panel-section">
+            <h3>2. Workflow Mode</h3>
+            <div class="mode-toggle">
+                <input type="radio" id="mode-build" name="mode" value="build" checked>
+                <label for="mode-build">Build Rig</label>
+                
+                <input type="radio" id="mode-pose" name="mode" value="pose">
+                <label for="mode-pose">Pose Character</label>
+            </div>
+            
+            <div id="build-help" class="help-text" style="display:block;">
+                <b>Build Mode:</b> Click to place joints. Subsequent clicks attach to the selected joint.
+                <button id="auto-rig-btn" style="margin-top: 10px; background-color:#2a4a2a; border-color:#3a6a3a;">🤖 Generate Auto-Rig (16 Joints)</button>
+            </div>
+            <div id="pose-help" class="help-text" style="display:none;">
+                <b>Pose Mode:</b> Drag joints to pose the character.
+                <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--border-dark);">
+                    <label for="rigidity-slider" style="display:flex; justify-content:space-between; margin-bottom: 5px;">
+                        <b>Mesh Rigidity</b> <span id="rigidity-val" style="color:var(--text-main);">12.0</span>
+                    </label>
+                    <input type="range" id="rigidity-slider" min="1" max="30" step="1" value="12">
+                </div>
+            </div>
+            <button id="clear-rig">Clear Rig</button>
+        </div>
+
+        <div class="panel-section">
+            <h3>3. Export</h3>
+            <button id="export-svg" style="margin-bottom:8px;">Export Posed SVG</button>
+            <div style="display:flex; gap:8px;">
+                <button id="export-png" style="flex:1;">Export PNG</button>
+                <button id="export-jpg" style="flex:1;">Export JPEG</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="workspace" id="workspace">
+        <svg id="stage" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000">
+            <g id="transform-group">
+                <path id="mesh" class="mesh-path" fill="#1a1a1a" d="" />
+                <path id="draw-preview" class="draw-path" d="" />
+                <g id="bones-layer"></g>
+                <g id="joints-layer"></g>
+            </g>
+        </svg>
+    </div>
+
+    <script>
+        const stage = document.getElementById('stage');
+        const transformGroup = document.getElementById('transform-group');
+        const meshPath = document.getElementById('mesh');
+        const drawPreview = document.getElementById('draw-preview');
+        const bonesLayer = document.getElementById('bones-layer');
+        const jointsLayer = document.getElementById('joints-layer');
+        
+        let sourceMode = 'draw'; // 'draw' or 'upload'
+        let mode = 'build'; // 'build' or 'pose'
+        
+        let joints = []; 
+        let bones = []; 
+        let selectedJointId = null;
+        let draggingJointId = null;
+        let nextJointId = 0;
+        
+        // Drawing state
+        let isDrawing = false;
+        let drawnPoints = [];
+
+        // Mesh Data
+        let originalPathCommands = [];
+        let boundPoints = []; 
+
+        // Undo/Redo State
+        let historyStack = [];
+        let historyIndex = -1;
+
+        function saveState() {
+            if (historyIndex < historyStack.length - 1) historyStack = historyStack.slice(0, historyIndex + 1);
+            historyStack.push({
+                joints: JSON.parse(JSON.stringify(joints)),
+                commands: JSON.parse(JSON.stringify(originalPathCommands)),
+                nextJointId: nextJointId
+            });
+            historyIndex++;
+            if (historyStack.length > 20) { historyStack.shift(); historyIndex--; }
+        }
+
+        function restoreState(index) {
+            if (index < 0 || index >= historyStack.length) return;
+            const state = historyStack[index];
+            joints = JSON.parse(JSON.stringify(state.joints));
+            originalPathCommands = JSON.parse(JSON.stringify(state.commands));
+            nextJointId = state.nextJointId;
+            historyIndex = index;
+            meshPath.setAttribute('d', stringifyPath(originalPathCommands));
+            if (mode === 'pose') { bindRig(); deformMesh(); }
+            renderRig();
+        }
+
+        document.getElementById('undo-btn').addEventListener('click', () => restoreState(historyIndex - 1));
+        document.getElementById('redo-btn').addEventListener('click', () => restoreState(historyIndex + 1));
+
+        document.querySelectorAll('input[name="source_mode"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                sourceMode = e.target.value;
+                document.getElementById('ui-draw-tools').style.display = sourceMode === 'draw' ? 'block' : 'none';
+                document.getElementById('ui-upload-tools').style.display = sourceMode === 'upload' ? 'block' : 'none';
+                if(sourceMode === 'draw') document.getElementById('mode-build').click(); // switch to build mode if drawing
+            });
+        });
+
+        document.querySelectorAll('input[name="mode"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                mode = e.target.value;
+                document.getElementById('build-help').style.display = mode === 'build' ? 'block' : 'none';
+                document.getElementById('pose-help').style.display = mode === 'pose' ? 'block' : 'none';
+                
+                if (mode === 'pose') {
+                    selectedJointId = null;
+                    bindRig();
+                }
+                renderRig();
+            });
+        });
+
+        document.getElementById('shape-color').addEventListener('input', (e) => {
+            meshPath.setAttribute('fill', e.target.value);
+        });
+
+        function clearEntireRig() {
+            joints = [];
+            selectedJointId = null;
+            nextJointId = 0;
+            boundPoints = [];
+            renderRig();
+            if (mode === 'pose' && originalPathCommands.length > 0) {
+                meshPath.setAttribute('d', stringifyPath(originalPathCommands));
+            }
+            saveState();
+        }
+        document.getElementById('clear-rig').addEventListener('click', clearEntireRig);
+
+        function simplifyPolygon(points, epsilon) {
+            if (points.length <= 2) return points;
+            const pointLineDistance = (p, p1, p2) => {
+                let num = Math.abs((p2.y - p1.y)*p.x - (p2.x - p1.x)*p.y + p2.x*p1.y - p2.y*p1.x);
+                let den = Math.hypot(p2.x - p1.x, p2.y - p1.y);
+                return den === 0 ? Math.hypot(p.x - p1.x, p.y - p1.y) : num / den;
+            };
+
+            let maxDist = 0, index = 0, end = points.length - 1;
+            for (let i = 1; i < end; i++) {
+                let dist = pointLineDistance(points[i], points[0], points[end]);
+                if (dist > maxDist) { maxDist = dist; index = i; }
+            }
+            if (maxDist > epsilon) {
+                let left = simplifyPolygon(points.slice(0, index + 1), epsilon);
+                let right = simplifyPolygon(points.slice(index), epsilon);
+                return left.slice(0, left.length - 1).concat(right);
+            } else {
+                return [points[0], points[end]];
+            }
+        }
+
+        function pointsToSmoothBeziers(points, tension = 0.22) {
+            let commands = [];
+            if (points.length < 3) return commands;
+            commands.push({ type: 'M', pts: [{ x: points[0].x, y: points[0].y }] });
+            
+            for (let i = 0; i < points.length; i++) {
+                let p0 = points[(i - 1 + points.length) % points.length];
+                let p1 = points[i];
+                let p2 = points[(i + 1) % points.length];
+                let p3 = points[(i + 2) % points.length];
+                
+                let cp1x = p1.x + (p2.x - p0.x) * tension;
+                let cp1y = p1.y + (p2.y - p0.y) * tension;
+                let cp2x = p2.x - (p3.x - p1.x) * tension;
+                let cp2y = p2.y - (p3.y - p1.y) * tension;
+                
+                commands.push({ type: 'C', pts: [{ x: cp1x, y: cp1y }, { x: cp2x, y: cp2y }, { x: p2.x, y: p2.y }] });
+            }
+            commands.push({ type: 'Z', pts: [] });
+            return commands;
+        }
+
+        function stringifyPath(commands) {
+            let d = "";
+            for (let cmd of commands) {
+                d += cmd.type + " ";
+                if (cmd.type === 'Z') continue;
+                for (let pt of cmd.pts) {
+                    if (cmd.type === 'A') d += `${pt.rx} ${pt.ry} ${pt.xrot} ${pt.large} ${pt.sweep} ${pt.x},${pt.y} `;
+                    else d += `${pt.x},${pt.y} `;
+                }
+            }
+            return d;
+        }
+
+        function getSVGPoint(evt) {
+            let pt = stage.createSVGPoint();
+            pt.x = evt.clientX || (evt.touches && evt.touches[0].clientX);
+            pt.y = evt.clientY || (evt.touches && evt.touches[0].clientY);
+            return pt.matrixTransform(transformGroup.getScreenCTM().inverse());
+        }
+
+        stage.addEventListener('pointerdown', (e) => {
+            let pt = getSVGPoint(e);
+            
+            if (sourceMode === 'draw') {
+                isDrawing = true;
+                drawnPoints = [pt];
+                drawPreview.setAttribute('d', `M ${pt.x},${pt.y}`);
+                e.preventDefault();
+                return;
+            }
+
+            let clickedJointId = null;
+            if (e.target.classList.contains('joint-circle')) {
+                clickedJointId = parseInt(e.target.getAttribute('data-id'));
+            }
+
+            if (mode === 'build') {
+                if (clickedJointId !== null) {
+                    selectedJointId = clickedJointId;
+                    draggingJointId = clickedJointId;
+                } else {
+                    let newJoint = {
+                        id: nextJointId++, x: pt.x, y: pt.y,
+                        parentId: joints.length === 0 ? null : (selectedJointId !== null ? selectedJointId : joints[joints.length-1].id)
+                    };
+                    joints.push(newJoint);
+                    selectedJointId = newJoint.id;
+                    draggingJointId = newJoint.id;
+                }
+                renderRig();
+            } else if (mode === 'pose' && clickedJointId !== null) {
+                draggingJointId = clickedJointId;
+            }
+            e.preventDefault();
+        });
+
+        window.addEventListener('pointermove', (e) => {
+            let pt = getSVGPoint(e);
+            
+            if (isDrawing && sourceMode === 'draw') {
+                drawnPoints.push(pt);
+                let d = drawPreview.getAttribute('d') + ` L ${pt.x},${pt.y}`;
+                drawPreview.setAttribute('d', d);
+                return;
+            }
+
+            if (draggingJointId === null) return;
+            let j = joints.find(j => j.id === draggingJointId);
+            
+            if (mode === 'build') {
+                j.x = pt.x; j.y = pt.y;
+                renderRig();
+            } else if (mode === 'pose') {
+                j.x = pt.x; j.y = pt.y;
+                solveKinematics();
+                deformMesh();
+                renderRig();
+            }
+        });
+
+        window.addEventListener('pointerup', () => {
+            let stateChanged = false;
+            if (isDrawing && sourceMode === 'draw') {
+                isDrawing = false;
+                drawPreview.setAttribute('d', '');
+                if (drawnPoints.length > 5) {
+                    let simplified = simplifyPolygon(drawnPoints, 6.0); // Increased for smoother curves
+                    originalPathCommands = pointsToSmoothBeziers(simplified, 0.22);
+                    meshPath.setAttribute('d', stringifyPath(originalPathCommands));
+                    meshPath.setAttribute('fill', document.getElementById('shape-color').value);
+                    joints = []; selectedJointId = null; nextJointId = 0; boundPoints = []; renderRig(); // clear rig
+                    stateChanged = true;
+                }
+                drawnPoints = [];
+            }
+            if (draggingJointId !== null) {
+                stateChanged = true;
+                draggingJointId = null;
+            }
+            if (stateChanged) saveState();
+        });
+
+        document.getElementById('auto-rig-btn').addEventListener('click', () => {
+            clearEntireRig();
+            
+            // Calculate bounding box of the graphic to center and scale the rig
+            let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+            if (originalPathCommands.length > 0) {
+                originalPathCommands.forEach(cmd => {
+                    cmd.pts.forEach(pt => {
+                        if(pt.x) { minX = Math.min(minX, pt.x); maxX = Math.max(maxX, pt.x); }
+                        if(pt.y) { minY = Math.min(minY, pt.y); maxY = Math.max(maxY, pt.y); }
+                    });
+                });
+            } else {
+                minX = 300; maxX = 700; minY = 200; maxY = 800; // Default fallback
+            }
+
+            let cx = minX + (maxX - minX)/2;
+            let w = maxX - minX;
+            let h = maxY - minY;
+            let cy = minY + h/2;
+            let scale = h * 0.45; // Scale relative to height
+
+            // Clean 16 Joint Biped Rig (Proper A-Pose structure)
+            joints = [
+                { id: 0, parentId: null, x: cx, y: cy + scale*0.1 }, // Root / Pelvis
+                { id: 1, parentId: 0, x: cx, y: cy - scale*0.2 }, // Spine/Chest
+                { id: 2, parentId: 1, x: cx, y: cy - scale*0.45 }, // Neck
+                { id: 3, parentId: 2, x: cx, y: cy - scale*0.65 }, // Head
+                
+                { id: 4, parentId: 1, x: cx - scale*0.3, y: cy - scale*0.2 }, // L Shoulder
+                { id: 5, parentId: 4, x: cx - scale*0.4, y: cy + scale*0.15 }, // L Elbow
+                { id: 6, parentId: 5, x: cx - scale*0.5, y: cy + scale*0.5 }, // L Hand
+
+                { id: 7, parentId: 1, x: cx + scale*0.3, y: cy - scale*0.2 }, // R Shoulder
+                { id: 8, parentId: 7, x: cx + scale*0.4, y: cy + scale*0.15 }, // R Elbow
+                { id: 9, parentId: 8, x: cx + scale*0.5, y: cy + scale*0.5 }, // R Hand
+                
+                { id: 10, parentId: 0, x: cx - scale*0.15, y: cy + scale*0.1 }, // L Hip
+                { id: 11, parentId: 10, x: cx - scale*0.15, y: cy + scale*0.5 }, // L Knee
+                { id: 12, parentId: 11, x: cx - scale*0.15, y: cy + scale*0.9 }, // L Foot
+                
+                { id: 13, parentId: 0, x: cx + scale*0.15, y: cy + scale*0.1 }, // R Hip
+                { id: 14, parentId: 13, x: cx + scale*0.15, y: cy + scale*0.5 }, // R Knee
+                { id: 15, parentId: 14, x: cx + scale*0.15, y: cy + scale*0.9 }, // R Foot
+            ];
+            nextJointId = 16;
+            document.getElementById('mode-build').click(); 
+            renderRig();
+            saveState();
+        });
+
+        function renderRig() {
+            jointsLayer.innerHTML = '';
+            bonesLayer.innerHTML = '';
+            joints.forEach(j => {
+                if (j.parentId !== null) {
+                    let parent = joints.find(p => p.id === j.parentId);
+                    if (parent) {
+                        let line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                        line.setAttribute('x1', parent.x); line.setAttribute('y1', parent.y);
+                        line.setAttribute('x2', j.x); line.setAttribute('y2', j.y);
+                        line.setAttribute('class', 'bone-line');
+                        bonesLayer.appendChild(line);
+                    }
+                }
+            });
+
+            joints.forEach(j => {
+                let circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                circle.setAttribute('cx', j.x); circle.setAttribute('cy', j.y);
+                circle.setAttribute('r', '6'); circle.setAttribute('data-id', j.id);
+                let classes = ['joint-circle'];
+                if (j.parentId === null) classes.push('root');
+                if (j.id === selectedJointId && mode === 'build') classes.push('selected');
+                circle.setAttribute('class', classes.join(' '));
+                jointsLayer.appendChild(circle);
+            });
+        }
+
+        function bindRig(isRecalculating = false) {
+            if (joints.length < 2 || originalPathCommands.length === 0) {
+                boundPoints = []; return;
+            }
+            
+            if (!isRecalculating) {
+                joints.forEach(j => {
+                    j.restX = j.x; j.restY = j.y;
+                    if (j.parentId !== null) {
+                        let p = joints.find(parent => parent.id === j.parentId);
+                        j.restLength = Math.hypot(j.x - p.x, j.y - p.y);
+                    }
+                });
+            }
+
+            let boneSegments = [];
+            joints.forEach(j => {
+                if (j.parentId !== null) {
+                    let p = joints.find(parent => parent.id === j.parentId);
+                    boneSegments.push({ childId: j.id, parentId: p.id, p: p, c: j });
+                }
+            });
+
+            boundPoints = [];
+            let rigidity = parseFloat(document.getElementById('rigidity-slider').value) || 12;
+
+            originalPathCommands.forEach((cmd, cmdIdx) => {
+                cmd.pts.forEach((pt, ptIdx) => {
+                    let influences = [];
+
+                    boneSegments.forEach(bone => {
+                        let dx = bone.c.restX - bone.p.restX;
+                        let dy = bone.c.restY - bone.p.restY;
+                        let l2 = dx*dx + dy*dy;
+                        let t = 0;
+                        if (l2 > 0) {
+                            t = ((pt.x - bone.p.restX) * dx + (pt.y - bone.p.restY) * dy) / l2;
+                            t = Math.max(0, Math.min(1, t));
+                        }
+                        
+                        let projX = bone.p.restX + t * dx;
+                        let projY = bone.p.restY + t * dy;
+                        let dist = Math.hypot(pt.x - projX, pt.y - projY);
+                        
+                        // Strong localized weighting based on Rigidity slider
+                        let weight = 1.0 / Math.pow(dist + 1, rigidity / 4);
+
+                        // Local UV Coordinates relative to the bone
+                        let nx = l2 > 0 ? dx / Math.sqrt(l2) : 0;
+                        let ny = l2 > 0 ? dy / Math.sqrt(l2) : 0;
+                        let vx = pt.x - bone.p.restX;
+                        let vy = pt.y - bone.p.restY;
+                        let u = vx * nx + vy * ny;
+                        let v = vx * (-ny) + vy * nx;
+
+                        influences.push({ bone, weight, u, v });
+                    });
+
+                    // FILTER LOGIC: Sort and keep only the Top 2 closest bones.
+                    // This mathematically guarantees no webbing across the body without catastrophic LOS drop-offs.
+                    influences.sort((a, b) => b.weight - a.weight);
+                    let topInfluences = influences.slice(0, 2);
+                    
+                    let totalFiltered = 0;
+                    topInfluences.forEach(inf => totalFiltered += inf.weight);
+
+                    // Normalize remaining valid weights
+                    if (totalFiltered > 0) {
+                        topInfluences.forEach(inf => inf.weight /= totalFiltered);
+                    }
+
+                    boundPoints.push({ cmdIdx, ptIdx, influences: topInfluences });
+                });
+            });
+        }
+
+        function solveKinematics() {
+            if (joints.length < 2) return;
+            const iterations = 15;
+            for (let iter = 0; iter < iterations; iter++) {
+                joints.forEach(j => {
+                    if (j.parentId !== null) {
+                        let p = joints.find(parent => parent.id === j.parentId);
+                        let dx = j.x - p.x; let dy = j.y - p.y;
+                        let dist = Math.hypot(dx, dy);
+                        if (dist > 0) {
+                            let diff = (dist - j.restLength) / dist;
+                            let offsetX = dx * diff * 0.5; let offsetY = dy * diff * 0.5;
+                            if (j.id !== draggingJointId) { j.x -= offsetX; j.y -= offsetY; }
+                            if (p.id !== draggingJointId && p.parentId !== null) {
+                                p.x += offsetX; p.y += offsetY;
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        function deformMesh() {
+            if (boundPoints.length === 0) return;
+            let poseCommands = JSON.parse(JSON.stringify(originalPathCommands));
+            
+            boundPoints.forEach(bp => {
+                let cmd = poseCommands[bp.cmdIdx];
+                if (!cmd || !cmd.pts || !cmd.pts[bp.ptIdx]) return;
+                let targetPt = cmd.pts[bp.ptIdx];
+                let finalX = 0, finalY = 0;
+
+                bp.influences.forEach(inf => {
+                    if (inf.weight === 0) return;
+                    let pJoint = joints.find(j => j.id === inf.bone.parentId);
+                    let cJoint = joints.find(j => j.id === inf.bone.childId);
+                    
+                    let dx = cJoint.x - pJoint.x; let dy = cJoint.y - pJoint.y;
+                    let l = Math.hypot(dx, dy);
+                    let nx = l > 0 ? dx / l : 0; let ny = l > 0 ? dy / l : 0;
+                    
+                    let defX = pJoint.x + inf.u * nx + inf.v * (-ny);
+                    let defY = pJoint.y + inf.u * ny + inf.v * nx;
+                    
+                    finalX += defX * inf.weight;
+                    finalY += defY * inf.weight;
+                });
+                
+                targetPt.x = finalX; targetPt.y = finalY;
+            });
+            meshPath.setAttribute('d', stringifyPath(poseCommands));
+        }
+
+        document.getElementById('rigidity-slider').addEventListener('input', (e) => {
+            document.getElementById('rigidity-val').innerText = parseFloat(e.target.value).toFixed(1);
+            if (mode === 'pose' && boundPoints.length > 0) {
+                bindRig(true); deformMesh(); 
+            }
+        });
+
+        // SVG Upload and Parser Logic 
+        function preprocessCanvas(canvas, ctx, width, height) {
+            let imgData = ctx.getImageData(0, 0, width, height); let data = imgData.data;
+            for (let i = 0; i < data.length; i += 4) {
+                if (data[i] > 240 && data[i+1] > 240 && data[i+2] > 240 && data[i+3] > 0) data[i+3] = 0; 
+            }
+            let borderOpaqueCount = 0; let borderTotal = (width * 2) + (height * 2) - 4;
+            const isOpq = (x, y) => data[(y * width + x) * 4 + 3] > 128 ? 1 : 0;
+            for (let x = 0; x < width; x++) { borderOpaqueCount += isOpq(x, 0) + isOpq(x, height - 1); }
+            for (let y = 1; y < height - 1; y++) { borderOpaqueCount += isOpq(0, y) + isOpq(width - 1, y); }
+            if (borderOpaqueCount / borderTotal > 0.5) {
+                for (let i = 0; i < data.length; i += 4) {
+                    data[i+3] = 255 - data[i+3];
+                    if (data[i+3] > 128) { data[i] = 30; data[i+1] = 30; data[i+2] = 30; }
+                }
+            }
+            ctx.putImageData(imgData, 0, 0);
+        }
+
+        function traceContour(canvas) {
+            const ctx = canvas.getContext('2d', { willReadFrequently: true });
+            const width = canvas.width; const height = canvas.height;
+            const imgData = ctx.getImageData(0, 0, width, height).data;
+            const isOpaque = (x, y) => {
+                if (x < 0 || x >= width || y < 0 || y >= height) return false;
+                return imgData[(y * width + x) * 4 + 3] > 0;
+            };
+            let startX = -1, startY = -1;
+            outer: for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x++) { if (isOpaque(x, y)) { startX = x; startY = y; break outer; } }
+            }
+            if (startX === -1) return [];
+            const dirs = [[0,-1], [1,-1], [1,0], [1,1], [0,1], [-1,1], [-1,0], [-1,-1]];
+            let contour = []; let currX = startX, currY = startY; let dir = 7; let iters = 0, maxIters = width * height;
+            do {
+                contour.push({x: currX, y: currY});
+                let check = dir; let found = false;
+                for (let i = 0; i < 8; i++) {
+                    let nx = currX + dirs[check][0]; let ny = currY + dirs[check][1];
+                    if (isOpaque(nx, ny)) { currX = nx; currY = ny; dir = (check + 5) % 8; found = true; break; }
+                    check = (check + 1) % 8;
+                }
+                if (!found) break; iters++;
+            } while ((currX !== startX || currY !== startY) && iters < maxIters);
+            return contour;
+        }
+
+        document.getElementById('upload-svg').addEventListener('change', (e) => {
+            const file = e.target.files[0]; if (!file) return;
+            const reader = new FileReader();
+            
+            reader.onload = (ev) => {
+                clearEntireRig();
+                const svgText = ev.target.result;
+                if (document.getElementById('auto-silhouette').checked) {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(svgText, "image/svg+xml");
+                    const svgEl = doc.documentElement;
+                    let wAttr = svgEl.getAttribute('width'); let hAttr = svgEl.getAttribute('height');
+                    let vbAttr = svgEl.getAttribute('viewBox');
+                    if (!vbAttr && wAttr && hAttr) {
+                        let wNum = parseFloat(wAttr); let hNum = parseFloat(hAttr);
+                        if (!isNaN(wNum) && !isNaN(hNum)) svgEl.setAttribute('viewBox', `0 0 ${wNum} ${hNum}`);
+                    }
+                    svgEl.setAttribute('width', '1000'); svgEl.setAttribute('height', '1000');
+                    if (!svgEl.getAttribute('preserveAspectRatio')) svgEl.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+                    
+                    const serialized = new XMLSerializer().serializeToString(svgEl);
+                    const base64 = btoa(unescape(encodeURIComponent(serialized)));
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = 1000; canvas.height = 1000; // Force high res un-squashed boundaries!
+                        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+                        ctx.drawImage(img, 20, 20, 960, 960);
+                        preprocessCanvas(canvas, ctx, canvas.width, canvas.height);
+                        let contour = traceContour(canvas);
+                        let simplified = simplifyPolygon(contour, 6.0); // Smoother auto-trace
+                        originalPathCommands = pointsToSmoothBeziers(simplified, 0.22);
+                        meshPath.setAttribute('fill', document.getElementById('shape-color').value);
+                        applyScalingAndCenter();
+                        saveState();
+                    };
+                    img.src = `data:image/svg+xml;base64,${base64}`;
+                }
+            };
+            reader.readAsText(file); e.target.value = null; 
+        });
+
+        function applyScalingAndCenter() {
+            let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+            originalPathCommands.forEach(cmd => {
+                cmd.pts.forEach(pt => {
+                    if(pt.x) { minX = Math.min(minX, pt.x); maxX = Math.max(maxX, pt.x); }
+                    if(pt.y) { minY = Math.min(minY, pt.y); maxY = Math.max(maxY, pt.y); }
+                });
+            });
+            let w = maxX - minX; let h = maxY - minY;
+            let scale = Math.min(800 / w, 800 / h) * 0.8;
+            let cx = minX + w/2; let cy = minY + h/2;
+            originalPathCommands.forEach(cmd => {
+                cmd.pts.forEach(pt => {
+                    if (pt.x !== undefined) pt.x = 500 + (pt.x - cx) * scale;
+                    if (pt.y !== undefined) pt.y = 500 + (pt.y - cy) * scale;
+                });
+            });
+            meshPath.setAttribute('d', stringifyPath(originalPathCommands));
+        }
+
+        // Exporters
+        document.getElementById('export-svg').addEventListener('click', () => {
+            const svgData = new XMLSerializer().serializeToString(stage);
+            const blob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a"); a.href = url; a.download = "posed-character.svg";
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        });
+
+        function exportImage(format) {
+            const svgElement = document.getElementById('stage');
+            const svgData = new XMLSerializer().serializeToString(svgElement)
+                .replace(/<g id="bones-layer">[\s\S]*?<\/g>/, '<g id="bones-layer"></g>')
+                .replace(/<g id="joints-layer">[\s\S]*?<\/g>/, '<g id="joints-layer"></g>');
+            const blob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
+            const url = URL.createObjectURL(blob);
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = 1000; canvas.height = 1000;
+                const ctx = canvas.getContext('2d');
+                if (format === 'jpeg') { ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, canvas.width, canvas.height); }
+                ctx.drawImage(img, 0, 0);
+                const a = document.createElement("a"); a.download = `posed-character.${format}`;
+                a.href = canvas.toDataURL(`image/${format}`, 1.0);
+                a.click(); URL.revokeObjectURL(url);
+            };
+            img.src = url;
+        }
+
+        document.getElementById('export-png').addEventListener('click', () => exportImage('png'));
+        document.getElementById('export-jpg').addEventListener('click', () => exportImage('jpeg'));
+
+        renderRig();
+        saveState(); // Initialize first state
+    </script>
+</body>
+</html>
