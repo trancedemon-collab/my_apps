@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Character Ref Sheet Generator</title>
+  <style>
+    :root {
+      --window-bg: #fafafa;
+      --card-bg: #ffffff;
+      --text-color: #2e3436;
+      --border-color: #dcdcdc;
+      --accent: #3584e4;
+      --accent-hover: #1c71d8;
+      --panel-border: #cccccc;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --window-bg: #242424;
+        --card-bg: #303030;
+        --text-color: #eeeeec;
+        --border-color: #454545;
+        --accent: #3584e4;
+        --accent-hover: #62a0ea;
+        --panel-border: #4a4a4a;
+      }
+    }
+
+    * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
+    body {
+      margin: 0;
+      padding: 24px;
+      background: var(--window-bg);
+      color: var(--text-color);
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+      background: var(--card-bg);
+      padding: 12px 16px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+
+    .tip {
+      font-size: 13px;
+      opacity: 0.7;
+      margin-left: auto;
+    }
+
+    input[type="text"], select {
+      background: var(--window-bg);
+      color: var(--text-color);
+      border: 1px solid var(--border-color);
+      padding: 8px 12px;
+      border-radius: 6px;
+    }
+
+    button, .file-label {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    button:hover, .file-label:hover { background: var(--accent-hover); }
+    input[type="file"] { display: none; }
+
+    .deck {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 12px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .card img {
+      width: 100%;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 4px;
+    }
+
+    .canvas-container {
+      overflow: auto;
+      background: var(--card-bg);
+      padding: 16px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      text-align: center;
+    }
+
+    canvas {
+      max-width: 100%;
+      height: auto;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="toolbar">
+    <input type="text" id="charName" placeholder="Character Name" value="Character Reference">
+    <label class="file-label">
+      Add Files
+      <input type="file" id="imageInput" multiple accept="image/*">
+    </label>
+    <select id="gridCols">
+      <option value="2">2 Columns</option>
+      <option value="3" selected>3 Columns</option>
+      <option value="4">4 Columns</option>
+    </select>
+    <button onclick="renderSheet()">Generate Sheet</button>
+    <button onclick="exportSheet()">Export PNG</button>
+    <span class="tip">Tip: Press <b>Ctrl+V</b> / <b>Cmd+V</b> anywhere to paste snapshots</span>
+  </div>
+
+  <div class="deck" id="deck"></div>
+
+  <div class="canvas-container">
+    <canvas id="refCanvas"></canvas>
+  </div>
+
+  <script>
+    const imageInput = document.getElementById('imageInput');
+    const deck = document.getElementById('deck');
+    const canvas = document.getElementById('refCanvas');
+    const ctx = canvas.getContext('2d');
+    let items = [];
+
+    const defaultTags = ["Front", "3/4 View", "Profile", "Back", "Close-up", "Expression", "Outfit", "Detail"];
+
+    function addImageFromSource(src) {
+      const img = new Image();
+      img.onload = () => {
+        items.push({
+          id: Date.now() + Math.random(),
+          img: img,
+          tag: defaultTags[items.length % defaultTags.length]
+        });
+        buildDeck();
+      };
+      img.src = src;
+    }
+
+    // Handle File Input
+    imageInput.addEventListener('change', (e) => {
+      Array.from(e.target.files).forEach((file) => {
+        const reader = new FileReader();
+        reader.onload = (evt) => addImageFromSource(evt.target.result);
+        reader.readAsDataURL(file);
+      });
+    });
+
+    // Handle Direct Clipboard Paste
+    window.addEventListener('paste', (e) => {
+      // Allow pasting text into textboxes without intercepting
+      if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+
+      const clipboardItems = e.clipboardData.items;
+      for (let i = 0; i < clipboardItems.length; i++) {
+        if (clipboardItems[i].type.indexOf('image') !== -1) {
+          const blob = clipboardItems[i].getAsFile();
+          const reader = new FileReader();
+          reader.onload = (evt) => addImageFromSource(evt.target.result);
+          reader.readAsDataURL(blob);
+        }
+      }
+    });
+
+    function buildDeck() {
+      deck.innerHTML = '';
+      items.forEach((item, index) => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+          <img src="${item.img.src}">
+          <input type="text" value="${item.tag}" oninput="items[${index}].tag = this.value">
+          <button style="background:#e01b24; padding:4px;" onclick="removeItem(${index})">Remove</button>
+        `;
+        deck.appendChild(card);
+      });
+    }
+
+    function removeItem(index) {
+      items.splice(index, 1);
+      buildDeck();
+    }
+
+    function renderSheet() {
+      if (!items.length) return;
+
+      const cols = parseInt(document.getElementById('gridCols').value);
+      const rows = Math.ceil(items.length / cols);
+      const panelW = 400;
+      const panelH = 500;
+      const pad = 24;
+      const headerH = 80;
+
+      canvas.width = (panelW * cols) + (pad * (cols + 1));
+      canvas.height = headerH + (panelH * rows) + (pad * (rows + 1));
+
+      const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const bg = isDark ? '#242424' : '#f6f5f4';
+      const cardBg = isDark ? '#303030' : '#ffffff';
+      const textColor = isDark ? '#ffffff' : '#2e3436';
+      const border = isDark ? '#454545' : '#deddda';
+
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = textColor;
+      ctx.font = 'bold 32px sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText(document.getElementById('charName').value || 'Reference Sheet', pad, 50);
+
+      items.forEach((item, i) => {
+        const r = Math.floor(i / cols);
+        const c = i % cols;
+        const x = pad + c * (panelW + pad);
+        const y = headerH + pad + r * (panelH + pad);
+
+        ctx.fillStyle = cardBg;
+        ctx.strokeStyle = border;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.roundRect(x, y, panelW, panelH, 8);
+        ctx.fill();
+        ctx.stroke();
+
+        const imgMaxH = panelH - 50;
+        const imgMaxW = panelW - 16;
+        const scale = Math.min(imgMaxW / item.img.width, imgMaxH / item.img.height);
+        const drawW = item.img.width * scale;
+        const drawH = item.img.height * scale;
+        const drawX = x + (panelW - drawW) / 2;
+        const drawY = y + 8 + (imgMaxH - drawH) / 2;
+
+        ctx.drawImage(item.img, drawX, drawY, drawW, drawH);
+
+        ctx.fillStyle = isDark ? '#1e1e1e' : '#e1dedb';
+        ctx.fillRect(x, y + panelH - 36, panelW, 36);
+
+        ctx.fillStyle = textColor;
+        ctx.font = '600 14px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText(item.tag.toUpperCase(), x + (panelW / 2), y + panelH - 14);
+      });
+    }
+
+    function exportSheet() {
+      const link = document.createElement('a');
+      link.download = `${document.getElementById('charName').value || 'ref-sheet'}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
+  </script>
+</body>
+</html>
