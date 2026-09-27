@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Video Prompt Builder - Multi-Project & Clip Suite</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --adw-window-bg: #fafafa;
+            --adw-header-bg: #ebebeb;
+            --adw-card-bg: #ffffff;
+            --adw-text-main: #000000;
+            --adw-text-dim: #5c5c5c;
+            --adw-border: #cdc7c2;
+            --adw-accent: #3584e4;
+            --adw-accent-hover: #1c71d8;
+            --adw-accent-fg: #ffffff;
+            --adw-input-bg: #ffffff;
+            --adw-btn-bg: #f6f5f4;
+            --adw-btn-hover: #deddda;
+            --adw-focus-ring: rgba(53, 132, 228, 0.5);
+            --adw-danger: #e01b24;
+            --adw-danger-hover: #c01c28;
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --adw-window-bg: #242424;
+                --adw-header-bg: #303030;
+                --adw-card-bg: #303030;
+                --adw-text-main: #ffffff;
+                --adw-text-dim: #9a9996;
+                --adw-border: #1e1e1e;
+                --adw-input-bg: #1e1e1e;
+                --adw-btn-bg: #3a3a3a;
+                --adw-btn-hover: #4a4a4a;
+                --adw-focus-ring: rgba(53, 132, 228, 0.7);
+                --adw-danger: #c01c28;
+                --adw-danger-hover: #a51d24;
+            }
+        }
+
+        body {
+            background-color: var(--adw-window-bg);
+            color: var(--adw-text-main);
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .adw-headerbar {
+            background-color: var(--adw-header-bg);
+            border-bottom: 1px solid var(--adw-border);
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .node-card {
+            background-color: var(--adw-card-bg);
+            border: 1px solid var(--adw-border);
+            border-radius: 12px;
+            transition: all 0.2s ease;
+            overflow: hidden;
+        }
+
+        .node-header {
+            padding: 1rem 1.25rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+            background-color: rgba(0,0,0,0.02);
+        }
+
+        .node-header:hover {
+            background-color: rgba(0,0,0,0.04);
+        }
+
+        .node-body {
+            padding: 1.25rem;
+            border-top: 1px solid var(--adw-border);
+            display: none !important;
+        }
+
+        .node-card.expanded .node-body {
+            display: block !important;
+        }
+
+        .node-card.dragging {
+            opacity: 0.4;
+            border: 2px dashed var(--adw-accent) !important;
+        }
+
+        .drag-handle {
+            cursor: grab;
+            color: var(--adw-text-dim);
+            padding: 0.25rem;
+        }
+        .drag-handle:active {
+            cursor: grabbing;
+        }
+
+        .adw-label {
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .adw-input, .adw-select {
+            width: 100%;
+            background-color: var(--adw-input-bg);
+            color: var(--adw-text-main);
+            border: 1px solid var(--adw-border);
+            border-radius: 8px;
+            padding: 0.65rem 0.75rem;
+            font-size: 0.95rem;
+            transition: box-shadow 0.2s, border-color 0.2s;
+            resize: vertical;
+            min-height: 120px;
+            /* Prevent drag events inside text areas */
+            -webkit-user-select: text;
+            user-select: text;
+        }
+
+        .adw-select {
+            min-height: auto;
+            cursor: pointer;
+        }
+
+        .adw-input:focus, .adw-select:focus {
+            outline: none;
+            border-color: var(--adw-accent);
+            box-shadow: 0 0 0 3px var(--adw-focus-ring);
+        }
+
+        .adw-btn {
+            background-color: var(--adw-btn-bg);
+            color: var(--adw-text-main);
+            border: 1px solid var(--adw-border);
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .adw-btn:hover {
+            background-color: var(--adw-btn-hover);
+        }
+
+        .adw-btn-primary {
+            background-color: var(--adw-accent);
+            color: var(--adw-accent-fg);
+            border-color: var(--adw-accent);
+        }
+
+        .adw-btn-primary:hover {
+            background-color: var(--adw-accent-hover);
+        }
+
+        .adw-btn-danger {
+            background-color: var(--adw-danger);
+            color: white;
+            border-color: var(--adw-danger);
+        }
+
+        .preset-chip {
+            background-color: var(--adw-btn-bg);
+            border: 1px solid var(--adw-border);
+            padding: 0.35rem 0.7rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+            display: inline-block;
+            text-align: left;
+        }
+
+        .preset-chip:hover {
+            background-color: var(--adw-btn-hover);
+            border-color: var(--adw-accent);
+        }
+
+        .chips-container {
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 6px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--adw-border);
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="adw-headerbar select-none">
+        <div class="flex items-center gap-3 flex-wrap">
+            <div class="flex items-center gap-2">
+                <span class="font-bold text-lg">AI Prompt Suite</span>
+                <select id="projectSelector" class="adw-select text-xs py-1 px-2 font-semibold" style="min-height: auto; width: auto;" onchange="switchProject(this.value)" title="Switch Project"></select>
+                <button class="adw-btn text-xs py-1 px-2" onclick="createNewProject()" title="Create new project">+ Project</button>
+                <button class="adw-btn text-xs py-1 px-2 text-red-500" onclick="deleteCurrentProject()" title="Delete current project">Del Project</button>
+            </div>
+            <div class="flex items-center gap-1 bg-black/5 dark:bg-white/5 p-1 rounded-lg border border-stone-500/20">
+                <select id="clipSelector" class="adw-select text-xs py-1 px-2 font-semibold" style="min-height: auto; width: auto;" onchange="switchClip(this.value)" title="Switch Clip"></select>
+                <button class="adw-btn text-xs py-1 px-2" onclick="createNewClip()" title="Create next sequential clip">+ Clip</button>
+                <button class="adw-btn text-xs py-1 px-2 text-red-500" onclick="deleteCurrentClip()" title="Delete current clip">Del Clip</button>
+            </div>
+        </div>
+        <div class="flex items-center gap-2 flex-wrap">
+            <button class="adw-btn text-xs" onclick="exportDataJSON()" title="Export all projects to JSON">Export JSON</button>
+            <label class="adw-btn text-xs cursor-pointer mb-0">
+                Import JSON <input type="file" accept=".json" class="hidden" onchange="importDataJSON(event)">
+            </label>
+            <button class="adw-btn text-xs" onclick="toggleAllNodes(false)">Collapse All</button>
+            <button class="adw-btn adw-btn-danger text-xs" onclick="clearAllData()" title="Reset workspace">Nuke All</button>
+        </div>
+    </header>
+
+    <main class="flex-grow p-4 md:p-6 lg:p-8 max-w-7xl mx-auto w-full flex flex-col gap-6">
+        
+        <div class="flex justify-between items-center text-sm" style="color: var(--adw-text-dim);">
+            <p>Click any node header to expand (only one expands at a time). Reorder using drag handles.</p>
+            <span id="saveStatus" class="font-mono text-xs text-emerald-500 hidden">Saved</span>
+        </div>
+
+        <!-- Sortable Node Container -->
+        <div id="sortableContainer" class="flex flex-col gap-4">
+            
+            <div class="node-card draggable-node" draggable="true" data-section-id="refImages">
+                <div class="node-header" onclick="toggleNode(this)">
+                    <div class="flex items-center gap-3">
+                        <span class="drag-handle" title="Drag to reorder" onclick="event.stopPropagation()">⠿</span>
+                        <input type="text" class="adw-input section-title-input font-semibold" style="padding: 0.2rem 0.4rem; min-height: auto; background: transparent; border-color: transparent;" value="Reference Images" onclick="event.stopPropagation()" onchange="saveToLocalStorage()">
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-mono toggle-indicator" style="color: var(--adw-text-dim);">Expand ▾</span>
+                        <button type="button" class="adw-btn adw-btn-danger text-xs px-2 py-1" onclick="event.stopPropagation(); removeSectionBlock(this);">Remove</button>
+                    </div>
+                </div>
+                <div class="node-body">
+                    <label for="refImages" class="adw-label">Reference Images Description</label>
+                    <textarea id="refImages" class="adw-input prompt-field" draggable="false" data-label="Reference Images" placeholder="e.g., image 1 is her. image 2 is the environment..."></textarea>
+                </div>
+            </div>
+
+            <div class="node-card draggable-node" draggable="true" data-section-id="artStyle">
+                <div class="node-header" onclick="toggleNode(this)">
+                    <div class="flex items-center gap-3">
+                        <span class="drag-handle" title="Drag to reorder" onclick="event.stopPropagation()">⠿</span>
+                        <input type="text" class="adw-input section-title-input font-semibold" style="padding: 0.2rem 0.4rem; min-height: auto; background: transparent; border-color: transparent;" value="Art Style & Medium" onclick="event.stopPropagation()" onchange="saveToLocalStorage()">
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-mono toggle-indicator" style="color: var(--adw-text-dim);">Expand ▾</span>
+                        <button type="button" class="adw-btn adw-btn-danger text-xs px-2 py-1" onclick="event.stopPropagation(); removeSectionBlock(this);">Remove</button>
+                    </div>
+                </div>
+                <div class="node-body flex flex-col gap-3">
+                    <label class="adw-label">Select from 25+ Art Style Presets (Click to append/replace):</label>
+                    <div class="chips-container border border-stone-500/20 rounded-lg bg-black/5">
+                        <button type="button" class="preset-chip" onclick="applyPreset('artStyle', 'Highly stylized 2D digital anime-realism illustration, manhwa/webtoon key visual style, crisp ink contour line art combined with hyper-rendered digital painting, high-contrast studio lighting.')">Anime Manhwa Style</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('artStyle', '1990s retro OVA anime aesthetic, cel-shaded animation style, thick ink outlines, authentic vintage analog film grain, VHS color grading.')">1990s Retro OVA Anime</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('artStyle', '2D Sakuga action anime key visual, highly dynamic fluid character motion lines, intense smear frames, high-contrast cel shading.')">2D Sakuga Action Anime</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('artStyle', 'Castlevania Nocturne dark gothic animated series style, rich painterly textures, dramatic chiaroscuro lighting.')">Castlevania Nocturne Style</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('artStyle', 'Retro 80s He-Man and Masters of the Universe cel cartoon style, bold thick ink lines, vibrant primary colors.')">Retro 80s He-Man Cartoon</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('artStyle', 'Cinematic hyper-realistic 35mm film shot, anamorphic lens flare, volumetric lighting, photorealistic textures.')">Cinematic Hyper-Realism</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('artStyle', 'Gritty cyberpunk neo-noir anime, neon reflections, deep shadows, moody cyan and magenta color grading.')">Cyberpunk Neo-Noir</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('artStyle', 'Classic 2D retro animation style, rubber-hose principles, expressive character animation.')">Classic Retro Animation</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('artStyle', 'Studio Ghibli lush hand-painted watercolor aesthetic, soft ambient lighting, whimsical pastoral beauty.')">Ghibli Watercolor Aesthetic</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('artStyle', 'Dark fantasy grimdark concept art, intricate cross-hatching, moody atmospheric haze.')">Grimdark Concept Art</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('artStyle', 'Ufotable high-octane magical combat digital compositing, vibrant particle effects, luminous glow rendering.')">Ufotable Magical Combat</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('artStyle', 'Kyoto Animation delicate soft pastel lighting, exquisite eye reflections, highly detailed emotional facial expressions.')">KyoAni Emotional Drama</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('artStyle', 'Trigger hyper-kinetic dynamic exaggerated perspective, bold marker stroke lines, neon pop-art color saturation.')">Studio Trigger Hyper-Kinetic</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('artStyle', 'Vintage 1970s vintage meji-anime cel aesthetic, muted color palette, grainy film stock texture.')">Vintage 70s Cel Anime</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('artStyle', 'Makoto Shinkai breathtaking skyscapes, hyper-detailed cloud shafts, radiant sun flare, luminous optical bloom.')">Shinkai Luminous Skyscapes</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('artStyle', 'Satoshi Kon psychological surrealism, blurring dream and reality, eerie cinematic staging.')">Satoshi Kon Surrealism</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('artStyle', 'Weta digital blockbuster cinematic CGI rendering, physical ray-traced reflections, subsurface skin scattering.')">Blockbuster CGI Realism</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('artStyle', 'Noir graphic novel ink wash, stark high contrast black and white shadows, moody cinematic framing.')">Noir Graphic Novel Ink</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('artStyle', 'Impressionist oil painting brushstrokes, visible thick paint texture, emotive light blending.')">Impressionist Oil Painting</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('artStyle', 'Cyberpunk edgerunners neon glitch aesthetics, vibrant saturated magenta and yellow hues, hyper-stylized lines.')">Cyberpunk Edgerunners Style</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('artStyle', 'Pixar 3D animated feature film aesthetic, subsurface scattering, stylized friendly proportions, warm lighting.')">Pixar 3D Animation</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('artStyle', 'Dark fantasy soulslike moody dark aesthetic, ash particles, crumbling gothic architecture, cold desaturated tones.')">Soulslike Dark Fantasy</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('artStyle', 'Vintage 1980s VHS anime mecha aesthetic, chunky mechanical paneling lines, analog TV static bleed.')">80s VHS Mecha Anime</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('artStyle', 'Hyper-stylized manhwa martial arts battle manhua ink strokes, flying sweat and chi aura particle effects.')">Manhua Martial Arts Style</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('artStyle', 'Surrealist dreamscape artistic painting, melting geometry, impossible perspective, ethereal fog.')">Surrealist Dreamscape</button>
+                    </div>
+                    <textarea id="artStyle" class="adw-input prompt-field" draggable="false" data-label="Art Style & Medium" placeholder="Select presets above or type custom art style..."></textarea>
+                </div>
+            </div>
+
+            <div class="node-card draggable-node" draggable="true" data-section-id="sceneVibes">
+                <div class="node-header" onclick="toggleNode(this)">
+                    <div class="flex items-center gap-3">
+                        <span class="drag-handle" title="Drag to reorder" onclick="event.stopPropagation()">⠿</span>
+                        <input type="text" class="adw-input section-title-input font-semibold" style="padding: 0.2rem 0.4rem; min-height: auto; background: transparent; border-color: transparent;" value="Scene Vibes" onclick="event.stopPropagation()" onchange="saveToLocalStorage()">
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-mono toggle-indicator" style="color: var(--adw-text-dim);">Expand ▾</span>
+                        <button type="button" class="adw-btn adw-btn-danger text-xs px-2 py-1" onclick="event.stopPropagation(); removeSectionBlock(this);">Remove</button>
+                    </div>
+                </div>
+                <div class="node-body flex flex-col gap-3">
+                    <label class="adw-label">Select Scene Vibes Presets (25+ options):</label>
+                    <div class="chips-container border border-stone-500/20 rounded-lg bg-black/5">
+                        <button type="button" class="preset-chip" onclick="applyPreset('sceneVibes', 'Suspense adventure unpredictability with high psychological tension and hazardous peril.')">Suspense Adventure & Unpredictability</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('sceneVibes', 'Dark psychological horror with oppressive dread and terrifying atmosphere.')">Dark Psychological Horror</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('sceneVibes', 'Gritty cyberpunk noir with neon rain, cynical mood, and high-tech dystopia.')">Cyberpunk Noir</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('sceneVibes', 'Epic high fantasy adventure with mystical wonder and ancient magical resonance.')">Epic High Fantasy</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('sceneVibes', 'Intense action-thriller pulse-pounding urgency with relentless pacing.')">Intense Action-Thriller</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('sceneVibes', 'Melancholic post-apocalyptic isolation with desolate silence and haunting beauty.')">Post-Apocalyptic Isolation</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('sceneVibes', 'Mysterious occult investigative tension with shadowy secrets and arcane discovery.')">Occult Investigative Tension</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('sceneVibes', 'Breathtaking romantic dramatic yearning with soft ambient lighting and emotional resonance.')">Romantic Dramatic Yearning</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('sceneVibes', 'Desperate survival struggle against insurmountable odds in a hostile environment.')">Desperate Survival Struggle</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('sceneVibes', 'High-energy triumphant victory celebration with warm sunlight breaking through storm clouds.')">Triumphant Victory Celebration</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('sceneVibes', 'Claustrophobic underground cave dread with dripping water echoes and stifling darkness.')">Claustrophobic Underground Dread</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('sceneVibes', 'Eerie otherworldly cosmic horror vibe with alien geometries and mind-bending stillness.')">Cosmic Horror Vibe</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('sceneVibes', 'Melancholy rainy city loneliness with neon lights reflecting in street puddles.')">Rainy City Loneliness</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('sceneVibes', 'Whimsical fairytale enchantment with glowing flora and magical dust motes dancing in air.')">Fairytale Enchantment</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('sceneVibes', 'Gritty medieval battlefield grit with smoke haze, clashing steel resonance, and mud.')">Medieval Battlefield Grit</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('sceneVibes', 'High-stakes corporate espionage tension in sleek minimalist glass skyscraper boardrooms.')">Corporate Espionage Tension</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('sceneVibes', 'Tranquil meditative Zen temple peacefulness with wind rustling bamboo leaves.')">Zen Temple Peacefulness</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('sceneVibes', 'Apocalyptic fiery destruction with towering infernos and billowing ash clouds.')">Apocalyptic Fiery Destruction</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('sceneVibes', 'Steampunk industrial grit with hissing steam pipes, brass gears turning, and coal smoke.')">Steampunk Industrial Grit</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('sceneVibes', 'Mystical starlit desert night with howling desert wind and ancient cosmic expansiveness.')">Mystical Starlit Desert</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('sceneVibes', 'Heartwarming cozy fireplace cabin comfort during a heavy winter snowstorm.')">Cozy Cabin Snowstorm</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('sceneVibes', 'Electrifying neon synthwave party atmosphere with heavy bass vibrations and laser grids.')">Neon Synthwave Party</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('sceneVibes', 'Bleak dystopian quarantine zone atmosphere with barbed wire and searchlights.')">Dystopian Quarantine Zone</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('sceneVibes', 'Ethereal angelic heavenly glow with blinding white light and floating celestial clouds.')">Ethereal Heavenly Glow</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('sceneVibes', 'Bizarre surreal dreamscape with impossible floating islands and clockwork skies.')">Bizarre Surreal Dreamscape</button>
+                    </div>
+                    <textarea id="sceneVibes" class="adw-input prompt-field" draggable="false" data-label="Scene Vibes" placeholder="Or type custom scene vibes..."></textarea>
+                </div>
+            </div>
+
+            <div class="node-card draggable-node" draggable="true" data-section-id="environment">
+                <div class="node-header" onclick="toggleNode(this)">
+                    <div class="flex items-center gap-3">
+                        <span class="drag-handle" title="Drag to reorder" onclick="event.stopPropagation()">⠿</span>
+                        <input type="text" class="adw-input section-title-input font-semibold" style="padding: 0.2rem 0.4rem; min-height: auto; background: transparent; border-color: transparent;" value="The Environment" onclick="event.stopPropagation()" onchange="saveToLocalStorage()">
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-mono toggle-indicator" style="color: var(--adw-text-dim);">Expand ▾</span>
+                        <button type="button" class="adw-btn adw-btn-danger text-xs px-2 py-1" onclick="event.stopPropagation(); removeSectionBlock(this);">Remove</button>
+                    </div>
+                </div>
+                <div class="node-body flex flex-col gap-3">
+                    <label class="adw-label">Select Cinematic Environment Presets (15+ options):</label>
+                    <div class="chips-container border border-stone-500/20 rounded-lg bg-black/5">
+                        <button type="button" class="preset-chip" onclick="applyPreset('environment', 'Ancient ruins with cracked stone walls, moss-covered pillars, a yawning pit of green acidic bubbling fluid with digesting skeletons, and a horizontal hemp rope across the chasm.')">Ancient Ruins & Acid Pit</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('environment', 'Luxury VIP penthouse hotel room featuring floor-to-ceiling glass windows overlooking a glittering cyberpunk metropolis skyline, polished marble floors.')">Luxury VIP Hotel Suite</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('environment', 'Dilapidated cyberpunk hacker den with exposed conduit wires, flickering holographic computer monitors casting blue glow, and stacked server racks.')">Dilapidated Cyberpunk Hacker Den</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('environment', 'Gothic cathedral interior with soaring ribbed vaulted ceilings, enormous stained-glass windows throwing colored light rays, and towering stone columns.')">Gothic Cathedral Nave</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('environment', 'Traditional minimalist Japanese tatami room with sliding shoji paper doors, warm paper lantern glow, and peaceful indoor rock garden courtyard view.')">Traditional Tatami Room</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('environment', 'Gritty underground subway station platform with rusted iron beams, flickering fluorescent lights, and graffiti-covered tiled walls.')">Gritty Subway Station</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('environment', 'Futuristic spaceship bridge command center with curved wraparound holographic displays, sleek metallic bulkheads, and blinking control panels.')">Spaceship Command Bridge</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('environment', 'Secluded mystical enchanted forest clearing with bioluminescent mushrooms, ancient gnarled oak trees, and floating magical spores.')">Enchanted Forest Clearing</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('environment', 'Victorian investigator study filled with towering bookshelves, leather-bound tomes, a glowing brass desk lamp, and a ticking grandfather clock.')">Victorian Investigator Study</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('environment', 'Post-apocalyptic highway overpass choked with abandoned rusted cars, dust swirling in harsh sunlight, and overgrown weeds breaking cracked asphalt.')">Post-Apocalyptic Highway</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('environment', 'High-tech subterranean secret laboratory with sterile white walls, humming cryogenic pods, and blue laser security grids.')">Underground Secret Laboratory</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('environment', 'Rustic medieval tavern interior with heavy oak tables, flickering hearth fire, swinging wooden saloon doors, and hanging cured hams.')">Rustic Medieval Tavern</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('environment', 'Opulent royal ballroom with crystal chandeliers, polished parquet floors, velvet drapery, and gilded baroque wall moldings.')">Opulent Royal Ballroom</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('preset_env_14', 'Desolate snowy arctic wasteland with howling blizzards, towering ice glaciers, and jagged frozen cliffs under an overcast grey sky.')">Arctic Snowy Wasteland</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('environment', 'Busy neon-lit Tokyo alleyway at night with glowing Japanese kanji signage, wet asphalt reflections, and steam venting from restaurant grates.')">Neon Tokyo Alleyway</button>
+                    </div>
+                    <textarea id="environment" class="adw-input prompt-field" draggable="false" data-label="The Environment" placeholder="Describe environment in detail..."></textarea>
+                </div>
+            </div>
+
+            <div class="node-card draggable-node" draggable="true" data-section-id="character">
+                <div class="node-header" onclick="toggleNode(this)">
+                    <div class="flex items-center gap-3">
+                        <span class="drag-handle" title="Drag to reorder" onclick="event.stopPropagation()">⠿</span>
+                        <input type="text" class="adw-input section-title-input font-semibold" style="padding: 0.2rem 0.4rem; min-height: auto; background: transparent; border-color: transparent;" value="Character" onclick="event.stopPropagation()" onchange="saveToLocalStorage()">
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-mono toggle-indicator" style="color: var(--adw-text-dim);">Expand ▾</span>
+                        <button type="button" class="adw-btn adw-btn-danger text-xs px-2 py-1" onclick="event.stopPropagation(); removeSectionBlock(this);">Remove</button>
+                    </div>
+                </div>
+                <div class="node-body flex flex-col gap-4">
+                    <div>
+                        <label class="adw-label text-sm">Physique Presets (15+ options):</label>
+                        <div class="chips-container border border-stone-500/20 rounded-lg bg-black/5 mb-2">
+                            <button type="button" class="preset-chip" onclick="insertCharacterAttribute('physique', 'Athletic mesomorph build with balanced proportional muscle definition.')">Athletic Mesomorph</button>
+                            <button type="button" class="preset-chip" onclick="insertCharacterAttribute('physique', 'Ectomorph slender lean frame with long graceful limbs.')">Ectomorph Slender Lean</button>
+                            <button type="button" class="preset-chip" onclick="insertCharacterAttribute('physique', 'Sinewy wiry muscle structure with hardened tendon definition.')">Sinewy Wiry Muscle</button>
+                            <button type="button" class="preset-chip" onclick="insertCharacterAttribute('physique', 'Skeletal build with prominent collarbones and delicate frame.')">Skeletal Build</button>
+                            <button type="button" class="preset-chip" onclick="insertCharacterAttribute('physique', 'V-taper broad bony shoulders with tiny waist and lean definition.')">V-Taper Broad Shoulders</button>
+                            <button type="button" class="preset-chip" onclick="insertCharacterAttribute('physique', 'Heavy-built burly powerful frame with massive physical presence.')">Heavy-Built Burly</button>
+                            <button type="button" class="preset-chip" onclick="insertCharacterAttribute('physique', 'Tall statuesque model physique with elegant proportions.')">Tall Statuesque</button>
+                            <button type="button" class="preset-chip" onclick="insertCharacterAttribute('physique', 'Compact muscular powerhouse frame with dense compact strength.')">Compact Muscular Powerhouse</button>
+                            <button type="button" class="preset-chip" onclick="insertCharacterAttribute('physique', 'Grounded sturdy build with wide hips and strong core balance.')">Grounded Sturdy Build</button>
+                            <button type="button" class="preset-chip" onclick="insertCharacterAttribute('physique', 'Extremely thin fragile frame with translucent porcelain skin.')">Extremely Thin Fragile</button>
+                            <button type="button" class="preset-chip" onclick="insertCharacterAttribute('physique', 'Super tall lanky height with long gangly arms and legs.')">Super Tall Lanky</button>
+                            <button type="button" class="preset-chip" onclick="insertCharacterAttribute('physique', 'Herculean bodybuilder physique with bulging vascular muscles.')">Herculean Bodybuilder</button>
+                            <button type="button" class="preset-chip" onclick="insertCharacterAttribute('physique', 'Agile feline acrobat physique with flexible spine and springy limbs.')">Agile Feline Acrobat</button>
+                            <button type="button" class="preset-chip" onclick="parsePhysique('physique', 'Compact petite frame with deceptively high explosive power.')">Compact Petite</button>
+                            <button type="button" class="preset-chip" onclick="insertCharacterAttribute('physique', 'Chiselled classical hero physique with symmetrical proportions.')">Chiselled Hero Physique</button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="adw-label text-sm">Personality & Mannerism Presets (25+ options):</label>
+                        <div class="chips-container border border-stone-500/20 rounded-lg bg-black/5 mb-2">
+                            <button type="button" class="preset-chip" onclick="insertCharacterAttribute('personality', 'Stoic, unflinching, cold focus with absolute emotional control.')">Stoic Unflinching Focus</button>
+                            <button type="button" class="preset-chip" onclick="insertCharacterAttribute('personality', 'Paranoid, darting watchful eyes, hyper-vigilant scanning surroundings.')">Paranoid Hyper-Vigilant</button>
+                            <button type="button" class="preset-chip" onclick="insertCharacterAttribute('personality', 'Stealthy, cat-like silent movements, predatory grace.')">Stealthy Cat-Like Grace</button>
+                            <button type="button" class="preset-chip" onclick="insertCharacterAttribute('personality', 'Gliding ghostly movement, seemingly weightless floating motion.')">Gliding Ghostly Movement</button>
+                            <button type="button" class="preset-chip" onclick="insertCharacterAttribute('personality', 'Impulsive, explosive reactive movements, high nervous energy.')">Impulsive High Energy</button>
+                            <button type="button" class="preset-chip" onclick="insertCharacterAttribute('personality', 'Calculating, methodical, slow deliberate precision gestures.')">Calculating Methodical</button>
+                            <button type="button" class="preset-chip" onclick="insertCharacterAttribute('personality', 'Arrogant swagger, chin tilted up, smug confident smirk.')">Arrogant Swagger</button>
+                            <button type="button" class="preset-chip" onclick="insertCharacterAttribute('personality', 'Melancholic, brooding gaze downward, sorrowful contemplative posture.')">Melancholic Brooding</button>
+                            <button type="button" class="preset-chip" onclick="insertCharacterAttribute('personality', 'Hyper-active fidgeting, constant restless motion, wide expressive eyes.')">Hyper-Active Fidgeting</button>
+                            <button type="button" class="preset-chip" onclick="insertCharacterAttribute('personality', 'Fearful trembling posture, defensive hunched shoulders, darting glances.')">Fearful Trembling Posture</button>
+                            <button type="button" class="preset-chip" onclick="insertCharacterAttribute('personality', 'Enigmatic serene smile, unfathomable calm, mysterious aura.')">Enigmatic Serene Smile</button>
+                            <button type="button" class="preset-chip" onclick="insertCharacterAttribute('personality', 'Aggressive predatory stance, leaning forward, tense coiled muscles.')">Aggressive Predatory Stance</button>
+                            <button type="button" class="preset-chip" onclick="insertCharacterAttribute('personality', 'Exhausted fatigued slouch, heavy drooping eyelids, sluggish movements.')">Exhausted Slouch</button>
+                            <button type="button" class="preset-chip" onclick="insertCharacterAttribute('personality', 'Playful teasing demeanor, cocked head, mischievous sparkling grin.')">Playful Mischievous Grin</button>
+                            <button type="button" class="preset-chip" onclick="insertCharacterAttribute('personality', 'Cold ruthless assassin focus, zero unnecessary motion, lethal stillness.')">Cold Lethal Stillness</button>
+                            <button type="button" class="preset-chip" onclick="insertCharacterAttribute('personality', 'Insane manic giggling, erratic twitching movements, wild unhinged eyes.')">Insane Manic Twitching</button>
+                            <button type="button" class="preset-chip" onclick="insertCharacterAttribute('personality', 'Noble aristocratic grace, perfectly straight posture, dignified composure.')">Noble Aristocratic Grace</button>
+                            <button type="button" class="preset-chip" onclick="insertCharacterAttribute('personality', 'Cynical world-weary slouch, hands in pockets, unimpressed gaze.')">Cynical World-Weary</button>
+                            <button type="button" class="preset-chip" onclick="insertCharacterAttribute('personality', 'Brave reckless enthusiasm, chest puffed out, eager charging energy.')">Brave Reckless Enthusiasm</button>
+                            <button type="button" class="preset-chip" onclick="insertCharacterAttribute('personality', 'Secretive paranoid glancing over shoulders, whispering nervous tone.')">Secretive Paranoid</button>
+                            <button type="button" class="preset-chip" onclick="insertCharacterAttribute('personality', 'Warm nurturing comforting presence, gentle reassuring gestures.')">Warm Comforting Presence</button>
+                            <button type="button" class="preset-chip" onclick="insertCharacterAttribute('personality', 'Scholarly intellectual focus, adjusting glasses, examining details.')">Scholarly Intellectual</button>
+                            <button type="button" class="preset-chip" onclick="insertCharacterAttribute('personality', 'Stubborn unyielding resolve, jaw clenched, planted stance.')">Stubborn Unyielding Resolve</button>
+                            <button type="button" class="preset-chip" onclick="insertCharacterAttribute('personality', 'Seductive hypnotic sway, slow graceful turns, smoldering gaze.')">Seductive Hypnotic Sway</button>
+                            <button type="button" class="preset-chip" onclick="insertCharacterAttribute('personality', 'Feral wild beast demeanor, crouching low, baring teeth, twitching ears.')">Feral Wild Beast</button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="adw-label text-sm">Wardrobe & Attire Presets (25+ options):</label>
+                        <div class="chips-container border border-stone-500/20 rounded-lg bg-black/5 mb-2">
+                            <button type="button" class="preset-chip" onclick="insertCharacterAttribute('wardrobe', 'Pink leotard with halter neck style, large square neck hole, large leg holes extended up to waist, paired with an elegant dark leather belt.')">Halter Leotard & Belt</button>
+                            <button type="button" class="preset-chip" onclick="insertCharacterAttribute('wardrobe', 'Tight-fit dress with trailing skirt, premium fluid fabric, and tight elegant waist belt.')">Tight Dress with Trailing Skirt</button>
+                            <button type="button" class="preset-chip" onclick="insertCharacterAttribute('wardrobe', 'Tactical combat gear with reinforced Kevlar plating, utility webbing, and durable cargo trousers.')">Tactical Combat Gear</button>
+                            <button type="button" class="preset-chip" onclick="insertCharacterAttribute('wardrobe', 'Racerback athletic bodysuit with breathable moisture-wicking synthetic fabric and compression fit.')">Racerback Athletic Bodysuit</button>
+                            <button type="button" class="preset-chip" onclick="insertCharacterAttribute('wardrobe', 'Flowing silk kimono robe with embroidered intricate floral patterns and wide Obi sash.')">Silk Kimono & Obi Sash</button>
+                            <button type="button" class="preset-chip" onclick="insertCharacterAttribute('wardrobe', 'Cyberpunk leather biker jacket with glowing LED piping, studded straps, and ripped denim jeans.')">Cyberpunk Biker Jacket</button>
+                            <button type="button" class="preset-chip" onclick="insertCharacterAttribute('wardrobe', 'Heavy medieval steel plate armor suit with chainmail underlay and battered surcoat.')">Medieval Steel Plate Armor</button>
+                            <button type="button" class="preset-chip" onclick="insertCharacterAttribute('preset_wardrobe_8', 'Sleek corporate tailored business suit with crisp white dress shirt and silk necktie.')">Corporate Tailored Suit</button>
+                            <button type="button" class="preset-chip" onclick="insertCharacterAttribute('wardrobe', 'Post-apocalyptic scavenger leather duster coat over studded leather straps and worn boots.')">Scavenger Leather Duster</button>
+                            <button type="button" class="preset-chip" onclick="insertCharacterAttribute('wardrobe', 'Ethereal mage hooded robes made of shimmering star-woven fabric with runes.')">Ethereal Mage Robes</button>
+                            <button type="button" class="preset-chip" onclick="insertCharacterAttribute('wardrobe', 'Casual oversized streetwear hoodie with graphic prints and baggy cargo pants.')">Oversized Streetwear Hoodie</button>
+                            <button type="button" class="preset-chip" onclick="insertCharacterAttribute('wardrobe', 'Victorian gothic corset dress with ruffled lace trim, tiered crinoline skirt, and velvet gloves.')">Victorian Gothic Corset Dress</button>
+                            <button type="button" class="preset-chip" onclick="insertCharacterAttribute('wardrobe', 'Steampunk adventurer leather corset, goggles on top hat, utility belt with brass vials.')">Steampunk Adventurer Gear</button>
+                            <button type="button" class="preset-chip" onclick="insertCharacterAttribute('preset_wardrobe_14', 'Minimalist athletic sports bra and high-waisted compression leggings.')">Athletic Sports Bra & Leggings</button>
+                            <button type="button" class="preset-chip" onclick="insertCharacterAttribute('wardrobe', 'Traditional ninja shinobi shozoku dark stealth tunic with face mask and arm guards.')">Ninja Shinobi Tunic</button>
+                            <button type="button" class="preset-chip" onclick="insertCharacterAttribute('wardrobe', 'High-society velvet evening gown with deep split thigh and sparkling diamond choker.')">High-Society Velvet Gown</button>
+                            <button type="button" class="preset-chip" onclick="insertCharacterAttribute('wardrobe', 'Rugged wilderness ranger leather tunic with fur shoulder mantle and quiver strap.')">Ranger Leather Tunic</button>
+                            <button type="button" class="preset-chip" onclick="insertCharacterAttribute('wardrobe', 'Futuristic astronaut pressure suit with reflective visor helmet and life-support backpack.')">Futuristic Astronaut Suit</button>
+                            <button type="button" class="preset-chip" onclick="insertCharacterAttribute('wardrobe', 'Punk rock studded leather vest with anarchist patches, ripped fishnets, and combat boots.')">Punk Rock Studded Vest</button>
+                            <button type="button" class="preset-chip" onclick="insertCharacterAttribute('wardrobe', 'Monk ascetic hemp robes with wooden prayer beads and straw sandals.')">Monk Ascetic Hemp Robes</button>
+                            <button type="button" class="preset-chip" onclick="insertCharacterAttribute('wardrobe', 'Bikini armor set with metal chest plates, leather hip guards, and thigh-high greaves.')">Fantasy Bikini Armor</button>
+                            <button type="button" class="preset-chip" onclick="insertCharacterAttribute('wardrobe', 'Sci-fi mech pilot plugsuit with form-fitting synthetic polymers and neural connection ports.')">Sci-Fi Mech Plugsuit</button>
+                            <button type="button" class="preset-chip" onclick="insertCharacterAttribute('wardrobe', 'Classic detective trench coat over a wrinkled shirt and fedora hat.')">Classic Detective Trench Coat</button>
+                            <button type="button" class="preset-chip" onclick="insertCharacterAttribute('wardrobe', 'Royal monarch velvet cape trimmed with ermine fur over ornate embroidered tunic.')">Royal Monarch Ermine Cape</button>
+                            <button type="button" class="preset-chip" onclick="insertCharacterAttribute('wardrobe', 'Dystopian prisoner jumpsuit with stenciled inmate numbers and heavy iron ankle shackles.')">Dystopian Prisoner Jumpsuit</button>
+                        </div>
+                    </div>
+
+                    <textarea id="character" class="adw-input prompt-field" draggable="false" data-label="Character" placeholder="Combine presets above or describe character details..."></textarea>
+                </div>
+            </div>
+
+            <div class="node-card draggable-node" draggable="true" data-section-id="actionScene">
+                <div class="node-header" onclick="toggleNode(this)">
+                    <div class="flex items-center gap-3">
+                        <span class="drag-handle" title="Drag to reorder" onclick="event.stopPropagation()">⠿</span>
+                        <input type="text" class="adw-input section-title-input font-semibold" style="padding: 0.2rem 0.4rem; min-height: auto; background: transparent; border-color: transparent;" value="Action Scene" onclick="event.stopPropagation()" onchange="saveToLocalStorage()">
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-mono toggle-indicator" style="color: var(--adw-text-dim);">Expand ▾</span>
+                        <button type="button" class="adw-btn adw-btn-danger text-xs px-2 py-1" onclick="event.stopPropagation(); removeSectionBlock(this);">Remove</button>
+                    </div>
+                </div>
+                <div class="node-body">
+                    <label for="actionScene" class="adw-label">Action Scene Details</label>
+                    <textarea id="actionScene" class="adw-input prompt-field" draggable="false" data-label="Action Scene" placeholder="Describe active movement and sequence for this specific clip..."></textarea>
+                </div>
+            </div>
+
+            <div class="node-card draggable-node" draggable="true" data-section-id="physics">
+                <div class="node-header" onclick="toggleNode(this)">
+                    <div class="flex items-center gap-3">
+                        <span class="drag-handle" title="Drag to reorder" onclick="event.stopPropagation()">⠿</span>
+                        <input type="text" class="adw-input section-title-input font-semibold" style="padding: 0.2rem 0.4rem; min-height: auto; background: transparent; border-color: transparent;" value="Physics & Mechanics" onclick="event.stopPropagation()" onchange="saveToLocalStorage()">
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-mono toggle-indicator" style="color: var(--adw-text-dim);">Expand ▾</span>
+                        <button type="button" class="adw-btn adw-btn-danger text-xs px-2 py-1" onclick="event.stopPropagation(); removeSectionBlock(this);">Remove</button>
+                    </div>
+                </div>
+                <div class="node-body">
+                    <label for="physics" class="adw-label">Physics & Weight Dynamics</label>
+                    <textarea id="physics" class="adw-input prompt-field" draggable="false" data-label="Physics & Specific Mechanics" placeholder="Gravity, weight displacement, rope tension..."></textarea>
+                </div>
+            </div>
+
+            <div class="node-card draggable-node" draggable="true" data-section-id="cinematography">
+                <div class="node-header" onclick="toggleNode(this)">
+                    <div class="flex items-center gap-3">
+                        <span class="drag-handle" title="Drag to reorder" onclick="event.stopPropagation()">⠿</span>
+                        <input type="text" class="adw-input section-title-input font-semibold" style="padding: 0.2rem 0.4rem; min-height: auto; background: transparent; border-color: transparent;" value="Cinematography & Camera" onclick="event.stopPropagation()" onchange="saveToLocalStorage()">
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-mono toggle-indicator" style="color: var(--adw-text-dim);">Expand ▾</span>
+                        <button type="button" class="adw-btn adw-btn-danger text-xs px-2 py-1" onclick="event.stopPropagation(); removeSectionBlock(this);">Remove</button>
+                    </div>
+                </div>
+                <div class="node-body flex flex-col gap-3">
+                    <label class="adw-label">Cinematography Presets (Click to append):</label>
+                    <div class="chips-container border border-stone-500/20 rounded-lg bg-black/5">
+                        <button type="button" class="preset-chip" onclick="applyPreset('cinematography', 'Multiple dynamic cinematic camera cuts every 0.3 seconds emphasizing fast-paced action and emotional tension.')">Camera Cuts (Every 0.3s)</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('cinematography', 'Multiple dynamic cinematic camera cuts every 0.5 seconds emphasizing rapid rhythm and drama.')">Camera Cuts (Every 0.5s)</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('cinematography', 'Multiple dynamic cinematic camera cuts every 1 second emphasizing balanced pacing and movement.')">Camera Cuts (Every 1s)</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('cinematography', 'Multiple dynamic cinematic camera cuts every 2 seconds for smooth dramatic shifts.')">Camera Cuts (Every 2s)</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('cinematography', 'Constant smooth tracking camera side-profile shot following character movement.')">Constant Tracking Camera</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('cinematography', 'Constant smooth orbiting camera panning 360 degrees around the character.')">Constant Orbiting Camera</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('cinematography', 'Dramatic low-angle hero shot looking up, emphasizing scale and danger.')">Dramatic Low-Angle Shot</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('cinematography', 'Extreme close-up macro shot on facial expression, eyes, and sweat droplets.')">Extreme Close-Up Macro</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('cinematography', 'Bird-eye high angle wide master shot showing the full hazardous environment.')">Bird-Eye High Angle Master Shot</button>
+                        <button type="button" class="preset-chip" onclick="applyPreset('cinematography', 'Handheld shaky cam simulation adding immersive documentary realism and panic.')">Handheld Shaky Cam Panic</button>
+                    </div>
+                    <textarea id="cinematography" class="adw-input prompt-field" draggable="false" data-label="Cinematography & Camera" placeholder="Or type custom camera directives..."></textarea>
+                </div>
+            </div>
+
+            <div class="node-card draggable-node" draggable="true" data-section-id="rules">
+                <div class="node-header" onclick="toggleNode(this)">
+                    <div class="flex items-center gap-3">
+                        <span class="drag-handle" title="Drag to reorder" onclick="event.stopPropagation()">⠿</span>
+                        <input type="text" class="adw-input section-title-input font-semibold" style="padding: 0.2rem 0.4rem; min-height: auto; background: transparent; border-color: transparent;" value="Rules & Constraints" onclick="event.stopPropagation()" onchange="saveToLocalStorage()">
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-mono toggle-indicator" style="color: var(--adw-text-dim);">Expand ▾</span>
+                        <button type="button" class="adw-btn adw-btn-danger text-xs px-2 py-1" onclick="event.stopPropagation(); removeSectionBlock(this);">Remove</button>
+                    </div>
+                </div>
+                <div class="node-body flex flex-col gap-3">
+                    <label class="adw-label">Rules Presets (Click to append):</label>
+                    <div class="chips-container border border-stone-500/20 rounded-lg bg-black/5">
+                        <button type="button" class="preset-chip" onclick="appendRuleText('Only render what is mentioned under action scene. The rest of it is only context and things that is needed to refer to when making the video. Do not render anything else.')">Strict Action Scope Guard</button>
+                        <button type="button" class="preset-chip" onclick="appendRuleText('Do not make the characters notice or face the camera.')">Never Look at Camera</button>
+                        <button type="button" class="preset-chip" onclick="appendRuleText('The characters react and interact organically with the environment and other characters around them.')">Organic Environment Interaction</button>
+                        <button type="button" class="preset-chip" onclick="appendRuleText('Do not use reference images as video frames; only render what is mentioned under action scene.')">No Ref Images as Frames</button>
+                        <button type="button" class="preset-chip" onclick="appendRuleText('Maintain exact character physical consistency across all cuts and camera angles.')">Strict Character Consistency</button>
+                        <button type="button" class="preset-chip" onclick="appendRuleText('Keep lighting and atmospheric conditions strictly uniform throughout the shot sequence.')">Uniform Atmospheric Lighting</button>
+                    </div>
+                    <div class="checkbox-group" id="rulesContainer" style="display:none;"></div>
+                    <div>
+                        <label class="text-xs font-semibold block mb-1" style="color: var(--adw-text-dim);">Custom Rules & Constraints:</label>
+                        <textarea id="customRulesInput" class="adw-input prompt-field" draggable="false" data-label="Rules & Constraints" style="min-height: 100px;" placeholder="Type or click presets above to add rules..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div id="extraSectionsContainer" class="flex flex-col gap-4"></div>
+
+        <div class="flex justify-center">
+            <button type="button" class="adw-btn" onclick="addExtraSection()">
+                + Add Another Custom Section
+            </button>
+        </div>
+
+        <div class="node-card">
+            <div class="node-header" style="background-color: var(--adw-accent); color: var(--adw-accent-fg);" onclick="toggleNode(this)">
+                <div class="flex items-center gap-3">
+                    <span class="font-semibold">Final Compiled Prompt for Active Clip (Editable)</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-xs font-mono toggle-indicator" style="color: rgba(255,255,255,0.8);">Expand ▾</span>
+                    <button id="generateBtn" class="adw-btn" style="background: #2ec27e; color: white;" onclick="event.stopPropagation(); compilePrompt();">Generate Prompt</button>
+                    <button id="copyBtn" class="adw-btn" style="background: white; color: black;" onclick="event.stopPropagation(); copyPrompt()">Copy Output</button>
+                </div>
+            </div>
+            <div class="node-body">
+                <p class="text-xs mb-2" style="color: var(--adw-text-dim);">You can freely edit the compiled prompt below. Clicking "Generate Prompt" above will compile fresh values from fields.</p>
+                <textarea id="finalOutput" class="adw-input" draggable="false" style="min-height: 350px; font-family: monospace; background-color: var(--adw-window-bg);" placeholder="Click 'Generate Prompt' to compile your prompt here..."></textarea>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let sectionOrder = ['refImages', 'artStyle', 'sceneVibes', 'environment', 'character', 'actionScene', 'physics', 'cinematography', 'rules'];
+
+        // Multi-project & multi-clip state management
+        let masterProjects = {
+            activeProjectId: 'proj_1',
+            projects: {
+                'proj_1': {
+                    name: 'Project 1',
+                    activeClipId: 'clip_1',
+                    clips: {
+                        'clip_1': {
+                            name: 'Clip 1',
+                            order: [...sectionOrder],
+                            titles: {
+                                refImages: 'Reference Images',
+                                artStyle: 'Art Style & Medium',
+                                sceneVibes: 'Scene Vibes',
+                                environment: 'The Environment',
+                                character: 'Character',
+                                actionScene: 'Action Scene',
+                                physics: 'Physics & Mechanics',
+                                cinematography: 'Cinematography & Camera',
+                                rules: 'Rules & Constraints'
+                            },
+                            fields: {},
+                            customRules: '',
+                            extras: []
+                        }
+                    }
+                }
+            }
+        };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadFromLocalStorage();
+            initDragAndDrop();
+            renderProjectSelector();
+            renderClipSelector();
+            loadActiveClipData();
+            compilePrompt();
+        });
+
+        // Strict accordion behavior: open one node, auto-collapse others, and scroll into view centered
+        function toggleNode(header) {
+            const card = header.parentElement;
+            const willExpand = !card.classList.contains('expanded');
+
+            document.querySelectorAll('.node-card').forEach(c => {
+                c.classList.remove('expanded');
+                const ind = c.querySelector('.toggle-indicator');
+                if (ind && !c.querySelector('button[style*="background: var(--adw-accent)"]')) {
+                    ind.innerText = 'Expand ▾';
+                }
+            });
+
+            if (willExpand) {
+                card.classList.add('expanded');
+                const indicator = header.querySelector('.toggle-indicator');
+                if (indicator) {
+                    indicator.innerText = 'Collapse ▴';
+                }
+                // Smooth scroll into center view
+                setTimeout(() => {
+                    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 100);
+            }
+        }
+
+        function toggleAllNodes(expand) {
+            document.querySelectorAll('.node-card').forEach(card => {
+                const indicator = card.querySelector('.toggle-indicator');
+                if (expand) {
+                    card.classList.add('expanded');
+                    if (indicator) indicator.innerText = 'Collapse ▴';
+                } else {
+                    card.classList.remove('expanded');
+                    if (indicator) indicator.innerText = 'Expand ▾';
+                }
+            });
+        }
+
+        function applyPreset(elementId, text) {
+            const el = document.getElementById(elementId);
+            if (el) {
+                el.value = el.value.trim() !== '' ? el.value + ' ' + text : text;
+                saveToLocalStorage();
+                showSavedIndicator();
+            }
+        }
+
+        function insertCharacterAttribute(category, value) {
+            if (!value) return;
+            const el = document.getElementById('character');
+            if (!el) return;
+            el.value = el.value.trim() !== '' ? el.value + ' ' + value : value;
+            saveToLocalStorage();
+            showSavedIndicator();
+        }
+
+        function appendRuleText(ruleText) {
+            const el = document.getElementById('customRulesInput');
+            if (!el) return;
+            el.value = el.value.trim() !== '' ? el.value + '\n- ' + ruleText : '- ' + ruleText;
+            saveToLocalStorage();
+            showSavedIndicator();
+        }
+
+        document.addEventListener('input', (e) => {
+            if (e.target.classList.contains('prompt-field') || e.target.classList.contains('extra-title') || e.target.classList.contains('extra-content') || e.target.classList.contains('section-title-input')) {
+                saveToLocalStorage();
+                showSavedIndicator();
+            }
+        });
+
+        function ensureFullStop(text) {
+            const trimmed = text.trim();
+            if (!trimmed) return "";
+            const lastChar = trimmed.slice(-1);
+            return ['.', '!', '?', ':', ';'].includes(lastChar) ? trimmed : trimmed + '.';
+        }
+
+        function compilePrompt() {
+            saveActiveClipData();
+            let compiledText = "";
+            const container = document.getElementById('sortableContainer');
+            const cards = container.querySelectorAll('.draggable-node');
+
+            sectionOrder = [];
+            cards.forEach(card => {
+                const sectionId = card.getAttribute('data-section-id');
+                sectionOrder.push(sectionId);
+                const titleInput = card.querySelector('.section-title-input');
+                const sectionTitle = titleInput ? titleInput.value.trim() : sectionId;
+
+                const textarea = card.querySelector('.prompt-field');
+                if (textarea) {
+                    const value = textarea.value.trim();
+                    if (value) {
+                        compiledText += `--- ${sectionTitle} ---\n${ensureFullStop(value)}\n\n`;
+                    }
+                }
+            });
+
+            document.querySelectorAll('.extra-section-item').forEach(item => {
+                const title = item.querySelector('.extra-title').value.trim() || 'Additional Notes';
+                const content = item.querySelector('.extra-content').value.trim();
+                if (content) {
+                    compiledText += `--- ${title} ---\n${ensureFullStop(content)}\n\n`;
+                }
+            });
+
+            document.getElementById('finalOutput').value = compiledText.trim();
+            showSavedIndicator();
+        }
+
+        function initDragAndDrop() {
+            const container = document.getElementById('sortableContainer');
+            let draggedNode = null;
+
+            container.addEventListener('dragstart', (e) => {
+                // Prevent drag if inside text areas or input elements
+                if (['TEXTAREA', 'INPUT', 'BUTTON', 'SELECT'].includes(e.target.tagName)) return;
+                draggedNode = e.target.closest('.draggable-node');
+                if (draggedNode) {
+                    draggedNode.classList.add('dragging');
+                    e.dataTransfer.effectAllowed = 'move';
+                }
+            });
+
+            container.addEventListener('dragend', () => {
+                if (draggedNode) {
+                    draggedNode.classList.remove('dragging');
+                    draggedNode = null;
+                    saveToLocalStorage();
+                }
+            });
+
+            container.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+                const targetNode = e.target.closest('.draggable-node');
+                if (targetNode && targetNode !== draggedNode) {
+                    const rect = targetNode.getBoundingClientRect();
+                    const next = (e.clientY - rect.top) / (rect.bottom - rect.top) > 0.5;
+                    container.insertBefore(draggedNode, next ? targetNode.nextSibling : targetNode);
+                }
+            });
+        }
+
+        function removeSectionBlock(btn) {
+            const card = btn.closest('.draggable-node');
+            if (card) {
+                card.remove();
+                saveToLocalStorage();
+            }
+        }
+
+        function addExtraSection(savedTitle = '', savedContent = '') {
+            const container = document.getElementById('extraSectionsContainer');
+            const card = document.createElement('div');
+            card.className = 'node-card extra-section-item';
+            card.innerHTML = `
+                <div class="node-header bg-stone-100 dark:bg-stone-800" onclick="toggleNode(this)">
+                    <div class="flex items-center gap-3 w-3/4">
+                        <input type="text" class="adw-input extra-title font-semibold" draggable="false" style="padding: 0.3rem 0.5rem; min-height: auto;" placeholder="Section Title" value="${savedTitle}" onclick="event.stopPropagation()">
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-mono toggle-indicator" style="color: var(--adw-text-dim);">Expand ▾</span>
+                        <button type="button" class="adw-btn adw-btn-danger text-xs px-2 py-1" onclick="event.stopPropagation(); this.closest('.extra-section-item').remove(); saveToLocalStorage();">Remove</button>
+                    </div>
+                </div>
+                <div class="node-body">
+                    <textarea class="adw-input extra-content prompt-field" draggable="false" placeholder="Enter details...">${savedContent}</textarea>
+                </div>
+            `;
+            container.appendChild(card);
+            saveToLocalStorage();
+        }
+
+        // Multi-project and clip management functions
+        function renderProjectSelector() {
+            const selector = document.getElementById('projectSelector');
+            selector.innerHTML = '';
+            for (const [id, proj] of Object.entries(masterProjects.projects)) {
+                const opt = document.createElement('option');
+                opt.value = id;
+                opt.textContent = proj.name;
+                if (id === masterProjects.activeProjectId) opt.selected = true;
+                selector.appendChild(opt);
+            }
+        }
+
+        function switchProject(projId) {
+            saveActiveClipData();
+            masterProjects.activeProjectId = projId;
+            const proj = masterProjects.projects[projId];
+            if (proj && proj.activeClipId && proj.clips[proj.activeClipId]) {
+                // Keep active clip
+            } else if (proj && Object.keys(proj.clips).length > 0) {
+                proj.activeClipId = Object.keys(proj.clips)[0];
+            }
+            renderClipSelector();
+            loadActiveClipData();
+        }
+
+        function createNewProject() {
+            saveActiveClipData();
+            const projIds = Object.keys(masterProjects.projects);
+            const newId = 'proj_' + Date.now();
+            const newName = 'Project ' + (projIds.length + 1);
+
+            const activeProj = masterProjects.projects[masterProjects.activeProjectId];
+            const activeClipId = 'clip_' + Date.now();
+            
+            masterProjects.projects[newId] = {
+                name: newName,
+                activeClipId: activeClipId,
+                clips: {
+                    [activeClipId]: {
+                        name: 'Clip 1',
+                        order: [...sectionOrder],
+                        titles: JSON.parse(JSON.stringify(activeProj.clips[activeProj.activeClipId].titles || {})),
+                        fields: JSON.parse(JSON.stringify(activeProj.clips[activeProj.activeClipId].fields || {})),
+                        customRules: activeProj.clips[activeProj.activeClipId].customRules || '',
+                        extras: JSON.parse(JSON.stringify(activeProj.clips[activeProj.activeClipId].extras || []))
+                    }
+                }
+            };
+
+            masterProjects.activeProjectId = newId;
+            renderProjectSelector();
+            renderClipSelector();
+            loadActiveClipData();
+            saveToLocalStorage();
+        }
+
+        function deleteCurrentProject() {
+            const projIds = Object.keys(masterProjects.projects);
+            if (projIds.length <= 1) {
+                alert("Cannot delete the only remaining project.");
+                return;
+            }
+            if (!confirm("Are you sure you want to delete this entire project and all its clips?")) return;
+
+            delete masterProjects.projects[masterProjects.activeProjectId];
+            masterProjects.activeProjectId = Object.keys(masterProjects.projects)[0];
+            renderProjectSelector();
+            renderClipSelector();
+            loadActiveClipData();
+            saveToLocalStorage();
+        }
+
+        function renderClipSelector() {
+            const proj = masterProjects.projects[masterProjects.activeProjectId];
+            const selector = document.getElementById('clipSelector');
+            selector.innerHTML = '';
+            if (!proj) return;
+            for (const [id, clip] of Object.entries(proj.clips)) {
+                const opt = document.createElement('option');
+                opt.value = id;
+                opt.textContent = clip.name;
+                if (id === proj.activeClipId) opt.selected = true;
+                selector.appendChild(opt);
+            }
+        }
+
+        function switchClip(clipId) {
+            saveActiveClipData();
+            const proj = masterProjects.projects[masterProjects.activeProjectId];
+            if (proj) {
+                proj.activeClipId = clipId;
+                loadActiveClipData();
+            }
+        }
+
+        function createNewClip() {
+            saveActiveClipData();
+            const proj = masterProjects.projects[masterProjects.activeProjectId];
+            if (!proj) return;
+
+            const clipIds = Object.keys(proj.clips);
+            const newId = 'clip_' + Date.now();
+            const newName = 'Clip ' + (clipIds.length + 1);
+
+            const activeClip = proj.clips[proj.activeClipId];
+            proj.clips[newId] = {
+                name: newName,
+                order: [...activeClip.order],
+                titles: JSON.parse(JSON.stringify(activeClip.titles || {})),
+                fields: JSON.parse(JSON.stringify(activeClip.fields)),
+                customRules: activeClip.customRules,
+                extras: JSON.parse(JSON.stringify(activeClip.extras))
+            };
+
+            proj.activeClipId = newId;
+            renderClipSelector();
+            loadActiveClipData();
+            saveToLocalStorage();
+        }
+
+        function deleteCurrentClip() {
+            const proj = masterProjects.projects[masterProjects.activeProjectId];
+            if (!proj) return;
+            const clipIds = Object.keys(proj.clips);
+            if (clipIds.length <= 1) {
+                alert("Cannot delete the only remaining clip in this project.");
+                return;
+            }
+            if (!confirm("Are you sure you want to delete this clip?")) return;
+
+            delete proj.clips[proj.activeClipId];
+            proj.activeClipId = Object.keys(proj.clips)[0];
+            renderClipSelector();
+            loadActiveClipData();
+            saveToLocalStorage();
+        }
+
+        function saveActiveClipData() {
+            const proj = masterProjects.projects[masterProjects.activeProjectId];
+            if (!proj) return;
+            const clip = proj.clips[proj.activeClipId];
+            if (!clip) return;
+
+            clip.fields = {};
+            document.querySelectorAll('.prompt-field').forEach(f => {
+                if (f.id) clip.fields[f.id] = f.value;
+            });
+
+            clip.titles = {};
+            document.querySelectorAll('.draggable-node').forEach(card => {
+                const sId = card.getAttribute('data-section-id');
+                const tInput = card.querySelector('.section-title-input');
+                if (sId && tInput) {
+                    clip.titles[sId] = tInput.value;
+                }
+            });
+
+            clip.order = [];
+            document.querySelectorAll('.draggable-node').forEach(card => {
+                clip.order.push(card.getAttribute('data-section-id'));
+            });
+
+            clip.extras = [];
+            document.querySelectorAll('.extra-section-item').forEach(item => {
+                clip.extras.push({
+                    title: item.querySelector('.extra-title').value,
+                    content: item.querySelector('.extra-content').value
+                });
+            });
+        }
+
+        function loadActiveClipData() {
+            const proj = masterProjects.projects[masterProjects.activeProjectId];
+            if (!proj) return;
+            const clip = proj.clips[proj.activeClipId];
+            if (!clip) return;
+
+            const container = document.getElementById('sortableContainer');
+            
+            if (clip.order && Array.isArray(clip.order)) {
+                const cardMap = {};
+                container.querySelectorAll('.draggable-node').forEach(card => {
+                    cardMap[card.getAttribute('data-section-id')] = card;
+                });
+                container.innerHTML = '';
+                clip.order.forEach(id => {
+                    if (cardMap[id]) {
+                        container.appendChild(cardMap[id]);
+                    }
+                });
+            }
+
+            if (clip.titles) {
+                document.querySelectorAll('.draggable-node').forEach(card => {
+                    const sId = card.getAttribute('data-section-id');
+                    const tInput = card.querySelector('.section-title-input');
+                    if (sId && tInput && clip.titles[sId]) {
+                        tInput.value = clip.titles[sId];
+                    }
+                });
+            }
+
+            document.querySelectorAll('.prompt-field').forEach(f => {
+                if (f.id) {
+                    f.value = clip.fields[f.id] || '';
+                }
+            });
+
+            document.getElementById('extraSectionsContainer').innerHTML = '';
+            if (clip.extras) {
+                clip.extras.forEach(ex => addExtraSection(ex.title, ex.content));
+            }
+            compilePrompt();
+        }
+
+        function saveToLocalStorage() {
+            saveActiveClipData();
+            localStorage.setItem('ai_video_prompt_master_v8', JSON.stringify(masterProjects));
+        }
+
+        function loadFromLocalStorage() {
+            try {
+                const saved = localStorage.getItem('ai_video_prompt_master_v8');
+                if (!saved) return;
+                const parsed = JSON.parse(saved);
+                if (parsed && parsed.projects) {
+                    masterProjects = parsed;
+                }
+            } catch (e) {
+                console.error("Local storage load error:", e);
+            }
+        }
+
+        function clearAllData() {
+            if (!confirm("Are you sure you want to nuke all projects, clips, and reset workspace?")) return;
+            localStorage.removeItem('ai_video_prompt_master_v8');
+            masterProjects = {
+                activeProjectId: 'proj_1',
+                projects: {
+                    'proj_1': {
+                        name: 'Project 1',
+                        activeClipId: 'clip_1',
+                        clips: {
+                            'clip_1': {
+                                name: 'Clip 1',
+                                order: [...sectionOrder],
+                                titles: {
+                                    refImages: 'Reference Images',
+                                    artStyle: 'Art Style & Medium',
+                                    sceneVibes: 'Scene Vibes',
+                                    environment: 'The Environment',
+                                    character: 'Character',
+                                    actionScene: 'Action Scene',
+                                    physics: 'Physics & Mechanics',
+                                    cinematography: 'Cinematography & Camera',
+                                    rules: 'Rules & Constraints'
+                                },
+                                fields: {},
+                                customRules: '',
+                                extras: []
+                            }
+                        }
+                    }
+                }
+            };
+            renderProjectSelector();
+            renderClipSelector();
+            loadActiveClipData();
+            compilePrompt();
+        }
+
+        function exportDataJSON() {
+            saveActiveClipData();
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(masterProjects, null, 2));
+            const dlAnchor = document.createElement('a');
+            dlAnchor.setAttribute("href", dataStr);
+            dlAnchor.setAttribute("download", "ai_video_prompt_suite_projects.json");
+            document.body.appendChild(dlAnchor);
+            dlAnchor.click();
+            dlAnchor.remove();
+        }
+
+        function importDataJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    if (imported && imported.projects) {
+                        masterProjects = imported;
+                        renderProjectSelector();
+                        renderClipSelector();
+                        loadActiveClipData();
+                        compilePrompt();
+                        alert("Projects successfully imported!");
+                    } else {
+                        alert("Invalid project JSON file format.");
+                    }
+                } catch (err) {
+                    alert("Error parsing JSON file.");
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function showSavedIndicator() {
+            const indicator = document.getElementById('saveStatus');
+            indicator.classList.remove('hidden');
+            setTimeout(() => indicator.classList.add('hidden'), 1000);
+        }
+
+        function copyPrompt() {
+            const finalOutput = document.getElementById('finalOutput');
+            if (!finalOutput.value.trim()) return;
+            finalOutput.select();
+            document.execCommand('copy');
+            const btn = document.getElementById('copyBtn');
+            const orig = btn.innerText;
+            btn.innerText = 'Copied!';
+            setTimeout(() => btn.innerText = orig, 1500);
+        }
+    </script>
+</body>
+</html>
