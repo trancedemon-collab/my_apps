@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resume Autofill Companion</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .toast {
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 p-3 sm:p-6 min-h-screen pb-28">
+
+  <div class="max-w-5xl mx-auto space-y-6">
+
+    <!-- Header -->
+    <header class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+      <div>
+        <h1 class="text-xl font-bold text-slate-900 tracking-tight">Resume & Application Autofill Companion</h1>
+        <p class="text-xs text-slate-500 mt-0.5">Quickly copy data fields, address variants, dates, and export 1-click A4 PDF cover letters.</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="px-3 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full text-xs font-semibold">
+          1-Click PDF & Copy Ready
+        </span>
+      </div>
+    </header>
+
+    <!-- SECTION 1: Personal & Contact Information -->
+    <section class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
+      <h2 class="text-xs font-bold uppercase tracking-wider text-indigo-700 border-b pb-2 flex items-center justify-between">
+        <span>1. Personal & Contact Information</span>
+        <span class="text-[11px] text-slate-400 font-normal">Click any button to copy</span>
+      </h2>
+      
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 text-xs">
+        
+        <div class="flex items-center justify-between p-2.5 bg-slate-50 border rounded-lg">
+          <div>
+            <div class="text-[10px] uppercase font-bold text-slate-400">First Name</div>
+            <div class="font-medium text-slate-900" id="val-fn">Bradford</div>
+          </div>
+          <button onclick="copyText('val-fn', 'First Name')" class="px-2.5 py-1 bg-white border border-slate-300 hover:bg-indigo-50 hover:text-indigo-600 rounded font-semibold transition shadow-sm">Copy</button>
+        </div>
+
+        <div class="flex items-center justify-between p-2.5 bg-slate-50 border rounded-lg">
+          <div>
+            <div class="text-[10px] uppercase font-bold text-slate-400">Last Name</div>
+            <div class="font-medium text-slate-900" id="val-ln">Risbert</div>
+          </div>
+          <button onclick="copyText('val-ln', 'Last Name')" class="px-2.5 py-1 bg-white border border-slate-300 hover:bg-indigo-50 hover:text-indigo-600 rounded font-semibold transition shadow-sm">Copy</button>
+        </div>
+
+        <div class="flex items-center justify-between p-2.5 bg-slate-50 border rounded-lg">
+          <div>
+            <div class="text-[10px] uppercase font-bold text-slate-400">Full Name</div>
+            <div class="font-medium text-slate-900" id="val-fullname">Bradford Risbert</div>
+          </div>
+          <button onclick="copyText('val-fullname', 'Full Name')" class="px-2.5 py-1 bg-white border border-slate-300 hover:bg-indigo-50 hover:text-indigo-600 rounded font-semibold transition shadow-sm">Copy</button>
+        </div>
+
+        <div class="flex items-center justify-between p-2.5 bg-slate-50 border rounded-lg">
+          <div>
+            <div class="text-[10px] uppercase font-bold text-slate-400">Email Address</div>
+            <div class="font-medium text-slate-900 truncate max-w-[150px]" id="val-email">trancedemon@gmail.com</div>
+          </div>
+          <button onclick="copyText('val-email', 'Email')" class="px-2.5 py-1 bg-white border border-slate-300 hover:bg-indigo-50 hover:text-indigo-600 rounded font-semibold transition shadow-sm">Copy</button>
+        </div>
+
+        <div class="flex items-center justify-between p-2.5 bg-slate-50 border rounded-lg">
+          <div>
+            <div class="text-[10px] uppercase font-bold text-slate-400">Phone (with +91)</div>
+            <div class="font-medium text-slate-900" id="val-phone-full">+91 9821320459</div>
+          </div>
+          <button onclick="copyText('val-phone-full', 'Phone with +91')" class="px-2.5 py-1 bg-white border border-slate-300 hover:bg-indigo-50 hover:text-indigo-600 rounded font-semibold transition shadow-sm">Copy</button>
+        </div>
+
+        <div class="flex items-center justify-between p-2.5 bg-slate-50 border rounded-lg">
+          <div>
+            <div class="text-[10px] uppercase font-bold text-slate-400">Phone (10 Digits Only)</div>
+            <div class="font-medium text-slate-900" id="val-phone-plain">9821320459</div>
+          </div>
+          <button onclick="copyText('val-phone-plain', '10-Digit Phone')" class="px-2.5 py-1 bg-white border border-slate-300 hover:bg-indigo-50 hover:text-indigo-600 rounded font-semibold transition shadow-sm">Copy</button>
+        </div>
+
+        <div class="flex items-center justify-between p-2.5 bg-slate-50 border rounded-lg">
+          <div>
+            <div class="text-[10px] uppercase font-bold text-slate-400">Country Code Box</div>
+            <div class="font-medium text-slate-900" id="val-code">+91</div>
+          </div>
+          <button onclick="copyText('val-code', 'Country Code')" class="px-2.5 py-1 bg-white border border-slate-300 hover:bg-indigo-50 hover:text-indigo-600 rounded font-semibold transition shadow-sm">Copy</button>
+        </div>
+
+        <div class="flex items-center justify-between p-2.5 bg-slate-50 border rounded-lg">
+          <div>
+            <div class="text-[10px] uppercase font-bold text-slate-400">Date of Birth (DD-MM-YYYY)</div>
+            <div class="font-medium text-slate-900" id="val-dob">20-11-1982</div>
+          </div>
+          <button onclick="copyText('val-dob', 'Date of Birth')" class="px-2.5 py-1 bg-white border border-slate-300 hover:bg-indigo-50 hover:text-indigo-600 rounded font-semibold transition shadow-sm">Copy</button>
+        </div>
+
+        <div class="flex items-center justify-between p-2.5 bg-slate-50 border rounded-lg">
+          <div>
+            <div class="text-[10px] uppercase font-bold text-slate-400">Age / Gender</div>
+            <div class="font-medium text-slate-900" id="val-age">44 / Male</div>
+          </div>
+          <button onclick="copyText('val-age', 'Age / Gender')" class="px-2.5 py-1 bg-white border border-slate-300 hover:bg-indigo-50 hover:text-indigo-600 rounded font-semibold transition shadow-sm">Copy</button>
+        </div>
+
+        <div class="flex items-center justify-between p-2.5 bg-slate-50 border rounded-lg">
+          <div>
+            <div class="text-[10px] uppercase font-bold text-slate-400">City</div>
+            <div class="font-medium text-slate-900" id="val-city">Virar West</div>
+          </div>
+          <button onclick="copyText('val-city', 'City')" class="px-2.5 py-1 bg-white border border-slate-300 hover:bg-indigo-50 hover:text-indigo-600 rounded font-semibold transition shadow-sm">Copy</button>
+        </div>
+
+        <div class="flex items-center justify-between p-2.5 bg-slate-50 border rounded-lg">
+          <div>
+            <div class="text-[10px] uppercase font-bold text-slate-400">District</div>
+            <div class="font-medium text-slate-900" id="val-district">Palghar District</div>
+          </div>
+          <button onclick="copyText('val-district', 'District')" class="px-2.5 py-1 bg-white border border-slate-300 hover:bg-indigo-50 hover:text-indigo-600 rounded font-semibold transition shadow-sm">Copy</button>
+        </div>
+
+        <div class="flex items-center justify-between p-2.5 bg-slate-50 border rounded-lg">
+          <div>
+            <div class="text-[10px] uppercase font-bold text-slate-400">State</div>
+            <div class="font-medium text-slate-900" id="val-state">Maharashtra</div>
+          </div>
+          <button onclick="copyText('val-state', 'State')" class="px-2.5 py-1 bg-white border border-slate-300 hover:bg-indigo-50 hover:text-indigo-600 rounded font-semibold transition shadow-sm">Copy</button>
+        </div>
+
+        <div class="flex items-center justify-between p-2.5 bg-slate-50 border rounded-lg">
+          <div>
+            <div class="text-[10px] uppercase font-bold text-slate-400">Postal Code / PIN</div>
+            <div class="font-medium text-slate-900" id="val-pincode">401303</div>
+          </div>
+          <button onclick="copyText('val-pincode', 'Postal Code')" class="px-2.5 py-1 bg-white border border-slate-300 hover:bg-indigo-50 hover:text-indigo-600 rounded font-semibold transition shadow-sm">Copy</button>
+        </div>
+
+        <div class="flex items-center justify-between p-2.5 bg-slate-50 border rounded-lg">
+          <div>
+            <div class="text-[10px] uppercase font-bold text-slate-400">Nationality</div>
+            <div class="font-medium text-slate-900" id="val-nationality">Indian</div>
+          </div>
+          <button onclick="copyText('val-nationality', 'Nationality')" class="px-2.5 py-1 bg-white border border-slate-300 hover:bg-indigo-50 hover:text-indigo-600 rounded font-semibold transition shadow-sm">Copy</button>
+        </div>
+
+        <div class="flex items-center justify-between p-2.5 bg-slate-50 border rounded-lg">
+          <div>
+            <div class="text-[10px] uppercase font-bold text-slate-400">Country of Residence</div>
+            <div class="font-medium text-slate-900" id="val-country">India</div>
+          </div>
+          <button onclick="copyText('val-country', 'Country')" class="px-2.5 py-1 bg-white border border-slate-300 hover:bg-indigo-50 hover:text-indigo-600 rounded font-semibold transition shadow-sm">Copy</button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- SECTION 2: Address Variants -->
+    <section class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
+      <h2 class="text-xs font-bold uppercase tracking-wider text-indigo-700 border-b pb-2">
+        2. Address Formats (Choose Best for Portal Form)
+      </h2>
+      <div class="space-y-2.5 text-xs">
+        
+        <div class="p-3 bg-slate-50 border rounded-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+          <div>
+            <span class="text-[10px] font-bold text-slate-400 uppercase block">Variant A: Complete Full Address</span>
+            <p class="font-medium text-slate-800 mt-0.5" id="addr-full">701, Casa Zion, Dongri, Global City, Virar West, Palghar District, Maharashtra 401303, India</p>
+          </div>
+          <button onclick="copyText('addr-full', 'Full Address')" class="px-3 py-1 bg-white border border-slate-300 hover:bg-indigo-50 hover:text-indigo-600 rounded font-semibold transition shadow-sm shrink-0">Copy Full</button>
+        </div>
+
+        <div class="p-3 bg-slate-50 border rounded-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+          <div>
+            <span class="text-[10px] font-bold text-slate-400 uppercase block">Variant B: Medium Address (No Flat Number)</span>
+            <p class="font-medium text-slate-800 mt-0.5" id="addr-medium">Casa Zion, Global City, Virar West, Palghar, Maharashtra 401303</p>
+          </div>
+          <button onclick="copyText('addr-medium', 'Medium Address')" class="px-3 py-1 bg-white border border-slate-300 hover:bg-indigo-50 hover:text-indigo-600 rounded font-semibold transition shadow-sm shrink-0">Copy Medium</button>
+        </div>
+
+        <div class="p-3 bg-slate-50 border rounded-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+          <div>
+            <span class="text-[10px] font-bold text-slate-400 uppercase block">Variant C: Short City / Region Only</span>
+            <p class="font-medium text-slate-800 mt-0.5" id="addr-short">Virar West, Mumbai Metropolitan Region, Maharashtra, India</p>
+          </div>
+          <button onclick="copyText('addr-short', 'Short Address')" class="px-3 py-1 bg-white border border-slate-300 hover:bg-indigo-50 hover:text-indigo-600 rounded font-semibold transition shadow-sm shrink-0">Copy Short</button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- SECTION 3: Ready-to-Send Cover Letters & PDF Generator -->
+    <section class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
+      <div class="border-b pb-2 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1">
+        <h2 class="text-xs font-bold uppercase tracking-wider text-indigo-700">
+          3. Quick Generic Cover Letters (Copy Text or Download PDF)
+        </h2>
+        <span class="text-[11px] text-slate-400">Formatted for clean A4 printing without page overflow</span>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        
+        <!-- Forest & Green Space Maintenance Letter -->
+        <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg flex flex-col justify-between space-y-3 text-xs">
+          <div>
+            <div class="flex items-center justify-between border-b pb-1.5 mb-2">
+              <span class="font-bold text-emerald-800 flex items-center gap-1">🌲 Forest & Green Area Maintenance</span>
+              <span class="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-semibold">Outdoor / Muni</span>
+            </div>
+            <pre class="whitespace-pre-wrap font-sans text-slate-600 text-[11px] leading-relaxed select-all" id="cl-forest">Dear Hiring Manager,
+
+I am writing to express my strong interest in the Forest and Green Area Maintenance position.
+
+I am 44 years old, physically fit, active, and thrive working outdoors in all weather conditions. I have strong stamina and am comfortable working independently or as part of a team to complete physical maintenance routines.
+
+I am ready and capable of handling hands-on outdoor tasks, including tree and vegetation pruning, invasive weed/bear claw removal, green space upkeeping around lakes and municipalities, maintenance of benches, tables, and animal enclosures, as well as supervising and clearing watercourses and streams (including crop cutting from small boats).
+
+Additionally, I can carry out routine inspections and daily maintenance for equipment to ensure safe and continuous operation. I hold a valid Category B driving license, have user-level IT knowledge for work logs or digital reporting, and collaborate smoothly with supervisors and colleagues.
+
+Please find my complete CV attached for your review. I am fully prepared to relocate and would be glad to contribute reliable, hard-working support to your maintenance team.
+
+Thank you for your time and consideration, and I look forward to hearing from you.
+
+Kind regards,
+Bradford Risbert
+Phone: +91 9821320459
+Email: trancedemon@gmail.com
+Location: Virar West, Maharashtra, India</pre>
+          </div>
+          <div class="flex items-center gap-2 pt-2 border-t">
+            <button onclick="copyText('cl-forest', 'Forest Maintenance Letter')" class="flex-1 py-1.5 bg-white border border-slate-300 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-300 rounded font-semibold shadow-sm transition">
+              Copy Text
+            </button>
+            <button onclick="downloadPDF('cl-forest', 'Cover_Letter_Forest_Maintenance_Bradford_Risbert.pdf', 'Application for Forest & Green Area Maintenance Worker')" class="flex-1 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded font-semibold shadow-sm transition flex items-center justify-center gap-1">
+              <span>📄 Download PDF</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Farm & Livestock Letter -->
+        <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg flex flex-col justify-between space-y-3 text-xs">
+          <div>
+            <div class="flex items-center justify-between border-b pb-1.5 mb-2">
+              <span class="font-bold text-amber-800 flex items-center gap-1">🌱 Farm / Cattle / Livestock</span>
+              <span class="text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded font-semibold">Agriculture</span>
+            </div>
+            <pre class="whitespace-pre-wrap font-sans text-slate-600 text-[11px] leading-relaxed select-all" id="cl-farm">Dear Hiring Manager,
+
+I am writing to express my sincere interest in your farm worker / livestock assistant position.
+
+I am from India, age 44, active, physically fit, and very comfortable with outdoor physical work in all weather conditions. I am reliable, disciplined, and ready to learn your daily farm routines, animal feeding, cattle handling, barn cleaning, and agricultural safety practices.
+
+I am a quick learner who follows instructions with care, works well on rotating shifts, and takes pride in dependable work.
+
+Please check my CV attached to this application for my complete background. I am ready to relocate and would be very grateful for the opportunity to work with you.
+
+Looking forward to your positive reply.
+
+Kind regards,
+Bradford Risbert
+Phone: +91 9821320459
+Email: trancedemon@gmail.com
+Location: Virar West, Maharashtra, India</pre>
+          </div>
+          <div class="flex items-center gap-2 pt-2 border-t">
+            <button onclick="copyText('cl-farm', 'Farm Cover Letter')" class="flex-1 py-1.5 bg-white border border-slate-300 hover:bg-amber-50 hover:text-amber-700 hover:border-amber-300 rounded font-semibold shadow-sm transition">
+              Copy Text
+            </button>
+            <button onclick="downloadPDF('cl-farm', 'Cover_Letter_Farm_Worker_Bradford_Risbert.pdf', 'Application for Farm & Agricultural Worker')" class="flex-1 py-1.5 bg-amber-700 hover:bg-amber-800 text-white rounded font-semibold shadow-sm transition flex items-center justify-center gap-1">
+              <span>📄 Download PDF</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Warehouse & Logistics Letter -->
+        <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg flex flex-col justify-between space-y-3 text-xs">
+          <div>
+            <div class="flex items-center justify-between border-b pb-1.5 mb-2">
+              <span class="font-bold text-sky-800 flex items-center gap-1">📦 Warehouse / Sorter / Packer</span>
+              <span class="text-[10px] bg-sky-100 text-sky-800 px-2 py-0.5 rounded font-semibold">Logistics</span>
+            </div>
+            <pre class="whitespace-pre-wrap font-sans text-slate-600 text-[11px] leading-relaxed select-all" id="cl-wh">Dear Hiring Manager,
+
+I am writing to express my strong interest in your warehouse and logistics position.
+
+I am 44 years old, physically active, disciplined, and bring over a decade of experience working in structured, process-driven environments. I am accustomed to standing for long hours, packing, sorting items, handling inventory checks, and adhering strictly to safety regulations and speed benchmarks.
+
+I adapt quickly to modern warehouse scanners, shift rotas (including night/weekend schedules), and collaborate respectfully in multicultural teams.
+
+I have attached my detailed CV for your review. I would be proud to bring my strong attendance and work ethic to your operations.
+
+Thank you for your consideration, and I hope for a positive response.
+
+Best regards,
+Bradford Risbert
+Phone: +91 9821320459
+Email: trancedemon@gmail.com
+Location: Virar West, Maharashtra, India</pre>
+          </div>
+          <div class="flex items-center gap-2 pt-2 border-t">
+            <button onclick="copyText('cl-wh', 'Warehouse Cover Letter')" class="flex-1 py-1.5 bg-white border border-slate-300 hover:bg-sky-50 hover:text-sky-700 hover:border-sky-300 rounded font-semibold shadow-sm transition">
+              Copy Text
+            </button>
+            <button onclick="downloadPDF('cl-wh', 'Cover_Letter_Warehouse_Worker_Bradford_Risbert.pdf', 'Application for Warehouse Worker & Order Packer')" class="flex-1 py-1.5 bg-sky-700 hover:bg-sky-800 text-white rounded font-semibold shadow-sm transition flex items-center justify-center gap-1">
+              <span>📄 Download PDF</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Hospitality & Kitchen Letter -->
+        <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg flex flex-col justify-between space-y-3 text-xs">
+          <div>
+            <div class="flex items-center justify-between border-b pb-1.5 mb-2">
+              <span class="font-bold text-rose-800 flex items-center gap-1">🏨 Hospitality / Steward / Helper</span>
+              <span class="text-[10px] bg-rose-100 text-rose-800 px-2 py-0.5 rounded font-semibold">Hospitality</span>
+            </div>
+            <pre class="whitespace-pre-wrap font-sans text-slate-600 text-[11px] leading-relaxed select-all" id="cl-hosp">Dear Hiring Manager,
+
+I am applying for your open entry-level position in hospitality / utility services.
+
+I am 44 years old, energetic, and bring extensive background in high-volume customer service operations. I speak fluent English, integrate smoothly with diverse teams, and am ready to handle hands-on utility duties, including kitchen porter tasks, dishwashing, stewarding, linen, and general guest area cleanliness.
+
+I respect hygiene protocols, maintain high standards of personal presentation, and am fully flexible with rotating weekend and evening shift schedules.
+
+My CV is attached with complete employment details. I am eager to contribute reliable support to your establishment.
+
+Thank you for your time, and I look forward to hearing from you.
+
+Warm regards,
+Bradford Risbert
+Phone: +91 9821320459
+Email: trancedemon@gmail.com
+Location: Virar West, Maharashtra, India</pre>
+          </div>
+          <div class="flex items-center gap-2 pt-2 border-t">
+            <button onclick="copyText('cl-hosp', 'Hospitality Cover Letter')" class="flex-1 py-1.5 bg-white border border-slate-300 hover:bg-rose-50 hover:text-rose-700 hover:border-rose-300 rounded font-semibold shadow-sm transition">
+              Copy Text
+            </button>
+            <button onclick="downloadPDF('cl-hosp', 'Cover_Letter_Hospitality_Worker_Bradford_Risbert.pdf', 'Application for Hospitality & Kitchen Utility Worker')" class="flex-1 py-1.5 bg-rose-700 hover:bg-rose-800 text-white rounded font-semibold shadow-sm transition flex items-center justify-center gap-1">
+              <span>📄 Download PDF</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- SECTION 4: Work Experiences (Detailed with split dates) -->
+    <section class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
+      <h2 class="text-xs font-bold uppercase tracking-wider text-indigo-700 border-b pb-2">
+        4. Work Experiences (Full Employment & Freelance History)
+      </h2>
+      <div class="space-y-3" id="exp-container"></div>
+    </section>
+
+    <!-- SECTION 5: Education Credentials -->
+    <section class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
+      <h2 class="text-xs font-bold uppercase tracking-wider text-indigo-700 border-b pb-2">
+        5. Education & Schooling (with Dates)
+      </h2>
+      <div class="space-y-3" id="edu-container"></div>
+    </section>
+
+    <!-- SECTION 6: Key Skills Quick Copy -->
+    <section class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
+      <h2 class="text-xs font-bold uppercase tracking-wider text-indigo-700 border-b pb-2 flex items-center justify-between">
+        <span>6. Skills Bank (Click Any Pill to Copy)</span>
+        <span class="text-[11px] text-slate-400 font-normal">Operational, Service & Fieldwork</span>
+      </h2>
+      <div class="flex flex-wrap gap-2 text-xs" id="skills-container"></div>
+    </section>
+
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast fixed bottom-5 right-5 bg-slate-900 text-white px-4 py-2.5 rounded-lg shadow-lg text-xs font-semibold flex items-center gap-2 z-50">
+    <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+    <span id="toast-text">Copied to clipboard!</span>
+  </div>
+
+  <script>
+    const experiences = [
+      {
+        company: "Independent Digital Production & Freelance",
+        title: "Digital Media Producer & Technical Creator",
+        city: "Mumbai / Remote",
+        country: "India",
+        from: "01-04-2023",
+        to: "Ongoing",
+        desc: "Authored digital media workflows, video timeline editing, technical problem-solving, browser script automation, and continuous independent project delivery."
+      },
+      {
+        company: "Code My Mobile",
+        title: "Operations & Client Support Specialist",
+        city: "Jaipur",
+        country: "India",
+        from: "01-10-2020",
+        to: "31-03-2023",
+        desc: "Managed client communication, process tracking, scheduling, and structured data handling across cross-functional remote teams."
+      },
+      {
+        company: "Teleperformance",
+        title: "Senior Customer Support Associate",
+        city: "Mumbai",
+        country: "India",
+        from: "01-08-2017",
+        to: "31-03-2019",
+        desc: "Handled high-volume customer escalations, ensured strict quality adherence, and worked rotational night/weekend shifts."
+      },
+      {
+        company: "Tech Mahindra",
+        title: "Technical Support Associate",
+        city: "Mumbai",
+        country: "India",
+        from: "01-08-2015",
+        to: "30-11-2016",
+        desc: "Delivered first-line technical support, system diagnostics, ticketing compliance, and process issue resolution."
+      },
+      {
+        company: "Altisource Business Solutions Pvt. Ltd.",
+        title: "Customer Service Representative",
+        city: "Navi Mumbai",
+        country: "India",
+        from: "01-06-2013",
+        to: "30-04-2015",
+        desc: "Maintained process documentation, verified administrative records, and adhered to operational service benchmarks."
+      },
+      {
+        company: "Epicenter Technologies Pvt. Ltd.",
+        title: "Customer Relationship Associate",
+        city: "Mumbai",
+        country: "India",
+        from: "01-11-2011",
+        to: "30-06-2012",
+        desc: "Managed customer account queries, maintained daily shift logs, and collaborated in fast-paced operational shifts."
+      },
+      {
+        company: "Stream International Services Pvt. Ltd.",
+        title: "Support Professional",
+        city: "Mumbai",
+        country: "India",
+        from: "01-09-2008",
+        to: "31-07-2011",
+        desc: "Ensured consistent adherence to operational standards, routine documentation, and punctuality across rotational shifts."
+      },
+      {
+        company: "IBM Daksh",
+        title: "Customer Service Executive",
+        city: "Mumbai",
+        country: "India",
+        from: "01-03-2007",
+        to: "30-04-2008",
+        desc: "Processed international client requests, adhered to shift discipline, and operated within strict performance metrics."
+      }
+    ];
+
+    const education = [
+      {
+        title: "Higher Secondary Certificate (HSC - 12th Grade)",
+        org: "Rizvi College of Arts, Science and Commerce",
+        city: "Mumbai",
+        country: "India",
+        from: "01-06-1999",
+        to: "31-03-2001",
+        desc: "Higher secondary education focusing on English communication, analytical skills, and general academia."
+      },
+      {
+        title: "Secondary School Certificate (SSC - 10th Grade)",
+        org: "St. Stanislaus High School",
+        city: "Mumbai",
+        country: "India",
+        from: "01-06-1988",
+        to: "31-03-1998",
+        desc: "Foundational schooling covering mathematics, basic sciences, and English discipline."
+      }
+    ];
+
+    const allSkills = [
+      // Outdoor, Forestry & Agriculture
+      "Forest & green area maintenance", "Tree & vegetation pruning", "Watercourse supervision",
+      "Weed & invasive plant removal", "Equipment care & daily maintenance", "Driving license (Category B)",
+      "Outdoor work in all weathers", "Physical stamina", "Animal & enclosure care",
+      // Operational & Entry-Level
+      "Customer service", "Teamwork", "Workplace safety", "Time management", 
+      "Shift flexibility", "Rotational shifts", "Attention to detail", "Punctuality",
+      "Inventory management", "Material handling", "Cleaning & sanitation", "Problem solving",
+      // IT & Digital
+      "User-level IT knowledge", "Microsoft Office", "Microsoft Excel", "Google Drive", "English communication"
+    ];
+
+    // Render Work Experience
+    const expContainer = document.getElementById('exp-container');
+    experiences.forEach((exp, i) => {
+      expContainer.innerHTML += `
+        <div class="p-3.5 bg-slate-50 border rounded-lg text-xs space-y-2">
+          <div class="flex flex-wrap justify-between items-baseline border-b pb-1.5 gap-2">
+            <span class="font-bold text-slate-900 text-sm">${exp.company}</span>
+            <div class="flex items-center gap-1.5 text-slate-500">
+              <span>${exp.from} → ${exp.to}</span>
+            </div>
+          </div>
+          
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 pt-1">
+            
+            <div class="flex items-center justify-between p-1.5 bg-white border rounded">
+              <div class="truncate mr-1.5">
+                <span class="text-[9px] uppercase font-bold text-slate-400 block">Position</span>
+                <span class="text-slate-800 font-medium truncate" id="exp-t-${i}">${exp.title}</span>
+              </div>
+              <button onclick="copyText('exp-t-${i}', 'Title')" class="px-2 py-0.5 border rounded hover:bg-slate-100 font-semibold text-[11px] shrink-0">Copy</button>
+            </div>
+
+            <div class="flex items-center justify-between p-1.5 bg-white border rounded">
+              <div class="truncate mr-1.5">
+                <span class="text-[9px] uppercase font-bold text-slate-400 block">Employer</span>
+                <span class="text-slate-800 font-medium truncate" id="exp-c-${i}">${exp.company}</span>
+              </div>
+              <button onclick="copyText('exp-c-${i}', 'Employer')" class="px-2 py-0.5 border rounded hover:bg-slate-100 font-semibold text-[11px] shrink-0">Copy</button>
+            </div>
+
+            <div class="flex items-center justify-between p-1.5 bg-white border rounded">
+              <div>
+                <span class="text-[9px] uppercase font-bold text-slate-400 block">Start Date</span>
+                <span class="text-slate-800 font-medium" id="exp-from-${i}">${exp.from}</span>
+              </div>
+              <button onclick="copyText('exp-from-${i}', 'Start Date')" class="px-2 py-0.5 border rounded hover:bg-slate-100 font-semibold text-[11px] shrink-0">Copy</button>
+            </div>
+
+            <div class="flex items-center justify-between p-1.5 bg-white border rounded">
+              <div>
+                <span class="text-[9px] uppercase font-bold text-slate-400 block">End Date</span>
+                <span class="text-slate-800 font-medium" id="exp-to-${i}">${exp.to}</span>
+              </div>
+              <button onclick="copyText('exp-to-${i}', 'End Date')" class="px-2 py-0.5 border rounded hover:bg-slate-100 font-semibold text-[11px] shrink-0">Copy</button>
+            </div>
+
+          </div>
+
+          <div class="flex items-start justify-between p-2 bg-white border rounded mt-1">
+            <div class="mr-2">
+              <span class="text-[9px] uppercase font-bold text-slate-400 block mb-0.5">Duties / Skills Covered</span>
+              <span class="text-slate-600 text-[11px] leading-relaxed" id="exp-d-${i}">${exp.desc}</span>
+            </div>
+            <button onclick="copyText('exp-d-${i}', 'Responsibilities')" class="px-2.5 py-1 border rounded hover:bg-slate-100 font-semibold text-[11px] shrink-0">Copy</button>
+          </div>
+        </div>
+      `;
+    });
+
+    // Render Education
+    const eduContainer = document.getElementById('edu-container');
+    education.forEach((edu, i) => {
+      eduContainer.innerHTML += `
+        <div class="p-3.5 bg-slate-50 border rounded-lg text-xs space-y-2">
+          <div class="flex flex-wrap justify-between items-baseline border-b pb-1.5 gap-2">
+            <span class="font-bold text-slate-900">${edu.title}</span>
+            <span class="text-slate-500">${edu.from} → ${edu.to}</span>
+          </div>
+          
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
+            
+            <div class="flex items-center justify-between p-1.5 bg-white border rounded">
+              <div class="truncate mr-1.5">
+                <span class="text-[9px] uppercase font-bold text-slate-400 block">Institution</span>
+                <span class="text-slate-800 font-medium truncate" id="edu-o-${i}">${edu.org}</span>
+              </div>
+              <button onclick="copyText('edu-o-${i}', 'School/College')" class="px-2 py-0.5 border rounded hover:bg-slate-100 font-semibold text-[11px] shrink-0">Copy</button>
+            </div>
+
+            <div class="flex items-center justify-between p-1.5 bg-white border rounded">
+              <div>
+                <span class="text-[9px] uppercase font-bold text-slate-400 block">Start Date</span>
+                <span class="text-slate-800 font-medium" id="edu-f-${i}">${edu.from}</span>
+              </div>
+              <button onclick="copyText('edu-f-${i}', 'Start Date')" class="px-2 py-0.5 border rounded hover:bg-slate-100 font-semibold text-[11px] shrink-0">Copy</button>
+            </div>
+
+            <div class="flex items-center justify-between p-1.5 bg-white border rounded">
+              <div>
+                <span class="text-[9px] uppercase font-bold text-slate-400 block">End Date</span>
+                <span class="text-slate-800 font-medium" id="edu-t-${i}">${edu.to}</span>
+              </div>
+              <button onclick="copyText('edu-t-${i}', 'End Date')" class="px-2 py-0.5 border rounded hover:bg-slate-100 font-semibold text-[11px] shrink-0">Copy</button>
+            </div>
+
+          </div>
+        </div>
+      `;
+    });
+
+    // Render Skills
+    const skillsContainer = document.getElementById('skills-container');
+    allSkills.forEach(skill => {
+      skillsContainer.innerHTML += `
+        <button onclick="copyDirect('${skill}')" class="px-2.5 py-1 bg-slate-50 border border-slate-200 hover:border-indigo-400 hover:bg-indigo-50 hover:text-indigo-700 rounded-md font-medium text-slate-700 transition flex items-center gap-1.5 text-xs">
+          <span>${skill}</span>
+          <span class="text-[10px] text-slate-400">📋</span>
+        </button>
+      `;
+    });
+
+    // Copy Handlers
+    function copyText(elemId, label) {
+      const text = document.getElementById(elemId).innerText.trim();
+      navigator.clipboard.writeText(text).then(() => showToast(`Copied ${label}`));
+    }
+
+    function copyDirect(text) {
+      navigator.clipboard.writeText(text).then(() => showToast(`Copied "${text}"`));
+    }
+
+    // PDF Print / Download Function
+    function downloadPDF(elemId, filename, subjectLine) {
+      const rawText = document.getElementById(elemId).innerText.trim();
+      const printWindow = window.open('', '_blank');
+      
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <title>${subjectLine}</title>
+          <style>
+            @page {
+              size: A4;
+              margin: 22mm 20mm;
+            }
+            body {
+              font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+              font-size: 11pt;
+              line-height: 1.6;
+              color: #1a1a1a;
+              margin: 0;
+              padding: 0;
+            }
+            .header {
+              border-bottom: 2px solid #003676;
+              padding-bottom: 12px;
+              margin-bottom: 24px;
+            }
+            .name {
+              font-size: 16pt;
+              font-weight: bold;
+              color: #003676;
+              margin: 0 0 4px 0;
+            }
+            .meta {
+              font-size: 9.5pt;
+              color: #555;
+            }
+            .subject {
+              font-size: 11pt;
+              font-weight: bold;
+              color: #111;
+              margin-bottom: 18px;
+            }
+            .body-text {
+              white-space: pre-wrap;
+              font-family: inherit;
+              font-size: 11pt;
+              line-height: 1.6;
+              margin: 0;
+            }
+            @media print {
+              body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div class="name">Bradford Risbert</div>
+            <div class="meta">Virar West, Palghar District, Maharashtra 401303, India | +91 9821320459 | trancedemon@gmail.com</div>
+          </div>
+          <div class="subject">RE: ${subjectLine}</div>
+          <pre class="body-text">${rawText}</pre>
+          <script>
+            window.onload = function() {
+              window.print();
+              setTimeout(() => window.close(), 1000);
+            };
+          <\/script>
+        </body>
+        </html>
+      `;
+
+      printWindow.document.open();
+      printWindow.document.write(htmlContent);
+      printWindow.document.close();
+      showToast('Opening PDF Print View...');
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toast-text').innerText = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 1800);
+    }
+  </script>
+</body>
+</html>
