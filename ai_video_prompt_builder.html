@@ -3,27 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Video Prompt Builder - Clean Dashboard</title>
+    <title>AI Video Prompt Builder - Split-Pane Tabbed Dashboard</title>
     <!-- Tailwind CSS loaded locally/fast -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        :root {
+            --bg-color: #f4f4f5;
+            --text-color: #18181b;
+            --card-bg: #ffffff;
+            --border-color: #d4d4d8;
+            --header-bg: #ffffff;
+            --sidebar-bg: #f4f4f5;
+            --sidebar-hover: #e4e4e7;
+            --input-bg: #ffffff;
+            --input-text: #18181b;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #18181b;
+                --text-color: #f4f4f5;
+                --card-bg: #27272a;
+                --border-color: #3f3f46;
+                --header-bg: #27272a;
+                --sidebar-bg: #1f1f23;
+                --sidebar-hover: #27272a;
+                --input-bg: #18181b;
+                --input-text: #f4f4f5;
+            }
+        }
+
         body {
-            background-color: #f4f4f5;
-            color: #18181b;
+            background-color: var(--bg-color);
+            color: var(--text-color);
             font-family: system-ui, -apple-system, sans-serif;
             margin: 0;
             padding: 0;
-        }
-        .dashboard-card {
-            background: #ffffff;
-            border: 1px solid #e4e4e7;
-            border-radius: 8px;
-            padding: 1rem;
-            margin-bottom: 1rem;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
         .preset-chip {
-            background-color: #f4f4f5;
-            border: 1px solid #d4d4d8;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
             padding: 0.3rem 0.6rem;
             border-radius: 4px;
             font-size: 0.75rem;
@@ -32,26 +56,26 @@
             transition: background 0.1s;
         }
         .preset-chip:hover {
-            background-color: #e4e4e7;
-            border-color: #a1a1aa;
+            opacity: 0.8;
+            border-color: #3b82f6;
         }
         .chips-container {
-            max-height: 180px;
+            max-height: 220px;
             overflow-y: auto;
-            padding: 4px;
+            padding: 6px;
             display: flex;
             flex-wrap: wrap;
             gap: 4px;
-            background: #fafafa;
-            border: 1px solid #e4e4e7;
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
             border-radius: 6px;
             margin-bottom: 8px;
         }
         textarea, input, select {
             width: 100%;
-            background: #ffffff;
-            color: #18181b;
-            border: 1px solid #d4d4d8;
+            background: var(--input-bg);
+            color: var(--input-text);
+            border: 1px solid var(--border-color);
             border-radius: 6px;
             padding: 0.5rem;
             font-size: 0.9rem;
@@ -63,8 +87,9 @@
             box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
         }
         .btn {
-            background: #f4f4f5;
-            border: 1px solid #d4d4d8;
+            background: var(--card-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
             padding: 0.4rem 0.8rem;
             border-radius: 6px;
             font-weight: 600;
@@ -72,293 +97,168 @@
             cursor: pointer;
         }
         .btn:hover {
-            background: #e4e4e7;
+            opacity: 0.85;
         }
         .btn-primary {
             background: #2563eb;
             color: #ffffff;
             border-color: #2563eb;
         }
-        .btn-primary:hover {
-            background: #1d4ed8;
-        }
         .btn-danger {
             background: #dc2626;
             color: #ffffff;
             border-color: #dc2626;
         }
-        .btn-danger:hover {
-            background: #b91c1c;
+        .tab-item {
+            padding: 0.6rem 0.75rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            transition: all 0.1s;
+        }
+        .tab-item:hover {
+            background: var(--sidebar-hover);
+        }
+        .tab-item.active {
+            background: #2563eb;
+            color: #ffffff;
+            border-color: #2563eb;
+        }
+        /* Modal styling */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+        .modal-content {
+            background: var(--card-bg);
+            color: var(--text-color);
+            padding: 1.5rem;
+            border-radius: 8px;
+            max-width: 450px;
+            width: 100%;
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
         }
     </style>
 </head>
-<body class="flex flex-col min-h-screen">
+<body>
 
     <!-- STREAMING_CHUNK:Rendering header controls... -->
-    <header class="sticky top-0 z-50 bg-white border-b border-zinc-200 p-4 shadow-sm flex justify-between items-center flex-wrap gap-4">
+    <header style="background: var(--header-bg); border-color: var(--border-color);" class="border-b p-3 shadow-sm flex justify-between items-center flex-wrap gap-4 shrink-0">
         <div class="flex items-center gap-3 flex-wrap">
-            <span class="font-bold text-lg">Prompt Dashboard</span>
-            <div class="flex items-center gap-1">
-                <span class="text-xs font-semibold text-zinc-500">Project:</span>
-                <select id="projectSelector" class="text-xs py-1 px-2 w-auto" onchange="switchProject(this.value)"></select>
-                <input type="text" id="projectNameInput" class="text-xs py-1 px-2 w-32 font-semibold" onchange="renameCurrentProject(this.value)" placeholder="Project Name">
-                <button class="btn text-xs py-1 px-2" onclick="createNewProject()">+ Proj</button>
-                <button class="btn text-xs py-1 px-2 text-red-600" onclick="deleteCurrentProject()">Del Proj</button>
+            <div>
+                <span class="font-bold text-base block">AI Video Prompt Builder</span>
+                <span class="text-[10px] opacity-70 block">Created by Bradford Risbert (<a href="mailto:trancedemon@gmail.com" class="underline">trancedemon@gmail.com</a>)</span>
             </div>
-            <div class="flex items-center gap-1 bg-zinc-50 p-1 rounded border border-zinc-200">
-                <span class="text-xs font-semibold text-zinc-500">Clip:</span>
+            <div class="flex items-center gap-1">
+                <span class="text-xs font-semibold opacity-70">Proj:</span>
+                <select id="projectSelector" class="text-xs py-1 px-2 w-auto" onchange="switchProject(this.value)"></select>
+                <input type="text" id="projectNameInput" class="text-xs py-1 px-2 w-28 font-semibold" onchange="renameCurrentProject(this.value)" placeholder="Project Name">
+                <button class="btn text-xs py-1 px-2" onclick="createNewProject()">+ Proj</button>
+                <button class="btn text-xs py-1 px-2 text-red-500" onclick="deleteCurrentProject()">Del Proj</button>
+            </div>
+            <div class="flex items-center gap-1 p-1 rounded border" style="border-color: var(--border-color);">
+                <span class="text-xs font-semibold opacity-70">Clip:</span>
                 <select id="clipSelector" class="text-xs py-1 px-2 w-auto" onchange="switchClip(this.value)"></select>
                 <button class="btn text-xs py-1 px-2" onclick="createNewClip()">+ Clip</button>
-                <button class="btn text-xs py-1 px-2 text-red-600" onclick="deleteCurrentClip()">Del Clip</button>
+                <button class="btn text-xs py-1 px-2 text-red-500" onclick="deleteCurrentClip()">Del Clip</button>
             </div>
         </div>
         <div class="flex items-center gap-2 flex-wrap">
-            <button class="btn text-xs" onclick="exportDataJSON()">Export JSON</button>
+            <button class="btn text-xs" onclick="exportCurrentProjectJSON()">Export Proj JSON</button>
+            <button class="btn text-xs" onclick="exportDataJSON()">Export All JSON</button>
             <label class="btn text-xs cursor-pointer mb-0">
-                Import JSON <input type="file" accept=".json" class="hidden" onchange="importDataJSON(event)">
+                Import JSON <input type="file" accept=".json" class="hidden" onchange="handleFileImport(event)">
             </label>
             <button class="btn btn-danger text-xs" onclick="clearAllData()">Nuke All</button>
+            <span id="saveStatus" class="font-mono text-xs text-emerald-500 hidden">Saved</span>
         </div>
     </header>
 
-    <!-- STREAMING_CHUNK:Rendering main dashboard layout... -->
-    <main class="flex-grow p-4 max-w-5xl mx-auto w-full flex flex-col gap-4">
+    <!-- STREAMING_CHUNK:Rendering split-pane layout... -->
+    <div class="flex-grow flex overflow-hidden">
         
-        <div class="flex justify-between items-center text-xs text-zinc-500">
-            <span>Clean, simple scrolling interface. No collapsing or dragging. Independent projects and clips.</span>
-            <span id="saveStatus" class="font-mono text-emerald-600 hidden">Saved</span>
-        </div>
+        <!-- Left Column: Navigation Tabs -->
+        <aside style="background: var(--sidebar-bg); border-color: var(--border-color);" class="w-[260px] border-r flex flex-col shrink-0 overflow-y-auto p-3 gap-2">
+            <div class="text-xs font-bold uppercase tracking-wider opacity-60 mb-1 px-1">Sections</div>
+            <div id="tabsContainer" class="flex flex-col gap-1.5">
+                <!-- Dynamically rendered tabs -->
+            </div>
+            <div class="mt-auto pt-3 border-t flex flex-col gap-2" style="border-color: var(--border-color);">
+                <button type="button" class="btn text-xs w-full py-2" onclick="addCustomSection()">+ Add Custom Section</button>
+            </div>
+        </aside>
 
-        <!-- Reference Images Card -->
-        <div class="dashboard-card">
-            <div class="flex justify-between items-center mb-2">
-                <input type="text" class="font-bold text-base w-auto border-none bg-transparent" value="Reference Images" id="title_refImages" onchange="saveToLocalStorage()">
-                <button class="btn text-xs text-red-600" onclick="this.closest('.dashboard-card').remove(); saveToLocalStorage();">Remove Block</button>
-            </div>
-            <textarea id="refImages" class="prompt-field" style="min-height: 80px;" placeholder="e.g., image 1 is her. image 2 is the environment..."></textarea>
-        </div>
-
-        <!-- Art Style & Medium Card -->
-        <div class="dashboard-card">
-            <div class="flex justify-between items-center mb-2">
-                <input type="text" class="font-bold text-base w-auto border-none bg-transparent" value="Art Style & Medium" id="title_artStyle" onchange="saveToLocalStorage()">
-                <button class="btn text-xs text-red-600" onclick="this.closest('.dashboard-card').remove(); saveToLocalStorage();">Remove Block</button>
-            </div>
-            <label class="text-xs font-semibold text-zinc-600 block mb-1">Select Art Style Presets (Click to append):</label>
-            <div class="chips-container">
-                <button type="button" class="preset-chip" onclick="applyPreset('artStyle', 'Highly stylized 2D digital anime-realism illustration, manhwa/webtoon key visual style, crisp ink contour line art combined with hyper-rendered digital painting, high-contrast studio lighting.')">Anime Manhwa Style</button>
-                <button type="button" class="preset-chip" onclick="applyPreset('artStyle', '1990s retro OVA anime aesthetic, cel-shaded animation style, thick ink outlines, authentic vintage analog film grain, VHS color grading.')">1990s Retro OVA Anime</button>
-                <button type="button" class="preset-chip" onclick="applyPreset('artStyle', '2D Sakuga action anime key visual, highly dynamic fluid character motion lines, intense smear frames, high-contrast cel shading.')">2D Sakuga Action Anime</button>
-                <button type="button" class="preset-chip" onclick="applyPreset('artStyle', 'Castlevania Nocturne dark gothic animated series style, rich painterly textures, dramatic chiaroscuro lighting.')">Castlevania Nocturne Style</button>
-                <button type="button" class="preset-chip" onclick="applyPreset('artStyle', 'Retro 80s He-Man and Masters of the Universe cel cartoon style, bold thick ink lines, vibrant primary colors.')">Retro 80s He-Man Cartoon</button>
-                <button type="button" class="preset-chip" onclick="applyPreset('artStyle', 'Cinematic hyper-realistic 35mm film shot, anamorphic lens flare, volumetric lighting, photorealistic textures.')">Cinematic Hyper-Realism</button>
-                <button type="button" class="preset-chip" onclick="applyPreset('artStyle', 'Gritty cyberpunk neo-noir anime, neon reflections, deep shadows, moody cyan and magenta color grading.')">Cyberpunk Neo-Noir</button>
-                <button type="button" class="preset-chip" onclick="applyPreset('artStyle', 'Studio Ghibli lush hand-painted watercolor aesthetic, soft ambient lighting, whimsical pastoral beauty.')">Ghibli Watercolor Aesthetic</button>
-                <button type="button" class="preset-chip" onclick="applyPreset('artStyle', 'Dark fantasy grimdark concept art, intricate cross-hatching, moody atmospheric haze.')">Grimdark Concept Art</button>
-                <button type="button" class="preset-chip" onclick="applyPreset('artStyle', 'Ufotable high-octane magical combat digital compositing, vibrant particle effects, luminous glow rendering.')">Ufotable Magical Combat</button>
-                <button type="button" class="preset-chip" onclick="applyPreset('artStyle', 'Kyoto Animation delicate soft pastel lighting, exquisite eye reflections, highly detailed emotional facial expressions.')">KyoAni Emotional Drama</button>
-                <button type="button" class="preset-chip" onclick="applyPreset('artStyle', 'Trigger hyper-kinetic dynamic exaggerated perspective, bold marker stroke lines, neon pop-art color saturation.')">Studio Trigger Hyper-Kinetic</button>
-                <button type="button" class="preset-chip" onclick="applyPreset('artStyle', 'Makoto Shinkai breathtaking skyscapes, hyper-detailed cloud shafts, radiant sun flare, luminous optical bloom.')">Shinkai Luminous Skyscapes</button>
-                <button type="button" class="preset-chip" onclick="applyPreset('artStyle', 'Satoshi Kon psychological surrealism, blurring dream and reality, eerie cinematic staging.')">Satoshi Kon Surrealism</button>
-                <button type="button" class="preset-chip" onclick="applyPreset('artStyle', 'Weta digital blockbuster cinematic CGI rendering, physical ray-traced reflections, subsurface skin scattering.')">Blockbuster CGI Realism</button>
-                <button type="button" class="preset-chip" onclick="applyPreset('artStyle', 'Noir graphic novel ink wash, stark high contrast black and white shadows, moody cinematic framing.')">Noir Graphic Novel Ink</button>
-                <button type="button" class="preset-chip" onclick="applyPreset('artStyle', 'Cyberpunk edgerunners neon glitch aesthetics, vibrant saturated magenta and yellow hues, hyper-stylized lines.')">Cyberpunk Edgerunners Style</button>
-                <button type="button" class="preset-chip" onclick="applyPreset('artStyle', 'Pixar 3D animated feature film aesthetic, subsurface scattering, stylized friendly proportions, warm lighting.')">Pixar 3D Animation</button>
-                <button type="button" class="preset-chip" onclick="applyPreset('artStyle', 'Soulslike dark fantasy, ash particles, crumbling gothic architecture, cold desaturated tones.')">Soulslike Dark Fantasy</button>
-                <button type="button" class="preset-chip" onclick="applyPreset('artStyle', 'Vintage 1980s VHS anime mecha aesthetic, chunky mechanical paneling lines, analog TV static bleed.')">80s VHS Mecha Anime</button>
-                <button type="button" class="preset-chip" onclick="applyPreset('artStyle', 'Hyper-stylized manhwa martial arts battle manhua ink strokes, flying sweat and chi aura particle effects.')">Manhua Martial Arts Style</button>
-                <button type="button" class="preset-chip" onclick="applyPreset('artStyle', 'Surrealist dreamscape artistic painting, melting geometry, impossible perspective, ethereal fog.')">Surrealist Dreamscape</button>
-                <button type="button" class="preset-chip" onclick="applyPreset('artStyle', 'Claymation stop-motion aesthetic, thumbprint textures, tactile physical miniature lighting.')">Claymation Stop-Motion</button>
-                <button type="button" class="preset-chip" onclick="applyPreset('artStyle', 'Vintage 1950s classic comic book halftone dot print, bold primary colors, newsprint paper grain texture.')">Vintage 1950s Comic Book</button>
-                <button type="button" class="preset-chip" onclick="applyPreset('artStyle', 'Impressionist oil painting brushstrokes, visible thick paint texture, emotive light blending.')">Impressionist Oil Painting</button>
-            </div>
-            <textarea id="artStyle" class="prompt-field" style="min-height: 90px;" placeholder="Type custom art style..."></textarea>
-        </div>
-
-        <!-- Scene Vibes Card -->
-        <div class="dashboard-card">
-            <div class="flex justify-between items-center mb-2">
-                <input type="text" class="font-bold text-base w-auto border-none bg-transparent" value="Scene Vibes" id="title_sceneVibes" onchange="saveToLocalStorage()">
-                <button class="btn text-xs text-red-600" onclick="this.closest('.dashboard-card').remove(); saveToLocalStorage();">Remove Block</button>
-            </div>
-            <label class="text-xs font-semibold text-zinc-600 block mb-1">Select Scene Vibes Presets:</label>
-            <div class="chips-container">
-                <button type="button" class="preset-chip" onclick="applyPreset('sceneVibes', 'Suspense adventure unpredictability with high psychological tension and hazardous peril.')">Suspense Adventure & Unpredictability</button>
-                <button type="button" class="preset-chip" onclick="applyPreset('sceneVibes', 'Dark psychological horror with oppressive dread and terrifying atmosphere.')">Dark Psychological Horror</button>
-                <button type="button" class="preset-chip" onclick="applyPreset('sceneVibes', 'Gritty cyberpunk noir with neon rain, cynical mood, and high-tech dystopia.')">Cyberpunk Noir</button>
-                <button type="button" class="preset-chip" onclick="applyPreset('sceneVibes', 'Epic high fantasy adventure with mystical wonder and ancient magical resonance.')">Epic High Fantasy</button>
-                <button type="button" class="preset-chip" onclick="applyPreset('sceneVibes', 'Intense action-thriller pulse-pounding urgency with relentless pacing.')">Intense Action-Thriller</button>
-                <button type="button" class="preset-chip" onclick="applyPreset('sceneVibes', 'Melancholic post-apocalyptic isolation with desolate silence and haunting beauty.')">Post-Apocalyptic Isolation</button>
-                <button type="button" class="preset-chip" onclick="applyPreset('sceneVibes', 'Mysterious occult investigative tension with shadowy secrets and arcane discovery.')">Occult Investigative Tension</button>
-                <button type="button" class="preset-chip" onclick="applyPreset('sceneVibes', 'Breathtaking romantic dramatic yearning with soft ambient lighting and emotional resonance.')">Romantic Dramatic Yearning</button>
-                <button type="button" class="preset-chip" onclick="applyPreset('sceneVibes', 'Desperate survival struggle against insurmountable odds in a hostile environment.')">Desperate Survival Struggle</button>
-                <button type="button" class="preset-chip" onclick="applyPreset('sceneVibes', 'High-energy triumphant victory celebration with warm sunlight breaking through storm clouds.')">Triumphant Victory Celebration</button>
-                <button type="button" class="preset-chip" onclick="applyPreset('sceneVibes', 'Claustrophobic underground cave dread with dripping water echoes and stifling darkness.')">Claustrophobic Underground Dread</button>
-                <button type="button" class="preset-chip" onclick="applyPreset('sceneVibes', 'Eerie otherworldly cosmic horror vibe with alien geometries and mind-bending stillness.')">Cosmic Horror Vibe</button>
-                <button type="button" class="preset-chip" onclick="applyPreset('sceneVibes', 'Melancholy rainy city loneliness with neon lights reflecting in street puddles.')">Rainy City Loneliness</button>
-                <button type="button" class="preset-chip" onclick="applyPreset('sceneVibes', 'Whimsical fairytale enchantment with glowing flora and magical dust motes dancing in air.')">Fairytale Enchantment</button>
-                <button type="button" class="preset-chip" onclick="applyPreset('sceneVibes', 'Gritty medieval battlefield grit with smoke haze, clashing steel resonance, and mud.')">Medieval Battlefield Grit</button>
-            </div>
-            <textarea id="sceneVibes" class="prompt-field" style="min-height: 90px;" placeholder="Type custom scene vibes..."></textarea>
-        </div>
-
-        <!-- Environment Card -->
-        <div class="dashboard-card">
-            <div class="flex justify-between items-center mb-2">
-                <input type="text" class="font-bold text-base w-auto border-none bg-transparent" value="The Environment" id="title_environment" onchange="saveToLocalStorage()">
-                <button class="btn text-xs text-red-600" onclick="this.closest('.dashboard-card').remove(); saveToLocalStorage();">Remove Block</button>
-            </div>
-            <label class="text-xs font-semibold text-zinc-600 block mb-1">Select Cinematic Environment Presets:</label>
-            <div class="chips-container">
-                <button type="button" class="preset-chip" onclick="applyPreset('environment', 'Ancient ruins with cracked stone walls, moss-covered pillars, a yawning pit of green acidic bubbling fluid with digesting skeletons, and a horizontal rope across the chasm.')">Ancient Ruins & Acid Pit</button>
-                <button type="button" class="preset-chip" onclick="applyPreset('environment', 'Luxury VIP penthouse hotel room featuring floor-to-ceiling glass windows overlooking a glittering cyberpunk metropolis skyline, polished marble floors.')">Luxury VIP Hotel Suite</button>
-                <button type="button" class="preset-chip" onclick="applyPreset('environment', 'Dilapidated cyberpunk hacker den with exposed conduit wires, flickering holographic computer monitors casting blue glow, and stacked server racks.')">Dilapidated Cyberpunk Hacker Den</button>
-                <button type="button" class="preset-chip" onclick="applyPreset('environment', 'Gothic cathedral interior with soaring ribbed vaulted ceilings, enormous stained-glass windows throwing colored light rays, and towering stone columns.')">Gothic Cathedral Nave</button>
-                <button type="button" class="preset-chip" onclick="applyPreset('environment', 'Traditional minimalist Japanese tatami room with sliding shoji paper doors, warm paper lantern glow, and peaceful indoor rock garden courtyard view.')">Traditional Tatami Room</button>
-            </div>
-            <textarea id="environment" class="prompt-field" style="min-height: 90px;" placeholder="Describe environment..."></textarea>
-        </div>
-
-        <!-- Character Card -->
-        <div class="dashboard-card">
-            <div class="flex justify-between items-center mb-2">
-                <input type="text" class="font-bold text-base w-auto border-none bg-transparent" value="Character" id="title_character" onchange="saveToLocalStorage()">
-                <button class="btn text-xs text-red-600" onclick="this.closest('.dashboard-card').remove(); saveToLocalStorage();">Remove Block</button>
-            </div>
-            <div class="flex flex-col gap-3">
-                <div>
-                    <label class="text-xs font-semibold text-zinc-600 block mb-1">Physique Presets:</label>
-                    <div class="chips-container">
-                        <button type="button" class="preset-chip" onclick="applyPreset('character', 'Athletic mesomorph build with balanced proportional muscle definition.')">Athletic Mesomorph</button>
-                        <button type="button" class="preset-chip" onclick="applyPreset('character', 'Ectomorph slender lean frame with long graceful limbs.')">Ectomorph Slender Lean</button>
-                        <button type="button" class="preset-chip" onclick="applyPreset('character', 'Sinewy wiry muscle structure with hardened tendon definition.')">Sinewy Wiry Muscle</button>
-                        <button type="button" class="preset-chip" onclick="applyPreset('character', 'Skeletal build with prominent collarbones and delicate frame.')">Skeletal Build</button>
-                        <button type="button" class="preset-chip" onclick="applyPreset('character', 'V-taper broad bony shoulders with tiny waist and lean definition.')">V-Taper Broad Shoulders</button>
-                        <button type="button" class="preset-chip" onclick="applyPreset('character', 'Heavy-built burly powerful frame with massive physical presence.')">Heavy-Built Burly</button>
-                        <button type="button" class="preset-chip" onclick="applyPreset('character', 'Tall statuesque model physique with elegant proportions.')">Tall Statuesque</button>
-                        <button type="button" class="preset-chip" onclick="applyPreset('character', 'Compact muscular powerhouse frame with dense compact strength.')">Compact Muscular Powerhouse</button>
-                        <button type="button" class="preset-chip" onclick="applyPreset('character', 'Grounded sturdy build with wide hips and strong core balance.')">Grounded Sturdy Build</button>
-                        <button type="button" class="preset-chip" onclick="applyPreset('character', 'Extremely thin fragile frame with translucent porcelain skin.')">Extremely Thin Fragile</button>
+        <!-- Center Column: Active Section Editor -->
+        <main class="flex-1 p-4 overflow-y-auto flex flex-col gap-3">
+            <div style="background: var(--card-bg); border-color: var(--border-color);" class="border rounded-lg p-4 flex flex-col gap-3 shadow-sm h-full">
+                <div class="flex justify-between items-center pb-2 border-b" style="border-color: var(--border-color);">
+                    <div class="flex items-center gap-2 flex-1">
+                        <input type="text" id="activeSectionTitle" class="font-bold text-base border-none bg-transparent w-full" onchange="updateActiveSectionTitle(this.value)">
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <button class="btn text-xs" onclick="moveActiveTab(-1)" title="Move Up">↑</button>
+                        <button class="btn text-xs" onclick="moveActiveTab(1)" title="Move Down">↓</button>
+                        <button class="btn text-xs text-red-500" onclick="removeActiveSection()">Delete</button>
                     </div>
                 </div>
-                <div>
-                    <label class="text-xs font-semibold text-zinc-600 block mb-1">Personality & Mannerism Presets:</label>
-                    <div class="chips-container">
-                        <button type="button" class="preset-chip" onclick="applyPreset('character', 'Stoic, unflinching, cold focus with absolute emotional control.')">Stoic Unflinching Focus</button>
-                        <button type="button" class="preset-chip" onclick="applyPreset('character', 'Paranoid, darting watchful eyes, hyper-vigilant scanning surroundings.')">Paranoid Hyper-Vigilant</button>
-                        <button type="button" class="preset-chip" onclick="applyPreset('character', 'Stealthy, cat-like silent movements, predatory grace.')">Stealthy Cat-Like Grace</button>
-                        <button type="button" class="preset-chip" onclick="applyPreset('character', 'Gliding ghostly movement, seemingly weightless floating motion.')">Gliding Ghostly Movement</button>
-                        <button type="button" class="preset-chip" onclick="applyPreset('character', 'Impulsive, explosive reactive movements, high nervous energy.')">Impulsive High Energy</button>
-                        <button type="button" class="preset-chip" onclick="applyPreset('character', 'Calculating, methodical, slow deliberate precision gestures.')">Calculating Methodical</button>
-                        <button type="button" class="preset-chip" onclick="applyPreset('character', 'Arrogant swagger, chin tilted up, smug confident smirk.')">Arrogant Swagger</button>
-                        <button type="button" class="preset-chip" onclick="applyPreset('character', 'Melancholic, brooding gaze downward, sorrowful contemplative posture.')">Melancholic Brooding</button>
-                        <button type="button" class="preset-chip" onclick="applyPreset('character', 'Hyper-active fidgeting, constant restless motion, wide expressive eyes.')">Hyper-Active Fidgeting</button>
-                        <button type="button" class="preset-chip" onclick="applyPreset('character', 'Fearful trembling posture, defensive hunched shoulders, darting glances.')">Fearful Trembling Posture</button>
-                        <button type="button" class="preset-chip" onclick="applyPreset('character', 'Enigmatic serene smile, unfathomable calm, mysterious aura.')">Enigmatic Serene Smile</button>
-                        <button type="button" class="preset-chip" onclick="applyPreset('character', 'Aggressive predatory stance, leaning forward, tense coiled muscles.')">Aggressive Predatory Stance</button>
-                    </div>
+
+                <div id="activePresetsContainer" class="flex flex-col gap-2">
+                    <!-- Presets container for active tab -->
                 </div>
-                <div>
-                    <label class="text-xs font-semibold text-zinc-600 block mb-1">Wardrobe & Attire Presets:</label>
-                    <div class="chips-container">
-                        <button type="button" class="preset-chip" onclick="applyPreset('character', 'Pink leotard with halter neck style, large square neck hole, large leg holes extended up to waist, paired with an elegant dark leather belt.')">Halter Leotard & Belt</button>
-                        <button type="button" class="preset-chip" onclick="applyPreset('character', 'Tight-fit dress with trailing skirt, premium fluid fabric, and tight elegant waist belt.')">Tight Dress with Trailing Skirt</button>
-                        <button type="button" class="preset-chip" onclick="applyPreset('character', 'Tactical combat gear with reinforced Kevlar plating, utility webbing, and durable cargo trousers.')">Tactical Combat Gear</button>
-                        <button type="button" class="preset-chip" onclick="applyPreset('character', 'Racerback athletic bodysuit with breathable moisture-wicking synthetic fabric and compression fit.')">Racerback Athletic Bodysuit</button>
-                        <button type="button" class="preset-chip" onclick="applyPreset('character', 'Flowing silk kimono robe with embroidered intricate floral patterns and wide Obi sash.')">Silk Kimono & Obi sash</button>
-                        <button type="button" class="preset-chip" onclick="applyPreset('character', 'Cyberpunk leather biker jacket with glowing LED piping, studded straps, and ripped denim jeans.')">Cyberpunk Biker Jacket</button>
-                        <button type="button" class="preset-chip" onclick="applyPreset('character', 'Heavy medieval steel plate armor suit with chainmail underlay and battered surcoat.')">Medieval Steel Plate Armor</button>
-                        <button type="button" class="preset-chip" onclick="applyPreset('character', 'Sleek corporate tailored business suit with crisp white dress shirt and silk necktie.')">Corporate Tailored Suit</button>
-                    </div>
+
+                <div class="flex flex-col flex-grow">
+                    <label class="text-xs font-semibold opacity-80 mb-1">Section Text Content:</label>
+                    <textarea id="activeSectionText" class="prompt-field flex-grow" style="min-height: 250px;" placeholder="Type or select presets above..." oninput="updateActiveSectionText(this.value)"></textarea>
                 </div>
             </div>
-            <textarea id="character" class="prompt-field mt-2" style="min-height: 90px;" placeholder="Describe character attributes..."></textarea>
-        </div>
+        </main>
 
-        <!-- Action Scene Card -->
-        <div class="dashboard-card">
-            <div class="flex justify-between items-center mb-2">
-                <input type="text" class="font-bold text-base w-auto border-none bg-transparent" value="Action Scene" id="title_actionScene" onchange="saveToLocalStorage()">
-                <button class="btn text-xs text-red-600" onclick="this.closest('.dashboard-card').remove(); saveToLocalStorage();">Remove Block</button>
-            </div>
-            <textarea id="actionScene" class="prompt-field" style="min-height: 90px;" onfocus="checkActionSceneInactivity(this)" placeholder="Describe active movement and sequence for this specific clip..."></textarea>
-        </div>
-
-        <!-- Physics & Mechanics Card -->
-        <div class="dashboard-card">
-            <div class="flex justify-between items-center mb-2">
-                <input type="text" class="font-bold text-base w-auto border-none bg-transparent" value="Physics & Mechanics" id="title_physics" onchange="saveToLocalStorage()">
-                <button class="btn text-xs text-red-600" onclick="this.closest('.dashboard-card').remove(); saveToLocalStorage();">Remove Block</button>
-            </div>
-            <textarea id="physics" class="prompt-field" style="min-height: 80px;" placeholder="Gravity, weight displacement, rope tension..."></textarea>
-        </div>
-
-        <!-- Cinematography Card -->
-        <div class="dashboard-card">
-            <div class="flex justify-between items-center mb-2">
-                <input type="text" class="font-bold text-base w-auto border-none bg-transparent" value="Cinematography & Camera" id="title_cinematography" onchange="saveToLocalStorage()">
-                <button class="btn text-xs text-red-600" onclick="this.closest('.dashboard-card').remove(); saveToLocalStorage();">Remove Block</button>
-            </div>
-            <label class="text-xs font-semibold text-zinc-600 block mb-1">Select Camera & Cut Presets:</label>
-            <div class="chips-container">
-                <button type="button" class="preset-chip" onclick="applyPreset('cinematography', 'Multiple dynamic cinematic camera cuts every 0.3 seconds emphasizing fast-paced action and emotional tension.')">Camera Cuts (Every 0.3s)</button>
-                <button type="button" class="preset-chip" onclick="applyPreset('cinematography', 'Multiple dynamic cinematic camera cuts every 0.5 seconds emphasizing rapid rhythm and drama.')">Camera Cuts (Every 0.5s)</button>
-                <button type="button" class="preset-chip" onclick="applyPreset('cinematography', 'Multiple dynamic cinematic camera cuts every 1 second emphasizing balanced pacing and movement.')">Camera Cuts (Every 1s)</button>
-                <button type="button" class="preset-chip" onclick="applyPreset('cinematography', 'Multiple dynamic cinematic camera cuts every 2 seconds for smooth dramatic shifts.')">Camera Cuts (Every 2s)</button>
-                <button type="button" class="preset-chip" onclick="applyPreset('cinematography', 'Constant smooth tracking camera side-profile shot following character movement.')">Constant Tracking Camera</button>
-                <button type="button" class="preset-chip" onclick="applyPreset('cinematography', 'Constant smooth orbiting camera panning 360 degrees around the character.')">Constant Orbiting Camera</button>
-                <button type="button" class="preset-chip" onclick="applyPreset('cinematography', 'Dramatic low-angle hero shot looking up, emphasizing scale and danger.')">Dramatic Low-Angle Shot</button>
-                <button type="button" class="preset-chip" onclick="applyPreset('cinematography', 'Extreme close-up macro shot on facial expression, eyes, and sweat droplets.')">Extreme Close-Up Macro</button>
-            </div>
-            <textarea id="cinematography" class="prompt-field mt-2" style="min-height: 80px;" placeholder="Camera directives..."></textarea>
-        </div>
-
-        <!-- Rules Card -->
-        <div class="dashboard-card">
-            <div class="flex justify-between items-center mb-2">
-                <input type="text" class="font-bold text-base w-auto border-none bg-transparent" value="Rules & Constraints" id="title_rules" onchange="saveToLocalStorage()">
-                <button class="btn text-xs text-red-600" onclick="this.closest('.dashboard-card').remove(); saveToLocalStorage();">Remove Block</button>
-            </div>
-            <label class="text-xs font-semibold text-zinc-600 block mb-1">Select Rules & Constraints Presets:</label>
-            <div class="chips-container">
-                <button type="button" class="preset-chip" onclick="applyPreset('rules', 'Only render what is mentioned under action scene. The rest of it is only context and things that is needed to refer to when making the video. Do not render anything else.')">Strict Action Scope Guard</button>
-                <button type="button" class="preset-chip" onclick="applyPreset('rules', 'Do not make the characters notice or face the camera.')">Never Look at Camera</button>
-                <button type="button" class="preset-chip" onclick="applyPreset('rules', 'The characters react and interact organically with the environment and other characters around them.')">Organic Environment Interaction</button>
-                <button type="button" class="preset-chip" onclick="applyPreset('rules', 'Do not use reference images as video frames; only render what is mentioned under action scene.')">No Ref Images as Frames</button>
-                <button type="button" class="preset-chip" onclick="applyPreset('rules', 'Maintain exact character physical consistency across all cuts and camera angles.')">Strict Character Consistency</button>
-                <button type="button" class="preset-chip" onclick="applyPreset('rules', 'Keep lighting and atmospheric conditions strictly uniform throughout the shot sequence.')">Uniform Atmospheric Lighting</button>
-            </div>
-            <textarea id="rules" class="prompt-field mt-2" style="min-height: 80px;" placeholder="Rules..."></textarea>
-        </div>
-
-        <div id="extraSectionsContainer"></div>
-
-        <div class="flex justify-center my-2">
-            <button type="button" class="btn" onclick="addExtraSection()">+ Add Custom Section</button>
-        </div>
-
-        <!-- Permanent Large Compiled Output Card -->
-        <div class="dashboard-card" style="background: #ffffff; color: #18181b; border: 1px solid #d4d4d8;">
-            <div class="flex justify-between items-center mb-3 flex-wrap gap-2">
-                <div class="flex items-center gap-3">
-                    <span class="font-bold text-base">Final Compiled Prompt</span>
-                    <label class="text-xs font-semibold flex items-center gap-1 cursor-pointer">
-                        Format:
-                        <select id="outputFormat" class="text-xs py-1 px-2 w-auto font-normal" onchange="compilePrompt()">
-                            <option value="plaintext">Plain Text (--- Title ---)</option>
-                            <option value="markdown">Markdown (# Title)</option>
-                        </select>
-                    </label>
+        <!-- Right Column: Final Compiled Prompt (Equal width w-1/2) -->
+        <section style="background: var(--card-bg); border-color: var(--border-color);" class="w-1/2 border-l p-4 flex flex-col shrink-0 gap-3">
+            <div class="flex justify-between items-center flex-wrap gap-2">
+                <div class="flex items-center gap-2">
+                    <span class="font-bold text-sm">Compiled Prompt</span>
+                    <select id="outputFormat" class="text-xs py-1 px-2 w-auto font-normal" onchange="compilePrompt()">
+                        <option value="markdown" selected>Markdown (#)</option>
+                        <option value="plaintext">Plain Text</option>
+                    </select>
                 </div>
-                <div class="flex gap-2">
-                    <button class="btn btn-primary text-xs" onclick="compilePrompt()">Generate Prompt</button>
-                    <button class="btn text-xs" onclick="copyPrompt()">Copy Output</button>
+                <div class="flex gap-1">
+                    <button class="btn text-xs py-1 px-2" onclick="copyPrompt()">Copy Output</button>
                 </div>
             </div>
-            <textarea id="finalOutput" style="min-height: 350px; font-family: monospace; background: #ffffff; color: #18181b; border-color: #d4d4d8;" placeholder="Click 'Generate Prompt' to compile your prompt here..."></textarea>
-        </div>
+            <textarea id="finalOutput" class="flex-grow font-mono text-xs border rounded-md p-3" style="resize: none; background: var(--input-bg); color: var(--input-text); border-color: var(--border-color);" placeholder="Generated output appears here..."></textarea>
+        </section>
 
-    </main>
+    </div>
+
+    <!-- Import Modal Overlay -->
+    <div id="importModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3 class="font-bold text-base">Import JSON Options</h3>
+            <p class="text-xs opacity-80">Existing projects detected in your workspace. How would you like to import this JSON file?</p>
+            <div class="flex flex-col gap-2 mt-2">
+                <button class="btn btn-primary text-xs py-2" onclick="executeImport('merge')">Merge / Append as New Project(s)</button>
+                <button class="btn btn-danger text-xs py-2" onclick="executeImport('overwrite')">Overwrite (Nuke) Everything & Import</button>
+                <button class="btn text-xs py-2" onclick="closeImportModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
 
     <!-- STREAMING_CHUNK:Initializing client application scripts... -->
     <script>
@@ -372,51 +272,264 @@
                         'clip_1': {
                             name: 'Clip 1',
                             lastModified: Date.now(),
-                            titles: {
-                                refImages: 'Reference Images',
-                                artStyle: 'Art Style & Medium',
-                                sceneVibes: 'Scene Vibes',
-                                environment: 'The Environment',
-                                character: 'Character',
-                                actionScene: 'Action Scene',
-                                physics: 'Physics & Mechanics',
-                                cinematography: 'Cinematography & Camera',
-                                rules: 'Rules & Constraints'
-                            },
-                            fields: {},
-                            extras: []
+                            activeTabId: 'refImages',
+                            sections: [
+                                { id: 'refImages', title: 'Reference Images', type: 'standard', value: '' },
+                                { id: 'artStyle', title: 'Art Style & Medium', type: 'artStyle', value: '' },
+                                { id: 'sceneVibes', title: 'Scene Vibes', type: 'sceneVibes', value: '' },
+                                { id: 'environment', title: 'The Environment', type: 'environment', value: '' },
+                                { id: 'character', title: 'Character', type: 'character', value: '' },
+                                { id: 'actionScene', title: 'Action Scene', type: 'actionScene', value: '' },
+                                { id: 'physics', title: 'Physics & Mechanics', type: 'physics', value: '' },
+                                { id: 'cinematography', title: 'Cinematography & Camera', type: 'cinematography', value: '' },
+                                { id: 'rules', title: 'Rules & Constraints', type: 'rules', value: '' }
+                            ]
                         }
                     }
                 }
             }
         };
 
+        const presetLibraries = {
+            artStyle: [
+                "Highly stylized 2D digital anime-realism illustration, manhwa/webtoon key visual style, crisp ink contour line art combined with hyper-rendered digital painting, high-contrast studio lighting.",
+                "1990s retro OVA anime aesthetic, cel-shaded animation style, thick ink outlines, authentic vintage analog film grain, VHS color grading.",
+                "2D Sakuga action anime key visual, highly dynamic fluid character motion lines, intense smear frames, high-contrast cel shading.",
+                "Castlevania Nocturne dark gothic animated series style, rich painterly textures, dramatic chiaroscuro lighting.",
+                "Retro 80s He-Man and Masters of the Universe cel cartoon style, bold thick ink lines, vibrant primary colors.",
+                "Cinematic hyper-realistic 35mm film shot, anamorphic lens flare, volumetric lighting, photorealistic textures.",
+                "Gritty cyberpunk neo-noir anime, neon reflections, deep shadows, moody cyan and magenta color grading.",
+                "Studio Ghibli lush hand-painted watercolor aesthetic, soft ambient lighting, whimsical pastoral beauty.",
+                "Dark fantasy grimdark concept art, intricate cross-hatching, moody atmospheric haze.",
+                "Ufotable high-octane magical combat digital compositing, vibrant particle effects, luminous glow rendering.",
+                "Kyoto Animation delicate soft pastel lighting, exquisite eye reflections, highly detailed emotional facial expressions.",
+                "Trigger hyper-kinetic dynamic exaggerated perspective, bold marker stroke lines, neon pop-art color saturation.",
+                "Makoto Shinkai breathtaking skyscapes, hyper-detailed cloud shafts, radiant sun flare, luminous optical bloom.",
+                "Satoshi Kon psychological surrealism, blurring dream and reality, eerie cinematic staging.",
+                "Weta digital blockbuster cinematic CGI rendering, physical ray-traced reflections, subsurface skin scattering.",
+                "Noir graphic novel ink wash, stark high contrast black and white shadows, moody cinematic framing.",
+                "Cyberpunk edgerunners neon glitch aesthetics, vibrant saturated magenta and yellow hues, hyper-stylized lines.",
+                "Pixar 3D animated feature film aesthetic, subsurface scattering, stylized friendly proportions, warm lighting.",
+                "Soulslike dark fantasy, ash particles, crumbling gothic architecture, cold desaturated tones.",
+                "Vintage 1980s VHS anime mecha aesthetic, chunky mechanical paneling lines, analog TV static bleed.",
+                "Hyper-stylized manhwa martial arts battle manhua ink strokes, flying sweat and chi aura particle effects.",
+                "Surrealist dreamscape artistic painting, melting geometry, impossible perspective, ethereal fog.",
+                "Claymation stop-motion aesthetic, thumbprint textures, tactile physical miniature lighting.",
+                "Vintage 1950s classic comic book halftone dot print, bold primary colors, newsprint paper grain texture.",
+                "Impressionist oil painting brushstrokes, visible thick paint texture, emotive light blending."
+            ],
+            sceneVibes: [
+                "Suspense adventure unpredictability with high psychological tension and hazardous peril.",
+                "Dark psychological horror with oppressive dread and terrifying atmosphere.",
+                "Gritty cyberpunk noir with neon rain, cynical mood, and high-tech dystopia.",
+                "Epic high fantasy adventure with mystical wonder and ancient magical resonance.",
+                "Intense action-thriller pulse-pounding urgency with relentless pacing.",
+                "Melancholic post-apocalyptic isolation with desolate silence and haunting beauty.",
+                "Mysterious occult investigative tension with shadowy secrets and arcane discovery.",
+                "Breathtaking romantic dramatic yearning with soft ambient lighting and emotional resonance.",
+                "Desperate survival struggle against insurmountable odds in a hostile environment.",
+                "High-energy triumphant victory celebration with warm sunlight breaking through storm clouds.",
+                "Claustrophobic underground cave dread with dripping water echoes and stifling darkness.",
+                "Eerie otherworldly cosmic horror vibe with alien geometries and mind-bending stillness.",
+                "Melancholy rainy city loneliness with neon lights reflecting in street puddles.",
+                "Whimsical fairytale enchantment with glowing flora and magical dust motes dancing in air.",
+                "Gritty medieval battlefield grit with smoke haze, clashing steel resonance, and mud."
+            ],
+            environment: [
+                "Ancient ruins with cracked stone walls, moss-covered pillars, a yawning pit of green acidic bubbling fluid with digesting skeletons, and a horizontal rope across the chasm.",
+                "Luxury VIP penthouse hotel room featuring floor-to-ceiling glass windows overlooking a glittering cyberpunk metropolis skyline, polished marble floors.",
+                "Dilapidated cyberpunk hacker den with exposed conduit wires, flickering holographic computer monitors casting blue glow, and stacked server racks.",
+                "Gothic cathedral interior with soaring ribbed vaulted ceilings, enormous stained-glass windows throwing colored light rays, and towering stone columns.",
+                "Traditional minimalist Japanese tatami room with sliding shoji paper doors, warm paper lantern glow, and peaceful indoor rock garden courtyard view."
+            ],
+            character: [
+                "Physique: Athletic mesomorph build with balanced proportional muscle definition.",
+                "Physique: Ectomorph slender lean frame with long graceful limbs.",
+                "Physique: Sinewy wiry muscle structure with hardened tendon definition.",
+                "Personality: Stoic, unflinching, cold focus with absolute emotional control.",
+                "Personality: Paranoid, darting watchful eyes, hyper-vigilant scanning surroundings.",
+                "Personality: Stealthy, cat-like silent movements, predatory grace.",
+                "Wardrobe: Pink leotard with halter neck style, large square neck hole, large leg holes extended up to waist, paired with an elegant dark leather belt.",
+                "Wardrobe: Tight-fit dress with trailing skirt, premium fluid fabric, and tight elegant waist belt.",
+                "Wardrobe: Tactical combat gear with reinforced Kevlar plating, utility webbing, and durable cargo trousers."
+            ],
+            cinematography: [
+                "Multiple dynamic cinematic camera cuts every 0.3 seconds emphasizing fast-paced action and emotional tension.",
+                "Multiple dynamic cinematic camera cuts every 0.5 seconds emphasizing rapid rhythm and drama.",
+                "Multiple dynamic cinematic camera cuts every 1 second emphasizing balanced pacing and movement.",
+                "Multiple dynamic cinematic camera cuts every 2 seconds for smooth dramatic shifts.",
+                "Constant smooth tracking camera side-profile shot following character movement.",
+                "Constant smooth orbiting camera panning 360 degrees around the character.",
+                "Dramatic low-angle hero shot looking up, emphasizing scale and danger.",
+                "Extreme close-up macro shot on facial expression, eyes, and sweat droplets."
+            ],
+            rules: [
+                "Only render what is mentioned under action scene. The rest of it is only context and things that is needed to refer to when making the video. Do not render anything else.",
+                "Do not make the characters notice or face the camera.",
+                "The characters react and interact organically with the environment and other characters around them.",
+                "Do not use reference images as video frames; only render what is mentioned under action scene.",
+                "Maintain exact character physical consistency across all cuts and camera angles.",
+                "Keep lighting and atmospheric conditions strictly uniform throughout the shot sequence."
+            ]
+        };
+
         window.addEventListener('DOMContentLoaded', () => {
             loadFromLocalStorage();
             renderProjectSelector();
             renderClipSelector();
-            loadActiveClipData();
+            renderTabs();
+            loadActiveSectionData();
             compilePrompt();
         });
 
-        function checkActionSceneInactivity(textarea) {
+        function getActiveClip() {
             const proj = masterProjects.projects[masterProjects.activeProjectId];
-            if (proj && proj.clips[proj.activeClipId]) {
-                const clip = proj.clips[proj.activeClipId];
-                if (clip.lastModified && (Date.now() - clip.lastModified) / 60000 >= 5) {
-                    if (confirm("More than 5 minutes have passed since this clip was last modified. Do you want to continue editing this clip or create a new one?")) {
-                        clip.lastModified = Date.now();
-                    }
-                }
+            if (!proj) return null;
+            return proj.clips[proj.activeClipId];
+        }
+
+        function renderTabs() {
+            const clip = getActiveClip();
+            if (!clip) return;
+            const container = document.getElementById('tabsContainer');
+            container.innerHTML = '';
+
+            clip.sections.forEach((sec) => {
+                const div = document.createElement('div');
+                div.className = `tab-item ${sec.id === clip.activeTabId ? 'active' : ''}`;
+                div.innerHTML = `<span>${sec.title}</span>`;
+                div.onclick = () => {
+                    saveActiveSectionInput();
+                    clip.activeTabId = sec.id;
+                    renderTabs();
+                    loadActiveSectionData();
+                };
+                container.appendChild(div);
+            });
+        }
+
+        function loadActiveSectionData() {
+            const clip = getActiveClip();
+            if (!clip) return;
+            const sec = clip.sections.find(s => s.id === clip.activeTabId);
+            if (!sec) return;
+
+            document.getElementById('activeSectionTitle').value = sec.title;
+            document.getElementById('activeSectionText').value = sec.value || '';
+            renderPresetsForSection(sec);
+        }
+
+        function renderPresetsForSection(sec) {
+            const container = document.getElementById('activePresetsContainer');
+            container.innerHTML = '';
+
+            let libraryKey = sec.type;
+            if (presetLibraries[libraryKey]) {
+                const label = document.createElement('label');
+                label.className = 'text-xs font-semibold opacity-80 block mb-1';
+                label.innerText = `Presets for ${sec.title} (Click to append):`;
+                container.appendChild(label);
+
+                const chipsDiv = document.createElement('div');
+                chipsDiv.className = 'chips-container';
+
+                presetLibraries[libraryKey].forEach(preset => {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'preset-chip';
+                    btn.innerText = preset;
+                    btn.onclick = () => {
+                        const ta = document.getElementById('activeSectionText');
+                        ta.value = ta.value.trim() !== '' ? ta.value + ' ' + preset : preset;
+                        updateActiveSectionText(ta.value);
+                    };
+                    chipsDiv.appendChild(btn);
+                });
+                container.appendChild(chipsDiv);
             }
         }
 
-        function applyPreset(elementId, text) {
-            const el = document.getElementById(elementId);
-            if (el) {
-                el.value = el.value.trim() !== '' ? el.value + ' ' + text : text;
+        function updateActiveSectionText(val) {
+            saveActiveSectionInput();
+            saveToLocalStorage();
+            compilePrompt();
+        }
+
+        function updateActiveSectionTitle(val) {
+            const clip = getActiveClip();
+            if (!clip) return;
+            const sec = clip.sections.find(s => s.id === clip.activeTabId);
+            if (sec && val.trim()) {
+                sec.title = val.trim();
+                renderTabs();
                 saveToLocalStorage();
+                compilePrompt();
             }
+        }
+
+        function saveActiveSectionInput() {
+            const clip = getActiveClip();
+            if (!clip) return;
+            const sec = clip.sections.find(s => s.id === clip.activeTabId);
+            if (sec) {
+                const ta = document.getElementById('activeSectionText');
+                if (ta) sec.value = ta.value;
+            }
+        }
+
+        function moveActiveTab(direction) {
+            saveActiveSectionInput();
+            const clip = getActiveClip();
+            if (!clip) return;
+            const idx = clip.sections.findIndex(s => s.id === clip.activeTabId);
+            if (idx < 0) return;
+
+            const targetIdx = idx + direction;
+            if (targetIdx < 0 || targetIdx >= clip.sections.length) return;
+
+            const temp = clip.sections[idx];
+            clip.sections[idx] = clip.sections[targetIdx];
+            clip.sections[targetIdx] = temp;
+
+            renderTabs();
+            saveToLocalStorage();
+            compilePrompt();
+        }
+
+        function addCustomSection() {
+            saveActiveSectionInput();
+            const clip = getActiveClip();
+            if (!clip) return;
+            const newId = 'sec_' + Date.now();
+            clip.sections.push({
+                id: newId,
+                title: 'Custom Section',
+                type: 'custom',
+                value: ''
+            });
+            clip.activeTabId = newId;
+            renderTabs();
+            loadActiveSectionData();
+            saveToLocalStorage();
+            compilePrompt();
+        }
+
+        function removeActiveSection() {
+            const clip = getActiveClip();
+            if (!clip) return;
+            if (clip.sections.length <= 1) {
+                alert("Cannot remove the last remaining section.");
+                return;
+            }
+            const idx = clip.sections.findIndex(s => s.id === clip.activeTabId);
+            if (idx < 0) return;
+
+            clip.sections.splice(idx, 1);
+            clip.activeTabId = clip.sections[Math.max(0, idx - 1)].id;
+            renderTabs();
+            loadActiveSectionData();
+            saveToLocalStorage();
+            compilePrompt();
         }
 
         function ensureFullStop(text) {
@@ -426,55 +539,27 @@
         }
 
         function compilePrompt() {
-            saveActiveClipData();
+            saveActiveSectionInput();
+            const clip = getActiveClip();
+            if (!clip) return;
+
             let compiledText = "";
             const format = document.getElementById('outputFormat').value;
-            
-            const standardFields = ['refImages', 'artStyle', 'sceneVibes', 'environment', 'character', 'actionScene', 'physics', 'cinematography', 'rules'];
-            standardFields.forEach(id => {
-                const titleInput = document.getElementById('title_' + id);
-                const textarea = document.getElementById(id);
-                if (textarea && textarea.value.trim()) {
-                    const title = titleInput ? titleInput.value.trim() : id;
-                    const content = ensureFullStop(textarea.value);
-                    if (format === 'markdown') {
-                        compiledText += `# ${title}\n${content}\n\n`;
-                    } else {
-                        compiledText += `--- ${title} ---\n${content}\n\n`;
-                    }
-                }
-            });
 
-            document.querySelectorAll('.extra-section-item').forEach(item => {
-                const title = item.querySelector('.extra-title').value.trim() || 'Custom Section';
-                const content = item.querySelector('.extra-content').value.trim();
-                if (content) {
-                    const formattedContent = ensureFullStop(content);
+            clip.sections.forEach(sec => {
+                const val = sec.value.trim();
+                if (val) {
+                    const content = ensureFullStop(val);
                     if (format === 'markdown') {
-                        compiledText += `# ${title}\n${formattedContent}\n\n`;
+                        compiledText += `# ${sec.title}\n${content}\n\n`;
                     } else {
-                        compiledText += `--- ${title} ---\n${formattedContent}\n\n`;
+                        compiledText += `--- ${sec.title} ---\n${content}\n\n`;
                     }
                 }
             });
 
             document.getElementById('finalOutput').value = compiledText.trim();
             showSavedIndicator();
-        }
-
-        function addExtraSection(savedTitle = '', savedContent = '') {
-            const container = document.getElementById('extraSectionsContainer');
-            const card = document.createElement('div');
-            card.className = 'dashboard-card extra-section-item';
-            card.innerHTML = `
-                <div class="flex justify-between items-center mb-2">
-                    <input type="text" class="font-bold text-base w-auto border-none bg-transparent extra-title" value="${savedTitle || 'Custom Section'}" placeholder="Section Title" onchange="saveToLocalStorage()">
-                    <button class="btn text-xs text-red-600" onclick="this.closest('.dashboard-card').remove(); saveToLocalStorage();">Remove Block</button>
-                </div>
-                <textarea class="extra-content prompt-field" style="min-height: 80px;" placeholder="Enter details...">${savedContent}</textarea>
-            `;
-            container.appendChild(card);
-            saveToLocalStorage();
         }
 
         function renderProjectSelector() {
@@ -503,7 +588,7 @@
         }
 
         function switchProject(projId) {
-            saveActiveClipData();
+            saveActiveSectionInput();
             masterProjects.activeProjectId = projId;
             const proj = masterProjects.projects[projId];
             if (proj && !proj.clips[proj.activeClipId]) {
@@ -511,11 +596,13 @@
             }
             renderProjectSelector();
             renderClipSelector();
-            loadActiveClipData();
+            renderTabs();
+            loadActiveSectionData();
+            compilePrompt();
         }
 
         function createNewProject() {
-            saveActiveClipData();
+            saveActiveSectionInput();
             const newId = 'proj_' + Date.now();
             const projCount = Object.keys(masterProjects.projects).length + 1;
             const clipId = 'clip_' + Date.now();
@@ -527,17 +614,28 @@
                     [clipId]: {
                         name: 'Clip 1',
                         lastModified: Date.now(),
-                        titles: { refImages: 'Reference Images', artStyle: 'Art Style & Medium', sceneVibes: 'Scene Vibes', environment: 'The Environment', character: 'Character', actionScene: 'Action Scene', physics: 'Physics & Mechanics', cinematography: 'Cinematography & Camera', rules: 'Rules & Constraints' },
-                        fields: {},
-                        extras: []
+                        activeTabId: 'refImages',
+                        sections: [
+                            { id: 'refImages', title: 'Reference Images', type: 'standard', value: '' },
+                            { id: 'artStyle', title: 'Art Style & Medium', type: 'artStyle', value: '' },
+                            { id: 'sceneVibes', title: 'Scene Vibes', type: 'sceneVibes', value: '' },
+                            { id: 'environment', title: 'The Environment', type: 'environment', value: '' },
+                            { id: 'character', title: 'Character', type: 'character', value: '' },
+                            { id: 'actionScene', title: 'Action Scene', type: 'actionScene', value: '' },
+                            { id: 'physics', title: 'Physics & Mechanics', type: 'physics', value: '' },
+                            { id: 'cinematography', title: 'Cinematography & Camera', type: 'cinematography', value: '' },
+                            { id: 'rules', title: 'Rules & Constraints', type: 'rules', value: '' }
+                        ]
                     }
                 }
             };
             masterProjects.activeProjectId = newId;
             renderProjectSelector();
             renderClipSelector();
-            loadActiveClipData();
+            renderTabs();
+            loadActiveSectionData();
             saveToLocalStorage();
+            compilePrompt();
         }
 
         function deleteCurrentProject() {
@@ -550,8 +648,10 @@
             masterProjects.activeProjectId = Object.keys(masterProjects.projects)[0];
             renderProjectSelector();
             renderClipSelector();
-            loadActiveClipData();
+            renderTabs();
+            loadActiveSectionData();
             saveToLocalStorage();
+            compilePrompt();
         }
 
         function renderClipSelector() {
@@ -569,16 +669,18 @@
         }
 
         function switchClip(clipId) {
-            saveActiveClipData();
+            saveActiveSectionInput();
             const proj = masterProjects.projects[masterProjects.activeProjectId];
             if (proj) {
                 proj.activeClipId = clipId;
-                loadActiveClipData();
+                renderTabs();
+                loadActiveSectionData();
+                compilePrompt();
             }
         }
 
         function createNewClip() {
-            saveActiveClipData();
+            saveActiveSectionInput();
             const proj = masterProjects.projects[masterProjects.activeProjectId];
             if (!proj) return;
             const newClipId = 'clip_' + Date.now();
@@ -588,14 +690,15 @@
             proj.clips[newClipId] = {
                 name: 'Clip ' + clipCount,
                 lastModified: Date.now(),
-                titles: JSON.parse(JSON.stringify(activeClip.titles)),
-                fields: JSON.parse(JSON.stringify(activeClip.fields)),
-                extras: JSON.parse(JSON.stringify(activeClip.extras))
+                activeTabId: activeClip.activeTabId,
+                sections: JSON.parse(JSON.stringify(activeClip.sections))
             };
             proj.activeClipId = newClipId;
             renderClipSelector();
-            loadActiveClipData();
+            renderTabs();
+            loadActiveSectionData();
             saveToLocalStorage();
+            compilePrompt();
         }
 
         function deleteCurrentClip() {
@@ -608,108 +711,195 @@
             delete proj.clips[proj.activeClipId];
             proj.activeClipId = Object.keys(proj.clips)[0];
             renderClipSelector();
-            loadActiveClipData();
+            renderTabs();
+            loadActiveSectionData();
             saveToLocalStorage();
-        }
-
-        function saveActiveClipData() {
-            const proj = masterProjects.projects[masterProjects.activeProjectId];
-            if (!proj) return;
-            const clip = proj.clips[proj.activeClipId];
-            if (!clip) return;
-
-            clip.fields = {};
-            const standardFields = ['refImages', 'artStyle', 'sceneVibes', 'environment', 'character', 'actionScene', 'physics', 'cinematography', 'rules'];
-            standardFields.forEach(id => {
-                const ta = document.getElementById(id);
-                if (ta) clip.fields[id] = ta.value;
-                const tInput = document.getElementById('title_' + id);
-                if (tInput) clip.titles[id] = tInput.value;
-            });
-
-            clip.extras = [];
-            document.querySelectorAll('.extra-section-item').forEach(item => {
-                clip.extras.push({
-                    title: item.querySelector('.extra-title').value,
-                    content: item.querySelector('.extra-content').value
-                });
-            });
-        }
-
-        function loadActiveClipData() {
-            const proj = masterProjects.projects[masterProjects.activeProjectId];
-            if (!proj) return;
-            const clip = proj.clips[proj.activeClipId];
-            if (!clip) return;
-
-            const standardFields = ['refImages', 'artStyle', 'sceneVibes', 'environment', 'character', 'actionScene', 'physics', 'cinematography', 'rules'];
-            standardFields.forEach(id => {
-                const ta = document.getElementById(id);
-                if (ta) ta.value = (clip.fields && clip.fields[id]) || '';
-                const tInput = document.getElementById('title_' + id);
-                if (tInput && clip.titles && clip.titles[id]) tInput.value = clip.titles[id];
-            });
-
-            document.getElementById('extraSectionsContainer').innerHTML = '';
-            if (clip.extras) {
-                clip.extras.forEach(ex => addExtraSection(ex.title, ex.content));
-            }
             compilePrompt();
         }
 
         function saveToLocalStorage() {
-            localStorage.setItem('ai_video_prompt_dashboard_v13', JSON.stringify(masterProjects));
+            saveActiveSectionInput();
+            localStorage.setItem('ai_video_prompt_dashboard_v16', JSON.stringify(masterProjects));
             showSavedIndicator();
         }
 
         function loadFromLocalStorage() {
             try {
-                const saved = localStorage.getItem('ai_video_prompt_dashboard_v13');
+                const saved = localStorage.getItem('ai_video_prompt_dashboard_v16');
                 if (saved) {
                     const parsed = JSON.parse(saved);
-                    if (parsed && parsed.projects) masterProjects = parsed;
+                    if (parsed && parsed.projects) {
+                        masterProjects = parsed;
+                        return;
+                    }
                 }
             } catch (e) {
                 console.error(e);
             }
         }
 
-        function clearAllData() {
-            if (!confirm("Are you sure you want to nuke all projects and clips?")) return;
-            localStorage.removeItem('ai_video_prompt_dashboard_v13');
-            location.reload();
+        function convertOldFormatToNew(imported) {
+            let converted = {
+                activeProjectId: 'proj_1',
+                projects: {}
+            };
+
+            const standardTypes = {
+                refImages: 'standard',
+                artStyle: 'artStyle',
+                sceneVibes: 'sceneVibes',
+                environment: 'environment',
+                character: 'character',
+                actionScene: 'actionScene',
+                physics: 'physics',
+                cinematography: 'cinematography',
+                rules: 'rules'
+            };
+
+            if (imported.projects) {
+                for (const [pKey, pVal] of Object.entries(imported.projects)) {
+                    let newProj = {
+                        name: pVal.name || 'Imported Project',
+                        activeClipId: pVal.activeClipId || Object.keys(pVal.clips || {})[0],
+                        clips: {}
+                    };
+
+                    if (pVal.clips) {
+                        for (const [cKey, cVal] of Object.entries(pVal.clips)) {
+                            let sections = [];
+                            let order = cVal.order || Object.keys(cVal.titles || {});
+                            if (order.length === 0) {
+                                order = ['refImages', 'artStyle', 'sceneVibes', 'environment', 'character', 'actionScene', 'physics', 'cinematography', 'rules'];
+                            }
+
+                            order.forEach(sId => {
+                                let title = (cVal.titles && cVal.titles[sId]) ? cVal.titles[sId] : sId;
+                                let val = '';
+                                if (cVal.fields && cVal.fields[sId] !== undefined) {
+                                    val = cVal.fields[sId];
+                                } else if (sId === 'customRulesInput' && cVal.customRules) {
+                                    val = cVal.customRules;
+                                }
+                                sections.push({
+                                    id: sId,
+                                    title: title,
+                                    type: standardTypes[sId] || 'custom',
+                                    value: val
+                                });
+                            });
+
+                            if (cVal.extras && Array.isArray(cVal.extras)) {
+                                cVal.extras.forEach((ex, idx) => {
+                                    sections.push({
+                                        id: 'extra_' + idx + '_' + Date.now(),
+                                        title: ex.title || 'Custom Section',
+                                        type: 'custom',
+                                        value: ex.content || ''
+                                    });
+                                });
+                            }
+
+                            newProj.clips[cKey] = {
+                                name: cVal.name || 'Clip',
+                                lastModified: cVal.lastModified || Date.now(),
+                                activeTabId: sections[0] ? sections[0].id : 'refImages',
+                                sections: sections
+                            };
+                        }
+                    }
+                    converted.projects[pKey] = newProj;
+                }
+                if (imported.activeProjectId && converted.projects[imported.activeProjectId]) {
+                    converted.activeProjectId = imported.activeProjectId;
+                } else {
+                    converted.activeProjectId = Object.keys(converted.projects)[0];
+                }
+            }
+            return converted;
         }
 
-        function exportDataJSON() {
-            saveActiveClipData();
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(masterProjects, null, 2));
-            const dlAnchor = document.createElement('a');
-            dlAnchor.setAttribute("href", dataStr);
-            dlAnchor.setAttribute("download", "prompt_dashboard_projects.json");
-            document.body.appendChild(dlAnchor);
-            dlAnchor.click();
-            dlAnchor.remove();
-        }
+        let pendingImportData = null;
 
-        function importDataJSON(event) {
+        function handleFileImport(event) {
             const file = event.target.files[0];
             if (!file) return;
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
-                    const imported = JSON.parse(e.target.result);
+                    let imported = JSON.parse(e.target.result);
                     if (imported && imported.projects) {
-                        masterProjects = imported;
-                        renderProjectSelector();
-                        renderClipSelector();
-                        loadActiveClipData();
-                        alert("Imported successfully!");
+                        pendingImportData = convertOldFormatToNew(imported);
+                    } else if (imported && imported.clips) {
+                        let convertedSingle = { activeProjectId: 'proj_imp', projects: { 'proj_imp': imported } };
+                        pendingImportData = convertOldFormatToNew(convertedSingle);
                     }
+                    document.getElementById('importModal').classList.remove('hidden');
                 } catch (err) {
-                    alert("Invalid JSON file.");
+                    console.error(err);
+                    alert("Invalid JSON file format.");
                 }
+                event.target.value = '';
             };
             reader.readAsText(file);
+        }
+
+        function closeImportModal() {
+            document.getElementById('importModal').classList.add('hidden');
+            pendingImportData = null;
+        }
+
+        function executeImport(mode) {
+            if (!pendingImportData) return;
+            if (mode === 'overwrite') {
+                masterProjects = pendingImportData;
+            } else if (mode === 'merge') {
+                for (const [pId, pObj] of Object.entries(pendingImportData.projects)) {
+                    let uniqueId = pId;
+                    while (masterProjects.projects[uniqueId]) {
+                        uniqueId = 'proj_' + Date.now() + '_' + Math.random().toString(36).substring(2, 5);
+                    }
+                    masterProjects.projects[uniqueId] = pObj;
+                }
+                masterProjects.activeProjectId = Object.keys(masterProjects.projects)[0];
+            }
+            closeImportModal();
+            renderProjectSelector();
+            renderClipSelector();
+            renderTabs();
+            loadActiveSectionData();
+            compilePrompt();
+            saveToLocalStorage();
+            alert("Backup file successfully imported!");
+        }
+
+        function clearAllData() {
+            if (!confirm("Are you sure you want to nuke all projects and clips?")) return;
+            localStorage.removeItem('ai_video_prompt_dashboard_v16');
+            location.reload();
+        }
+
+        function exportCurrentProjectJSON() {
+            saveActiveSectionInput();
+            const proj = masterProjects.projects[masterProjects.activeProjectId];
+            if (!proj) return;
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(proj, null, 2));
+            const dlAnchor = document.createElement('a');
+            dlAnchor.setAttribute("href", dataStr);
+            dlAnchor.setAttribute("download", `${proj.name.toLowerCase().replace(/\s+/g, '_')}_export.json`);
+            document.body.appendChild(dlAnchor);
+            dlAnchor.click();
+            dlAnchor.remove();
+        }
+
+        function exportDataJSON() {
+            saveActiveSectionInput();
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(masterProjects, null, 2));
+            const dlAnchor = document.createElement('a');
+            dlAnchor.setAttribute("href", dataStr);
+            dlAnchor.setAttribute("download", "all_prompt_dashboard_projects.json");
+            document.body.appendChild(dlAnchor);
+            dlAnchor.click();
+            dlAnchor.remove();
         }
 
         function showSavedIndicator() {
