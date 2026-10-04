@@ -127,9 +127,11 @@
             background: var(--sidebar-hover);
         }
         .tab-item.active {
-            background: #2563eb;
-            color: #ffffff;
             border-color: #2563eb;
+            box-shadow: 0 0 0 1px #2563eb;
+        }
+        .tab-item.disabled-tab {
+            opacity: 0.5;
         }
         /* Modal styling */
         .modal-overlay {
@@ -194,7 +196,7 @@
         
         <!-- Left Column: Navigation Tabs -->
         <aside style="background: var(--sidebar-bg); border-color: var(--border-color);" class="w-[260px] border-r flex flex-col shrink-0 overflow-y-auto p-3 gap-2">
-            <div class="text-xs font-bold uppercase tracking-wider opacity-60 mb-1 px-1">Sections</div>
+            <div class="text-xs font-bold uppercase tracking-wider opacity-60 mb-1 px-1">Sections (Toggle On/Off)</div>
             <div id="tabsContainer" class="flex flex-col gap-1.5">
                 <!-- Dynamically rendered tabs -->
             </div>
@@ -274,15 +276,15 @@
                             lastModified: Date.now(),
                             activeTabId: 'refImages',
                             sections: [
-                                { id: 'refImages', title: 'Reference Images', type: 'standard', value: '' },
-                                { id: 'artStyle', title: 'Art Style & Medium', type: 'artStyle', value: '' },
-                                { id: 'sceneVibes', title: 'Scene Vibes', type: 'sceneVibes', value: '' },
-                                { id: 'environment', title: 'The Environment', type: 'environment', value: '' },
-                                { id: 'character', title: 'Character', type: 'character', value: '' },
-                                { id: 'actionScene', title: 'Action Scene', type: 'actionScene', value: '' },
-                                { id: 'physics', title: 'Physics & Mechanics', type: 'physics', value: '' },
-                                { id: 'cinematography', title: 'Cinematography & Camera', type: 'cinematography', value: '' },
-                                { id: 'rules', title: 'Rules & Constraints', type: 'rules', value: '' }
+                                { id: 'refImages', title: 'Reference Images', type: 'standard', enabled: true, value: '' },
+                                { id: 'artStyle', title: 'Art Style & Medium', type: 'artStyle', enabled: true, value: '' },
+                                { id: 'sceneVibes', title: 'Scene Vibes', type: 'sceneVibes', enabled: true, value: '' },
+                                { id: 'environment', title: 'The Environment', type: 'environment', enabled: true, value: '' },
+                                { id: 'character', title: 'Character', type: 'character', enabled: true, value: '' },
+                                { id: 'actionScene', title: 'Action Scene', type: 'actionScene', enabled: true, value: '' },
+                                { id: 'physics', title: 'Physics & Mechanics', type: 'physics', enabled: true, value: '' },
+                                { id: 'cinematography', title: 'Cinematography & Camera', type: 'cinematography', enabled: true, value: '' },
+                                { id: 'rules', title: 'Rules & Constraints', type: 'rules', enabled: true, value: '' }
                             ]
                         }
                     }
@@ -395,17 +397,40 @@
             container.innerHTML = '';
 
             clip.sections.forEach((sec) => {
+                if (sec.enabled === undefined) sec.enabled = true; // backward compatibility
                 const div = document.createElement('div');
-                div.className = `tab-item ${sec.id === clip.activeTabId ? 'active' : ''}`;
-                div.innerHTML = `<span>${sec.title}</span>`;
-                div.onclick = () => {
-                    saveActiveSectionInput();
-                    clip.activeTabId = sec.id;
-                    renderTabs();
-                    loadActiveSectionData();
-                };
+                div.className = `tab-item ${sec.id === clip.activeTabId ? 'active' : ''} ${!sec.enabled ? 'disabled-tab' : ''}`;
+                
+                div.innerHTML = `
+                    <span class="truncate flex-1 pr-2" onclick="selectTab('${sec.id}')">${sec.title}</span>
+                    <label class="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded cursor-pointer select-none ${sec.enabled ? 'bg-emerald-600 text-white' : 'bg-zinc-300 dark:bg-zinc-700 opacity-60'}" title="Toggle section on/off in compiled prompt" onclick="event.stopPropagation(); toggleSectionEnabled('${sec.id}')">
+                        ${sec.enabled ? 'ON' : 'OFF'}
+                    </label>
+                `;
                 container.appendChild(div);
             });
+        }
+
+        function selectTab(id) {
+            saveActiveSectionInput();
+            const clip = getActiveClip();
+            if (!clip) return;
+            clip.activeTabId = id;
+            renderTabs();
+            loadActiveSectionData();
+        }
+
+        function toggleSectionEnabled(id) {
+            saveActiveSectionInput();
+            const clip = getActiveClip();
+            if (!clip) return;
+            const sec = clip.sections.find(s => s.id === id);
+            if (sec) {
+                sec.enabled = sec.enabled === false ? true : false;
+                renderTabs();
+                saveToLocalStorage();
+                compilePrompt();
+            }
         }
 
         function loadActiveSectionData() {
@@ -505,6 +530,7 @@
                 id: newId,
                 title: 'Custom Section',
                 type: 'custom',
+                enabled: true,
                 value: ''
             });
             clip.activeTabId = newId;
@@ -547,6 +573,7 @@
             const format = document.getElementById('outputFormat').value;
 
             clip.sections.forEach(sec => {
+                if (sec.enabled === false) return; // Skip disabled sections
                 const val = sec.value.trim();
                 if (val) {
                     const content = ensureFullStop(val);
@@ -616,15 +643,15 @@
                         lastModified: Date.now(),
                         activeTabId: 'refImages',
                         sections: [
-                            { id: 'refImages', title: 'Reference Images', type: 'standard', value: '' },
-                            { id: 'artStyle', title: 'Art Style & Medium', type: 'artStyle', value: '' },
-                            { id: 'sceneVibes', title: 'Scene Vibes', type: 'sceneVibes', value: '' },
-                            { id: 'environment', title: 'The Environment', type: 'environment', value: '' },
-                            { id: 'character', title: 'Character', type: 'character', value: '' },
-                            { id: 'actionScene', title: 'Action Scene', type: 'actionScene', value: '' },
-                            { id: 'physics', title: 'Physics & Mechanics', type: 'physics', value: '' },
-                            { id: 'cinematography', title: 'Cinematography & Camera', type: 'cinematography', value: '' },
-                            { id: 'rules', title: 'Rules & Constraints', type: 'rules', value: '' }
+                            { id: 'refImages', title: 'Reference Images', type: 'standard', enabled: true, value: '' },
+                            { id: 'artStyle', title: 'Art Style & Medium', type: 'artStyle', enabled: true, value: '' },
+                            { id: 'sceneVibes', title: 'Scene Vibes', type: 'sceneVibes', enabled: true, value: '' },
+                            { id: 'environment', title: 'The Environment', type: 'environment', enabled: true, value: '' },
+                            { id: 'character', title: 'Character', type: 'character', enabled: true, value: '' },
+                            { id: 'actionScene', title: 'Action Scene', type: 'actionScene', enabled: true, value: '' },
+                            { id: 'physics', title: 'Physics & Mechanics', type: 'physics', enabled: true, value: '' },
+                            { id: 'cinematography', title: 'Cinematography & Camera', type: 'cinematography', enabled: true, value: '' },
+                            { id: 'rules', title: 'Rules & Constraints', type: 'rules', enabled: true, value: '' }
                         ]
                     }
                 }
@@ -719,13 +746,13 @@
 
         function saveToLocalStorage() {
             saveActiveSectionInput();
-            localStorage.setItem('ai_video_prompt_dashboard_v16', JSON.stringify(masterProjects));
+            localStorage.setItem('ai_video_prompt_dashboard_v17', JSON.stringify(masterProjects));
             showSavedIndicator();
         }
 
         function loadFromLocalStorage() {
             try {
-                const saved = localStorage.getItem('ai_video_prompt_dashboard_v16');
+                const saved = localStorage.getItem('ai_video_prompt_dashboard_v17');
                 if (saved) {
                     const parsed = JSON.parse(saved);
                     if (parsed && parsed.projects) {
@@ -784,6 +811,7 @@
                                     id: sId,
                                     title: title,
                                     type: standardTypes[sId] || 'custom',
+                                    enabled: true,
                                     value: val
                                 });
                             });
@@ -794,6 +822,7 @@
                                         id: 'extra_' + idx + '_' + Date.now(),
                                         title: ex.title || 'Custom Section',
                                         type: 'custom',
+                                        enabled: true,
                                         value: ex.content || ''
                                     });
                                 });
@@ -874,7 +903,7 @@
 
         function clearAllData() {
             if (!confirm("Are you sure you want to nuke all projects and clips?")) return;
-            localStorage.removeItem('ai_video_prompt_dashboard_v16');
+            localStorage.removeItem('ai_video_prompt_dashboard_v17');
             location.reload();
         }
 
