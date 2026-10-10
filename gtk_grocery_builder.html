@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GTK Grocery Cart & Catalog</title>
+    <style>
+        :root {
+            --bg-color: #f6f6f6;
+            --window-bg: #ffffff;
+            --text-color: #2e3436;
+            --text-muted: #555753;
+            --border-color: #d0d0d0;
+            --header-bg: #e2e2e2;
+            --btn-bg: #f0f0f0;
+            --btn-hover: #e0e0e0;
+            --btn-active: #d0d0d0;
+            --primary-bg: #3584e4;
+            --primary-fg: #ffffff;
+            --primary-hover: #1c71d8;
+            --destructive-bg: #c01c28;
+            --destructive-fg: #ffffff;
+            --destructive-hover: #a51d24;
+            --item-bg: #ffffff;
+            --item-hover: #f0f0f0;
+            --shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme="light"]) {
+                --bg-color: #1e1e1e;
+                --window-bg: #2d2d2d;
+                --text-color: #eeeeec;
+                --text-muted: #9a9996;
+                --border-color: #444444;
+                --header-bg: #333333;
+                --btn-bg: #383838;
+                --btn-hover: #484848;
+                --btn-active: #585858;
+                --primary-bg: #1c71d8;
+                --primary-fg: #ffffff;
+                --primary-hover: #3584e4;
+                --destructive-bg: #e01b24;
+                --destructive-fg: #ffffff;
+                --destructive-hover: #c01c28;
+                --item-bg: #353535;
+                --item-hover: #404040;
+                --shadow: 0 1px 3px rgba(0,0,0,0.3);
+            }
+        }
+
+        [data-theme="light"] {
+            --bg-color: #f6f6f6;
+            --window-bg: #ffffff;
+            --text-color: #2e3436;
+            --text-muted: #555753;
+            --border-color: #d0d0d0;
+            --header-bg: #e2e2e2;
+            --btn-bg: #f0f0f0;
+            --btn-hover: #e0e0e0;
+            --btn-active: #d0d0d0;
+            --primary-bg: #3584e4;
+            --primary-fg: #ffffff;
+            --primary-hover: #1c71d8;
+            --destructive-bg: #c01c28;
+            --destructive-fg: #ffffff;
+            --destructive-hover: #a51d24;
+            --item-bg: #ffffff;
+            --item-hover: #f0f0f0;
+            --shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #1e1e1e;
+            --window-bg: #2d2d2d;
+            --text-color: #eeeeec;
+            --text-muted: #9a9996;
+            --border-color: #444444;
+            --header-bg: #333333;
+            --btn-bg: #383838;
+            --btn-hover: #484848;
+            --btn-active: #585858;
+            --primary-bg: #1c71d8;
+            --primary-fg: #ffffff;
+            --primary-hover: #3584e4;
+            --destructive-bg: #e01b24;
+            --destructive-fg: #ffffff;
+            --destructive-hover: #c01c28;
+            --item-bg: #353535;
+            --item-hover: #404040;
+            --shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-size: 13px;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            padding: 8px;
+        }
+
+        header {
+            background-color: var(--window-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 6px 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+            box-shadow: var(--shadow);
+            flex-shrink: 0;
+        }
+
+        .header-title {
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .cost-badge {
+            background: var(--primary-bg);
+            color: var(--primary-fg);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-weight: 500;
+            font-size: 12px;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        button, select {
+            background-color: var(--btn-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 400;
+            transition: background 0.1s, border-color 0.1s;
+        }
+
+        button:hover, select:hover {
+            background-color: var(--btn-hover);
+            border-color: var(--text-muted);
+        }
+
+        button:active {
+            background-color: var(--btn-active);
+        }
+
+        button.primary {
+            background-color: var(--primary-bg);
+            color: var(--primary-fg);
+            border-color: transparent;
+        }
+
+        button.primary:hover {
+            background-color: var(--primary-hover);
+        }
+
+        button.destructive {
+            background-color: var(--destructive-bg);
+            color: var(--destructive-fg);
+            border-color: transparent;
+        }
+
+        button.destructive:hover {
+            background-color: var(--destructive-hover);
+        }
+
+        .workspace {
+            display: flex;
+            gap: 8px;
+            flex: 1;
+            overflow: hidden;
+            min-height: 0; /* CRITICAL: prevents flex item from overflowing parent height */
+        }
+
+        .panel {
+            background-color: var(--window-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            flex: 1;
+            min-width: 0;
+            min-height: 0; /* CRITICAL: ensures internal scroll containers work */
+        }
+
+        .panel-header {
+            background-color: var(--header-bg);
+            padding: 6px 10px;
+            font-weight: 600;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+            font-size: 12px;
+        }
+
+        .panel-toolbar {
+            padding: 6px 8px;
+            border-bottom: 1px solid var(--border-color);
+            background-color: var(--window-bg);
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        input[type="text"], input[type="number"] {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            padding: 4px 6px;
+            border-radius: 4px;
+            outline: none;
+            flex: 1;
+        }
+
+        input:focus {
+            border-color: var(--primary-bg);
+        }
+
+        .items-container {
+            flex: 1;
+            overflow-y: auto; /* CRITICAL: ensures scrolling works properly */
+            overflow-x: hidden;
+            padding: 4px;
+            min-height: 0; /* CRITICAL for flex child vertical scrolling */
+        }
+
+        .item-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 4px 6px;
+            margin-bottom: 2px;
+            background-color: var(--item-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            cursor: grab;
+            user-select: none;
+            transition: background 0.1s, border-color 0.1s;
+        }
+
+        .item-row:hover {
+            background-color: var(--item-hover);
+            border-color: var(--text-muted);
+        }
+
+        .item-row:active {
+            cursor: grabbing;
+        }
+
+        .item-info {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+            overflow: hidden;
+            flex: 1;
+            margin-right: 6px;
+        }
+
+        .item-name {
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .item-details {
+            font-size: 11px;
+            color: var(--text-muted);
+            display: flex;
+            gap: 8px;
+        }
+
+        .item-actions {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .item-actions button {
+            padding: 2px 5px;
+            font-size: 11px;
+        }
+
+        .drop-zone {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .drop-zone.drag-over {
+            background-color: rgba(53, 132, 228, 0.05);
+            border: 2px dashed var(--primary-bg);
+        }
+
+        .empty-state {
+            padding: 20px;
+            text-align: center;
+            color: var(--text-muted);
+            font-style: italic;
+            margin: auto;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            display: none;
+        }
+
+        .modal-dialog {
+            background: var(--window-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            width: 320px;
+            padding: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .modal-title {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .form-group label {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 6px;
+            margin-top: 6px;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+    </style>
+</head>
+<body data-theme="auto">
+
+    <header>
+        <div class="header-title">
+            <span>🛒 GTK Grocery Manager</span>
+            <span class="cost-badge" id="total-cost-badge">Est. Total: ₹0</span>
+        </div>
+        <div class="header-controls">
+            <button onclick="openAddModal()">+ Add Item</button>
+            <button onclick="copyCartText()">Copy Cart</button>
+            <button class="destructive" onclick="clearCart()">Clear Cart</button>
+            <select id="theme-selector" onchange="setTheme(this.value)">
+                <option value="auto">Theme: Auto</option>
+                <option value="light">Theme: Light</option>
+                <option value="dark">Theme: Dark</option>
+            </select>
+        </div>
+    </header>
+
+    <div class="workspace">
+        
+        <!-- Left Panel: Master Catalog -->
+        <div class="panel">
+            <div class="panel-header">
+                <span>Master Catalog (All Items)</span>
+                <span id="catalog-count" style="font-weight: normal; color: var(--text-muted);">0 items</span>
+            </div>
+            <div class="panel-toolbar">
+                <input type="text" id="catalog-search" placeholder="Search catalog..." oninput="renderCatalog()">
+                <select id="category-filter" onchange="renderCatalog()" style="width: 110px;">
+                    <option value="all">All Cats</option>
+                    <option value="Grains & Staples">Grains</option>
+                    <option value="Dairy & Bakery">Dairy</option>
+                    <option value="Produce">Produce</option>
+                    <option value="Proteins">Proteins</option>
+                    <option value="Spices & Masalas">Spices</option>
+                    <option value="Snacks & Beverages">Snacks</option>
+                    <option value="Household & Personal">Personal</option>
+                </select>
+            </div>
+            <div class="items-container drop-zone" id="catalog-container" ondragover="allowDrop(event)" ondragleave="removeDropStyle(event)" ondrop="dropToCatalog(event)">
+                <!-- Master items rendered dynamically -->
+            </div>
+        </div>
+
+        <!-- Right Panel: Shopping Cart -->
+        <div class="panel">
+            <div class="panel-header">
+                <span>Shopping Cart (Selected Items)</span>
+                <span id="cart-count" style="font-weight: normal; color: var(--text-muted);">0 selected</span>
+            </div>
+            <div class="panel-toolbar">
+                <input type="text" id="cart-search" placeholder="Filter cart..." oninput="renderCart()">
+                <button onclick="addAllToCart()">Add All</button>
+            </div>
+            <div class="items-container drop-zone" id="cart-container" ondragover="allowDrop(event)" ondragleave="removeDropStyle(event)" ondrop="dropToCart(event)">
+                <!-- Cart items rendered dynamically -->
+            </div>
+        </div>
+
+    </div>
+
+    <div class="modal-overlay" id="item-modal">
+        <div class="modal-dialog">
+            <div class="modal-title" id="modal-title-text">Add New Catalog Item</div>
+            <div class="form-group">
+                <label>Item Name</label>
+                <input type="text" id="modal-name" placeholder="e.g. Kashmiri Chilli Powder">
+            </div>
+            <div class="form-group">
+                <label>Category</label>
+                <select id="modal-category">
+                    <option value="Grains & Staples">Grains & Staples</option>
+                    <option value="Dairy & Bakery">Dairy & Bakery</option>
+                    <option value="Produce">Produce</option>
+                    <option value="Proteins">Proteins</option>
+                    <option value="Spices & Masalas">Spices & Masalas</option>
+                    <option value="Snacks & Beverages">Snacks & Beverages</option>
+                    <option value="Household & Personal">Household & Personal</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Estimated Price (₹)</label>
+                <input type="number" id="modal-price" placeholder="50">
+            </div>
+            <div class="form-group">
+                <label>Default Qty / Unit</label>
+                <input type="text" id="modal-unit" placeholder="1 pkt / 1 kg">
+            </div>
+            <div class="modal-buttons">
+                <button onclick="closeModal()">Cancel</button>
+                <button class="primary" onclick="saveModalItem()">Save Item</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const defaultCatalog = [
+            { id: "p1", name: "Whole Farm Raw Peanuts", category: "Grains & Staples", price: 193, unit: "500g bag", inCart: false },
+            { id: "p2", name: "Chyawanprash", category: "Household & Personal", price: 350, unit: "1 jar", inCart: false },
+            { id: "p3", name: "Fresh Ginger", category: "Produce", price: 22, unit: "250g pack", inCart: false },
+            { id: "p4", name: "Toothpaste", category: "Household & Personal", price: 95, unit: "1 tube", inCart: false },
+            { id: "p5", name: "Red Chilli Powder", category: "Spices & Masalas", price: 85, unit: "200g pack", inCart: false },
+            { id: "p6", name: "Turmeric Powder (Haldi)", category: "Spices & Masalas", price: 79, unit: "200g pack", inCart: false },
+            { id: "p7", name: "Coriander Powder (Dhania)", category: "Spices & Masalas", price: 37, unit: "100g pack", inCart: false },
+            { id: "p8", name: "Jeera Powder (Cumin)", category: "Spices & Masalas", price: 54, unit: "100g pack", inCart: false },
+            { id: "p9", name: "Garam Masala", category: "Spices & Masalas", price: 39, unit: "100g pack", inCart: false },
+            { id: "p10", name: "Puramate Instant Dry Yeast", category: "Grains & Staples", price: 48, unit: "1 box", inCart: false },
+            { id: "p11", name: "Daawat Rozana Super Basmati Rice", category: "Grains & Staples", price: 80, unit: "1 kg pack", inCart: false },
+            { id: "p12", name: "Madhur Pure Sulphurless Sugar", category: "Grains & Staples", price: 52, unit: "1 kg pack", inCart: false },
+            { id: "p13", name: "Pillsbury Fresh Chakki Atta", category: "Grains & Staples", price: 57, unit: "1 kg bag", inCart: false },
+            { id: "p14", name: "Tata Tea Agni Special Blend", category: "Snacks & Beverages", price: 130, unit: "250g pouch", inCart: false },
+            { id: "p15", name: "Saffola Active Blended Cooking Oil", category: "Grains & Staples", price: 165, unit: "1 L pouch", inCart: false },
+            { id: "p16", name: "Whole Farm Masoor Dal", category: "Grains & Staples", price: 100, unit: "500g pack", inCart: false },
+            { id: "p17", name: "Nutrela Soya Granules", category: "Grains & Staples", price: 42, unit: "200g pack", inCart: false },
+            { id: "p18", name: "Amulya Dairy Whitener", category: "Dairy & Bakery", price: 245, unit: "500g pouch", inCart: false },
+            { id: "p19", name: "Gokul Pouch Curd", category: "Dairy & Bakery", price: 92, unit: "400g pouch", inCart: false },
+            { id: "p20", name: "Amul Malai Paneer", category: "Dairy & Bakery", price: 95, unit: "200g pouch", inCart: false },
+            { id: "p21", name: "Everyday White Eggs", category: "Dairy & Bakery", price: 102, unit: "12 pcs pack", inCart: false },
+            { id: "p22", name: "Zorabian Skinless Chicken Curry Cut", category: "Proteins", price: 295, unit: "500g tray", inCart: false },
+            { id: "p23", name: "ITC Master Chef Chicken Seekh Kebab", category: "Proteins", price: 273, unit: "Pouch", inCart: false },
+            { id: "p24", name: "Hybrid Tomatoes", category: "Produce", price: 25, unit: "500g pack", inCart: false },
+            { id: "p25", name: "Fresh Spinach", category: "Produce", price: 27, unit: "Pack", inCart: false },
+            { id: "p26", name: "Onions", category: "Produce", price: 27, unit: "1 kg pack", inCart: false },
+            { id: "p27", name: "New Crop Potatoes", category: "Produce", price: 27, unit: "1 kg pack", inCart: false },
+            { id: "p28", name: "Fresh Lemons", category: "Produce", price: 40, unit: "Pack", inCart: false },
+            { id: "p29", name: "Bananas", category: "Produce", price: 20, unit: "1/2 dozen", inCart: false },
+            { id: "p30", name: "Green Chillies", category: "Produce", price: 12, unit: "100g pack", inCart: false },
+            { id: "p31", name: "Dettol Icy Cool Bathing Soap", category: "Household & Personal", price: 262, unit: "Bar", inCart: false },
+            { id: "p32", name: "Surf Excel Matic Liquid Detergent", category: "Household & Personal", price: 210, unit: "1 L pkt", inCart: false },
+            { id: "p33", name: "All Out Ultra Mosquito Coil / Refill", category: "Household & Personal", price: 42, unit: "Box", inCart: false },
+            { id: "p34", name: "Kurkure Masala Munch Crisps", category: "Snacks & Beverages", price: 20, unit: "Pack", inCart: false }
+        ];
+
+        let catalog = [];
+
+        function loadData() {
+            const saved = localStorage.getItem('gtk_grocery_catalog_v2');
+            if (saved) {
+                try {
+                    catalog = JSON.parse(saved);
+                } catch(e) {
+                    catalog = defaultCatalog;
+                }
+            } else {
+                catalog = defaultCatalog;
+            }
+            const savedTheme = localStorage.getItem('gtk_grocery_theme') || 'auto';
+            document.getElementById('theme-selector').value = savedTheme;
+            setTheme(savedTheme);
+        }
+
+        function saveData() {
+            localStorage.setItem('gtk_grocery_catalog_v2', JSON.stringify(catalog));
+            updateEstTotal();
+        }
+
+        function setTheme(theme) {
+            document.body.setAttribute('data-theme', theme);
+            localStorage.setItem('gtk_grocery_theme', theme);
+        }
+
+        function renderCatalog() {
+            const container = document.getElementById('catalog-container');
+            const search = document.getElementById('catalog-search').value.toLowerCase();
+            const catFilter = document.getElementById('category-filter').value;
+
+            const filtered = catalog.filter(item => {
+                const matchesSearch = item.name.toLowerCase().includes(search);
+                const matchesCat = catFilter === 'all' || item.category === catFilter;
+                return matchesSearch && matchesCat && !item.inCart;
+            });
+
+            document.getElementById('catalog-count').innerText = `${filtered.length} available`;
+
+            if (filtered.length === 0) {
+                container.innerHTML = `<div class="empty-state">No items in catalog match filter.</div>`;
+                return;
+            }
+
+            container.innerHTML = filtered.map(item => `
+                <div class="item-row" draggable="true" ondragstart="drag(event, '${item.id}')" ondblclick="moveToCart('${item.id}')">
+                    <div class="item-info">
+                        <span class="item-name">${item.name}</span>
+                        <span class="item-details">
+                            <span>📁 ${item.category}</span>
+                            <span>📦 ${item.unit}</span>
+                            <span>💰 ₹${item.price}</span>
+                        </span>
+                    </div>
+                    <div class="item-actions">
+                        <button class="primary" onclick="moveToCart('${item.id}')">Add ➔</button>
+                        <button class="destructive" onclick="deleteCatalogItem('${item.id}')" title="Delete from database">✕</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderCart() {
+            const container = document.getElementById('cart-container');
+            const search = document.getElementById('cart-search').value.toLowerCase();
+
+            const cartItems = catalog.filter(item => item.inCart && item.name.toLowerCase().includes(search));
+
+            document.getElementById('cart-count').innerText = `${cartItems.length} selected`;
+
+            if (cartItems.length === 0) {
+                container.innerHTML = `<div class="empty-state">Cart is empty.<br>Drag items here or click Add ➔</div>`;
+                updateEstTotal();
+                return;
+            }
+
+            container.innerHTML = cartItems.map(item => `
+                <div class="item-row" draggable="true" ondragstart="drag(event, '${item.id}')" ondblclick="moveToCatalog('${item.id}')">
+                    <div class="item-actions" style="margin-right: 6px;">
+                        <button onclick="moveToCatalog('${item.id}')">⬅</button>
+                    </div>
+                    <div class="item-info">
+                        <span class="item-name">${item.name}</span>
+                        <span class="item-details">
+                            <span>📦 ${item.unit}</span>
+                            <span>💰 ₹${item.price}</span>
+                        </span>
+                    </div>
+                </div>
+            `).join('');
+
+            updateEstTotal();
+        }
+
+        function updateEstTotal() {
+            const total = catalog.filter(i => i.inCart).reduce((sum, i) => sum + (Number(i.price) || 0), 0);
+            document.getElementById('total-cost-badge').innerText = `Est. Total: ₹${total}`;
+        }
+
+        function allowDrop(ev) {
+            ev.preventDefault();
+            ev.currentTarget.classList.add('drag-over');
+        }
+
+        function removeDropStyle(ev) {
+            ev.preventDefault();
+            ev.currentTarget.classList.remove('drag-over');
+        }
+
+        function drag(ev, id) {
+            ev.dataTransfer.setData("text/plain", id);
+        }
+
+        function dropToCart(ev) {
+            ev.preventDefault();
+            ev.currentTarget.classList.remove('drag-over');
+            const id = ev.dataTransfer.getData("text/plain");
+            if (id) {
+                const item = catalog.find(i => i.id === id);
+                if (item && !item.inCart) {
+                    item.inCart = true;
+                    saveData();
+                    renderCatalog();
+                    renderCart();
+                }
+            }
+        }
+
+        function dropToCatalog(ev) {
+            ev.preventDefault();
+            ev.currentTarget.classList.remove('drag-over');
+            const id = ev.dataTransfer.getData("text/plain");
+            if (id) {
+                const item = catalog.find(i => i.id === id);
+                if (item && item.inCart) {
+                    item.inCart = false;
+                    saveData();
+                    renderCatalog();
+                    renderCart();
+                }
+            }
+        }
+
+        function moveToCart(id) {
+            const item = catalog.find(i => i.id === id);
+            if (item) {
+                item.inCart = true;
+                saveData();
+                renderCatalog();
+                renderCart();
+            }
+        }
+
+        function moveToCatalog(id) {
+            const item = catalog.find(i => i.id === id);
+            if (item) {
+                item.inCart = false;
+                saveData();
+                renderCatalog();
+                renderCart();
+            }
+        }
+
+        function addAllToCart() {
+            catalog.forEach(i => i.inCart = true);
+            saveData();
+            renderCatalog();
+            renderCart();
+        }
+
+        function clearCart() {
+            catalog.forEach(i => i.inCart = false);
+            saveData();
+            renderCatalog();
+            renderCart();
+        }
+
+        function deleteCatalogItem(id) {
+            if (confirm("Are you sure you want to remove this item from the database?")) {
+                catalog = catalog.filter(i => i.id !== id);
+                saveData();
+                renderCatalog();
+                renderCart();
+            }
+        }
+
+        function openAddModal() {
+            document.getElementById('modal-name').value = '';
+            document.getElementById('modal-price').value = '';
+            document.getElementById('modal-unit').value = '1 pack';
+            document.getElementById('item-modal').style.display = 'flex';
+            document.getElementById('modal-name').focus();
+        }
+
+        function closeModal() {
+            document.getElementById('item-modal').style.display = 'none';
+        }
+
+        function saveModalItem() {
+            const name = document.getElementById('modal-name').value.trim();
+            const category = document.getElementById('modal-category').value;
+            const price = parseFloat(document.getElementById('modal-price').value) || 0;
+            const unit = document.getElementById('modal-unit').value.trim() || '1 pack';
+
+            if (!name) {
+                alert("Please enter a valid item name.");
+                return;
+            }
+
+            const newItem = {
+                id: 'item_' + Date.now(),
+                name: name,
+                category: category,
+                price: price,
+                unit: unit,
+                inCart: false
+            };
+
+            catalog.push(newItem);
+            saveData();
+            renderCatalog();
+            closeModal();
+        }
+
+        function copyCartText() {
+            const cartItems = catalog.filter(i => i.inCart);
+            if (cartItems.length === 0) {
+                alert("Cart is empty!");
+                return;
+            }
+            let text = "🛒 My Grocery Shopping List:\n\n";
+            let total = 0;
+            cartItems.forEach(i => {
+                text += `• ${i.name} (${i.unit}) - ₹${i.price}\n`;
+                total += Number(i.price) || 0;
+            });
+            text += `\nEstimated Total: ₹${total}`;
+
+            navigator.clipboard.writeText(text).then(() => {
+                alert("Shopping list copied to clipboard!");
+            }).catch(err => {
+                alert("Failed to copy list.");
+            });
+        }
+
+        window.onload = function() {
+            loadData();
+            renderCatalog();
+            renderCart();
+        };
+    </script>
+</body>
+</html>
