@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UltraEQ — Lightweight Global 5-Band Equalizer</title>
+  <style>
+    :root {
+      --bg: #090e17;
+      --card-bg: #121c2d;
+      --card-border: #1e2f4a;
+      --accent-cyan: #38bdf8;
+      --accent-hover: #0284c7;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --code-bg: #0b1320;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      line-height: 1.6;
+      padding: 2rem 1rem;
+      display: flex;
+      justify-content: center;
+    }
+
+    .container {
+      max-width: 760px;
+      width: 100%;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--accent-cyan);
+      margin-bottom: 1rem;
+      font-weight: 600;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.75rem;
+    }
+
+    p.tagline {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      max-width: 600px;
+      margin: 0 auto 1.75rem;
+    }
+
+    .cta-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 3rem;
+    }
+
+    .btn-download {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      background-color: var(--accent-cyan);
+      color: #031320;
+      font-weight: 700;
+      font-size: 1rem;
+      text-decoration: none;
+      padding: 0.9rem 2.2rem;
+      border-radius: 8px;
+      transition: background 0.2s ease, transform 0.1s ease;
+    }
+
+    .btn-download:hover {
+      background-color: var(--accent-hover);
+      color: #ffffff;
+      transform: translateY(-1px);
+    }
+
+    .btn-download svg {
+      width: 20px;
+      height: 20px;
+      fill: currentColor;
+    }
+
+    .sub-cta {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .grid-benefits {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 3rem;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 1.4rem;
+    }
+
+    .card h3 {
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+      color: var(--text-main);
+    }
+
+    .card p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .bands-section {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 1.75rem;
+      margin-bottom: 3rem;
+    }
+
+    .bands-section h2 {
+      font-size: 1.3rem;
+      margin-bottom: 1rem;
+      color: var(--accent-cyan);
+    }
+
+    .bands-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .band-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 0.75rem;
+      background: var(--code-bg);
+      border-radius: 6px;
+      font-size: 0.9rem;
+    }
+
+    .band-freq {
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .band-desc {
+      color: var(--text-muted);
+    }
+
+    .setup-guide {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 1.75rem;
+      margin-bottom: 3rem;
+    }
+
+    .setup-guide h2 {
+      font-size: 1.3rem;
+      margin-bottom: 1rem;
+      color: var(--accent-cyan);
+    }
+
+    .setup-steps {
+      padding-left: 1.25rem;
+      color: var(--text-muted);
+      font-size: 0.92rem;
+    }
+
+    .setup-steps li {
+      margin-bottom: 0.75rem;
+    }
+
+    .setup-steps code {
+      background: var(--code-bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      color: var(--accent-cyan);
+      font-family: monospace;
+      font-size: 0.85rem;
+    }
+
+    footer {
+      border-top: 1px solid var(--card-border);
+      padding-top: 2rem;
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    footer a {
+      color: var(--accent-cyan);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <span class="badge">Open Source • Ad-Free</span>
+      <h1>UltraEQ</h1>
+      <p class="tagline">A minimal, ultra-lightweight 5-band global equalizer for Android. Correct muddy frequencies and take full control of your earphone audio profile.</p>
+      
+      <div class="cta-group">
+        <a href="https://trancedemon-collab.github.io/my_apps/apk/UltraEQ.apk" class="btn-download">
+          <svg viewBox="0 0 24 24">
+            <path d="M5 20h14v-2H5v2zM12 2v12l4-4h-3V2h-2v8H8l4 4z"/>
+          </svg>
+          Download APK (Android)
+        </a>
+        <span class="sub-cta">Direct download • No telemetry • No ads</span>
+      </div>
+    </header>
+
+    <div class="grid-benefits">
+      <div class="card">
+        <h3>Zero Bloat</h3>
+        <p>No advertisements, no accounts, and no background analytics. Runs fast and respects your battery.</p>
+      </div>
+      <div class="card">
+        <h3>Universal Control</h3>
+        <p>Intercepts device audio sessions to reshape tone across your media, browsers, and streaming apps.</p>
+      </div>
+      <div class="card">
+        <h3>Hardware Neutralizer</h3>
+        <p>Fixes muddy midranges and harsh treble inherent to budget and unbalanced earphones.</p>
+      </div>
+    </div>
+
+    <section class="bands-section">
+      <h2>5 Precision Tuning Bands</h2>
+      <ul class="bands-list">
+        <li class="band-item">
+          <span class="band-freq">60 Hz</span>
+          <span class="band-desc">Sub-Bass & Kick Depth</span>
+        </li>
+        <li class="band-item">
+          <span class="band-freq">230 Hz</span>
+          <span class="band-desc">Bass Body & Warmth</span>
+        </li>
+        <li class="band-item">
+          <span class="band-freq">910 Hz</span>
+          <span class="band-desc">Midrange Resonance & Vocals</span>
+        </li>
+        <li class="band-item">
+          <span class="band-freq">3.6 kHz</span>
+          <span class="band-desc">Upper Midrange Clarity</span>
+        </li>
+        <li class="band-item">
+          <span class="band-freq">14 kHz</span>
+          <span class="band-desc">Treble Shimmer & Air</span>
+        </li>
+      </ul>
+    </section>
+
+    <section class="setup-guide">
+      <h2>Routing on Android 14+</h2>
+      <ol class="setup-steps">
+        <li><strong>VLC Media Player:</strong> Settings &gt; Audio &gt; Audio output &gt; Select <code>AudioTrack (Java)</code>.</li>
+        <li><strong>Spotify:</strong> Settings &gt; Turn ON <code>Device Broadcast Status</code> &gt; Tap <code>Equalizer</code> to attach UltraEQ.</li>
+        <li><strong>Global System Audio:</strong> To capture all playback sessions globally, run this one-time command via ADB:<br>
+          <code>adb shell pm grant com.ultraeq.app android.permission.DUMP</code>
+        </li>
+      </ol>
+    </section>
+
+    <footer>
+      <p>Created by <strong>Bradford Risbert</strong></p>
+      <p>Contact: <a href="mailto:trancedemon@gmail.com">trancedemon@gmail.com</a></p>
+      <p style="margin-top: 0.5rem; font-size: 0.75rem;">Independent open-source utility.</p>
+    </footer>
+  </div>
+
+</body>
+</html>
