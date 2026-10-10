@@ -14,6 +14,8 @@
       --text-main: #f1f5f9;
       --text-muted: #94a3b8;
       --code-bg: #0b1320;
+      --paypal-gold: #eab308;
+      --paypal-hover: #ca8a04;
     }
 
     * {
@@ -33,13 +35,13 @@
     }
 
     .container {
-      max-width: 760px;
+      max-width: 820px;
       width: 100%;
     }
 
     header {
       text-align: center;
-      margin-bottom: 2.5rem;
+      margin-bottom: 2rem;
     }
 
     .badge {
@@ -65,8 +67,26 @@
     p.tagline {
       font-size: 1.15rem;
       color: var(--text-muted);
-      max-width: 600px;
-      margin: 0 auto 1.75rem;
+      max-width: 620px;
+      margin: 0 auto 1.5rem;
+    }
+
+    /* Hero Infographic Banner */
+    .hero-banner {
+      width: 100%;
+      margin: 1.5rem 0 2.5rem;
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid var(--card-border);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(56, 189, 248, 0.1);
+      background-color: var(--code-bg);
+    }
+
+    .hero-banner img {
+      width: 100%;
+      height: auto;
+      display: block;
+      object-fit: cover;
     }
 
     .cta-group {
@@ -85,17 +105,19 @@
       background-color: var(--accent-cyan);
       color: #031320;
       font-weight: 700;
-      font-size: 1rem;
+      font-size: 1.05rem;
       text-decoration: none;
-      padding: 0.9rem 2.2rem;
+      padding: 0.9rem 2.4rem;
       border-radius: 8px;
-      transition: background 0.2s ease, transform 0.1s ease;
+      transition: background 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+      box-shadow: 0 4px 14px rgba(56, 189, 248, 0.25);
     }
 
     .btn-download:hover {
       background-color: var(--accent-hover);
       color: #ffffff;
-      transform: translateY(-1px);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(2, 132, 199, 0.4);
     }
 
     .btn-download svg {
@@ -207,6 +229,100 @@
       font-size: 0.85rem;
     }
 
+    /* Creator & Support Card */
+    .creator-section {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 2rem;
+      margin-bottom: 3rem;
+      position: relative;
+    }
+
+    .creator-section h2 {
+      font-size: 1.35rem;
+      color: var(--text-main);
+      margin-bottom: 0.75rem;
+    }
+
+    .creator-bio {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin-bottom: 1.5rem;
+    }
+
+    .creator-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: center;
+      margin-bottom: 1.75rem;
+    }
+
+    .contact-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: var(--code-bg);
+      border: 1px solid var(--card-border);
+      padding: 0.45rem 0.85rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      color: var(--text-main);
+      text-decoration: none;
+      transition: border-color 0.2s ease, color 0.2s ease;
+    }
+
+    .contact-badge:hover {
+      border-color: var(--accent-cyan);
+      color: var(--accent-cyan);
+    }
+
+    .donation-box {
+      background: var(--code-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    @media (min-width: 600px) {
+      .donation-box {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+      }
+    }
+
+    .donation-text {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .btn-paypal {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background-color: var(--paypal-gold);
+      color: #000;
+      font-weight: 700;
+      font-size: 0.9rem;
+      text-decoration: none;
+      padding: 0.65rem 1.4rem;
+      border-radius: 6px;
+      white-space: nowrap;
+      transition: background 0.2s ease, transform 0.1s ease;
+    }
+
+    .btn-paypal:hover {
+      background-color: var(--paypal-hover);
+      color: #fff;
+      transform: translateY(-1px);
+    }
+
     footer {
       border-top: 1px solid var(--card-border);
       padding-top: 2rem;
@@ -231,7 +347,16 @@
     <header>
       <span class="badge">Open Source • Ad-Free</span>
       <h1>UltraEQ</h1>
-      <p class="tagline">A minimal, ultra-lightweight 5-band global equalizer for Android. Correct muddy frequencies and take full control of your earphone audio profile.</p>
+      <p class="tagline">A minimal, ultra-lightweight 5-band global equalizer for Android. Eliminate boxy mids, restore kick presence, and match any earphones to your ears.</p>
+
+      <!-- Infographic Hero Showcase -->
+      <div class="hero-banner">
+        <img 
+          src="https://trancedemon-collab.github.io/my_apps/ultraeq_web.png" 
+          alt="UltraEQ 5-Band Equalizer Infographic Showcase" 
+          loading="eager"
+        />
+      </div>
       
       <div class="cta-group">
         <a href="https://trancedemon-collab.github.io/my_apps/apk/UltraEQ.apk" class="btn-download">
@@ -240,22 +365,22 @@
           </svg>
           Download APK (Android)
         </a>
-        <span class="sub-cta">Direct download • No telemetry • No ads</span>
+        <span class="sub-cta">Direct download • Zero ads • Background service</span>
       </div>
     </header>
 
     <div class="grid-benefits">
       <div class="card">
         <h3>Zero Bloat</h3>
-        <p>No advertisements, no accounts, and no background analytics. Runs fast and respects your battery.</p>
+        <p>No advertisements, no accounts, and no tracking analytics. Instant startup with zero impact on battery life.</p>
       </div>
       <div class="card">
         <h3>Universal Control</h3>
-        <p>Intercepts device audio sessions to reshape tone across your media, browsers, and streaming apps.</p>
+        <p>Runs as a persistent background engine, shaping audio output system-wide across streaming, games, and video.</p>
       </div>
       <div class="card">
         <h3>Hardware Neutralizer</h3>
-        <p>Fixes muddy midranges and harsh treble inherent to budget and unbalanced earphones.</p>
+        <p>Tames muddy, boxy midranges and smooths harsh treble typical of factory earphone tunings.</p>
       </div>
     </div>
 
@@ -289,17 +414,45 @@
       <h2>Routing on Android 14+</h2>
       <ol class="setup-steps">
         <li><strong>VLC Media Player:</strong> Settings &gt; Audio &gt; Audio output &gt; Select <code>AudioTrack (Java)</code>.</li>
-        <li><strong>Spotify:</strong> Settings &gt; Turn ON <code>Device Broadcast Status</code> &gt; Tap <code>Equalizer</code> to attach UltraEQ.</li>
-        <li><strong>Global System Audio:</strong> To capture all playback sessions globally, run this one-time command via ADB:<br>
+        <li><strong>Spotify:</strong> Settings &gt; Turn ON <code>Device Broadcast Status</code> &gt; Tap <code>Equalizer</code> to link UltraEQ.</li>
+        <li><strong>Global System Audio:</strong> To route audio sessions globally across all applications, connect to a PC once and execute:<br>
           <code>adb shell pm grant com.ultraeq.app android.permission.DUMP</code>
         </li>
       </ol>
     </section>
 
+    <!-- Creator & Support Section -->
+    <section class="creator-section">
+      <h2>Behind the Code</h2>
+      <p class="creator-bio">
+        UltraEQ was developed by <strong>Bradford R.</strong> using vibe coding—prioritizing absolute architectural simplicity, zero bloatware, and direct intent over corporate friction. The entire project centers on a singular mission: pure, unadulterated acoustic control for anyone who demands balanced sound from their gear.
+      </p>
+
+      <div class="creator-links">
+        <a href="mailto:trancedemon@gmail.com" class="contact-badge">
+          ✉️ trancedemon@gmail.com
+        </a>
+        <a href="https://facebook.com/bradford.risbert" target="_blank" rel="noopener noreferrer" class="contact-badge">
+          🌐 facebook.com/bradford.risbert
+        </a>
+        <span class="contact-badge">
+          💬 WhatsApp: @B_Risbert
+        </span>
+      </div>
+
+      <div class="donation-box">
+        <div class="donation-text">
+          Have feedback, need collaboration on similar clean-build software, or appreciate the tool? Contributions fuel future open utilities.
+        </div>
+        <a href="https://paypal.com/paypalme/BradfordRisbert" target="_blank" rel="noopener noreferrer" class="btn-paypal">
+          Support via PayPal
+        </a>
+      </div>
+    </section>
+
     <footer>
-      <p>Created by <strong>Bradford Risbert</strong></p>
-      <p>Contact: <a href="mailto:trancedemon@gmail.com">trancedemon@gmail.com</a></p>
-      <p style="margin-top: 0.5rem; font-size: 0.75rem;">Independent open-source utility.</p>
+      <p>UltraEQ • Independent Open Utility • Built by Bradford Risbert</p>
+      <p style="margin-top: 0.5rem; font-size: 0.75rem;">Direct feedback & collaboration: <a href="mailto:trancedemon@gmail.com">trancedemon@gmail.com</a></p>
     </footer>
   </div>
 
